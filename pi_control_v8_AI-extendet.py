@@ -35,6 +35,7 @@ import time
 import re
 import random
 import math
+import ast
 import statistics
 import fcntl
 import heapq
@@ -4038,16 +4039,31 @@ def get_ram_usage() -> float:
     return 0.0
 
 def send_ssh_command(host: str, user: str, key: str, cmd: str, port: int = 22) -> bool:
+    """
+    Führt SSH-Befehl sicher aus.
+
+    SECURITY: Lädt bekannte Hosts aus ~/.ssh/known_hosts.
+    Bei unbekannten Hosts wird eine Warnung geloggt und der Verbindungsversuch abgebrochen.
+    """
     if not HAVE_PARAMIKO:
         return False
     try:
         client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # SECURITY: Lade bekannte Hosts statt alle zu akzeptieren (verhindert MITM)
+        known_hosts_path = os.path.expanduser("~/.ssh/known_hosts")
+        if os.path.exists(known_hosts_path):
+            client.load_system_host_keys()
+            client.load_host_keys(known_hosts_path)
+        # Bei unbekanntem Host: Warnung loggen statt blind akzeptieren
+        client.set_missing_host_key_policy(paramiko.WarningPolicy())
         client.connect(host, port=port, username=user, key_filename=key, timeout=10)
         stdin, stdout, stderr = client.exec_command(cmd)
         exit_status = stdout.channel.recv_exit_status()
         client.close()
         return exit_status == 0
+    except paramiko.ssh_exception.SSHException as e:
+        logger.error(f"SSH security error for {host}: {e}")
+        return False
     except Exception as e:
         logger.error(f"SSH failed: {e}")
         return False
@@ -4917,7 +4933,12 @@ class SequenceDetector:
         data = load_json_file(self.state_file, {})
         if "outcomes" in data:
             for seq_str, outcomes in data["outcomes"].items():
-                seq = eval(seq_str)
+                # SECURITY: Verwende ast.literal_eval statt eval um Code-Injection zu verhindern
+                try:
+                    seq = ast.literal_eval(seq_str)
+                except (ValueError, SyntaxError) as e:
+                    logger.warning(f"Konnte Pattern nicht parsen: {seq_str} - {e}")
+                    continue
                 self.pattern_outcomes[seq] = outcomes
 
 

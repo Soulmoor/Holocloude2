@@ -18489,6 +18489,52 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             except Exception as e:
                 logger.debug(f"Loyalty tracking error: {e}")
 
+        # 5b.5 Knowledge Influence - Erfahrungen aufzeichnen (NEU!)
+        if hasattr(self, 'knowledge_influence') and self.knowledge_influence:
+            try:
+                # Prüfe ob erweiterte Version mit Erfahrungs-System
+                if hasattr(self.knowledge_influence, 'record_interaction_experience'):
+                    # Erkenne Thema aus User-Nachricht
+                    topic_keywords = {
+                        'technik': ['computer', 'software', 'app', 'internet', 'ki', 'ai'],
+                        'gefühle': ['traurig', 'froh', 'glücklich', 'ängstlich', 'wütend'],
+                        'alltag': ['arbeit', 'schule', 'essen', 'schlafen', 'wetter'],
+                        'freizeit': ['spiel', 'film', 'musik', 'anime', 'buch'],
+                        'beziehung': ['freund', 'familie', 'liebe', 'beziehung'],
+                    }
+
+                    detected_topic = 'allgemein'
+                    msg_lower = user_message.lower()
+                    for topic, keywords in topic_keywords.items():
+                        if any(kw in msg_lower for kw in keywords):
+                            detected_topic = topic
+                            break
+
+                    # Bestimme Outcome basierend auf Response-Qualität und User-Feedback-Indikatoren
+                    positive_indicators = ['danke', 'super', 'toll', 'gut', 'hilft', 'cool', 'perfekt']
+                    negative_indicators = ['falsch', 'nein', 'blöd', 'nervt', 'hilft nicht']
+
+                    if any(ind in msg_lower for ind in positive_indicators):
+                        outcome = 'positive'
+                        emotional_impact = 0.3
+                    elif any(ind in msg_lower for ind in negative_indicators):
+                        outcome = 'negative'
+                        emotional_impact = -0.3
+                    else:
+                        outcome = 'neutral'
+                        emotional_impact = 0.0
+
+                    # Erfahrung aufzeichnen
+                    self.knowledge_influence.record_interaction_experience(
+                        topic=detected_topic,
+                        outcome=outcome,
+                        emotional_impact=emotional_impact
+                    )
+                    logger.debug(f"[KNOWLEDGE] Erfahrung aufgezeichnet: {detected_topic} -> {outcome}")
+
+            except Exception as e:
+                logger.debug(f"Knowledge influence experience recording error: {e}")
+
         # ================================================================
         # 5c. CONTEXT COMPRESSION - Gespräch komprimieren
         # ================================================================
@@ -22990,10 +23036,24 @@ Erwähne es beiläufig wenn es passt, z.B.:
                 logger.debug(f"Cognitive enhancement context error: {e}")
 
         # === 🌱 KNOWLEDGE INFLUENCE CONTEXT (Persönlichkeits-Evolution, Überzeugungen) ===
+        # ENHANCED: Nutzt jetzt alle 4 Verbesserungen:
+        # 1. Überzeugungen beeinflussen aktiv das Denken
+        # 2. Persönlichkeits-Traits formen den Antwortstil
+        # 3. Relevantes Wissen wird automatisch in Kontext geholt
+        # 4. Erfahrungen bilden Meinungen
         if hasattr(self, 'knowledge_influence') and self.knowledge_influence:
             try:
-                # Hole den vollständigen Einfluss-Kontext
-                ki_context = self.knowledge_influence.get_full_prompt_context()
+                # Prüfe ob erweiterte Version verfügbar
+                if hasattr(self.knowledge_influence, 'get_enhanced_prompt_context'):
+                    # Erweiterte Version mit User-Nachricht für automatische Wissens-Kontextualisierung
+                    ki_context = self.knowledge_influence.get_enhanced_prompt_context(
+                        user_message=query,
+                        knowledge_db=getattr(self, 'knowledge', None)
+                    )
+                else:
+                    # Fallback auf Basis-Version
+                    ki_context = self.knowledge_influence.get_full_prompt_context()
+
                 if ki_context:
                     persona += f"\n{ki_context}\n"
             except Exception as e:

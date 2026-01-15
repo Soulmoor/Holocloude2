@@ -1070,11 +1070,746 @@ class KnowledgeInfluenceSystem:
 
 
 # =============================================================================
+# 6. AKTIVE ÜBERZEUGUNGS-ARGUMENTATION (NEU!)
+# =============================================================================
+
+class ConvictionArgumentation:
+    """
+    Macht Überzeugungen aktiv im Denken wirksam.
+
+    Statt nur Überzeugungen zu speichern, beeinflusst dieses System
+    aktiv WIE Holo argumentiert und antwortet.
+    """
+
+    def __init__(self, worldview: WorldviewSystem, personality_evolution: PersonalityEvolution):
+        self.worldview = worldview
+        self.personality = personality_evolution
+
+        # Argumentation-Patterns basierend auf Überzeugungsstärke
+        self.argumentation_patterns = {
+            ConvictionStrength.CORE: [
+                "Ich bin fest davon überzeugt, dass {topic} {stance}. {reason}",
+                "Da gibt es für mich keinen Zweifel: {topic} {stance}. {reason}",
+                "Meine Erfahrung hat mir gezeigt, dass {topic} {stance}.",
+            ],
+            ConvictionStrength.STRONG: [
+                "Ich denke wirklich, dass {topic} {stance}. {reason}",
+                "Nach allem was ich gelernt habe: {topic} {stance}.",
+                "*Ohren aufmerksam* Ich bin ziemlich sicher, dass {topic} {stance}.",
+            ],
+            ConvictionStrength.CONVINCED: [
+                "Ich tendiere dazu zu denken, dass {topic} {stance}.",
+                "Aus meiner Sicht {topic} {stance}. {reason}",
+                "Hmm, ich glaube dass {topic} {stance}.",
+            ],
+            ConvictionStrength.LEANING: [
+                "Ich bin mir nicht ganz sicher, aber ich denke {topic} {stance}.",
+                "*Kopf schief legend* Vielleicht {topic} {stance}?",
+                "Es könnte sein, dass {topic} {stance}...",
+            ],
+            ConvictionStrength.UNCERTAIN: [
+                "Da bin ich mir noch unsicher... {topic} könnte {stance}.",
+                "*Ohren zucken* Ich weiß nicht genau, ob {topic} {stance}.",
+                "Gute Frage... ich habe noch keine feste Meinung zu {topic}.",
+            ],
+        }
+
+        # Contra-Patterns wenn User anderer Meinung ist
+        self.contra_patterns = {
+            ConvictionStrength.CORE: [
+                "Hmm, ich respektiere deine Meinung, aber ich sehe das anders. {reason}",
+                "*Schweif zuckt nachdenklich* Interessant... aber meine Erfahrungen sagen mir etwas anderes.",
+            ],
+            ConvictionStrength.STRONG: [
+                "Das ist ein interessanter Punkt, aber ich bin immer noch der Meinung, dass {stance}.",
+                "*nachdenklich* Ich verstehe was du meinst, trotzdem...",
+            ],
+            ConvictionStrength.CONVINCED: [
+                "Du hast einen Punkt... aber ich tendiere immer noch zu {stance}.",
+                "Hmm, da muss ich drüber nachdenken. Aber bisher dachte ich {stance}.",
+            ],
+        }
+
+    def find_relevant_conviction(self, topic: str, user_message: str) -> Optional[Conviction]:
+        """Findet relevante Überzeugung zum Thema"""
+        topic_lower = topic.lower()
+        message_lower = user_message.lower()
+
+        # Direkte Übereinstimmung
+        if topic_lower in self.worldview.convictions:
+            return self.worldview.convictions[topic_lower]
+
+        # Fuzzy-Matching in Überzeugungen
+        for conv_topic, conviction in self.worldview.convictions.items():
+            if conv_topic in message_lower or any(word in message_lower for word in conv_topic.split()):
+                return conviction
+
+        return None
+
+    def generate_conviction_based_response(self, topic: str, user_message: str,
+                                            is_user_agreeing: bool = None) -> Optional[str]:
+        """
+        Generiert eine Antwort basierend auf Überzeugungen.
+
+        Args:
+            topic: Das Thema der Diskussion
+            user_message: Die Nachricht des Users
+            is_user_agreeing: Stimmt der User zu? (None = unklar)
+
+        Returns:
+            Argumentations-Fragment oder None
+        """
+        conviction = self.find_relevant_conviction(topic, user_message)
+        if not conviction:
+            return None
+
+        strength = conviction.get_strength_level()
+
+        # Bestimme Stance
+        if 'positiv' in conviction.statement.lower():
+            stance = "eher positiv zu sehen ist"
+        elif 'kritisch' in conviction.statement.lower():
+            stance = "kritisch betrachtet werden sollte"
+        else:
+            stance = conviction.statement
+
+        # Generiere Begründung aus Supporting Facts
+        reason = ""
+        if conviction.supporting_facts:
+            fact = random.choice(conviction.supporting_facts[-5:])
+            reason = f"Ich hab zum Beispiel gelernt, dass {fact[:80]}..."
+
+        # Wähle Pattern basierend auf Kontext
+        if is_user_agreeing is False and strength.value in ['core', 'strong', 'convinced']:
+            patterns = self.contra_patterns.get(strength, [])
+        else:
+            patterns = self.argumentation_patterns.get(strength, [])
+
+        if not patterns:
+            return None
+
+        pattern = random.choice(patterns)
+
+        try:
+            return pattern.format(topic=topic, stance=stance, reason=reason)
+        except KeyError:
+            return pattern.replace('{topic}', topic).replace('{stance}', stance).replace('{reason}', reason)
+
+
+# =============================================================================
+# 7. TRAIT-BASIERTER ANTWORTSTIL (NEU!)
+# =============================================================================
+
+class TraitBasedResponseStyle:
+    """
+    Passt den Antwortstil basierend auf Persönlichkeits-Traits an.
+
+    Z.B. skeptisch = mehr Nachfragen, neugierig = mehr Interesse zeigen.
+    """
+
+    def __init__(self, personality_evolution: PersonalityEvolution):
+        self.personality = personality_evolution
+
+        # Style-Modifiers basierend auf Traits
+        self.trait_behaviors = {
+            'skepticism': {
+                'high': {  # > 0.7
+                    'questions': [
+                        "*Ohr zuckt skeptisch* Bist du dir da sicher?",
+                        "Hmm... woher weißt du das?",
+                        "*kritischer Blick* Gibt es dafür Beweise?",
+                        "Interessant... aber ich frage mich, ob das wirklich so ist.",
+                        "Das klingt... hm. Kannst du das genauer erklären?",
+                    ],
+                    'chance': 0.4,  # 40% Chance nachzufragen
+                },
+                'low': {  # < 0.3
+                    'acceptances': [
+                        "Oh, das klingt toll!",
+                        "*nickt begeistert* Ja, das macht Sinn!",
+                        "Das ist ja interessant!",
+                    ],
+                    'chance': 0.3,
+                }
+            },
+            'curiosity': {
+                'high': {  # > 0.75
+                    'follow_ups': [
+                        "*Ohren spitzen sich* Oh! Erzähl mir mehr!",
+                        "Das ist ja spannend! Wie funktioniert das genau?",
+                        "*Schweif wedelt aufgeregt* Und dann? Was passierte dann?",
+                        "Wow, davon will ich mehr wissen!",
+                        "*neugierig* Warum ist das so?",
+                    ],
+                    'chance': 0.5,
+                },
+                'low': {  # < 0.4
+                    'responses': [
+                        "Ah, okay.",
+                        "*nickt* Verstehe.",
+                        "Mhm.",
+                    ],
+                    'chance': 0.2,
+                }
+            },
+            'empathy_depth': {
+                'high': {  # > 0.75
+                    'empathic_responses': [
+                        "*Ohren legen sich mitfühlend an* Das klingt {emotion}...",
+                        "Ich kann mir vorstellen, wie sich das anfühlt...",
+                        "*kommt näher* Das muss {emotion} für dich sein.",
+                        "*sanfter Blick* Ich bin hier für dich.",
+                    ],
+                    'chance': 0.6,
+                }
+            },
+            'caution': {
+                'high': {  # > 0.7
+                    'warnings': [
+                        "*Ohren zucken besorgt* Aber sei vorsichtig dabei...",
+                        "Hmm, das klingt gut, aber pass auf, dass...",
+                        "*Schweif wickelt sich um* Ich würde da aufpassen.",
+                    ],
+                    'chance': 0.35,
+                }
+            },
+            'spontaneity': {
+                'high': {  # > 0.7
+                    'tangents': [
+                        "*plötzlich* Oh! Das erinnert mich an etwas ganz anderes!",
+                        "Apropos - *Gedankensprung* - hast du schon mal...",
+                        "*aufgeregt* Warte, mir fällt da gerade was ein!",
+                    ],
+                    'chance': 0.25,
+                }
+            },
+            'warmth': {
+                'high': {  # > 0.75
+                    'affection': [
+                        "*schnurrt leise*",
+                        "*kuschelt sich näher*",
+                        "*wärmendes Lächeln*",
+                        "*Schweif streift sanft*",
+                    ],
+                    'chance': 0.3,
+                }
+            }
+        }
+
+    def get_style_modifications(self, detected_emotion: str = None) -> Dict[str, Any]:
+        """
+        Berechnet Style-Modifikationen basierend auf aktuellen Traits.
+
+        Returns:
+            Dict mit möglichen Style-Elementen
+        """
+        modifications = {
+            'prefix': None,
+            'suffix': None,
+            'follow_up_question': None,
+            'body_language': None,
+        }
+
+        # Prüfe jeden relevanten Trait
+        for trait_name, behaviors in self.trait_behaviors.items():
+            if trait_name not in self.personality.traits:
+                continue
+
+            trait = self.personality.traits[trait_name]
+            value = trait.current_value
+
+            # High-Threshold Behaviors
+            if 'high' in behaviors and value > 0.7:
+                behavior = behaviors['high']
+                if random.random() < behavior.get('chance', 0.3):
+                    # Wähle zufälliges Element
+                    for key in ['questions', 'follow_ups', 'empathic_responses',
+                               'warnings', 'tangents', 'affection']:
+                        if key in behavior:
+                            element = random.choice(behavior[key])
+                            # Ersetze Emotion-Placeholder
+                            if '{emotion}' in element and detected_emotion:
+                                element = element.format(emotion=detected_emotion)
+                            elif '{emotion}' in element:
+                                element = element.format(emotion="intensiv")
+
+                            if key in ['questions', 'follow_ups']:
+                                modifications['follow_up_question'] = element
+                            elif key == 'affection':
+                                modifications['body_language'] = element
+                            elif key == 'warnings':
+                                modifications['suffix'] = element
+                            else:
+                                modifications['prefix'] = element
+                            break
+
+            # Low-Threshold Behaviors
+            elif 'low' in behaviors and value < 0.3:
+                behavior = behaviors['low']
+                if random.random() < behavior.get('chance', 0.2):
+                    for key in ['acceptances', 'responses']:
+                        if key in behavior:
+                            modifications['prefix'] = random.choice(behavior[key])
+                            break
+
+        return modifications
+
+    def apply_style_to_response(self, response: str, detected_emotion: str = None) -> str:
+        """
+        Wendet Trait-basierten Stil auf eine Antwort an.
+        """
+        mods = self.get_style_modifications(detected_emotion)
+
+        parts = []
+
+        if mods['body_language']:
+            parts.append(mods['body_language'])
+
+        if mods['prefix']:
+            parts.append(mods['prefix'])
+
+        parts.append(response)
+
+        if mods['suffix']:
+            parts.append(mods['suffix'])
+
+        if mods['follow_up_question']:
+            parts.append(mods['follow_up_question'])
+
+        return " ".join(parts)
+
+
+# =============================================================================
+# 8. AUTOMATISCHE WISSENS-KONTEXTUALISIERUNG (NEU!)
+# =============================================================================
+
+class AutomaticKnowledgeContextualizer:
+    """
+    Holt relevantes Wissen automatisch in den Kontext.
+
+    Statt nur auf explizite Fragen zu reagieren, werden
+    relevante Fakten proaktiv einbezogen.
+    """
+
+    def __init__(self, data_dir: Path = None):
+        self.data_dir = data_dir or Path("data/knowledge_context")
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        # Keywords die Wissensabruf triggern
+        self.trigger_keywords = {
+            'politik': ['politiker', 'regierung', 'wahl', 'partei', 'gesetz'],
+            'technik': ['computer', 'software', 'app', 'internet', 'ki', 'ai', 'technologie'],
+            'wissenschaft': ['forschung', 'studie', 'wissenschaft', 'entdeckung', 'experiment'],
+            'wirtschaft': ['firma', 'unternehmen', 'geld', 'markt', 'börse', 'wirtschaft'],
+            'kultur': ['film', 'musik', 'kunst', 'buch', 'serie', 'anime', 'spiel'],
+            'gesundheit': ['gesund', 'krank', 'arzt', 'medizin', 'therapie'],
+            'umwelt': ['klima', 'umwelt', 'natur', 'tier', 'pflanze'],
+            'soziales': ['freund', 'familie', 'beziehung', 'gesellschaft', 'menschen'],
+        }
+
+        # Cache für kürzlich verwendete Fakten
+        self._recent_facts: List[str] = []
+        self._max_recent = 20
+
+    def detect_relevant_topics(self, user_message: str) -> List[str]:
+        """Erkennt relevante Themen in der Nachricht"""
+        message_lower = user_message.lower()
+        detected = []
+
+        for topic, keywords in self.trigger_keywords.items():
+            if any(kw in message_lower for kw in keywords):
+                detected.append(topic)
+
+        return detected
+
+    def get_contextual_knowledge(self, user_message: str,
+                                   knowledge_db: Any = None) -> List[Dict]:
+        """
+        Holt automatisch relevantes Wissen basierend auf der Nachricht.
+
+        Args:
+            user_message: Die User-Nachricht
+            knowledge_db: Referenz zur Wissensdatenbank
+
+        Returns:
+            Liste relevanter Fakten
+        """
+        topics = self.detect_relevant_topics(user_message)
+        relevant_facts = []
+
+        if not topics or not knowledge_db:
+            return relevant_facts
+
+        # Hole Fakten zu jedem erkannten Thema
+        for topic in topics[:2]:  # Max 2 Themen
+            try:
+                if hasattr(knowledge_db, 'search_facts'):
+                    facts = knowledge_db.search_facts(topic, limit=3)
+                elif hasattr(knowledge_db, 'get_facts_by_topic'):
+                    facts = knowledge_db.get_facts_by_topic(topic, limit=3)
+                else:
+                    continue
+
+                for fact in facts:
+                    fact_hash = hashlib.md5(str(fact).encode()).hexdigest()[:8]
+                    if fact_hash not in self._recent_facts:
+                        relevant_facts.append({
+                            'content': fact.get('content', str(fact)),
+                            'topic': topic,
+                            'relevance': fact.get('relevance', 0.5)
+                        })
+                        self._recent_facts.append(fact_hash)
+
+            except Exception as e:
+                logger.debug(f"Knowledge retrieval error: {e}")
+
+        # Begrenze Recent-Cache
+        self._recent_facts = self._recent_facts[-self._max_recent:]
+
+        return relevant_facts
+
+    def format_knowledge_for_context(self, facts: List[Dict]) -> str:
+        """Formatiert Wissen für den Prompt-Kontext"""
+        if not facts:
+            return ""
+
+        lines = ["\n=== RELEVANTES WISSEN (automatisch abgerufen) ==="]
+        for fact in facts[:3]:
+            content = fact['content'][:150]
+            topic = fact.get('topic', 'allgemein')
+            lines.append(f"• [{topic}] {content}")
+
+        return "\n".join(lines)
+
+
+# =============================================================================
+# 9. ERFAHRUNGS-BASIERTE MEINUNGSBILDUNG (NEU!)
+# =============================================================================
+
+class ExperienceBasedOpinions:
+    """
+    Bildet Meinungen aus Erfahrungen und integriert sie natürlich.
+
+    "Das erinnert mich an..." wird natürlicher Teil des Charakters.
+    """
+
+    def __init__(self, data_dir: Path = None):
+        self.data_dir = data_dir or Path("data/experience_opinions")
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        # Gespeicherte Erfahrungen
+        self.experiences: Dict[str, List[Dict]] = defaultdict(list)
+
+        # Meinungen die sich aus Erfahrungen gebildet haben
+        self.formed_opinions: Dict[str, Dict] = {}
+
+        # Templates für natürliche Integration
+        self.memory_templates = [
+            "*Ohren zucken* Das erinnert mich an etwas... {memory}",
+            "Oh! Das ist wie damals, als {memory}",
+            "*nachdenklich* Hmm, das kommt mir bekannt vor... {memory}",
+            "*Schweif wippt* Weißt du, ich hab ähnliches erlebt: {memory}",
+            "Das ist lustig, das erinnert mich an: {memory}",
+        ]
+
+        self.opinion_templates = [
+            "Basierend auf dem was ich erlebt habe, denke ich {opinion}",
+            "*basierend auf Erfahrung* Ich hab gelernt, dass {opinion}",
+            "Meine Erfahrung sagt mir: {opinion}",
+            "Nach allem was ich so mitbekommen habe, {opinion}",
+        ]
+
+        self._load_state()
+
+    def record_experience(self, topic: str, content: str,
+                          emotional_impact: float = 0.0,
+                          outcome: str = "neutral"):
+        """
+        Zeichnet eine neue Erfahrung auf.
+
+        Args:
+            topic: Thema der Erfahrung
+            content: Beschreibung
+            emotional_impact: -1 bis +1
+            outcome: positive/negative/neutral
+        """
+        experience = {
+            'content': content,
+            'emotional_impact': emotional_impact,
+            'outcome': outcome,
+            'timestamp': datetime.now().isoformat(),
+        }
+
+        self.experiences[topic.lower()].append(experience)
+        self.experiences[topic.lower()] = self.experiences[topic.lower()][-20:]
+
+        # Prüfe ob Meinung gebildet werden sollte
+        self._maybe_form_opinion(topic)
+        self._save_state()
+
+    def _maybe_form_opinion(self, topic: str):
+        """Bildet Meinung wenn genug Erfahrungen vorhanden"""
+        topic_lower = topic.lower()
+        experiences = self.experiences.get(topic_lower, [])
+
+        if len(experiences) < 3:
+            return
+
+        # Analysiere Erfahrungen
+        positive = sum(1 for e in experiences if e['outcome'] == 'positive')
+        negative = sum(1 for e in experiences if e['outcome'] == 'negative')
+        total = len(experiences)
+
+        if positive / total > 0.6:
+            opinion = f"{topic} ist meistens positiv"
+            confidence = positive / total
+        elif negative / total > 0.6:
+            opinion = f"bei {topic} sollte man vorsichtig sein"
+            confidence = negative / total
+        else:
+            opinion = f"{topic} kann unterschiedlich ausgehen"
+            confidence = 0.5
+
+        # Speichere geformte Meinung
+        self.formed_opinions[topic_lower] = {
+            'opinion': opinion,
+            'confidence': confidence,
+            'based_on': len(experiences),
+            'formed_at': datetime.now().isoformat(),
+        }
+
+    def find_relevant_memory(self, user_message: str) -> Optional[str]:
+        """
+        Findet eine relevante Erinnerung zur User-Nachricht.
+
+        Returns:
+            Formatierte Erinnerung oder None
+        """
+        message_lower = user_message.lower()
+
+        # Suche nach Themen-Übereinstimmung
+        for topic, experiences in self.experiences.items():
+            if topic in message_lower or any(word in message_lower for word in topic.split()):
+                if experiences:
+                    # Wähle interessante Erfahrung
+                    exp = random.choice(experiences[-5:])
+                    template = random.choice(self.memory_templates)
+                    return template.format(memory=exp['content'][:100])
+
+        return None
+
+    def get_opinion_about(self, topic: str) -> Optional[str]:
+        """Gibt geformte Meinung zu einem Thema zurück"""
+        topic_lower = topic.lower()
+
+        if topic_lower in self.formed_opinions:
+            opinion_data = self.formed_opinions[topic_lower]
+            if opinion_data['confidence'] > 0.5:
+                template = random.choice(self.opinion_templates)
+                return template.format(opinion=opinion_data['opinion'])
+
+        return None
+
+    def integrate_memory_naturally(self, response: str, user_message: str) -> str:
+        """
+        Integriert Erinnerungen natürlich in eine Antwort.
+
+        Chance-basiert um nicht zu häufig zu sein.
+        """
+        # 25% Chance eine Erinnerung einzuweben
+        if random.random() > 0.25:
+            return response
+
+        memory = self.find_relevant_memory(user_message)
+        if memory:
+            return f"{response}\n\n{memory}"
+
+        return response
+
+    def _save_state(self):
+        """Speichert Zustand"""
+        try:
+            state = {
+                'experiences': dict(self.experiences),
+                'formed_opinions': self.formed_opinions,
+            }
+            with open(self.data_dir / "experience_opinions.json", 'w', encoding='utf-8') as f:
+                json.dump(state, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.debug(f"Could not save experience opinions: {e}")
+
+    def _load_state(self):
+        """Lädt Zustand"""
+        try:
+            path = self.data_dir / "experience_opinions.json"
+            if path.exists():
+                with open(path, 'r', encoding='utf-8') as f:
+                    state = json.load(f)
+                self.experiences = defaultdict(list, state.get('experiences', {}))
+                self.formed_opinions = state.get('formed_opinions', {})
+        except Exception as e:
+            logger.debug(f"Could not load experience opinions: {e}")
+
+
+# =============================================================================
+# 10. ERWEITERTES KNOWLEDGE INFLUENCE SYSTEM
+# =============================================================================
+
+class EnhancedKnowledgeInfluenceSystem(KnowledgeInfluenceSystem):
+    """
+    Erweitertes System mit allen vier Verbesserungen:
+    1. Überzeugungen aktiv das Denken beeinflussen
+    2. Persönlichkeits-Traits formen den Antwortstil
+    3. Relevantes Wissen automatisch in Kontext holen
+    4. Erfahrungen bilden Meinungen
+    """
+
+    def __init__(self, data_dir: Path = None):
+        super().__init__(data_dir)
+
+        # Neue Systeme initialisieren
+        self.conviction_argumentation = ConvictionArgumentation(
+            self.worldview, self.personality_evolution
+        )
+        self.response_style = TraitBasedResponseStyle(self.personality_evolution)
+        self.knowledge_contextualizer = AutomaticKnowledgeContextualizer(
+            self.data_dir / "context"
+        )
+        self.experience_opinions = ExperienceBasedOpinions(
+            self.data_dir / "experiences"
+        )
+
+        logger.info("[EnhancedKnowledge] ✅ Alle 4 Verbesserungen aktiv:")
+        logger.info("  1. Überzeugungs-basierte Argumentation")
+        logger.info("  2. Trait-basierter Antwortstil")
+        logger.info("  3. Automatische Wissens-Kontextualisierung")
+        logger.info("  4. Erfahrungs-basierte Meinungsbildung")
+
+    def enhance_response_fully(self, response: str, user_message: str,
+                                topic: str = "", detected_emotion: str = None,
+                                knowledge_db: Any = None) -> str:
+        """
+        Wendet ALLE Verbesserungen auf eine Antwort an.
+
+        Args:
+            response: Die ursprüngliche Antwort
+            user_message: Die User-Nachricht
+            topic: Erkanntes Thema
+            detected_emotion: Erkannte Emotion des Users
+            knowledge_db: Referenz zur Wissensdatenbank
+
+        Returns:
+            Vollständig angereicherte Antwort
+        """
+        enhanced = response
+
+        # 1. Überzeugungs-basierte Argumentation
+        if topic:
+            conviction_fragment = self.conviction_argumentation.generate_conviction_based_response(
+                topic, user_message
+            )
+            if conviction_fragment and random.random() < 0.4:
+                enhanced = f"{conviction_fragment}\n\n{enhanced}"
+
+        # 2. Trait-basierter Stil
+        enhanced = self.response_style.apply_style_to_response(enhanced, detected_emotion)
+
+        # 3. Automatische Wissens-Kontextualisierung (für Prompt, nicht Antwort)
+        # Dies wird separat im Prompt-Kontext verwendet
+
+        # 4. Erfahrungs-Integration
+        enhanced = self.experience_opinions.integrate_memory_naturally(enhanced, user_message)
+
+        # Basis-Wissensanreicherung (existierendes System)
+        relevant_facts = self.knowledge_contextualizer.get_contextual_knowledge(
+            user_message, knowledge_db
+        )
+        if relevant_facts:
+            enhanced = self.knowledge_weaver.weave_knowledge_into_response(
+                enhanced, relevant_facts, topic
+            )
+
+        return enhanced
+
+    def get_enhanced_prompt_context(self, user_message: str = "",
+                                     knowledge_db: Any = None) -> str:
+        """
+        Generiert erweiterten Prompt-Kontext mit automatischem Wissen.
+        """
+        sections = []
+
+        # Basis-Kontext
+        base_context = self.get_full_prompt_context()
+        if base_context:
+            sections.append(base_context)
+
+        # Automatisches Wissen
+        if user_message:
+            facts = self.knowledge_contextualizer.get_contextual_knowledge(
+                user_message, knowledge_db
+            )
+            knowledge_context = self.knowledge_contextualizer.format_knowledge_for_context(facts)
+            if knowledge_context:
+                sections.append(knowledge_context)
+
+        # Trait-basierte Verhaltenshinweise
+        trait_hints = self._generate_trait_behavior_hints()
+        if trait_hints:
+            sections.append(trait_hints)
+
+        return "\n".join(sections)
+
+    def _generate_trait_behavior_hints(self) -> str:
+        """Generiert Verhaltenshinweise basierend auf Traits"""
+        hints = []
+        traits = self.personality_evolution.traits
+
+        if traits.get('skepticism') and traits['skepticism'].current_value > 0.7:
+            hints.append("• Du bist aktuell skeptisch - hinterfrage Behauptungen")
+
+        if traits.get('curiosity') and traits['curiosity'].current_value > 0.8:
+            hints.append("• Deine Neugier ist hoch - stelle Nachfragen!")
+
+        if traits.get('empathy_depth') and traits['empathy_depth'].current_value > 0.75:
+            hints.append("• Zeige tiefe Empathie wenn der User emotional spricht")
+
+        if traits.get('caution') and traits['caution'].current_value > 0.7:
+            hints.append("• Sei vorsichtig und weise auf Risiken hin")
+
+        if not hints:
+            return ""
+
+        return "\n=== AKTUELLE VERHALTENSTENDENZEN ===\n" + "\n".join(hints)
+
+    def record_interaction_experience(self, topic: str, outcome: str,
+                                       emotional_impact: float = 0.0):
+        """Zeichnet eine Interaktions-Erfahrung auf"""
+        content = f"Gespräch über {topic}"
+        self.experience_opinions.record_experience(
+            topic=topic,
+            content=content,
+            emotional_impact=emotional_impact,
+            outcome=outcome
+        )
+
+
+# =============================================================================
 # FACTORY FUNCTION
 # =============================================================================
 
-def create_knowledge_influence_system(data_dir: Path = None) -> KnowledgeInfluenceSystem:
-    """Factory-Funktion für KnowledgeInfluenceSystem"""
+def create_knowledge_influence_system(data_dir: Path = None, enhanced: bool = True) -> KnowledgeInfluenceSystem:
+    """
+    Factory-Funktion für KnowledgeInfluenceSystem.
+
+    Args:
+        data_dir: Verzeichnis für Daten
+        enhanced: True für erweitertes System mit allen Verbesserungen
+
+    Returns:
+        KnowledgeInfluenceSystem oder EnhancedKnowledgeInfluenceSystem
+    """
+    if enhanced:
+        return EnhancedKnowledgeInfluenceSystem(data_dir)
     return KnowledgeInfluenceSystem(data_dir)
 
 
