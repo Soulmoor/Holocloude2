@@ -858,6 +858,20 @@ except ImportError as e:
     HoloWebSocketHandler = None
     logger.debug(f"[Brain] HoloWebSocketHandler nicht verfügbar: {e}")
 
+# Cognitive Enhancement System (Proaktives Wissen, Transfer-Learning, Symbolisches Reasoning)
+try:
+    from holo_cognitive_enhancement import (
+        CognitiveEnhancementSystem,
+        create_cognitive_enhancement
+    )
+    COGNITIVE_ENHANCEMENT_AVAILABLE = True
+    logger.info("[Brain] ✓ CognitiveEnhancementSystem (Proaktives Wissen, Reasoning) geladen")
+except ImportError as e:
+    COGNITIVE_ENHANCEMENT_AVAILABLE = False
+    CognitiveEnhancementSystem = None
+    create_cognitive_enhancement = None
+    logger.debug(f"[Brain] CognitiveEnhancementSystem nicht verfügbar: {e}")
+
 # =============================================================================
 # KONFIGURATION
 # =============================================================================
@@ -13382,6 +13396,23 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"WebSocketHandler nicht verfügbar: {e}")
 
+        # Cognitive Enhancement System - Proaktives Wissen, Transfer-Learning, Symbolisches Reasoning
+        self.cognitive_enhancement = None
+        if COGNITIVE_ENHANCEMENT_AVAILABLE and create_cognitive_enhancement:
+            try:
+                self.cognitive_enhancement = create_cognitive_enhancement(
+                    data_dir=Path("data/cognitive_enhancement")
+                )
+                # Verbinde mit WebCuriosity und Preferences
+                if hasattr(self, 'web_curiosity') and self.web_curiosity:
+                    self.cognitive_enhancement.connect_modules(
+                        web_curiosity=self.web_curiosity,
+                        preferences=getattr(self, 'preferences', None)
+                    )
+                logger.info("🧠 CognitiveEnhancementSystem initialisiert (Proaktives Wissen + Reasoning)")
+            except Exception as e:
+                logger.debug(f"CognitiveEnhancementSystem nicht verfügbar: {e}")
+
         # ================================================================
         # 13d. AUTONOMOUS ACTIVITY mit READING ENGINE!
         # ================================================================
@@ -22712,6 +22743,28 @@ Erwähne es beiläufig wenn es passt, z.B.:
             except Exception as e:
                 logger.debug(f"Web curiosity context error: {e}")
 
+        # === 🧠 COGNITIVE ENHANCEMENT CONTEXT (Proaktives Wissen, Muster, Reasoning) ===
+        if hasattr(self, 'cognitive_enhancement') and self.cognitive_enhancement:
+            try:
+                # Hole User-Interessen für Reasoning
+                user_interests = []
+                if hasattr(self, 'web_curiosity') and self.web_curiosity:
+                    interests = self.web_curiosity.get_discovered_interests()
+                    user_interests = [i.get('name', '') for i in interests[:5]]
+
+                # Erweitere Kontext mit proaktivem Wissen und Reasoning
+                ce_context = self.cognitive_enhancement.enhance_context(
+                    user_message=user_input if 'user_input' in dir() else "",
+                    conversation_history=history if 'history' in dir() else None,
+                    existing_context="",
+                    user_interests=user_interests
+                )
+                if ce_context:
+                    persona += f"\n{ce_context}\n"
+
+            except Exception as e:
+                logger.debug(f"Cognitive enhancement context error: {e}")
+
         # === ⚡ ENERGY MANAGEMENT CONTEXT (Selbst-Regulierung) ===
         if hasattr(self, 'energy_management') and self.energy_management:
             try:
@@ -23255,6 +23308,28 @@ WICHTIG:
             )
         except Exception as e:
             logger.debug(f"Self-learning error: {e}")
+
+        # Cognitive Enhancement lernt auch aus der Interaktion
+        if hasattr(self, 'cognitive_enhancement') and self.cognitive_enhancement:
+            try:
+                # Hole letzte User-Nachricht und Holo-Antwort aus der History
+                user_msg = ""
+                holo_response = ""
+                if hasattr(self, 'conversation_history') and self.conversation_history:
+                    for msg in reversed(self.conversation_history[-4:]):
+                        if msg.get('role') == 'user' and not user_msg:
+                            user_msg = msg.get('content', '')
+                        elif msg.get('role') == 'assistant' and not holo_response:
+                            holo_response = msg.get('content', '')
+
+                if user_msg:
+                    self.cognitive_enhancement.learn_from_interaction(
+                        user_message=user_msg,
+                        holo_response=holo_response,
+                        was_successful=(user_reaction >= 0.5)
+                    )
+            except Exception as e:
+                logger.debug(f"Cognitive enhancement learning error: {e}")
 
     def generate_creative_goal(self) -> Optional[str]:
         """
