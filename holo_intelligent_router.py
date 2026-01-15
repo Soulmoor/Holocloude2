@@ -7333,7 +7333,9 @@ class HoloIntelligentRouter:
                        cognitive_integration=None,
                        reader_extended=None,
                        vision_extended=None,
-                       websocket_handler=None):
+                       websocket_handler=None,
+                       local_understanding=None,
+                       cognitive_enhancement=None):
         """Verbinde alle externen Module"""
 
         # State Collector - Basis-Module
@@ -7392,6 +7394,10 @@ class HoloIntelligentRouter:
         self.state_collector.reader_extended = reader_extended
         self.state_collector.vision_extended = vision_extended
         self.state_collector.websocket_handler = websocket_handler
+
+        # === NEU: Intelligenz-Module ===
+        self.local_understanding = local_understanding
+        self.cognitive_enhancement = cognitive_enhancement
 
         # Direkte Referenzen
         self.impulse_generator = impulse_generator
@@ -7468,6 +7474,11 @@ class HoloIntelligentRouter:
         if vision_extended: integrated_modules.append("VisionExtended")
         if websocket_handler: integrated_modules.append("WebSocketHandler")
 
+        # Intelligenz-Module
+        intelligence_modules = []
+        if local_understanding: intelligence_modules.append("LocalUnderstanding")
+        if cognitive_enhancement: intelligence_modules.append("CognitiveEnhancement")
+
         if activity_modules:
             logger.info(f"[Router] Aktivitäts-Module verbunden: {', '.join(activity_modules)}")
         if extended_modules:
@@ -7478,8 +7489,10 @@ class HoloIntelligentRouter:
             logger.info(f"[Router] Wissens-Module verbunden: {', '.join(knowledge_modules)}")
         if integrated_modules:
             logger.info(f"[Router] Integrierte Module verbunden: {', '.join(integrated_modules)}")
+        if intelligence_modules:
+            logger.info(f"[Router] 🧠 Intelligenz-Module verbunden: {', '.join(intelligence_modules)}")
 
-        logger.info("[Router] Module vollständig verbunden (Wissen + Beziehung + Emotionen + Aktivitäten + Wahrnehmung + Perception + Integrierte)")
+        logger.info("[Router] Module vollständig verbunden (Wissen + Beziehung + Emotionen + Aktivitäten + Wahrnehmung + Perception + Integrierte + Intelligenz)")
 
     def route(self, user_input: str,
               conversation_history: List[Dict] = None) -> Dict[str, Any]:
@@ -7502,16 +7515,45 @@ class HoloIntelligentRouter:
         # 1. Zustand sammeln
         state = self.state_collector.collect()
 
-        # 2. Intent analysieren
+        # 2. Intent analysieren (klassisch)
         intent = self.intent_analyzer.analyze(user_input)
+
+        # 2b. Lokales Verständnis (wenn verfügbar) - ECHTES Sprachverständnis
+        local_understanding_result = None
+        if hasattr(self, 'local_understanding') and self.local_understanding:
+            try:
+                local_understanding_result = self.local_understanding.understand(user_input)
+                # Verbessere Intent-Analyse mit lokalem Verständnis
+                if local_understanding_result.intent_confidence > 0.7:
+                    intent.complexity = local_understanding_result.complexity
+                    if local_understanding_result.sentiment < -0.3:
+                        intent.emotional_content = True
+                logger.debug(f"[Router] LocalUnderstanding: {local_understanding_result.intent.name} "
+                            f"({local_understanding_result.intent_confidence:.0%})")
+            except Exception as e:
+                logger.debug(f"[Router] LocalUnderstanding error: {e}")
 
         # 3. Route bestimmen
         route_type = self._determine_route(intent, state, len(conversation_history))
 
+        # 3b. Prüfe ob lokale Antwort möglich (OHNE LLM)
+        local_response = None
+        if local_understanding_result and not local_understanding_result.needs_llm:
+            try:
+                local_response = self.local_understanding.get_local_response(local_understanding_result)
+                if local_response:
+                    logger.info(f"[Router] ✓ Lokale Antwort generiert (kein LLM nötig)")
+            except Exception as e:
+                logger.debug(f"[Router] Lokale Antwort fehlgeschlagen: {e}")
+
         # 4. Antwort generieren
-        response, metadata = self._generate_response(
-            user_input, intent, state, route_type, conversation_history
-        )
+        if local_response:
+            response = local_response
+            metadata = {"source": "local_understanding", "llm_used": False}
+        else:
+            response, metadata = self._generate_response(
+                user_input, intent, state, route_type, conversation_history
+            )
 
         # 5. Personalisieren (NEU: mit user_input fuer Response Enhancement)
         # Tracke Nachrichtenanzahl fuer kontextuelle Anpassung
@@ -7530,6 +7572,7 @@ class HoloIntelligentRouter:
             "state": state,
             "intent": intent,
             "metadata": metadata,
+            "local_understanding": local_understanding_result.to_dict() if local_understanding_result else None,
         }
 
     def _determine_route(self, intent: IntentAnalysis,

@@ -872,6 +872,24 @@ except ImportError as e:
     create_cognitive_enhancement = None
     logger.debug(f"[Brain] CognitiveEnhancementSystem nicht verfügbar: {e}")
 
+# Local Understanding System (Lokales Sprachverständnis ohne LLM)
+try:
+    from holo_local_understanding import (
+        HoloLocalUnderstanding,
+        create_local_understanding,
+        Understanding,
+        IntentType
+    )
+    LOCAL_UNDERSTANDING_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloLocalUnderstanding (Lokales Sprachverständnis) geladen")
+except ImportError as e:
+    LOCAL_UNDERSTANDING_AVAILABLE = False
+    HoloLocalUnderstanding = None
+    create_local_understanding = None
+    Understanding = None
+    IntentType = None
+    logger.debug(f"[Brain] HoloLocalUnderstanding nicht verfügbar: {e}")
+
 # =============================================================================
 # KONFIGURATION
 # =============================================================================
@@ -13413,6 +13431,17 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"CognitiveEnhancementSystem nicht verfügbar: {e}")
 
+        # Local Understanding System - Lokales Sprachverständnis ohne LLM
+        self.local_understanding = None
+        if LOCAL_UNDERSTANDING_AVAILABLE and create_local_understanding:
+            try:
+                self.local_understanding = create_local_understanding(
+                    data_dir=Path("data/local_understanding")
+                )
+                logger.info("🗣️ LocalUnderstanding initialisiert (Lokales Sprachverständnis)")
+            except Exception as e:
+                logger.debug(f"LocalUnderstanding nicht verfügbar: {e}")
+
         # ================================================================
         # 13d. AUTONOMOUS ACTIVITY mit READING ENGINE!
         # ================================================================
@@ -16027,6 +16056,9 @@ class HoloPersona:
             reader_extended=getattr(self, 'reader_extended', None),
             vision_extended=getattr(self, 'vision_extended', None),
             websocket_handler=getattr(self, 'websocket_handler', None),
+            # === NEU: INTELLIGENZ-MODULE ===
+            local_understanding=getattr(self, 'local_understanding', None),
+            cognitive_enhancement=getattr(self, 'cognitive_enhancement', None),
         )
 
         # LLM Callback setzen
