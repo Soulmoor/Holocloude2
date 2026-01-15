@@ -1,8 +1,8 @@
 # HOLOCLOUDE - Vollständige Projektdokumentation
 
-> **Version**: 15.0 (Intelligent Router Edition)
+> **Version**: 15.1 (Enhanced Personality Edition)
 > **Stand**: Januar 2026
-> **Codeumfang**: ~212.000 Zeilen in 93+ Python-Modulen
+> **Codeumfang**: ~217.000 Zeilen in 89 Python-Modulen
 > **Letzte Aktualisierung**: 15. Januar 2026
 
 ---
@@ -14,19 +14,21 @@
 3. [Kernfähigkeiten & Features](#3-kernfähigkeiten--features)
 4. [Die 4 konsolidierten Hauptmodule](#4-die-4-konsolidierten-hauptmodule)
 5. [Das Intelligent Router System](#5-das-intelligent-router-system)
-6. [Knowledge Influence System (NEU)](#6-knowledge-influence-system-neu)
-7. [Kognitive Systeme im Detail](#7-kognitive-systeme-im-detail)
-8. [Wahrnehmungssysteme](#8-wahrnehmungssysteme)
-9. [Kommunikation & NLP](#9-kommunikation--nlp)
-10. [Autonomes Verhalten](#10-autonomes-verhalten)
-11. [Energiesystem](#11-energiesystem)
-12. [Datenpersistenz & Datenbanken](#12-datenpersistenz--datenbanken)
-13. [Integration & Schnittstellen](#13-integration--schnittstellen)
-14. [Vollständiger Datenfluss](#14-vollständiger-datenfluss)
-15. [Alle Module im Überblick](#15-alle-module-im-überblick)
-16. [Konfiguration](#16-konfiguration)
-17. [Verzeichnisstruktur](#17-verzeichnisstruktur)
-18. [Einstiegspunkte & Verwendung](#18-einstiegspunkte--verwendung)
+6. [Knowledge Influence System](#6-knowledge-influence-system)
+7. [Enhanced Personality System (NEU v15.1)](#7-enhanced-personality-system-neu-v151)
+8. [Kognitive Systeme im Detail](#8-kognitive-systeme-im-detail)
+9. [Wahrnehmungssysteme](#9-wahrnehmungssysteme)
+10. [Kommunikation & NLP](#10-kommunikation--nlp)
+11. [Autonomes Verhalten](#11-autonomes-verhalten)
+12. [Energiesystem](#12-energiesystem)
+13. [Datenpersistenz & Datenbanken](#13-datenpersistenz--datenbanken)
+14. [Integration & Schnittstellen](#14-integration--schnittstellen)
+15. [Vollständiger Datenfluss](#15-vollständiger-datenfluss)
+16. [Alle Module im Überblick](#16-alle-module-im-überblick)
+17. [Konfiguration](#17-konfiguration)
+18. [Verzeichnisstruktur](#18-verzeichnisstruktur)
+19. [Einstiegspunkte & Verwendung](#19-einstiegspunkte--verwendung)
+20. [Sicherheitsverbesserungen](#20-sicherheitsverbesserungen)
 
 ---
 
@@ -488,7 +490,7 @@ class IntelligentRouter:
 
 ---
 
-## 6. Knowledge Influence System (NEU)
+## 6. Knowledge Influence System
 
 ### 6.1 Übersicht
 
@@ -666,9 +668,266 @@ def process_learned_knowledge(self, fact, topic, sentiment):
 
 ---
 
-## 7. Kognitive Systeme im Detail
+## 7. Enhanced Personality System (NEU v15.1)
 
-### 7.1 holo_cognitive_modules.py
+### 7.1 Übersicht
+
+Das **Enhanced Personality System** erweitert das Knowledge Influence System mit **4 neuen Fähigkeiten**, die Holo noch lebendiger und authentischer machen:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              ENHANCED PERSONALITY SYSTEM v15.1                   │
+│                                                                 │
+│  "Persönlichkeit wird aktiv im Denken und Antworten wirksam"   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 1. CONVICTION ARGUMENTATION                               │  │
+│  │    Überzeugungen beeinflussen aktiv die Argumentation    │  │
+│  │    "Ich bin fest überzeugt, dass..." vs "Vielleicht..."  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 2. TRAIT-BASED RESPONSE STYLE                            │  │
+│  │    Persönlichkeits-Traits formen den Antwortstil         │  │
+│  │    skeptisch → mehr Nachfragen, neugierig → mehr Interesse│  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 3. AUTOMATIC KNOWLEDGE CONTEXTUALIZER                    │  │
+│  │    Relevantes Wissen automatisch in Kontext holen        │  │
+│  │    Proaktiver Wissensabruf bei erkannten Themen          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ 4. EXPERIENCE-BASED OPINIONS                             │  │
+│  │    Erfahrungen bilden Meinungen                          │  │
+│  │    "Das erinnert mich an..." wird natürlicher Charakter  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 7.2 ConvictionArgumentation - Überzeugungs-basierte Argumentation
+
+**Was es macht**: Macht Überzeugungen aktiv im Denken wirksam - je stärker die Überzeugung, desto selbstsicherer die Argumentation.
+
+```python
+class ConvictionArgumentation:
+    """Überzeugungen beeinflussen aktiv WIE Holo argumentiert"""
+
+    # Argumentation-Patterns basierend auf Überzeugungsstärke
+    argumentation_patterns = {
+        ConvictionStrength.CORE: [
+            "Ich bin fest davon überzeugt, dass {topic} {stance}.",
+            "Da gibt es für mich keinen Zweifel: {topic} {stance}.",
+        ],
+        ConvictionStrength.STRONG: [
+            "Ich denke wirklich, dass {topic} {stance}.",
+            "*Ohren aufmerksam* Ich bin ziemlich sicher, dass {topic} {stance}.",
+        ],
+        ConvictionStrength.UNCERTAIN: [
+            "Da bin ich mir noch unsicher... {topic} könnte {stance}.",
+            "*Ohren zucken* Ich weiß nicht genau, ob {topic} {stance}.",
+        ],
+    }
+```
+
+**Beispiel**:
+```
+User: "Was denkst du über Politik?"
+
+Holo (mit CORE Überzeugung "Politik ist kritisch zu sehen"):
+→ "Da gibt es für mich keinen Zweifel: Politik sollte kritisch
+   betrachtet werden. Ich hab zum Beispiel gelernt, dass..."
+
+Holo (mit UNCERTAIN Überzeugung):
+→ "*Ohren zucken* Ich weiß nicht genau, ob Politik gut oder
+   schlecht ist. Gute Frage..."
+```
+
+### 7.3 TraitBasedResponseStyle - Trait-basierter Antwortstil
+
+**Was es macht**: Passt den Antwortstil basierend auf aktuellen Persönlichkeits-Traits an.
+
+```python
+class TraitBasedResponseStyle:
+    """Persönlichkeits-Traits formen den Antwortstil"""
+
+    trait_behaviors = {
+        'skepticism': {
+            'high': {  # > 0.7
+                'questions': [
+                    "*Ohr zuckt skeptisch* Bist du dir da sicher?",
+                    "Hmm... woher weißt du das?",
+                    "*kritischer Blick* Gibt es dafür Beweise?",
+                ],
+                'chance': 0.4,  # 40% Chance nachzufragen
+            }
+        },
+        'curiosity': {
+            'high': {  # > 0.75
+                'follow_ups': [
+                    "*Ohren spitzen sich* Oh! Erzähl mir mehr!",
+                    "*Schweif wedelt aufgeregt* Und dann?",
+                ],
+                'chance': 0.5,
+            }
+        },
+        'empathy_depth': {
+            'high': {  # > 0.75
+                'empathic_responses': [
+                    "*Ohren legen sich mitfühlend an* Das klingt {emotion}...",
+                    "*sanfter Blick* Ich bin hier für dich.",
+                ],
+                'chance': 0.6,
+            }
+        },
+        'warmth': {
+            'high': {
+                'affection': ["*schnurrt leise*", "*kuschelt sich näher*"],
+                'chance': 0.3,
+            }
+        }
+    }
+```
+
+**Verhaltensänderungen**:
+
+| Trait | Wenn hoch (>0.7) | Wenn niedrig (<0.3) |
+|-------|------------------|---------------------|
+| `skepticism` | 40% mehr Nachfragen | Schnelle Akzeptanz |
+| `curiosity` | 50% mehr "Erzähl mehr!" | Kurze "Okay" Antworten |
+| `empathy_depth` | 60% empathische Reaktionen | Sachlichere Antworten |
+| `caution` | 35% Warnungen hinzufügen | Spontaner |
+| `warmth` | 30% Zuneigungsgesten | Distanzierter |
+
+### 7.4 AutomaticKnowledgeContextualizer - Automatischer Wissensabruf
+
+**Was es macht**: Erkennt Themen in User-Nachrichten und holt automatisch relevantes Wissen.
+
+```python
+class AutomaticKnowledgeContextualizer:
+    """Holt relevantes Wissen proaktiv in den Kontext"""
+
+    trigger_keywords = {
+        'politik': ['politiker', 'regierung', 'wahl', 'partei', 'gesetz'],
+        'technik': ['computer', 'software', 'ki', 'ai', 'technologie'],
+        'wissenschaft': ['forschung', 'studie', 'experiment'],
+        'wirtschaft': ['firma', 'unternehmen', 'geld', 'markt'],
+        'kultur': ['film', 'musik', 'kunst', 'buch', 'anime'],
+        'gesundheit': ['gesund', 'krank', 'arzt', 'medizin'],
+        'umwelt': ['klima', 'umwelt', 'natur', 'tier'],
+        'soziales': ['freund', 'familie', 'beziehung', 'menschen'],
+    }
+
+    def get_contextual_knowledge(self, user_message: str) -> List[Dict]:
+        """Holt automatisch relevantes Wissen"""
+        topics = self.detect_relevant_topics(user_message)
+        # Suche passende Fakten in der Wissensdatenbank
+        # Verhindere Wiederholungen durch Recent-Cache
+        return relevant_facts
+```
+
+**Beispiel-Ablauf**:
+```
+User: "Ich hab gestern einen interessanten Artikel über KI gelesen"
+
+System:
+1. Erkennt Thema: 'technik' (wegen 'KI')
+2. Holt automatisch 2-3 gespeicherte Fakten zu KI
+3. Fügt sie dem Kontext hinzu
+
+Holo kann dann antworten:
+→ "Oh spannend! Apropos KI - ich hab auch was gelesen über..."
+```
+
+### 7.5 ExperienceBasedOpinions - Erfahrungs-basierte Meinungsbildung
+
+**Was es macht**: Zeichnet Erfahrungen auf, bildet daraus Meinungen und integriert sie natürlich in Gespräche.
+
+```python
+class ExperienceBasedOpinions:
+    """Erfahrungen bilden Meinungen und Erinnerungen"""
+
+    memory_templates = [
+        "*Ohren zucken* Das erinnert mich an etwas... {memory}",
+        "Oh! Das ist wie damals, als {memory}",
+        "*nachdenklich* Hmm, das kommt mir bekannt vor...",
+    ]
+
+    opinion_templates = [
+        "Basierend auf dem was ich erlebt habe, denke ich {opinion}",
+        "*basierend auf Erfahrung* Ich hab gelernt, dass {opinion}",
+        "Meine Erfahrung sagt mir: {opinion}",
+    ]
+
+    def record_experience(self, topic: str, content: str,
+                          emotional_impact: float, outcome: str):
+        """Zeichnet Erfahrung auf"""
+        self.experiences[topic].append(experience)
+        self._maybe_form_opinion(topic)  # Prüft ob Meinung gebildet werden soll
+
+    def _maybe_form_opinion(self, topic: str):
+        """Bildet Meinung nach 3+ ähnlichen Erfahrungen"""
+        if len(experiences) >= 3:
+            positive = count_positive / total
+            if positive > 0.6:
+                opinion = f"{topic} ist meistens positiv"
+            elif negative > 0.6:
+                opinion = f"bei {topic} sollte man vorsichtig sein"
+```
+
+**Beispiel**:
+```
+Holo hat 5 negative Erfahrungen mit "Online-Shopping" gesammelt:
+→ Bildet Meinung: "bei Online-Shopping sollte man vorsichtig sein"
+
+Später im Gespräch:
+User: "Ich will mir was online bestellen"
+Holo: "*Ohren zucken* Das erinnert mich an etwas... Ich hatte
+      da mal schlechte Erfahrungen. Bei Online-Shopping sollte
+      man vorsichtig sein, meine Erfahrung sagt mir das."
+```
+
+### 7.6 Integration in holo_brain.py
+
+```python
+# In holo_brain.py wird jetzt EnhancedKnowledgeInfluenceSystem verwendet:
+
+class HoloPersona:
+    def __init__(self):
+        # Nutze das erweiterte System
+        self.knowledge_influence = EnhancedKnowledgeInfluenceSystem()
+
+    def process_message(self, message: str) -> str:
+        # ... normale Verarbeitung ...
+
+        # NEUER SCHRITT: Wende alle 4 Verbesserungen an
+        enhanced_response = self.knowledge_influence.enhance_response_fully(
+            response=base_response,
+            user_message=message,
+            topic=detected_topic,
+            detected_emotion=user_emotion,
+            knowledge_db=self.knowledge_database
+        )
+
+        # Zeichne Erfahrung auf
+        self.knowledge_influence.experience_opinions.record_experience(
+            topic=detected_topic,
+            content=f"Gespräch über {detected_topic}",
+            emotional_impact=detected_sentiment,
+            outcome=conversation_outcome
+        )
+
+        return enhanced_response
+```
+
+---
+
+## 8. Kognitive Systeme im Detail
+
+### 8.1 holo_cognitive_modules.py
 
 **5 Kernmodule** für erweiterte Kognition:
 
@@ -750,7 +1009,7 @@ class AdvancedLearningEngine:
         self.update_learning_strategy(history)
 ```
 
-### 7.2 holo_autonomous_thinking.py
+### 8.2 holo_autonomous_thinking.py
 
 **Kontinuierliches Hintergrunddenken**:
 
@@ -785,7 +1044,7 @@ class AutonomousThinking:
         return generator()
 ```
 
-### 7.3 holo_creative_mind.py
+### 8.3 holo_creative_mind.py
 
 **Kreativitäts-Engine**:
 
@@ -812,9 +1071,9 @@ class CreativeMind:
 
 ---
 
-## 8. Wahrnehmungssysteme
+## 9. Wahrnehmungssysteme
 
-### 8.1 Vision-Module (3 Stufen)
+### 9.1 Vision-Module (3 Stufen)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -839,7 +1098,7 @@ class CreativeMind:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 8.2 Audio-Module
+### 9.2 Audio-Module
 
 ```python
 class AudioProcessor:
@@ -868,7 +1127,7 @@ class EnhancedAudio:
         )
 ```
 
-### 8.3 Cross-Modal Integration
+### 9.3 Cross-Modal Integration
 
 ```python
 class CrossModalIntegration:
@@ -886,9 +1145,9 @@ class CrossModalIntegration:
 
 ---
 
-## 9. Kommunikation & NLP
+## 10. Kommunikation & NLP
 
-### 9.1 holo_smart_understanding.py
+### 10.1 holo_smart_understanding.py
 
 **Intent-Erkennung und Textverstehen**:
 
@@ -932,7 +1191,7 @@ class SmartUnderstanding:
 | `COMMAND` | "Licht an" | SKILL_EXECUTION |
 | `EMOTIONAL_SHARE` | "Ich bin traurig" | HYBRID_IMPULSE |
 
-### 9.2 holo_nlp_algorithms.py
+### 10.2 holo_nlp_algorithms.py
 
 **Fortgeschrittene NLP-Algorithmen**:
 
@@ -974,7 +1233,7 @@ class EntityExtractor:
         return entities
 ```
 
-### 9.3 holo_dialogue_engine.py
+### 10.3 holo_dialogue_engine.py
 
 **Dialogmanagement**:
 
@@ -1007,9 +1266,9 @@ class DialogueEngine:
 
 ---
 
-## 10. Autonomes Verhalten
+## 11. Autonomes Verhalten
 
-### 10.1 holo_impulse_system.py
+### 11.1 holo_impulse_system.py
 
 **Authentische Verhaltensimpulse**:
 
@@ -1061,7 +1320,7 @@ class ImpulseSystem:
         return True
 ```
 
-### 10.2 holo_drive_system.py
+### 11.2 holo_drive_system.py
 
 **Bedürfnisse und Antriebe**:
 
@@ -1105,7 +1364,7 @@ class DriveSystem:
         return goals
 ```
 
-### 10.3 holo_web_curiosity.py
+### 11.3 holo_web_curiosity.py
 
 **Autonome Web-Recherche**:
 
@@ -1130,9 +1389,9 @@ class WebCuriosity:
 
 ---
 
-## 11. Energiesystem
+## 12. Energiesystem
 
-### 11.1 Das 6-dimensionale Energiemodell
+### 12.1 Das 6-dimensionale Energiemodell
 
 ```python
 @dataclass
@@ -1145,7 +1404,7 @@ class EnergyState:
     spiritual: float   # Bedeutungs-Energie
 ```
 
-### 11.2 Energieverbrauch und -regeneration
+### 12.2 Energieverbrauch und -regeneration
 
 ```python
 class EnergySystem:
@@ -1187,7 +1446,7 @@ class EnergySystem:
         return sum(values) / len(values)
 ```
 
-### 11.3 Energie-basiertes Verhalten
+### 12.3 Energie-basiertes Verhalten
 
 ```python
 def get_response_style(energy_level: float) -> ResponseStyle:
@@ -1206,9 +1465,9 @@ def get_response_style(energy_level: float) -> ResponseStyle:
 
 ---
 
-## 12. Datenpersistenz & Datenbanken
+## 13. Datenpersistenz & Datenbanken
 
-### 12.1 Die 17 spezialisierten Datenbanken
+### 13.1 Die 17 spezialisierten Datenbanken
 
 ```python
 class HoloDatabaseManager:
@@ -1244,7 +1503,7 @@ class HoloDatabaseManager:
     }
 ```
 
-### 12.2 Datenstruktur für Knowledge Influence
+### 13.2 Datenstruktur für Knowledge Influence
 
 ```
 data/knowledge_influence/
@@ -1256,7 +1515,7 @@ data/knowledge_influence/
     └── influence_tracking.json   # Einfluss-Events + Summaries
 ```
 
-### 12.3 JSON-Dateien in data/
+### 13.3 JSON-Dateien in data/
 
 ```python
 # conversation_context.json
@@ -1281,9 +1540,9 @@ data/knowledge_influence/
 
 ---
 
-## 13. Integration & Schnittstellen
+## 14. Integration & Schnittstellen
 
-### 13.1 smart_llm_system.py - 3-Tier LLM
+### 14.1 smart_llm_system.py - 3-Tier LLM
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -1330,7 +1589,7 @@ class UnifiedLLM:
         return await self.call_model(self.remote_model, prompt)
 ```
 
-### 13.2 Externe Dienste
+### 14.2 Externe Dienste
 
 | Dienst | URL | Zweck |
 |--------|-----|-------|
@@ -1340,7 +1599,7 @@ class UnifiedLLM:
 | **NAS** | 192.168.178.40 | Datenspeicherung |
 | **ComfyUI** | localhost:8188 | Bildgenerierung |
 
-### 13.3 pi_holo_interface.py - Raspberry Pi
+### 14.3 pi_holo_interface.py - Raspberry Pi
 
 ```python
 class HoloInterface:
@@ -1361,7 +1620,7 @@ class HoloInterface:
         self.mqtt_client.publish("holo/state", json.dumps(state_dict))
 ```
 
-### 13.4 holo_device_agent.py - Smart Home
+### 14.4 holo_device_agent.py - Smart Home
 
 ```python
 class DeviceAgent:
@@ -1381,9 +1640,9 @@ class DeviceAgent:
 
 ---
 
-## 14. Vollständiger Datenfluss
+## 15. Vollständiger Datenfluss
 
-### 14.1 Nachrichtenverarbeitung (Detailliert)
+### 15.1 Nachrichtenverarbeitung (Detailliert)
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -1463,7 +1722,7 @@ Nach allem was ich gelesen habe über Skandale und so...
 Aber ich versuche fair zu bleiben. Was denkst du darüber?"
 ```
 
-### 14.2 Hintergrund-Prozesse
+### 15.2 Hintergrund-Prozesse
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -1507,9 +1766,9 @@ PARALLEL LAUFEND:
 
 ---
 
-## 15. Alle Module im Überblick
+## 16. Alle Module im Überblick
 
-### 15.1 Kernmodule (ESSENTIAL)
+### 16.1 Kernmodule (ESSENTIAL)
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1520,7 +1779,7 @@ PARALLEL LAUFEND:
 | `smart_llm_system.py` | 1.100 | **3-TIER LLM** - KI-Generierung |
 | `holo_core_types.py` | 1.500 | **TYPEN** - Enums, Dataclasses |
 
-### 15.2 Kognitive Module
+### 16.2 Kognitive Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1529,9 +1788,9 @@ PARALLEL LAUFEND:
 | `holo_personality.py` | 3.200 | Big Five, Körpersprache |
 | `holo_context_mind.py` | 2.200 | Kontext, Aktivitäten |
 | `holo_cognitive_modules.py` | 9.000 | Reasoning, Learning |
-| `holo_knowledge_influence.py` | 1.100 | **NEU** Persönlichkeitsentwicklung |
+| `holo_knowledge_influence.py` | 1.860 | **v15.1** Persönlichkeitsentwicklung + 4 neue Features |
 
-### 15.3 Autonomie-Module
+### 16.3 Autonomie-Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1540,7 +1799,7 @@ PARALLEL LAUFEND:
 | `holo_drive_system.py` | 1.700 | Antriebe & Bedürfnisse |
 | `holo_energy_system.py` | 1.900 | 6D-Energiemodell |
 
-### 15.4 Wahrnehmungs-Module
+### 16.4 Wahrnehmungs-Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1551,7 +1810,7 @@ PARALLEL LAUFEND:
 | `holo_audio_enhanced.py` | 1.400 | Sprach/Musikanalyse |
 | `holo_crossmodal.py` | 1.250 | Multi-Sensorik |
 
-### 15.5 Kommunikations-Module
+### 16.5 Kommunikations-Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1561,7 +1820,7 @@ PARALLEL LAUFEND:
 | `holo_speech_engine.py` | 2.000 | Text-to-Speech |
 | `holo_voice_interface.py` | 1.300 | Sprach-I/O |
 
-### 15.6 Integrations-Module
+### 16.6 Integrations-Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1570,7 +1829,7 @@ PARALLEL LAUFEND:
 | `holo_device_agent.py` | 640 | Smart Home |
 | `pi_holo_interface.py` | 1.400 | Pi-Kommunikation |
 
-### 15.7 Utility-Module
+### 16.7 Utility-Module
 
 | Modul | Zeilen | Beschreibung |
 |-------|--------|--------------|
@@ -1582,9 +1841,9 @@ PARALLEL LAUFEND:
 
 ---
 
-## 16. Konfiguration
+## 17. Konfiguration
 
-### 16.1 config.json - Hauptkonfiguration
+### 17.1 config.json - Hauptkonfiguration
 
 ```json
 {
@@ -1621,7 +1880,7 @@ PARALLEL LAUFEND:
 }
 ```
 
-### 16.2 Umgebungsvariablen
+### 17.2 Umgebungsvariablen
 
 ```bash
 # Überschreiben von Konfiguration
@@ -1632,7 +1891,7 @@ HOLO_DATA_DIR=/custom/path    # Ändert Datenverzeichnis
 
 ---
 
-## 17. Verzeichnisstruktur
+## 18. Verzeichnisstruktur
 
 ```
 /home/user/Holocloude2/
@@ -1667,9 +1926,9 @@ HOLO_DATA_DIR=/custom/path    # Ändert Datenverzeichnis
 
 ---
 
-## 18. Einstiegspunkte & Verwendung
+## 19. Einstiegspunkte & Verwendung
 
-### 18.1 Volles System starten
+### 19.1 Volles System starten
 
 ```python
 from holo_brain import HoloPersona
@@ -1685,7 +1944,7 @@ print(response)
 holo.run()
 ```
 
-### 18.2 Vereinfachte API
+### 19.2 Vereinfachte API
 
 ```python
 from holo_unified import HoloUnified
@@ -1702,7 +1961,7 @@ result = holo.process("Was weißt du über KI?")
 print(result.stats)
 ```
 
-### 18.3 Kommandozeile
+### 19.3 Kommandozeile
 
 ```bash
 # Direkt starten
@@ -1715,7 +1974,7 @@ HOLO_LOG_LEVEL=DEBUG python holo_brain.py
 python holo_unified.py --test
 ```
 
-### 18.4 Spezielle Befehle
+### 19.4 Spezielle Befehle
 
 ```
 /stats          # Zeigt System-Statistiken
@@ -1728,23 +1987,77 @@ python holo_unified.py --test
 
 ---
 
+## 20. Sicherheitsverbesserungen (v15.1)
+
+### 20.1 Übersicht
+
+In Version 15.1 wurden wichtige Sicherheitsverbesserungen implementiert:
+
+| Fix | Datei | Beschreibung |
+|-----|-------|--------------|
+| **eval() ersetzt** | `pi_control_v8_AI-extendet.py` | Unsicheres `eval()` durch `ast.literal_eval()` ersetzt |
+| **SSH gehärtet** | `pi_control_v8_AI-extendet.py` | `AutoAddPolicy` durch `known_hosts` Validierung ersetzt |
+
+### 20.2 eval() → ast.literal_eval()
+
+**Problem**: `eval()` kann beliebigen Python-Code ausführen und ist ein Sicherheitsrisiko.
+
+```python
+# VORHER (unsicher):
+result = eval(user_input)  # Kann beliebigen Code ausführen!
+
+# NACHHER (sicher):
+import ast
+result = ast.literal_eval(user_input)  # Nur sichere Literale
+```
+
+**Was `ast.literal_eval()` erlaubt**:
+- Strings, Zahlen, Tupel, Listen, Dicts, Booleans, None
+- Keine Funktionsaufrufe, Importe oder Code-Ausführung
+
+### 20.3 SSH-Verbindungssicherheit
+
+**Problem**: `AutoAddPolicy` akzeptiert jeden Host-Key und ist anfällig für Man-in-the-Middle-Angriffe.
+
+```python
+# VORHER (unsicher):
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+# NACHHER (sicher):
+client.load_system_host_keys()  # Lädt ~/.ssh/known_hosts
+# Verbindungen zu unbekannten Hosts werden abgelehnt
+```
+
+**Empfehlung**: Füge vertrauenswürdige Host-Keys zu `~/.ssh/known_hosts` hinzu:
+```bash
+ssh-keyscan -H <hostname> >> ~/.ssh/known_hosts
+```
+
+---
+
 ## Zusammenfassung
 
-**Holocloude v15.0** ist ein hochentwickeltes KI-System mit:
+**Holocloude v15.1** (Enhanced Personality Edition) ist ein hochentwickeltes KI-System mit:
 
-- **93+ Python-Module** (~212.000 Zeilen Code)
+- **89 Python-Module** (~217.000 Zeilen Code)
 - **Intelligentes Routing** (LOCAL/HYBRID/LLM)
 - **Lebendige Persönlichkeit** mit Evolution durch Wissen
+- **4 neue Personality-Enhancements** (v15.1):
+  - ConvictionArgumentation - Überzeugungen formen Argumentation
+  - TraitBasedResponseStyle - Traits formen Antwortstil
+  - AutomaticKnowledgeContextualizer - Proaktiver Wissensabruf
+  - ExperienceBasedOpinions - Erfahrungen bilden Meinungen
 - **Autonomes Verhalten** mit Hintergrunddenken
 - **Körpersprache** (Kemonomimi mit Ohren & Schwanz)
 - **6D-Energiemodell** beeinflusst Verhalten
 - **17 spezialisierte Datenbanken**
 - **Smart Home Integration**
 - **Graceful Degradation** bei fehlenden Modulen
+- **Sicherheitsverbesserungen** (eval-Fix, SSH-Härtung)
 
 Das System ist so konzipiert, dass Holo wirklich **"lebendig"** wirkt - mit eigenen Gedanken, sich entwickelnder Persönlichkeit und authentischen Reaktionen.
 
 ---
 
 *Dokumentation aktualisiert am 15. Januar 2026*
-*Version 15.0 - Intelligent Router Edition*
+*Version 15.1 - Enhanced Personality Edition*
