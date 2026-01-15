@@ -872,6 +872,20 @@ except ImportError as e:
     create_cognitive_enhancement = None
     logger.debug(f"[Brain] CognitiveEnhancementSystem nicht verfügbar: {e}")
 
+# Knowledge Influence System (Persönlichkeits-Evolution, Überzeugungen, Medien-Einfluss)
+try:
+    from holo_knowledge_influence import (
+        KnowledgeInfluenceSystem,
+        create_knowledge_influence_system
+    )
+    KNOWLEDGE_INFLUENCE_AVAILABLE = True
+    logger.info("[Brain] ✓ KnowledgeInfluenceSystem (Persönlichkeits-Evolution, Überzeugungen) geladen")
+except ImportError as e:
+    KNOWLEDGE_INFLUENCE_AVAILABLE = False
+    KnowledgeInfluenceSystem = None
+    create_knowledge_influence_system = None
+    logger.debug(f"[Brain] KnowledgeInfluenceSystem nicht verfügbar: {e}")
+
 # Local Understanding System (Lokales Sprachverständnis ohne LLM)
 try:
     from holo_local_understanding import (
@@ -13518,6 +13532,17 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"CognitiveEnhancementSystem nicht verfügbar: {e}")
 
+        # Knowledge Influence System - Persönlichkeits-Evolution, Überzeugungen, Medien-Einfluss
+        self.knowledge_influence = None
+        if KNOWLEDGE_INFLUENCE_AVAILABLE and create_knowledge_influence_system:
+            try:
+                self.knowledge_influence = create_knowledge_influence_system(
+                    data_dir=Path("data/knowledge_influence")
+                )
+                logger.info("🌱 KnowledgeInfluenceSystem initialisiert (Persönlichkeit entwickelt sich durch Wissen)")
+            except Exception as e:
+                logger.debug(f"KnowledgeInfluenceSystem nicht verfügbar: {e}")
+
         # Local Understanding System - Lokales Sprachverständnis ohne LLM
         self.local_understanding = None
         if LOCAL_UNDERSTANDING_AVAILABLE and create_local_understanding:
@@ -22963,6 +22988,16 @@ Erwähne es beiläufig wenn es passt, z.B.:
 
             except Exception as e:
                 logger.debug(f"Cognitive enhancement context error: {e}")
+
+        # === 🌱 KNOWLEDGE INFLUENCE CONTEXT (Persönlichkeits-Evolution, Überzeugungen) ===
+        if hasattr(self, 'knowledge_influence') and self.knowledge_influence:
+            try:
+                # Hole den vollständigen Einfluss-Kontext
+                ki_context = self.knowledge_influence.get_full_prompt_context()
+                if ki_context:
+                    persona += f"\n{ki_context}\n"
+            except Exception as e:
+                logger.debug(f"Knowledge influence context error: {e}")
 
         # === 🔮 PREDICTION SYSTEM CONTEXT (Verhaltensvorhersagen) ===
         if hasattr(self, 'prediction_system') and self.prediction_system:
