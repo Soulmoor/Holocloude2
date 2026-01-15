@@ -711,6 +711,154 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloRAMManager nicht verfügbar: {e}")
 
 # =============================================================================
+# ERWEITERTE MODULE - Verwaiste Module integrieren
+# =============================================================================
+
+# Digital Body - Hardware-Wahrnehmung
+try:
+    from holo_digital_body import DigitalBodySystem
+    DIGITAL_BODY_AVAILABLE = True
+    logger.info("[Brain] ✓ DigitalBodySystem (Hardware → Mentaler Zustand) geladen")
+except ImportError as e:
+    DIGITAL_BODY_AVAILABLE = False
+    DigitalBodySystem = None
+    logger.debug(f"[Brain] DigitalBodySystem nicht verfügbar: {e}")
+
+# Policy Engine - Policy-basierte Entscheidungen
+try:
+    from holo_policy_engine import HoloPolicyEngine, create_policy_engine
+    POLICY_ENGINE_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloPolicyEngine (Policy-Entscheidungen) geladen")
+except ImportError as e:
+    POLICY_ENGINE_AVAILABLE = False
+    HoloPolicyEngine = None
+    create_policy_engine = None
+    logger.debug(f"[Brain] HoloPolicyEngine nicht verfügbar: {e}")
+
+# Emotion Regulation - Emotionale Selbstkontrolle
+try:
+    from holo_emotion_regulation import EmotionRegulator, RegulationStrategy
+    EMOTION_REGULATION_AVAILABLE = True
+    logger.info("[Brain] ✓ EmotionRegulator (Emotionale Selbstkontrolle) geladen")
+except ImportError as e:
+    EMOTION_REGULATION_AVAILABLE = False
+    EmotionRegulator = None
+    RegulationStrategy = None
+    logger.debug(f"[Brain] EmotionRegulator nicht verfügbar: {e}")
+
+# Mixed Emotions - Gemischte Emotionen
+try:
+    from holo_mixed_emotions import MixedEmotionAnalyzer, EmotionalBlend
+    MIXED_EMOTIONS_AVAILABLE = True
+    logger.info("[Brain] ✓ MixedEmotionAnalyzer (Gemischte Emotionen) geladen")
+except ImportError as e:
+    MIXED_EMOTIONS_AVAILABLE = False
+    MixedEmotionAnalyzer = None
+    EmotionalBlend = None
+    logger.debug(f"[Brain] MixedEmotionAnalyzer nicht verfügbar: {e}")
+
+# Deception Detection - Täuschungserkennung
+try:
+    from holo_deception_detection import DeceptionDetector
+    DECEPTION_DETECTION_AVAILABLE = True
+    logger.info("[Brain] ✓ DeceptionDetector (Täuschungserkennung) geladen")
+except ImportError as e:
+    DECEPTION_DETECTION_AVAILABLE = False
+    DeceptionDetector = None
+    logger.debug(f"[Brain] DeceptionDetector nicht verfügbar: {e}")
+
+# Algorithmic Cognition - Algorithmisches Denken
+try:
+    from holo_algorithmic_cognition import AlgorithmicCognitionSystem, create_algorithmic_cognition
+    ALGORITHMIC_COGNITION_AVAILABLE = True
+    logger.info("[Brain] ✓ AlgorithmicCognitionSystem (Algorithmisches Denken) geladen")
+except ImportError as e:
+    ALGORITHMIC_COGNITION_AVAILABLE = False
+    AlgorithmicCognitionSystem = None
+    create_algorithmic_cognition = None
+    logger.debug(f"[Brain] AlgorithmicCognitionSystem nicht verfügbar: {e}")
+
+# Counterfactual Reasoning - Was-wäre-wenn Denken
+try:
+    from holo_counterfactual_reasoning import CounterfactualReasoner
+    COUNTERFACTUAL_AVAILABLE = True
+    logger.info("[Brain] ✓ CounterfactualReasoner (Was-wäre-wenn Denken) geladen")
+except ImportError as e:
+    COUNTERFACTUAL_AVAILABLE = False
+    CounterfactualReasoner = None
+    logger.debug(f"[Brain] CounterfactualReasoner nicht verfügbar: {e}")
+
+# Hidden Motives - Versteckte Motive
+try:
+    from holo_hidden_motives import HiddenMotivesEngine
+    HIDDEN_MOTIVES_AVAILABLE = True
+    logger.info("[Brain] ✓ HiddenMotivesEngine (Versteckte Motive) geladen")
+except ImportError as e:
+    HIDDEN_MOTIVES_AVAILABLE = False
+    HiddenMotivesEngine = None
+    logger.debug(f"[Brain] HiddenMotivesEngine nicht verfügbar: {e}")
+
+# Longterm Goals - Langfristige Ziele
+try:
+    from holo_longterm_goals import LongtermGoalManager
+    LONGTERM_GOALS_AVAILABLE = True
+    logger.info("[Brain] ✓ LongtermGoalManager (Langfristige Ziele) geladen")
+except ImportError as e:
+    LONGTERM_GOALS_AVAILABLE = False
+    LongtermGoalManager = None
+    logger.debug(f"[Brain] LongtermGoalManager nicht verfügbar: {e}")
+
+# Cognitive Integration - Kognitive Integration
+try:
+    from holo_cognitive_integration import CognitiveIntegrator
+    COGNITIVE_INTEGRATION_AVAILABLE = True
+    logger.info("[Brain] ✓ CognitiveIntegrator (Kognitive Integration) geladen")
+except ImportError as e:
+    COGNITIVE_INTEGRATION_AVAILABLE = False
+    CognitiveIntegrator = None
+    logger.debug(f"[Brain] CognitiveIntegrator nicht verfügbar: {e}")
+
+# Perception Unified - Vereinte Wahrnehmung
+try:
+    from holo_perception_unified import HoloPerceptionUnified
+    PERCEPTION_UNIFIED_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloPerceptionUnified (Vereinte Wahrnehmung) geladen")
+except ImportError as e:
+    PERCEPTION_UNIFIED_AVAILABLE = False
+    HoloPerceptionUnified = None
+    logger.debug(f"[Brain] HoloPerceptionUnified nicht verfügbar: {e}")
+
+# Vision Extended - Erweiterte Vision
+try:
+    from holo_vision_extended import HoloVisionExtended
+    VISION_EXTENDED_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloVisionExtended (Erweiterte Vision) geladen")
+except ImportError as e:
+    VISION_EXTENDED_AVAILABLE = False
+    HoloVisionExtended = None
+    logger.debug(f"[Brain] HoloVisionExtended nicht verfügbar: {e}")
+
+# Reader Extended - Erweitertes Lesen
+try:
+    from holo_reader_extended import ExtendedReader
+    READER_EXTENDED_AVAILABLE = True
+    logger.info("[Brain] ✓ ExtendedReader (Erweitertes Lesen) geladen")
+except ImportError as e:
+    READER_EXTENDED_AVAILABLE = False
+    ExtendedReader = None
+    logger.debug(f"[Brain] ExtendedReader nicht verfügbar: {e}")
+
+# WebSocket Handler - WebSocket-Kommunikation
+try:
+    from holo_websocket_handler import HoloWebSocketHandler
+    WEBSOCKET_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloWebSocketHandler (WebSocket-Kommunikation) geladen")
+except ImportError as e:
+    WEBSOCKET_AVAILABLE = False
+    HoloWebSocketHandler = None
+    logger.debug(f"[Brain] HoloWebSocketHandler nicht verfügbar: {e}")
+
+# =============================================================================
 # KONFIGURATION
 # =============================================================================
 
@@ -13105,7 +13253,137 @@ class HoloPersona:
             self.drive_system = None
 
         # ================================================================
-        # 13c. AUTONOMOUS ACTIVITY mit READING ENGINE!
+        # 13c. ERWEITERTE KOGNITIVE MODULE
+        # ================================================================
+
+        # Digital Body - Hardware-Wahrnehmung
+        self.digital_body = None
+        if DIGITAL_BODY_AVAILABLE and DigitalBodySystem:
+            try:
+                self.digital_body = DigitalBodySystem()
+                logger.info("🤖 DigitalBodySystem initialisiert")
+            except Exception as e:
+                logger.debug(f"DigitalBodySystem nicht verfügbar: {e}")
+
+        # Policy Engine - Policy-basierte Entscheidungen
+        self.policy_engine = None
+        if POLICY_ENGINE_AVAILABLE and create_policy_engine:
+            try:
+                self.policy_engine = create_policy_engine(BrainConfig.DATA_DIR)
+                logger.info("📜 PolicyEngine initialisiert")
+            except Exception as e:
+                logger.debug(f"PolicyEngine nicht verfügbar: {e}")
+
+        # Emotion Regulation - Emotionale Selbstkontrolle
+        self.emotion_regulation = None
+        if EMOTION_REGULATION_AVAILABLE and EmotionRegulator:
+            try:
+                self.emotion_regulation = EmotionRegulator()
+                logger.info("🧘 EmotionRegulator initialisiert")
+            except Exception as e:
+                logger.debug(f"EmotionRegulator nicht verfügbar: {e}")
+
+        # Mixed Emotions - Gemischte Emotionen
+        self.mixed_emotions = None
+        if MIXED_EMOTIONS_AVAILABLE and MixedEmotionAnalyzer:
+            try:
+                self.mixed_emotions = MixedEmotionAnalyzer()
+                logger.info("🎭 MixedEmotionAnalyzer initialisiert")
+            except Exception as e:
+                logger.debug(f"MixedEmotionAnalyzer nicht verfügbar: {e}")
+
+        # Deception Detection - Täuschungserkennung
+        self.deception_detector = None
+        if DECEPTION_DETECTION_AVAILABLE and DeceptionDetector:
+            try:
+                self.deception_detector = DeceptionDetector()
+                logger.info("🔍 DeceptionDetector initialisiert")
+            except Exception as e:
+                logger.debug(f"DeceptionDetector nicht verfügbar: {e}")
+
+        # Algorithmic Cognition - Algorithmisches Denken
+        self.algorithmic_cognition = None
+        if ALGORITHMIC_COGNITION_AVAILABLE and create_algorithmic_cognition:
+            try:
+                self.algorithmic_cognition = create_algorithmic_cognition()
+                logger.info("🧮 AlgorithmicCognition initialisiert")
+            except Exception as e:
+                logger.debug(f"AlgorithmicCognition nicht verfügbar: {e}")
+
+        # Counterfactual Reasoning - Was-wäre-wenn Denken
+        self.counterfactual_reasoner = None
+        if COUNTERFACTUAL_AVAILABLE and CounterfactualReasoner:
+            try:
+                self.counterfactual_reasoner = CounterfactualReasoner()
+                logger.info("🔮 CounterfactualReasoner initialisiert")
+            except Exception as e:
+                logger.debug(f"CounterfactualReasoner nicht verfügbar: {e}")
+
+        # Hidden Motives - Versteckte Motive
+        self.hidden_motives = None
+        if HIDDEN_MOTIVES_AVAILABLE and HiddenMotivesEngine:
+            try:
+                self.hidden_motives = HiddenMotivesEngine()
+                logger.info("🎭 HiddenMotivesEngine initialisiert")
+            except Exception as e:
+                logger.debug(f"HiddenMotivesEngine nicht verfügbar: {e}")
+
+        # Longterm Goals - Langfristige Ziele
+        self.longterm_goals = None
+        if LONGTERM_GOALS_AVAILABLE and LongtermGoalManager:
+            try:
+                self.longterm_goals = LongtermGoalManager()
+                logger.info("🎯 LongtermGoalManager initialisiert")
+            except Exception as e:
+                logger.debug(f"LongtermGoalManager nicht verfügbar: {e}")
+
+        # Cognitive Integration - Kognitive Integration
+        self.cognitive_integrator = None
+        if COGNITIVE_INTEGRATION_AVAILABLE and CognitiveIntegrator:
+            try:
+                self.cognitive_integrator = CognitiveIntegrator()
+                logger.info("🔗 CognitiveIntegrator initialisiert")
+            except Exception as e:
+                logger.debug(f"CognitiveIntegrator nicht verfügbar: {e}")
+
+        # Perception Unified - Vereinte Wahrnehmung
+        self.perception_unified = None
+        if PERCEPTION_UNIFIED_AVAILABLE and HoloPerceptionUnified:
+            try:
+                self.perception_unified = HoloPerceptionUnified()
+                logger.info("👁️ PerceptionUnified initialisiert")
+            except Exception as e:
+                logger.debug(f"PerceptionUnified nicht verfügbar: {e}")
+
+        # Vision Extended - Erweiterte Vision
+        self.vision_extended = None
+        if VISION_EXTENDED_AVAILABLE and HoloVisionExtended:
+            try:
+                self.vision_extended = HoloVisionExtended()
+                logger.info("🔭 VisionExtended initialisiert")
+            except Exception as e:
+                logger.debug(f"VisionExtended nicht verfügbar: {e}")
+
+        # Reader Extended - Erweitertes Lesen
+        self.reader_extended = None
+        if READER_EXTENDED_AVAILABLE and ExtendedReader:
+            try:
+                self.reader_extended = ExtendedReader()
+                logger.info("📖 ReaderExtended initialisiert")
+            except Exception as e:
+                logger.debug(f"ReaderExtended nicht verfügbar: {e}")
+
+        # WebSocket Handler - WebSocket-Kommunikation
+        self.websocket_handler = None
+        if WEBSOCKET_AVAILABLE and HoloWebSocketHandler:
+            try:
+                self.websocket_handler = HoloWebSocketHandler()
+                logger.info("🔌 WebSocketHandler initialisiert")
+            except Exception as e:
+                logger.debug(f"WebSocketHandler nicht verfügbar: {e}")
+
+        # ================================================================
+        # 13d. AUTONOMOUS ACTIVITY mit READING ENGINE!
         # ================================================================
         try:
             if self.proactive_intelligence:
@@ -15705,6 +15983,19 @@ class HoloPersona:
             # === NEU: WISSENS-MODULE ===
             media_knowledge=getattr(self, 'media_knowledge', None) or getattr(self, 'media_db', None),
             entity_database=getattr(self, 'entity_database', None) or getattr(self, 'entity_db', None),
+            # === NEU: INTEGRIERTE VERWAISTE MODULE ===
+            policy_engine=getattr(self, 'policy_engine', None),
+            emotion_regulation=getattr(self, 'emotion_regulation', None),
+            mixed_emotions=getattr(self, 'mixed_emotions', None),
+            deception_detection=getattr(self, 'deception_detection', None),
+            algorithmic_cognition=getattr(self, 'algorithmic_cognition', None),
+            counterfactual_reasoning=getattr(self, 'counterfactual_reasoning', None),
+            hidden_motives=getattr(self, 'hidden_motives', None),
+            longterm_goals=getattr(self, 'longterm_goals', None),
+            cognitive_integration=getattr(self, 'cognitive_integration', None),
+            reader_extended=getattr(self, 'reader_extended', None),
+            vision_extended=getattr(self, 'vision_extended', None),
+            websocket_handler=getattr(self, 'websocket_handler', None),
         )
 
         # LLM Callback setzen

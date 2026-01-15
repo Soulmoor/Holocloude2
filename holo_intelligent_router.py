@@ -7320,7 +7320,20 @@ class HoloIntelligentRouter:
                        crossmodal=None,
                        # === NEU: Wissens-Module ===
                        media_knowledge=None,
-                       entity_database=None):
+                       entity_database=None,
+                       # === NEU: Integrierte verwaiste Module ===
+                       policy_engine=None,
+                       emotion_regulation=None,
+                       mixed_emotions=None,
+                       deception_detection=None,
+                       algorithmic_cognition=None,
+                       counterfactual_reasoning=None,
+                       hidden_motives=None,
+                       longterm_goals=None,
+                       cognitive_integration=None,
+                       reader_extended=None,
+                       vision_extended=None,
+                       websocket_handler=None):
         """Verbinde alle externen Module"""
 
         # State Collector - Basis-Module
@@ -7365,6 +7378,20 @@ class HoloIntelligentRouter:
         self.state_collector.media_knowledge = media_knowledge
         self.state_collector.entity_database = entity_database
         self.state_collector.web_curiosity = web_curiosity  # Auch für StateCollector
+
+        # === NEU: Integrierte verwaiste Module ===
+        self.state_collector.policy_engine = policy_engine
+        self.state_collector.emotion_regulation = emotion_regulation
+        self.state_collector.mixed_emotions = mixed_emotions
+        self.state_collector.deception_detection = deception_detection
+        self.state_collector.algorithmic_cognition = algorithmic_cognition
+        self.state_collector.counterfactual_reasoning = counterfactual_reasoning
+        self.state_collector.hidden_motives = hidden_motives
+        self.state_collector.longterm_goals = longterm_goals
+        self.state_collector.cognitive_integration = cognitive_integration
+        self.state_collector.reader_extended = reader_extended
+        self.state_collector.vision_extended = vision_extended
+        self.state_collector.websocket_handler = websocket_handler
 
         # Direkte Referenzen
         self.impulse_generator = impulse_generator
@@ -7426,6 +7453,21 @@ class HoloIntelligentRouter:
         if entity_database: knowledge_modules.append("EntityDatabase")
         if web_curiosity: knowledge_modules.append("WebCuriosity")
 
+        # Integrierte verwaiste Module
+        integrated_modules = []
+        if policy_engine: integrated_modules.append("PolicyEngine")
+        if emotion_regulation: integrated_modules.append("EmotionRegulation")
+        if mixed_emotions: integrated_modules.append("MixedEmotions")
+        if deception_detection: integrated_modules.append("DeceptionDetection")
+        if algorithmic_cognition: integrated_modules.append("AlgorithmicCognition")
+        if counterfactual_reasoning: integrated_modules.append("CounterfactualReasoning")
+        if hidden_motives: integrated_modules.append("HiddenMotives")
+        if longterm_goals: integrated_modules.append("LongtermGoals")
+        if cognitive_integration: integrated_modules.append("CognitiveIntegration")
+        if reader_extended: integrated_modules.append("ReaderExtended")
+        if vision_extended: integrated_modules.append("VisionExtended")
+        if websocket_handler: integrated_modules.append("WebSocketHandler")
+
         if activity_modules:
             logger.info(f"[Router] Aktivitäts-Module verbunden: {', '.join(activity_modules)}")
         if extended_modules:
@@ -7434,8 +7476,10 @@ class HoloIntelligentRouter:
             logger.info(f"[Router] Perception-Module verbunden: {', '.join(perception_modules)}")
         if knowledge_modules:
             logger.info(f"[Router] Wissens-Module verbunden: {', '.join(knowledge_modules)}")
+        if integrated_modules:
+            logger.info(f"[Router] Integrierte Module verbunden: {', '.join(integrated_modules)}")
 
-        logger.info("[Router] Module vollständig verbunden (Wissen + Beziehung + Emotionen + Aktivitäten + Wahrnehmung + Perception)")
+        logger.info("[Router] Module vollständig verbunden (Wissen + Beziehung + Emotionen + Aktivitäten + Wahrnehmung + Perception + Integrierte)")
 
     def route(self, user_input: str,
               conversation_history: List[Dict] = None) -> Dict[str, Any]:
