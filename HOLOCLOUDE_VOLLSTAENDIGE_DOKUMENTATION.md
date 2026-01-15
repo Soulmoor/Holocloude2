@@ -3,7 +3,7 @@
 > **Version**: 15.0 (Intelligent Router Edition)
 > **Stand**: Januar 2026
 > **Autor**: Automatisch generierte Dokumentation
-> **Codeumfang**: ~400.000+ Zeilen in 78+ Python-Modulen
+> **Codeumfang**: ~212.000 Zeilen in 86 Python-Modulen
 
 ---
 
@@ -103,48 +103,32 @@
 ```
 /home/user/Holocloude/
 │
-├── holo_brain.py              # 🧠 Haupt-Orchestrator (26.600+ Zeilen)
-├── holo_intelligent_router.py # 🔀 Zentrales Routing (10.000+ Zeilen)
-├── holo_database_system.py    # 💾 17 SQLite-Datenbanken (7.000+ Zeilen)
-├── holo_cognitive_modules.py  # 🧩 Kognitive Module (9.000+ Zeilen)
-├── holo_inner_life.py         # 💭 Innenleben (8.000+ Zeilen)
-├── ... (78+ weitere Module)
+├── holo_brain.py              # 🧠 Haupt-Orchestrator (~27.600 Zeilen)
+├── holo_intelligent_router.py # 🔀 Zentrales Routing (~8.900 Zeilen)
+├── holo_database_system.py    # 💾 17 SQLite-Datenbanken (~7.700 Zeilen)
+├── holo_cognitive_modules.py  # 🧩 Kognitive Module (~10.200 Zeilen)
+├── holo_inner_life.py         # 💭 Innenleben (~10.700 Zeilen)
+├── ... (81 weitere Module)
 │
 ├── config.json                # ⚙️ Zentrale Konfiguration
 ├── holo_config.py             # 📝 Konfigurationslader
 ├── holo_comfyui_config.json   # 🎨 ComfyUI-Konfiguration
 ├── requirements.txt           # 📦 Python-Abhängigkeiten
 │
-├── data/                      # 📂 Datenpersistenz
+├── data/                      # 📂 Datenpersistenz (wird bei Bedarf erstellt)
 │   ├── conversation_context.json
 │   ├── trust_network.json
-│   ├── regrets.json
-│   ├── negative_behaviors.json
-│   ├── analogy_experiences.json
-│   ├── offloaded/             # Große ausgelagerte Daten
-│   └── histories/             # Historische Aufzeichnungen
+│   └── ...
 │
-├── state/                     # 🔄 Laufzeit-Zustand
+├── state/                     # 🔄 Laufzeit-Zustand (wird bei Bedarf erstellt)
 │   └── holo_to_pi.json        # Pi-Kommunikation
 │
-├── logs/                      # 📋 Runtime-Logs
+├── logs/                      # 📋 Runtime-Logs (wird bei Bedarf erstellt)
 │
-├── skills/                    # 🎯 Erweiterbare Skills
-│   ├── __init__.py
-│   └── comfyui_skill.py       # ComfyUI-Integration
-│
-└── tests/                     # 🧪 Test-Suite
-    ├── conftest.py
-    ├── test_brain_background.py
-    ├── test_dashboard.py
-    ├── test_database_system.py
-    ├── test_error_tracker.py
-    ├── test_integration.py
-    ├── test_memory_monitor.py
-    ├── test_process_controller.py
-    ├── test_ram_manager.py
-    ├── test_shutdown.py
-    └── test_smart_llm.py
+└── skills/                    # 🎯 Erweiterbare Skills (optional)
+    └── comfyui_skill.py       # ComfyUI-Integration
+
+# HINWEIS: Test-Suite muss noch implementiert werden
 ```
 
 ---
@@ -1264,32 +1248,33 @@ class WebCuriosity:
 
 ## 11. Datenpersistenz
 
-### 11.1 holo_database_system.py (~7.000 Zeilen)
+### 11.1 holo_database_system.py (~7.700 Zeilen)
 
 **Zweck**: Verwaltung von 17 spezialisierten SQLite-Datenbanken
 
 ```python
-class DatabaseManager:
-    """Zentrale Datenbankverwaltung"""
+class HoloDatabaseManager:
+    """Zentrale Datenbankverwaltung (siehe holo_database_system.py:7272)"""
 
+    # Die 17 tatsächlichen Datenbank-Klassen:
     DATABASES = {
-        "brain": BrainDatabase,           # Kernerinnerungen, Emotionen
-        "knowledge": KnowledgeBase,       # Gelernte Fakten
+        "memory": MemoryDatabase,         # Erinnerungen, Erlebnisse
+        "emotions": EmotionsDatabase,     # Emotionsverläufe
+        "knowledge": KnowledgeDatabase,   # Gelernte Fakten
+        "conversations": ConversationsDatabase,  # Gesprächsverläufe
         "media": MediaDatabase,           # Medien-Metadaten
-        "entity": EntityDatabase,         # Personen, Orte, Konzepte
-        "conversation": ConversationDB,   # Gesprächsverläufe
-        "learning": LearningDatabase,     # Lernfortschritt
-        "personality": PersonalityDB,     # Persönlichkeitsentwicklung
-        "emotion": EmotionHistoryDB,      # Emotionsverläufe
-        "relationship": RelationshipDB,   # Beziehungen
-        "skill": SkillDatabase,           # Erlernte Fähigkeiten
-        "preference": PreferenceDB,       # Präferenzen
-        "event": EventDatabase,           # Ereignisse
-        "dream": DreamDatabase,           # Träume
-        "creative": CreativeDB,           # Kreative Werke
-        "reflection": ReflectionDB,       # Reflexionen
-        "goal": GoalDatabase,             # Ziele
-        "experience": ExperienceDB        # Erfahrungen
+        "language": LanguageDatabase,     # Sprachmuster, Phrasen
+        "activity": ActivityDatabase,     # Aktivitäten, Handlungen
+        "identity": IdentityDatabase,     # Personen, Entitäten
+        "state": StateDatabase,           # Systemzustand
+        "productivity": ProductivityDatabase,  # Timer, Todos, Notizen
+        "environment": EnvironmentDatabase,    # Umgebungsdaten
+        "network": NetworkDatabase,       # Netzwerk-Geräte
+        "presence": PresenceDatabase,     # Anwesenheitserkennung
+        "home": HomeDatabase,             # Smart Home Status
+        "news": NewsDatabase,             # Gelesene Nachrichten
+        "calendar": CalendarDatabase,     # Termine, Events
+        "predictions": PredictionsDatabase  # Vorhersagen, Muster
     }
 
     def __init__(self):
