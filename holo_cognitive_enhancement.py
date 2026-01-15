@@ -104,18 +104,29 @@ class ProactiveKnowledgeInjector:
 
     VORHER: Wissen wurde nur bei expliziten Fragen genutzt
     NACHHER: Relevantes Wissen wird automatisch eingebracht
+
+    Verbindet BEIDE Wissenssysteme:
+    - web_curiosity.facts_db (WebFactsDB)
+    - learning_system.knowledge_db (KnowledgeDB)
     """
 
-    def __init__(self, web_curiosity=None):
+    def __init__(self, web_curiosity=None, learning_system=None):
         self.web_curiosity = web_curiosity
+        self.learning_system = learning_system  # NEU: holo_learning.py System
         self.relevance_scorer = RelevanceScorer()
         self.injection_history: List[str] = []  # Verhindert Wiederholungen
-        self.max_facts_per_response = 3
-        self.min_relevance_threshold = 0.3
+        self.max_facts_per_response = 5  # Erhöht von 3 auf 5
+        self.min_relevance_threshold = 0.25  # Gesenkt für mehr Treffer
 
     def connect_web_curiosity(self, web_curiosity):
         """Verbindet mit dem WebCuriosity-System"""
         self.web_curiosity = web_curiosity
+        logger.debug("[KnowledgeInjector] WebCuriosity verbunden")
+
+    def connect_learning_system(self, learning_system):
+        """Verbindet mit dem Learning-System (holo_learning.py)"""
+        self.learning_system = learning_system
+        logger.debug("[KnowledgeInjector] LearningSystem verbunden")
 
     def get_relevant_facts_for_context(self, user_message: str,
                                         conversation_history: List[str] = None
@@ -123,11 +134,14 @@ class ProactiveKnowledgeInjector:
         """
         Findet relevante Fakten für den aktuellen Konversationskontext.
 
+        Durchsucht BEIDE Wissenssysteme:
+        1. web_curiosity.facts_db (verifizierte Web-Fakten)
+        2. learning_system.knowledge_db (gelernte Fakten aus RSS etc.)
+
         Returns:
             Liste von relevanten Fakten mit Relevanz-Score
         """
-        if not self.web_curiosity:
-            return []
+        scored_facts = []
 
         # Extrahiere Themen aus aktueller Nachricht und Historie
         topics = self.relevance_scorer.extract_topics(user_message)
@@ -138,37 +152,94 @@ class ProactiveKnowledgeInjector:
 
         topics = list(set(topics))  # Deduplizieren
 
-        if not topics:
+        # Auch die User-Nachricht selbst als Suchbegriff nutzen
+        search_terms = topics + [user_message[:100]] if user_message else topics
+
+        if not search_terms:
             return []
 
-        # Hole alle verfügbaren Fakten
-        try:
-            all_facts = self.web_curiosity.facts_db.get_verified_facts()
-        except Exception as e:
-            logger.debug(f"Konnte Fakten nicht laden: {e}")
-            return []
+        # === QUELLE 1: WebCuriosity Facts ===
+        if self.web_curiosity:
+            try:
+                # Methode 1: Verifizierte Fakten
+                if hasattr(self.web_curiosity, 'facts_db'):
+                    all_facts = self.web_curiosity.facts_db.get_verified_facts()
+                    for fact in all_facts:
+                        relevance = self.relevance_scorer.score_fact_relevance(
+                            fact.content, fact.topic, topics
+                        )
+                        if relevance >= self.min_relevance_threshold:
+                            fact_hash = hashlib.md5(fact.content.encode()).hexdigest()[:8]
+                            if fact_hash not in self.injection_history[-20:]:
+                                scored_facts.append({
+                                    'content': fact.content,
+                                    'topic': fact.topic,
+                                    'trust_score': fact.trust_score,
+                                    'relevance': relevance,
+                                    'source': 'web_curiosity',
+                                    'hash': fact_hash
+                                })
 
-        # Bewerte Relevanz für jeden Fakt
-        scored_facts = []
-        for fact in all_facts:
-            relevance = self.relevance_scorer.score_fact_relevance(
-                fact.content,
-                fact.topic,
-                topics
-            )
+                # Methode 2: Direkte Suche
+                if hasattr(self.web_curiosity, 'facts_db') and hasattr(self.web_curiosity.facts_db, 'search_facts'):
+                    for term in search_terms[:3]:
+                        search_results = self.web_curiosity.facts_db.search_facts(term)
+                        for fact in search_results[:5]:
+                            fact_hash = hashlib.md5(fact.content.encode()).hexdigest()[:8]
+                            if fact_hash not in self.injection_history[-20:]:
+                                if not any(f['hash'] == fact_hash for f in scored_facts):
+                                    scored_facts.append({
+                                        'content': fact.content,
+                                        'topic': getattr(fact, 'topic', 'allgemein'),
+                                        'trust_score': getattr(fact, 'trust_score', 0.5),
+                                        'relevance': 0.5,  # Suchergebnis = mittlere Relevanz
+                                        'source': 'web_search',
+                                        'hash': fact_hash
+                                    })
+            except Exception as e:
+                logger.debug(f"WebCuriosity Fakten-Abruf: {e}")
 
-            if relevance >= self.min_relevance_threshold:
-                # Prüfe ob Fakt kürzlich schon verwendet wurde
-                fact_hash = hashlib.md5(fact.content.encode()).hexdigest()[:8]
-                if fact_hash not in self.injection_history[-10:]:
-                    scored_facts.append({
-                        'content': fact.content,
-                        'topic': fact.topic,
-                        'trust_score': fact.trust_score,
-                        'relevance': relevance,
-                        'source': getattr(fact, 'source', 'Unbekannt'),
-                        'hash': fact_hash
-                    })
+        # === QUELLE 2: Learning System (holo_learning.py) ===
+        if self.learning_system:
+            try:
+                # Methode 1: knowledge_db.search()
+                if hasattr(self.learning_system, 'knowledge_db'):
+                    kb = self.learning_system.knowledge_db
+                    for term in search_terms[:3]:
+                        results = kb.search(term, limit=5)
+                        for fact in results:
+                            fact_hash = hashlib.md5(fact.content.encode()).hexdigest()[:8]
+                            if fact_hash not in self.injection_history[-20:]:
+                                if not any(f['hash'] == fact_hash for f in scored_facts):
+                                    scored_facts.append({
+                                        'content': fact.content,
+                                        'topic': getattr(fact, 'category', 'gelernt').value if hasattr(getattr(fact, 'category', None), 'value') else 'gelernt',
+                                        'trust_score': getattr(fact, 'importance', 0.5),
+                                        'relevance': getattr(fact, 'importance', 0.5),
+                                        'source': 'learning_system',
+                                        'hash': fact_hash
+                                    })
+
+                # Methode 2: Direkte Suche via search_knowledge()
+                if hasattr(self.learning_system, 'search_knowledge'):
+                    for term in search_terms[:2]:
+                        results = self.learning_system.search_knowledge(term, limit=3)
+                        for fact in results:
+                            content = fact.get('content', '') or fact.get('fact', '') or str(fact)
+                            if content:
+                                fact_hash = hashlib.md5(content.encode()).hexdigest()[:8]
+                                if fact_hash not in self.injection_history[-20:]:
+                                    if not any(f['hash'] == fact_hash for f in scored_facts):
+                                        scored_facts.append({
+                                            'content': content,
+                                            'topic': fact.get('topic', 'gelernt'),
+                                            'trust_score': fact.get('importance', 0.5),
+                                            'relevance': 0.4,
+                                            'source': 'learning_search',
+                                            'hash': fact_hash
+                                        })
+            except Exception as e:
+                logger.debug(f"LearningSystem Fakten-Abruf: {e}")
 
         # Sortiere nach Relevanz und Trust
         scored_facts.sort(key=lambda x: (x['relevance'] * 0.6 + x['trust_score'] * 0.4),
@@ -866,13 +937,28 @@ class CognitiveEnhancementSystem:
 
         logger.info("[CognitiveEnhancement] System initialisiert")
 
-    def connect_modules(self, web_curiosity=None, preferences=None):
-        """Verbindet mit anderen Holo-Modulen"""
+    def connect_modules(self, web_curiosity=None, preferences=None, learning_system=None):
+        """
+        Verbindet mit anderen Holo-Modulen.
+
+        Args:
+            web_curiosity: HoloWebCuriosity für verifizierte Web-Fakten
+            preferences: HoloPreferences für User-Präferenzen
+            learning_system: HoloLearningSystem für gelernte Fakten (RSS etc.)
+        """
+        # Verbinde WebCuriosity (web_facts_db)
         if web_curiosity:
             self.knowledge_injector.connect_web_curiosity(web_curiosity)
+            logger.info("[CognitiveEnhancement] WebCuriosity verbunden")
+
+        # Verbinde Learning System (knowledge_db)
+        if learning_system:
+            self.knowledge_injector.connect_learning_system(learning_system)
+            logger.info("[CognitiveEnhancement] LearningSystem verbunden")
 
         # Importiere existierende Präferenzen als Patterns
         if preferences and hasattr(preferences, 'preferences'):
+            pattern_count = 0
             for item, pref in preferences.preferences.items():
                 if hasattr(pref, 'strength') and abs(pref.strength) > 0.3:
                     desc = f"{'mag' if pref.strength > 0 else 'mag nicht'} {item}"
@@ -882,6 +968,9 @@ class CognitiveEnhancementSystem:
                         category=getattr(pref, 'category', 'general'),
                         strength=abs(pref.strength)
                     )
+                    pattern_count += 1
+            if pattern_count > 0:
+                logger.info(f"[CognitiveEnhancement] {pattern_count} Präferenzen als Patterns importiert")
 
     def enhance_context(self, user_message: str,
                         conversation_history: List[str] = None,

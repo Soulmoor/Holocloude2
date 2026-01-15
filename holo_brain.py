@@ -13508,12 +13508,12 @@ class HoloPersona:
                 self.cognitive_enhancement = create_cognitive_enhancement(
                     data_dir=Path("data/cognitive_enhancement")
                 )
-                # Verbinde mit WebCuriosity und Preferences
-                if hasattr(self, 'web_curiosity') and self.web_curiosity:
-                    self.cognitive_enhancement.connect_modules(
-                        web_curiosity=self.web_curiosity,
-                        preferences=getattr(self, 'preferences', None)
-                    )
+                # Verbinde mit ALLEN Wissenssystemen
+                self.cognitive_enhancement.connect_modules(
+                    web_curiosity=getattr(self, 'web_curiosity', None),
+                    preferences=getattr(self, 'preferences', None),
+                    learning_system=getattr(self, 'learning_system', None) or getattr(self, 'advanced_learning', None)
+                )
                 logger.info("🧠 CognitiveEnhancementSystem initialisiert (Proaktives Wissen + Reasoning)")
             except Exception as e:
                 logger.debug(f"CognitiveEnhancementSystem nicht verfügbar: {e}")
