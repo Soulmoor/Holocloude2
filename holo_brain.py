@@ -912,6 +912,71 @@ except ImportError as e:
     Analogy = None
     logger.debug(f"[Brain] AnalogyEngine nicht verfügbar: {e}")
 
+# Intuitive System - Bauchgefühl und Intuition
+try:
+    from holo_autonomous_thinking import IntuitiveSystem, GutFeeling
+    INTUITIVE_SYSTEM_AVAILABLE = True
+    logger.info("[Brain] ✓ IntuitiveSystem (Intuition/Bauchgefühl) geladen")
+except ImportError as e:
+    INTUITIVE_SYSTEM_AVAILABLE = False
+    IntuitiveSystem = None
+    GutFeeling = None
+    logger.debug(f"[Brain] IntuitiveSystem nicht verfügbar: {e}")
+
+# Self Challenger - Selbst-Hinterfragung
+try:
+    from holo_autonomous_thinking import SelfChallenger, SelfChallenge
+    SELF_CHALLENGER_AVAILABLE = True
+    logger.info("[Brain] ✓ SelfChallenger (Selbst-Hinterfragung) geladen")
+except ImportError as e:
+    SELF_CHALLENGER_AVAILABLE = False
+    SelfChallenger = None
+    SelfChallenge = None
+    logger.debug(f"[Brain] SelfChallenger nicht verfügbar: {e}")
+
+# Hypothesis Engine - Hypothesen-Testing
+try:
+    from holo_autonomous_thinking import HypothesisEngine, Hypothesis
+    HYPOTHESIS_ENGINE_AVAILABLE = True
+    logger.info("[Brain] ✓ HypothesisEngine (Hypothesen-Testing) geladen")
+except ImportError as e:
+    HYPOTHESIS_ENGINE_AVAILABLE = False
+    HypothesisEngine = None
+    Hypothesis = None
+    logger.debug(f"[Brain] HypothesisEngine nicht verfügbar: {e}")
+
+# Trust Network - Vertrauens-basierte Entscheidungen
+try:
+    from holo_autonomous_thinking import TrustNetwork, TrustRelation
+    TRUST_NETWORK_AVAILABLE = True
+    logger.info("[Brain] ✓ TrustNetwork (Vertrauensnetzwerk) geladen")
+except ImportError as e:
+    TRUST_NETWORK_AVAILABLE = False
+    TrustNetwork = None
+    TrustRelation = None
+    logger.debug(f"[Brain] TrustNetwork nicht verfügbar: {e}")
+
+# Regret Learning System - Lernen aus Fehlern
+try:
+    from holo_autonomous_thinking import RegretLearningSystem, Regret
+    REGRET_LEARNING_AVAILABLE = True
+    logger.info("[Brain] ✓ RegretLearningSystem (Lernen aus Fehlern) geladen")
+except ImportError as e:
+    REGRET_LEARNING_AVAILABLE = False
+    RegretLearningSystem = None
+    Regret = None
+    logger.debug(f"[Brain] RegretLearningSystem nicht verfügbar: {e}")
+
+# Autonomous Thinking System - Haupt-Orchestrator für autonomes Denken
+try:
+    from holo_autonomous_thinking import AutonomousThinkingSystem
+    AUTONOMOUS_THINKING_AVAILABLE = True
+    logger.info("[Brain] ✓ AutonomousThinkingSystem (Autonomes Denken) geladen")
+except ImportError as e:
+    AUTONOMOUS_THINKING_AVAILABLE = False
+    AutonomousThinkingSystem = None
+    logger.debug(f"[Brain] AutonomousThinkingSystem nicht verfügbar: {e}")
+
 # =============================================================================
 # KONFIGURATION
 # =============================================================================
@@ -13482,6 +13547,68 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"AnalogyEngine nicht verfügbar: {e}")
 
+        # Intuitive System - Bauchgefühl und Intuition
+        self.intuitive_system = None
+        if INTUITIVE_SYSTEM_AVAILABLE and IntuitiveSystem:
+            try:
+                self.intuitive_system = IntuitiveSystem()
+                logger.info("💡 IntuitiveSystem initialisiert (Bauchgefühl)")
+            except Exception as e:
+                logger.debug(f"IntuitiveSystem nicht verfügbar: {e}")
+
+        # Self Challenger - Selbst-Hinterfragung
+        self.self_challenger = None
+        if SELF_CHALLENGER_AVAILABLE and SelfChallenger:
+            try:
+                self.self_challenger = SelfChallenger()
+                logger.info("🤔 SelfChallenger initialisiert (Selbst-Hinterfragung)")
+            except Exception as e:
+                logger.debug(f"SelfChallenger nicht verfügbar: {e}")
+
+        # Hypothesis Engine - Hypothesen-Testing
+        self.hypothesis_engine = None
+        if HYPOTHESIS_ENGINE_AVAILABLE and HypothesisEngine:
+            try:
+                self.hypothesis_engine = HypothesisEngine()
+                logger.info("🧪 HypothesisEngine initialisiert (Hypothesen-Testing)")
+            except Exception as e:
+                logger.debug(f"HypothesisEngine nicht verfügbar: {e}")
+
+        # Trust Network - Vertrauens-basierte Entscheidungen
+        self.trust_network = None
+        if TRUST_NETWORK_AVAILABLE and TrustNetwork:
+            try:
+                self.trust_network = TrustNetwork()
+                logger.info("🤝 TrustNetwork initialisiert (Vertrauensnetzwerk)")
+            except Exception as e:
+                logger.debug(f"TrustNetwork nicht verfügbar: {e}")
+
+        # Regret Learning System - Lernen aus Fehlern
+        self.regret_learning = None
+        if REGRET_LEARNING_AVAILABLE and RegretLearningSystem:
+            try:
+                self.regret_learning = RegretLearningSystem()
+                logger.info("📚 RegretLearningSystem initialisiert (Lernen aus Fehlern)")
+            except Exception as e:
+                logger.debug(f"RegretLearningSystem nicht verfügbar: {e}")
+
+        # Autonomous Thinking System - Haupt-Orchestrator
+        self.autonomous_thinking = None
+        if AUTONOMOUS_THINKING_AVAILABLE and AutonomousThinkingSystem:
+            try:
+                self.autonomous_thinking = AutonomousThinkingSystem(
+                    intuitive_system=self.intuitive_system,
+                    self_challenger=self.self_challenger,
+                    hypothesis_engine=self.hypothesis_engine,
+                    prediction_system=self.prediction_system,
+                    trust_network=self.trust_network,
+                    analogy_engine=self.analogy_engine,
+                    regret_learning=self.regret_learning
+                )
+                logger.info("🧠 AutonomousThinkingSystem initialisiert (Haupt-Orchestrator)")
+            except Exception as e:
+                logger.debug(f"AutonomousThinkingSystem nicht verfügbar: {e}")
+
         # ================================================================
         # 13d. AUTONOMOUS ACTIVITY mit READING ENGINE!
         # ================================================================
@@ -16092,7 +16219,7 @@ class HoloPersona:
             counterfactual_reasoning=getattr(self, 'counterfactual_reasoning', None),
             hidden_motives=getattr(self, 'hidden_motives', None),
             longterm_goals=getattr(self, 'longterm_goals', None),
-            cognitive_integration=getattr(self, 'cognitive_integration', None),
+            cognitive_integration=getattr(self, 'cognitive_integrator', None),
             reader_extended=getattr(self, 'reader_extended', None),
             vision_extended=getattr(self, 'vision_extended', None),
             websocket_handler=getattr(self, 'websocket_handler', None),
@@ -22869,11 +22996,11 @@ Erwähne es beiläufig wenn es passt, z.B.:
                 logger.debug(f"Analogy engine context error: {e}")
 
         # === 🎯 BDI SYSTEM CONTEXT (Beliefs, Desires, Intentions) ===
-        if hasattr(self, 'cognitive_integration') and self.cognitive_integration:
+        if hasattr(self, 'cognitive_integrator') and self.cognitive_integrator:
             try:
                 # Prüfe ob BDI-System verfügbar ist
-                if hasattr(self.cognitive_integration, 'bdi_system'):
-                    bdi = self.cognitive_integration.bdi_system
+                if hasattr(self.cognitive_integrator, 'bdi_system'):
+                    bdi = self.cognitive_integrator.bdi_system
 
                     # Aktive Intentionen
                     if hasattr(bdi, 'get_active_intentions'):
@@ -22895,8 +23022,160 @@ Erwähne es beiläufig wenn es passt, z.B.:
                             for desire in top_desires:
                                 desc = getattr(desire, 'description', str(desire))
                                 persona += f"• {desc}\n"
+
+                # Selbstverständnis aus Cognitive Integration
+                if hasattr(self.cognitive_integrator, 'get_self_understanding'):
+                    try:
+                        self_understanding = self.cognitive_integrator.get_self_understanding()
+                        if self_understanding:
+                            # Persönlichkeits-Stärken
+                            if hasattr(self_understanding, 'core_traits') and self_understanding.core_traits:
+                                traits = list(self_understanding.core_traits.items())[:3]
+                                if traits:
+                                    persona += "\n=== MEINE KERNSTÄRKEN ===\n"
+                                    for trait, value in traits:
+                                        if value > 0.6:
+                                            persona += f"• {trait}: stark ausgeprägt\n"
+
+                            # Aktuelle Erkenntnisse
+                            if hasattr(self_understanding, 'recent_insights') and self_understanding.recent_insights:
+                                persona += "\n=== LETZTE ERKENNTNISSE ===\n"
+                                for insight in list(self_understanding.recent_insights)[-2:]:
+                                    persona += f"• {insight}\n"
+                    except Exception as inner_e:
+                        logger.debug(f"Self understanding error: {inner_e}")
+
+                # Narrative Self Model - Wer bin ich gerade?
+                if hasattr(self.cognitive_integrator, 'narrative_self'):
+                    try:
+                        narrative = self.cognitive_integrator.narrative_self
+                        if hasattr(narrative, 'current_narrative') and narrative.current_narrative:
+                            persona += f"\n=== MEINE AKTUELLE SELBSTWAHRNEHMUNG ===\n"
+                            persona += f"{narrative.current_narrative}\n"
+                    except Exception as inner_e:
+                        logger.debug(f"Narrative self error: {inner_e}")
+
             except Exception as e:
                 logger.debug(f"BDI system context error: {e}")
+
+        # === 🧠 LOCAL UNDERSTANDING CONTEXT (Tiefes Verständnis der Anfrage) ===
+        if query and hasattr(self, 'local_understanding') and self.local_understanding:
+            try:
+                understanding = self.local_understanding.understand(query)
+                if understanding:
+                    persona += "\n=== MEIN VERSTÄNDNIS DIESER NACHRICHT ===\n"
+
+                    # Intent mit Konfidenz
+                    intent_name = understanding.intent.name if hasattr(understanding.intent, 'name') else str(understanding.intent)
+                    persona += f"• Absicht: {intent_name} ({understanding.intent_confidence*100:.0f}% sicher)\n"
+
+                    # Sentiment
+                    if understanding.sentiment > 0.3:
+                        persona += f"• Stimmung: Positiv ({understanding.sentiment:+.2f})\n"
+                    elif understanding.sentiment < -0.3:
+                        persona += f"• Stimmung: Negativ ({understanding.sentiment:+.2f}) - einfühlsam reagieren!\n"
+
+                    # Emotionale Keywords
+                    if understanding.emotional_keywords:
+                        persona += f"• Emotionale Wörter: {', '.join(understanding.emotional_keywords[:5])}\n"
+
+                    # Sekundäre Absichten
+                    if understanding.secondary_intents:
+                        secondary = [f"{i[0].name}({i[1]*100:.0f}%)" for i in understanding.secondary_intents[:2]]
+                        persona += f"• Weitere Absichten: {', '.join(secondary)}\n"
+
+                    # Extrahierte Entities
+                    if understanding.entities:
+                        entity_strs = [f"{e.type}:{e.value}" for e in understanding.entities[:3]]
+                        persona += f"• Erkannte Entitäten: {', '.join(entity_strs)}\n"
+
+            except Exception as e:
+                logger.debug(f"Local understanding context error: {e}")
+
+        # === 💡 INTUITIVE SYSTEM CONTEXT (Bauchgefühl) ===
+        if hasattr(self, 'intuitive_system') and self.intuitive_system:
+            try:
+                if hasattr(self.intuitive_system, 'gut_feelings') and self.intuitive_system.gut_feelings:
+                    recent_feelings = list(self.intuitive_system.gut_feelings)[-3:]
+                    if recent_feelings:
+                        persona += "\n=== MEIN BAUCHGEFÜHL ===\n"
+                        for feeling in recent_feelings:
+                            feeling_type = getattr(feeling, 'feeling_type', 'unknown')
+                            if hasattr(feeling_type, 'name'):
+                                feeling_type = feeling_type.name
+                            intensity = getattr(feeling, 'intensity', 0.5)
+                            desc = getattr(feeling, 'description', str(feeling))
+                            persona += f"• {feeling_type}: {desc} (Intensität: {intensity:.0%})\n"
+            except Exception as e:
+                logger.debug(f"Intuitive system context error: {e}")
+
+        # === 🤔 SELF CHALLENGER CONTEXT (Selbst-Hinterfragung) ===
+        if hasattr(self, 'self_challenger') and self.self_challenger:
+            try:
+                if hasattr(self.self_challenger, 'active_challenges'):
+                    active = [c for c in self.self_challenger.active_challenges
+                             if hasattr(c, 'resolved') and not c.resolved]
+                    if active:
+                        persona += "\n=== OFFENE SELBST-FRAGEN ===\n"
+                        for challenge in active[:2]:
+                            question = getattr(challenge, 'question', str(challenge))
+                            persona += f"• {question}\n"
+            except Exception as e:
+                logger.debug(f"Self challenger context error: {e}")
+
+        # === 🧪 HYPOTHESIS ENGINE CONTEXT (Aktive Hypothesen) ===
+        if hasattr(self, 'hypothesis_engine') and self.hypothesis_engine:
+            try:
+                if hasattr(self.hypothesis_engine, 'hypotheses'):
+                    active_hypos = [h for h in self.hypothesis_engine.hypotheses
+                                   if hasattr(h, 'status') and
+                                   getattr(h.status, 'name', str(h.status)) in ['PROPOSED', 'TESTING']]
+                    if active_hypos:
+                        persona += "\n=== MEINE HYPOTHESEN ===\n"
+                        for hypo in active_hypos[:2]:
+                            statement = getattr(hypo, 'statement', str(hypo))
+                            confidence = getattr(hypo, 'confidence', 0.5)
+                            persona += f"• {statement} (Konfidenz: {confidence:.0%})\n"
+            except Exception as e:
+                logger.debug(f"Hypothesis engine context error: {e}")
+
+        # === 🤝 TRUST NETWORK CONTEXT (Vertrauensnetzwerk) ===
+        if hasattr(self, 'trust_network') and self.trust_network:
+            try:
+                if hasattr(self.trust_network, 'relations') and self.trust_network.relations:
+                    # Zeige Vertrauenslevel zu aktuellen Entitäten
+                    top_relations = sorted(
+                        self.trust_network.relations.items(),
+                        key=lambda x: getattr(x[1], 'trust_level', 0),
+                        reverse=True
+                    )[:3]
+                    if top_relations:
+                        persona += "\n=== VERTRAUENSNETZWERK ===\n"
+                        for entity, relation in top_relations:
+                            trust = getattr(relation, 'trust_level', 0.5)
+                            trust_desc = "sehr vertrauenswürdig" if trust > 0.8 else \
+                                        "vertrauenswürdig" if trust > 0.6 else \
+                                        "neutral" if trust > 0.4 else "vorsichtig"
+                            persona += f"• {entity}: {trust_desc} ({trust:.0%})\n"
+            except Exception as e:
+                logger.debug(f"Trust network context error: {e}")
+
+        # === 📚 REGRET LEARNING CONTEXT (Lernen aus Fehlern) ===
+        if hasattr(self, 'regret_learning') and self.regret_learning:
+            try:
+                if hasattr(self.regret_learning, 'regrets') and self.regret_learning.regrets:
+                    recent_regrets = list(self.regret_learning.regrets)[-2:]
+                    if recent_regrets:
+                        persona += "\n=== WAS ICH GELERNT HABE (aus Fehlern) ===\n"
+                        for regret in recent_regrets:
+                            lesson = getattr(regret, 'lesson_learned', None)
+                            if lesson:
+                                persona += f"• {lesson}\n"
+                            else:
+                                desc = getattr(regret, 'description', str(regret))
+                                persona += f"• Nicht wiederholen: {desc}\n"
+            except Exception as e:
+                logger.debug(f"Regret learning context error: {e}")
 
         # === ⚡ ENERGY MANAGEMENT CONTEXT (Selbst-Regulierung) ===
         if hasattr(self, 'energy_management') and self.energy_management:
