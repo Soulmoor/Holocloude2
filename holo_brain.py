@@ -2083,11 +2083,14 @@ class MemoryStore:
         logger.info(f"MemoryStore: {db_path} (WAL mode)")
 
     def _get_connection(self):
-        """Erstellt eine DB-Verbindung mit optimalen Einstellungen"""
+        """Erstellt eine DB-Verbindung mit optimalen Einstellungen.
+
+        Jeder Aufruf erstellt eine neue Connection - Thread-Safe durch WAL-Modus.
+        """
         conn = sqlite3.connect(
             self.db_path,
             timeout=self.DB_TIMEOUT,
-            check_same_thread=False  # Erlaubt Zugriff von mehreren Threads
+            check_same_thread=True  # Sicher: Jede Connection nur im erstellenden Thread
         )
         # WAL-Modus für bessere Concurrent-Zugriffe
         conn.execute("PRAGMA journal_mode=WAL")
@@ -8394,11 +8397,11 @@ class ReadingEngine:
         sicher mit 'with' genutzt werden kann ohne die Haupt-Connection zu schließen.
         """
         if self._use_central_db and self.db_manager:
-            # Erstelle neue Verbindung zur gleichen DB (thread-safe)
+            # Erstelle neue Verbindung zur gleichen DB (thread-safe durch neue Connection)
             conn = sqlite3.connect(
                 self.db_manager.data_dir / "holo_knowledge.db",
                 timeout=30,
-                check_same_thread=False
+                check_same_thread=True  # Sicher: Jede Connection nur im erstellenden Thread
             )
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA busy_timeout=30000")

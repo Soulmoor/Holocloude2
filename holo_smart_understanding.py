@@ -5078,8 +5078,8 @@ class ConversationContextTracker:
             elif pronoun_type in ["thing", "topic", "neutral"]:
                 return entity
 
-        # Fallback: Letzte Entity
-        return self.entity_stack[-1]
+        # Fallback: Letzte Entity (sicher, da entity_stack nicht leer ist nach Check oben)
+        return self.entity_stack[-1] if self.entity_stack else None
 
     def enhance_search_query(self, query: str) -> str:
         """
