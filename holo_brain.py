@@ -810,9 +810,9 @@ except ImportError as e:
 
 # Cognitive Integration - Kognitive Integration
 try:
-    from holo_cognitive_integration import CognitiveIntegrator
+    from holo_cognitive_integration import CognitiveIntegrationCoreV2 as CognitiveIntegrator
     COGNITIVE_INTEGRATION_AVAILABLE = True
-    logger.info("[Brain] ✓ CognitiveIntegrator (Kognitive Integration) geladen")
+    logger.info("[Brain] ✓ CognitiveIntegrationCoreV2 (BDI-System, Kognitive Integration) geladen")
 except ImportError as e:
     COGNITIVE_INTEGRATION_AVAILABLE = False
     CognitiveIntegrator = None
@@ -889,6 +889,28 @@ except ImportError as e:
     Understanding = None
     IntentType = None
     logger.debug(f"[Brain] HoloLocalUnderstanding nicht verfügbar: {e}")
+
+# Prediction System - Verhaltensvorhersage (aus holo_autonomous_thinking)
+try:
+    from holo_autonomous_thinking import PredictionSystem, Prediction
+    PREDICTION_SYSTEM_AVAILABLE = True
+    logger.info("[Brain] ✓ PredictionSystem (Verhaltensvorhersage) geladen")
+except ImportError as e:
+    PREDICTION_SYSTEM_AVAILABLE = False
+    PredictionSystem = None
+    Prediction = None
+    logger.debug(f"[Brain] PredictionSystem nicht verfügbar: {e}")
+
+# Analogy Engine - Analogie-basiertes Lernen (aus holo_autonomous_thinking)
+try:
+    from holo_autonomous_thinking import AnalogyEngine, Analogy
+    ANALOGY_ENGINE_AVAILABLE = True
+    logger.info("[Brain] ✓ AnalogyEngine (Analogie-Lernen) geladen")
+except ImportError as e:
+    ANALOGY_ENGINE_AVAILABLE = False
+    AnalogyEngine = None
+    Analogy = None
+    logger.debug(f"[Brain] AnalogyEngine nicht verfügbar: {e}")
 
 # =============================================================================
 # KONFIGURATION
@@ -13442,6 +13464,24 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"LocalUnderstanding nicht verfügbar: {e}")
 
+        # Prediction System - Verhaltensvorhersage
+        self.prediction_system = None
+        if PREDICTION_SYSTEM_AVAILABLE and PredictionSystem:
+            try:
+                self.prediction_system = PredictionSystem()
+                logger.info("🔮 PredictionSystem initialisiert (Verhaltensvorhersage)")
+            except Exception as e:
+                logger.debug(f"PredictionSystem nicht verfügbar: {e}")
+
+        # Analogy Engine - Analogie-basiertes Lernen
+        self.analogy_engine = None
+        if ANALOGY_ENGINE_AVAILABLE and AnalogyEngine:
+            try:
+                self.analogy_engine = AnalogyEngine()
+                logger.info("🔗 AnalogyEngine initialisiert (Analogie-Lernen)")
+            except Exception as e:
+                logger.debug(f"AnalogyEngine nicht verfügbar: {e}")
+
         # ================================================================
         # 13d. AUTONOMOUS ACTIVITY mit READING ENGINE!
         # ================================================================
@@ -22796,6 +22836,67 @@ Erwähne es beiläufig wenn es passt, z.B.:
 
             except Exception as e:
                 logger.debug(f"Cognitive enhancement context error: {e}")
+
+        # === 🔮 PREDICTION SYSTEM CONTEXT (Verhaltensvorhersagen) ===
+        if hasattr(self, 'prediction_system') and self.prediction_system:
+            try:
+                # Hole aktive Vorhersagen
+                if hasattr(self.prediction_system, 'predictions') and self.prediction_system.predictions:
+                    active_predictions = [p for p in self.prediction_system.predictions
+                                         if hasattr(p, 'confidence') and p.confidence > 0.6]
+                    if active_predictions:
+                        persona += "\n=== MEINE VORHERSAGEN ===\n"
+                        for pred in active_predictions[:3]:
+                            pred_text = getattr(pred, 'prediction', str(pred))
+                            conf = getattr(pred, 'confidence', 0.5)
+                            persona += f"• {pred_text} (Konfidenz: {conf:.0%})\n"
+            except Exception as e:
+                logger.debug(f"Prediction system context error: {e}")
+
+        # === 🔗 ANALOGY ENGINE CONTEXT (Weisheit aus der Vergangenheit) ===
+        if hasattr(self, 'analogy_engine') and self.analogy_engine:
+            try:
+                # Suche relevante Analogien basierend auf aktuellem Kontext
+                if hasattr(self.analogy_engine, 'get_wisdom_from_past'):
+                    # Extrahiere Situation aus letzter Nachricht
+                    situation = user_input if 'user_input' in dir() else ""
+                    if situation:
+                        wisdom = self.analogy_engine.get_wisdom_from_past(situation)
+                        if wisdom:
+                            persona += "\n=== WEISHEIT AUS DER VERGANGENHEIT ===\n"
+                            persona += f"{wisdom}\n"
+            except Exception as e:
+                logger.debug(f"Analogy engine context error: {e}")
+
+        # === 🎯 BDI SYSTEM CONTEXT (Beliefs, Desires, Intentions) ===
+        if hasattr(self, 'cognitive_integration') and self.cognitive_integration:
+            try:
+                # Prüfe ob BDI-System verfügbar ist
+                if hasattr(self.cognitive_integration, 'bdi_system'):
+                    bdi = self.cognitive_integration.bdi_system
+
+                    # Aktive Intentionen
+                    if hasattr(bdi, 'get_active_intentions'):
+                        intentions = bdi.get_active_intentions()
+                        if intentions:
+                            persona += "\n=== MEINE AKTUELLEN ABSICHTEN ===\n"
+                            for intent in intentions[:3]:
+                                desc = getattr(intent, 'description', str(intent))
+                                status = getattr(intent, 'status', 'aktiv')
+                                persona += f"• {desc} [{status}]\n"
+
+                    # Aktive Desires
+                    if hasattr(bdi, 'desires') and bdi.desires:
+                        top_desires = sorted(bdi.desires,
+                                            key=lambda d: getattr(d, 'priority', 0),
+                                            reverse=True)[:2]
+                        if top_desires:
+                            persona += "\n=== WAS ICH MIR WÜNSCHE ===\n"
+                            for desire in top_desires:
+                                desc = getattr(desire, 'description', str(desire))
+                                persona += f"• {desc}\n"
+            except Exception as e:
+                logger.debug(f"BDI system context error: {e}")
 
         # === ⚡ ENERGY MANAGEMENT CONTEXT (Selbst-Regulierung) ===
         if hasattr(self, 'energy_management') and self.energy_management:
