@@ -40,7 +40,7 @@
 | Bereich | Beschreibung |
 |---------|--------------|
 | **Kognition** | Bewusstsein, Reasoning, Lernen, Meta-Kognition |
-| **Emotionen** | 12 Emotionen × 3 Intensitätsstufen, komplexe Stimmungsdynamik |
+| **Emotionen** | 12 Emotionen × 6 Intensitätsstufen (minimal, leicht, mittel, stark, sehr_stark, extrem), komplexe Stimmungsdynamik |
 | **Wahrnehmung** | Vision, Audio, Text, Video-Analyse |
 | **Kommunikation** | Dialog-Engine, LLM-Integration, Sprach-Interface |
 | **Autonomie** | Innenleben, autonomes Denken, Impulsgenerierung |

@@ -6,7 +6,7 @@
 ║                                                                              ║
 ║  Verbindet ALLE Module zu einem kohärenten System:                           ║
 ║  • Energy (6 Dimensionen) → Antwortstil                                      ║
-║  • Emotions (12 Stufen) → Körpersprache & Ton                                ║
+║  • Emotions (12 Emotionen × 6 Intensitäten) → Körpersprache & Ton            ║
 ║  • Cognitive → Tiefe & Komplexität                                           ║
 ║  • Impulse → Authentische Basis                                              ║
 ║  • NLP → Lokale Verarbeitung                                                 ║
@@ -121,7 +121,7 @@ class UnifiedHoloState:
     effective_energy: float = 0.75     # Mit emotionalem Einfluss
     energy_state: str = "awake"        # awake/tired/exhausted/resting/dreaming/energized
 
-    # === EMOTIONS (12 Kategorien mit 3 Stufen) ===
+    # === EMOTIONS (12 Kategorien mit 6 Intensitätsstufen) ===
     primary_emotion: str = "neutral"   # Hauptemotion
     emotion_intensity: float = 0.5     # 0-1
     secondary_emotion: Optional[str] = None

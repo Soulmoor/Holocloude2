@@ -9,7 +9,7 @@
 ║  • ContextCompressor - Token-Sparung                                         ║
 ║  • ImpulseGenerator - Authentische Impulse                                   ║
 ║  • NLPAlgorithms - Lokale Verarbeitung                                       ║
-║  • EmotionLevels - 12 Emotionen × 3 Stufen                                   ║
+║  • EmotionLevels - 12 Emotionen × 6 Stufen                                   ║
 ║                                                                              ║
 ║  VERBINDUNGS-MATRIX:                                                         ║
 ║  ┌─────────────┬──────────────────────────────────────────────────────────┐  ║
