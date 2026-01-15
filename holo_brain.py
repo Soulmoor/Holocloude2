@@ -880,8 +880,8 @@ class TypingSimulator:
                     base_speed *= 0.6  # Müde = langsamer
                 elif energy_level > 0.7:
                     base_speed *= 1.3  # Energiegeladen = schneller
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Energy level retrieval failed: {e}")
 
         return base_speed * self.speed_multiplier
 
@@ -1660,15 +1660,15 @@ class ResponseGenerator:
             try:
                 status = self.energy.get_status()
                 return status.get('total_energy', 0.5)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Energy status retrieval failed: {e}")
         # Fallback zu EmotionalCore (mit Null-Check)
         if self.emotions and hasattr(self.emotions, 'get_detailed_state'):
             try:
                 state = self.emotions.get_detailed_state()
                 return state.get('energy', 0.5)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Emotion state retrieval failed: {e}")
         return 0.5  # Default-Fallback
 
     def _get_personality_modifier(self) -> Dict:
@@ -1676,8 +1676,8 @@ class ResponseGenerator:
         if self.personality and hasattr(self.personality, 'get_current_traits'):
             try:
                 return self.personality.get_current_traits()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Personality traits retrieval failed: {e}")
         return {}
 
     def generate_greeting(self, time_of_day: str = None) -> str:
@@ -3860,8 +3860,8 @@ class PiCommunicator:
             # Direct HTTP Push
             try:
                 requests.post(f"{self._pi_api_url}/api/command", json=cmd.to_dict(), timeout=1)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Direct HTTP push to Pi failed (non-critical): {e}")
 
             logger.info(f"Gesendet: {cmd.action} ({cmd.id})")
             return True
@@ -6106,8 +6106,8 @@ class ProactiveIntelligence:
             start = self.memory.get_activity_data().get('relationship_start')
             if start:
                 return datetime.fromisoformat(start)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Could not load relationship start date: {e}")
         return datetime.now()
 
     def _load_state(self):
@@ -7210,8 +7210,8 @@ class ProactiveIntelligence:
             # Wird später von HoloPersona gesetzt
             if hasattr(self, '_reading_engine'):
                 reading_engine = self._reading_engine
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"ReadingEngine lookup failed: {e}")
 
         if not reading_engine:
             return None
@@ -7455,8 +7455,8 @@ class ProactiveIntelligence:
                 # Bald (in 1-3 Tagen)
                 elif 1 <= days_until <= 3:
                     self.on_event_approaching(event_info.get('name', ''), days_until)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Calendar event processing failed: {e}")
 
         return None
 
@@ -8117,7 +8117,8 @@ class ReadingEngine:
         try:
             with self._get_knowledge_connection() as conn:
                 return self._get_db_size(conn) / 1024 / 1024
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Could not get DB size: {e}")
             return 0.0
 
     def _fetch_full_article(self, url: str, timeout: int = 10) -> Optional[str]:
@@ -9238,8 +9239,8 @@ class ReadingEngine:
                     facts_learned
                 ))
                 conn.commit()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to log research session: {e}")
 
         if facts_learned > 0:
             return {

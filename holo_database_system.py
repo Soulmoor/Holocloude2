@@ -220,11 +220,11 @@ class BaseDatabase(ABC):
 
     @property
     def connection(self) -> sqlite3.Connection:
-        """Thread-lokale Connection"""
+        """Thread-lokale Connection - jeder Thread bekommt seine eigene sichere Connection"""
         if not hasattr(self._local, 'conn') or self._local.conn is None:
             self._local.conn = sqlite3.connect(
                 self.db_path,
-                check_same_thread=False,
+                check_same_thread=True,  # SICHER: Jeder Thread nutzt nur seine eigene Connection
                 timeout=30.0
             )
             self._local.conn.row_factory = sqlite3.Row

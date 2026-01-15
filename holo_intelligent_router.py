@@ -280,6 +280,51 @@ class UnifiedHoloState:
     # === META ===
     timestamp: float = field(default_factory=time.time)
 
+    # Maximale Listen-Größen zur Vermeidung von Memory Leaks
+    MAX_LIST_SIZE: int = field(default=100, repr=False)
+
+    def __post_init__(self):
+        """Begrenzt Listen-Größen nach Initialisierung zur Vermeidung von Memory Leaks."""
+        self._trim_lists()
+
+    def _trim_lists(self) -> None:
+        """
+        Begrenzt alle Listen auf MAX_LIST_SIZE.
+        Verhindert unbegrenztes Wachstum und Memory Leaks bei langer Laufzeit.
+        """
+        list_fields = [
+            'recent_activities', 'active_timers', 'recent_notes', 'pending_todos',
+            'shopping_items', 'recent_thoughts', 'active_projects', 'current_goals',
+            'completed_today', 'active_entity_relations', 'web_search_results'
+        ]
+        for field_name in list_fields:
+            if hasattr(self, field_name):
+                current_list = getattr(self, field_name)
+                if isinstance(current_list, list) and len(current_list) > self.MAX_LIST_SIZE:
+                    # Behalte die neuesten Einträge
+                    setattr(self, field_name, current_list[-self.MAX_LIST_SIZE:])
+
+    def trim_and_cleanup(self) -> Dict[str, int]:
+        """
+        Führt Cleanup durch und gibt Statistiken zurück.
+        Sollte periodisch aufgerufen werden (z.B. alle 30 Minuten).
+        """
+        trimmed = {}
+        list_fields = [
+            'recent_activities', 'active_timers', 'recent_notes', 'pending_todos',
+            'shopping_items', 'recent_thoughts', 'active_projects', 'current_goals',
+            'completed_today', 'active_entity_relations', 'web_search_results'
+        ]
+        for field_name in list_fields:
+            if hasattr(self, field_name):
+                current_list = getattr(self, field_name)
+                if isinstance(current_list, list):
+                    original_len = len(current_list)
+                    if original_len > self.MAX_LIST_SIZE:
+                        setattr(self, field_name, current_list[-self.MAX_LIST_SIZE:])
+                        trimmed[field_name] = original_len - self.MAX_LIST_SIZE
+        return trimmed
+
     def get_response_style(self) -> ResponseStyle:
         """Bestimme den passenden Antwortstil basierend auf Zustand."""
 
