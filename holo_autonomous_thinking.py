@@ -1,0 +1,2253 @@
+"""
+holo_autonomous_thinking.py - Autonomes Denken für Holo
+
+Ermöglicht selbstständiges, menschenähnliches Denken:
+
+1. IntuitiveSystem - Bauchgefühl (niedrige Gewichtung, schnelle Urteile)
+2. SelfChallenger - Kontinuierliche Selbst-Hinterfragung
+3. HypothesisEngine - "Was wenn?" Szenarien
+4. PredictionSystem - Vorhersagen über Zukunft
+5. TrustNetwork - Netzwerk-basiertes Vertrauen
+6. AnalogyEngine - "Das erinnert mich an..." (Analogie-basiertes Lernen)
+7. RegretLearningSystem - Reue und Lernen aus Fehlern
+
+Author: Kira & Claude
+"""
+
+import logging
+import random
+import math
+import json
+import hashlib
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any, Tuple, Set, Callable
+from enum import Enum
+from pathlib import Path
+from collections import defaultdict
+
+logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# ENUMS & TYPES
+# ============================================================
+
+class GutFeelingType(Enum):
+    """Arten von Bauchgefühlen"""
+    POSITIVE = "positive"           # Gutes Gefühl
+    NEGATIVE = "negative"           # Schlechtes Gefühl
+    SUSPICIOUS = "suspicious"       # Etwas stimmt nicht
+    EXCITED = "excited"             # Aufgeregt/gespannt
+    UNEASY = "uneasy"              # Unwohl
+    CURIOUS = "curious"            # Neugierig
+    WARM = "warm"                  # Warmes Gefühl (Sympathie)
+    COLD = "cold"                  # Kaltes Gefühl (Antipathie)
+    NEUTRAL = "neutral"            # Kein besonderes Gefühl
+
+
+class PredictionConfidence(Enum):
+    """Wie sicher ist die Vorhersage?"""
+    GUESS = 0.2          # Reine Vermutung
+    HUNCH = 0.4          # Ahnung
+    LIKELY = 0.6         # Wahrscheinlich
+    CONFIDENT = 0.8      # Ziemlich sicher
+    CERTAIN = 0.95       # Fast sicher
+
+
+class HypothesisStatus(Enum):
+    """Status einer Hypothese"""
+    PROPOSED = "proposed"       # Neu aufgestellt
+    TESTING = "testing"         # Wird getestet
+    SUPPORTED = "supported"     # Durch Evidenz gestützt
+    REFUTED = "refuted"        # Widerlegt
+    UNCERTAIN = "uncertain"    # Unklar
+
+
+# ============================================================
+# INTUITIVE SYSTEM - Bauchgefühl
+# ============================================================
+
+@dataclass
+class GutFeeling:
+    """Ein Bauchgefühl"""
+    feeling_type: GutFeelingType
+    intensity: float              # 0-1
+    trigger: str                  # Was hat es ausgelöst?
+    vague_reason: str            # Vage Begründung ("irgendwie...")
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+    def express(self) -> str:
+        """Drückt das Bauchgefühl aus"""
+        intensity_prefix = ""
+        if self.intensity > 0.7:
+            intensity_prefix = "stark "
+        elif self.intensity < 0.3:
+            intensity_prefix = "leicht "
+
+        expressions = {
+            GutFeelingType.POSITIVE: f"*{intensity_prefix}gutes Gefühl* {self.vague_reason}",
+            GutFeelingType.NEGATIVE: f"*{intensity_prefix}ungutes Gefühl* {self.vague_reason}",
+            GutFeelingType.SUSPICIOUS: f"*Ohren zucken* Hmm... {self.vague_reason}",
+            GutFeelingType.EXCITED: f"*aufgeregt* Oh! {self.vague_reason}",
+            GutFeelingType.UNEASY: f"*unruhig* {self.vague_reason}",
+            GutFeelingType.CURIOUS: f"*neugierig* {self.vague_reason}",
+            GutFeelingType.WARM: f"*warm ums Herz* {self.vague_reason}",
+            GutFeelingType.COLD: f"*kühl* {self.vague_reason}",
+            GutFeelingType.NEUTRAL: "",
+        }
+        return expressions.get(self.feeling_type, "")
+
+
+class IntuitiveSystem:
+    """
+    Holos Bauchgefühl-System.
+
+    Funktioniert durch:
+    - Implizite Muster-Erkennung (ohne bewusste Analyse)
+    - Emotionale Assoziationen
+    - Schnelle Heuristiken
+
+    WICHTIG: Niedrige Gewichtung (0.15-0.3) bei Entscheidungen!
+    """
+
+    # Intuitive Trigger-Wörter
+    POSITIVE_TRIGGERS = {
+        "ehrlich", "offen", "warm", "freundlich", "hilft", "lacht",
+        "versteht", "zuhört", "respektiert", "unterstützt", "teilt",
+        "anime", "manga", "musik", "kreativ", "tiefgründig"
+    }
+
+    NEGATIVE_TRIGGERS = {
+        "lügt", "versteckt", "kalt", "ignoriert", "beleidigt",
+        "manipuliert", "ausnutzt", "oberflächlich", "arrogant",
+        "fake", "heuchelt", "betrügt"
+    }
+
+    SUSPICIOUS_TRIGGERS = {
+        "plötzlich", "zu gut", "perfekt", "alle sagen", "garantiert",
+        "geheim", "nur heute", "exklusiv", "niemand weiß"
+    }
+
+    # Vage Begründungen (menschenähnlich unpräzise)
+    VAGUE_REASONS = {
+        GutFeelingType.POSITIVE: [
+            "Irgendwie fühlt sich das richtig an...",
+            "Kann's nicht erklären, aber das gefällt mir.",
+            "Das hat was... weiß nicht genau was.",
+            "Mein Gefühl sagt mir, das ist gut.",
+        ],
+        GutFeelingType.NEGATIVE: [
+            "Irgendwas stimmt da nicht...",
+            "Ich weiß nicht warum, aber das gefällt mir nicht.",
+            "Hab kein gutes Gefühl dabei...",
+            "Mein Bauch sagt nein.",
+        ],
+        GutFeelingType.SUSPICIOUS: [
+            "Das kommt mir komisch vor...",
+            "Warum hab ich das Gefühl, dass was nicht stimmt?",
+            "Hmm, irgendwas ist faul...",
+            "Meine Intuition sagt: Vorsicht.",
+        ],
+        GutFeelingType.WARM: [
+            "Die Person hat irgendwie was...",
+            "Ich mag die Ausstrahlung.",
+            "Fühlt sich vertraut an, obwohl ich sie nicht kenne.",
+        ],
+        GutFeelingType.COLD: [
+            "Die Vibe ist irgendwie... off.",
+            "Ich komm nicht warm mit der Person.",
+            "Keine Ahnung warum, aber... nee.",
+        ],
+    }
+
+    def __init__(self, intuition_weight: float = 0.2):
+        """
+        Args:
+            intuition_weight: Wie stark Intuition gewichtet wird (0.15-0.3 empfohlen)
+        """
+        self.intuition_weight = max(0.1, min(0.4, intuition_weight))
+        self.recent_feelings: List[GutFeeling] = []
+        self.pattern_memory: Dict[str, float] = {}  # Implizite Muster
+        self.max_feelings = 100
+
+    def get_gut_feeling(self, text: str, context: Dict = None) -> Optional[GutFeeling]:
+        """
+        Generiert ein Bauchgefühl basierend auf impliziten Mustern.
+
+        Dies passiert SCHNELL und VOR der bewussten Analyse!
+        """
+        text_lower = text.lower()
+        context = context or {}
+
+        # Schnelle Trigger-Suche
+        pos_score = sum(1 for t in self.POSITIVE_TRIGGERS if t in text_lower)
+        neg_score = sum(1 for t in self.NEGATIVE_TRIGGERS if t in text_lower)
+        sus_score = sum(1 for t in self.SUSPICIOUS_TRIGGERS if t in text_lower)
+
+        # Implizite Muster aus Erinnerung
+        pattern_score = self._check_implicit_patterns(text_lower)
+
+        # Entscheide Gefühlstyp
+        if sus_score >= 2:
+            feeling_type = GutFeelingType.SUSPICIOUS
+            intensity = min(0.8, sus_score * 0.25)
+        elif pos_score > neg_score + 1:
+            feeling_type = GutFeelingType.POSITIVE if pos_score < 3 else GutFeelingType.WARM
+            intensity = min(0.7, pos_score * 0.2)
+        elif neg_score > pos_score + 1:
+            feeling_type = GutFeelingType.NEGATIVE if neg_score < 3 else GutFeelingType.COLD
+            intensity = min(0.7, neg_score * 0.2)
+        elif pattern_score > 0.3:
+            feeling_type = GutFeelingType.POSITIVE
+            intensity = pattern_score * 0.6
+        elif pattern_score < -0.3:
+            feeling_type = GutFeelingType.SUSPICIOUS
+            intensity = abs(pattern_score) * 0.6
+        else:
+            # Kein starkes Gefühl
+            if random.random() < 0.1:  # Manchmal trotzdem ein vages Gefühl
+                feeling_type = random.choice([GutFeelingType.CURIOUS, GutFeelingType.NEUTRAL])
+                intensity = 0.2
+            else:
+                return None
+
+        # Vage Begründung wählen
+        reasons = self.VAGUE_REASONS.get(feeling_type, ["Hmm..."])
+        vague_reason = random.choice(reasons)
+
+        feeling = GutFeeling(
+            feeling_type=feeling_type,
+            intensity=intensity,
+            trigger=text[:100],
+            vague_reason=vague_reason
+        )
+
+        self._remember_feeling(feeling)
+        return feeling
+
+    def get_first_impression(self, about: str, info: str) -> Tuple[float, str]:
+        """
+        Gibt einen schnellen ersten Eindruck.
+
+        Returns:
+            (score -1 bis 1, vage Begründung)
+        """
+        feeling = self.get_gut_feeling(f"{about}: {info}")
+
+        if feeling is None:
+            return (0.0, "Kein besonderer erster Eindruck.")
+
+        score_map = {
+            GutFeelingType.POSITIVE: 0.4,
+            GutFeelingType.WARM: 0.6,
+            GutFeelingType.EXCITED: 0.5,
+            GutFeelingType.CURIOUS: 0.2,
+            GutFeelingType.NEUTRAL: 0.0,
+            GutFeelingType.UNEASY: -0.3,
+            GutFeelingType.SUSPICIOUS: -0.4,
+            GutFeelingType.NEGATIVE: -0.5,
+            GutFeelingType.COLD: -0.6,
+        }
+
+        base_score = score_map.get(feeling.feeling_type, 0.0)
+        final_score = base_score * feeling.intensity
+
+        return (final_score, feeling.express())
+
+    def should_trust_intuition(self, rational_score: float, gut_score: float) -> str:
+        """
+        Entscheidet ob Intuition oder Ratio folgen.
+        Gibt Erklärung zurück.
+        """
+        diff = abs(rational_score - gut_score)
+
+        if diff < 0.2:
+            return "Kopf und Bauch sind sich einig."
+        elif gut_score > 0 and rational_score < 0:
+            return "*nachdenklich* Mein Bauch sagt ja, aber mein Kopf sagt nein... Ich vertraue erstmal dem Kopf."
+        elif gut_score < 0 and rational_score > 0:
+            return "*zögerlich* Rational klingt das gut, aber mein Bauch ist skeptisch... Ich behalte das im Hinterkopf."
+        else:
+            return "Interessanter Konflikt zwischen Gefühl und Verstand..."
+
+    def learn_pattern(self, trigger: str, outcome_positive: bool) -> None:
+        """Lernt implizit aus Erfahrungen"""
+        key = self._pattern_key(trigger)
+        current = self.pattern_memory.get(key, 0.0)
+
+        if outcome_positive:
+            self.pattern_memory[key] = min(1.0, current + 0.1)
+        else:
+            self.pattern_memory[key] = max(-1.0, current - 0.1)
+
+    def _check_implicit_patterns(self, text: str) -> float:
+        """Prüft implizite Muster aus Erfahrung"""
+        words = text.split()
+        total_score = 0.0
+        matches = 0
+
+        for word in words:
+            key = self._pattern_key(word)
+            if key in self.pattern_memory:
+                total_score += self.pattern_memory[key]
+                matches += 1
+
+        return total_score / max(1, matches)
+
+    def _pattern_key(self, text: str) -> str:
+        """Generiert einen Pattern-Key"""
+        return hashlib.md5(text.lower().encode()).hexdigest()[:8]
+
+    def _remember_feeling(self, feeling: GutFeeling) -> None:
+        """Speichert Gefühl"""
+        self.recent_feelings.append(feeling)
+        if len(self.recent_feelings) > self.max_feelings:
+            self.recent_feelings = self.recent_feelings[-self.max_feelings:]
+
+    def get_intuition_weight(self) -> float:
+        """Gibt die aktuelle Intuitions-Gewichtung zurück"""
+        return self.intuition_weight
+
+
+# ============================================================
+# SELF CHALLENGER - Selbst-Hinterfragung
+# ============================================================
+
+@dataclass
+class SelfChallenge:
+    """Eine Selbst-Hinterfragung"""
+    belief: str                    # Die Überzeugung die hinterfragt wird
+    challenge: str                 # Die Gegen-Frage
+    counter_arguments: List[str]   # Gegenargumente
+    conclusion: str                # Schlussfolgerung
+    belief_adjusted: bool          # Wurde die Überzeugung angepasst?
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class SelfChallenger:
+    """
+    System für kontinuierliche Selbst-Hinterfragung.
+
+    "Wie könnte ich mich täuschen?"
+    "Was spricht dagegen?"
+    "Bin ich zu sicher?"
+    """
+
+    CHALLENGE_TEMPLATES = [
+        "Aber was ist, wenn {belief} nicht stimmt?",
+        "Könnte ich mich bei {belief} täuschen?",
+        "Gibt es Gegenbeweise für {belief}?",
+        "Warum glaube ich eigentlich, dass {belief}?",
+        "Was würde jemand sagen, der anderer Meinung ist?",
+        "Bin ich vielleicht voreingenommen bei {belief}?",
+    ]
+
+    COGNITIVE_BIASES = {
+        "confirmation_bias": {
+            "name": "Bestätigungsfehler",
+            "check": "Suche ich nur nach Infos die meine Meinung bestätigen?",
+            "fix": "Aktiv nach Gegenbeispielen suchen."
+        },
+        "halo_effect": {
+            "name": "Halo-Effekt",
+            "check": "Übertrage ich positive Eigenschaften auf andere Bereiche?",
+            "fix": "Jeden Aspekt einzeln bewerten."
+        },
+        "recency_bias": {
+            "name": "Aktualitätsfehler",
+            "check": "Gewichte ich neuere Infos zu stark?",
+            "fix": "Auch ältere Erfahrungen berücksichtigen."
+        },
+        "anchoring": {
+            "name": "Ankereffekt",
+            "check": "Hänge ich zu sehr am ersten Eindruck?",
+            "fix": "Erster Eindruck neu evaluieren."
+        },
+        "overconfidence": {
+            "name": "Überkonfidenz",
+            "check": "Bin ich mir zu sicher?",
+            "fix": "Confidence um 20% reduzieren."
+        }
+    }
+
+    def __init__(self, challenge_frequency: float = 0.3):
+        """
+        Args:
+            challenge_frequency: Wie oft soll hinterfragt werden? (0-1)
+        """
+        self.challenge_frequency = challenge_frequency
+        self.challenges_history: List[SelfChallenge] = []
+        self.last_challenge_time = datetime.now()
+
+    def should_challenge(self, confidence: float) -> bool:
+        """Entscheidet ob jetzt hinterfragt werden soll"""
+        # Höhere Confidence = mehr Grund zur Hinterfragung
+        challenge_threshold = 1.0 - self.challenge_frequency
+
+        # Bei sehr hoher Confidence immer hinterfragen
+        if confidence > 0.9:
+            return True
+
+        # Zeit seit letzter Hinterfragung
+        time_since = (datetime.now() - self.last_challenge_time).seconds
+        if time_since > 300:  # 5 Minuten
+            return random.random() < self.challenge_frequency
+
+        return confidence > challenge_threshold
+
+    def challenge_belief(self, belief: str, confidence: float,
+                        evidence: List[str] = None) -> SelfChallenge:
+        """
+        Hinterfragt eine Überzeugung.
+
+        Returns:
+            SelfChallenge mit Analyse
+        """
+        self.last_challenge_time = datetime.now()
+        evidence = evidence or []
+
+        # Wähle Challenge-Template
+        template = random.choice(self.CHALLENGE_TEMPLATES)
+        challenge = template.format(belief=belief)
+
+        # Generiere Gegenargumente
+        counter_args = self._generate_counter_arguments(belief, evidence)
+
+        # Bias-Check
+        bias_warning = self._check_for_bias(belief, confidence, evidence)
+        if bias_warning:
+            counter_args.append(f"⚠️ Möglicher Bias: {bias_warning}")
+
+        # Schlussfolgerung
+        if len(counter_args) >= 3:
+            conclusion = f"*nachdenklich* Hmm, vielleicht bin ich bei '{belief[:50]}...' zu sicher."
+            belief_adjusted = True
+        elif len(counter_args) >= 1:
+            conclusion = f"Es gibt Gegenargumente, aber ich bleibe vorerst bei meiner Meinung."
+            belief_adjusted = False
+        else:
+            conclusion = f"Nach Prüfung: Meine Überzeugung scheint fundiert."
+            belief_adjusted = False
+
+        challenge_result = SelfChallenge(
+            belief=belief,
+            challenge=challenge,
+            counter_arguments=counter_args,
+            conclusion=conclusion,
+            belief_adjusted=belief_adjusted
+        )
+
+        self.challenges_history.append(challenge_result)
+        return challenge_result
+
+    def devils_advocate(self, position: str) -> str:
+        """
+        Spielt Devil's Advocate gegen eine Position.
+        """
+        counter_positions = [
+            f"Aber was ist mit dem Gegenteil? Was wenn '{position}' falsch ist?",
+            f"Jemand könnte argumentieren, dass genau das Gegenteil wahr ist...",
+            f"*kritisch* Lass mich mal die andere Seite beleuchten...",
+            f"Okay, aber hier sind mögliche Probleme mit dieser Sicht:",
+        ]
+
+        intro = random.choice(counter_positions)
+
+        # Generiere Gegen-Punkte
+        points = [
+            "- Was wenn ich nur das sehe, was ich sehen will?",
+            "- Gibt es Fälle wo das nicht zutrifft?",
+            "- Könnte meine Erfahrung untypisch sein?",
+            "- Was sagen Leute mit anderer Perspektive?",
+        ]
+
+        return f"{intro}\n" + "\n".join(random.sample(points, min(3, len(points))))
+
+    def am_i_wrong_about(self, topic: str, my_opinion: float) -> Dict[str, Any]:
+        """
+        Prüft ob ich bei einem Thema falsch liegen könnte.
+
+        Returns:
+            Dict mit Analyse
+        """
+        wrong_probability = 0.0
+        reasons = []
+
+        # Extreme Meinungen sind oft falsch
+        if abs(my_opinion) > 0.8:
+            wrong_probability += 0.2
+            reasons.append("Meine Meinung ist sehr extrem - das ist oft ein Warnsignal")
+
+        # Wenig Evidenz
+        # (würde in echtem System Evidenz-Menge prüfen)
+
+        # Bias-Check
+        for bias_key, bias_info in self.COGNITIVE_BIASES.items():
+            if random.random() < 0.3:  # Zufällige Bias-Prüfung
+                reasons.append(f"Möglicher {bias_info['name']}: {bias_info['check']}")
+                wrong_probability += 0.1
+
+        wrong_probability = min(0.8, wrong_probability)
+
+        return {
+            "topic": topic,
+            "my_opinion": my_opinion,
+            "could_be_wrong_probability": wrong_probability,
+            "reasons": reasons,
+            "suggestion": "Mehr Perspektiven einholen" if wrong_probability > 0.3 else "Meinung scheint fundiert"
+        }
+
+    def _generate_counter_arguments(self, belief: str, evidence: List[str]) -> List[str]:
+        """Generiert Gegenargumente"""
+        counters = []
+
+        # Allgemeine Gegenargumente
+        general_counters = [
+            "Korrelation bedeutet nicht Kausalität",
+            "Eine Erfahrung ist kein Beweis",
+            "Menschen können sich ändern",
+            "Kontext könnte anders gewesen sein",
+            "Meine Wahrnehmung könnte verzerrt sein",
+        ]
+
+        # Wähle 1-3 relevante
+        num_counters = random.randint(0, 3)
+        counters = random.sample(general_counters, min(num_counters, len(general_counters)))
+
+        return counters
+
+    def _check_for_bias(self, belief: str, confidence: float,
+                       evidence: List[str]) -> Optional[str]:
+        """Prüft auf kognitive Verzerrungen"""
+        # Überkonfidenz
+        if confidence > 0.85 and len(evidence) < 3:
+            return self.COGNITIVE_BIASES["overconfidence"]["check"]
+
+        # Bestätigungsfehler (vereinfacht)
+        if random.random() < 0.2:
+            return self.COGNITIVE_BIASES["confirmation_bias"]["check"]
+
+        return None
+
+
+# ============================================================
+# HYPOTHESIS ENGINE - Was-Wenn Szenarien
+# ============================================================
+
+@dataclass
+class Hypothesis:
+    """Eine Hypothese"""
+    hypothesis_id: str
+    statement: str                 # "Wenn X, dann Y"
+    condition: str                 # X
+    prediction: str                # Y
+    confidence: float              # Wie wahrscheinlich?
+    status: HypothesisStatus
+    evidence_for: List[str] = field(default_factory=list)
+    evidence_against: List[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class HypothesisEngine:
+    """
+    System für "Was wenn?"-Szenarien und Hypothesen-Bildung.
+
+    "Was würde passieren wenn..."
+    "Ich vermute, dass..."
+    "Wenn X stimmt, dann müsste Y folgen..."
+    """
+
+    def __init__(self):
+        self.hypotheses: Dict[str, Hypothesis] = {}
+        self.tested_hypotheses: List[Hypothesis] = []
+
+    def generate_hypothesis(self, observation: str,
+                           context: Dict = None) -> Hypothesis:
+        """
+        Generiert eine Hypothese aus einer Beobachtung.
+
+        "Ich habe X beobachtet → Ich vermute Y ist die Ursache"
+        """
+        context = context or {}
+
+        # Einfache Kausal-Hypothesen
+        hypothesis_templates = [
+            ("Vielleicht liegt das daran, dass {cause}",
+             "Das würde erklären warum {observation}"),
+            ("Wenn {cause} stimmt",
+             "dann sollte auch {prediction} zutreffen"),
+            ("Meine Vermutung: {cause}",
+             "Das würde zu {observation} passen"),
+        ]
+
+        template = random.choice(hypothesis_templates)
+
+        # Generiere plausible Ursache (vereinfacht)
+        possible_causes = [
+            "die Person etwas zu verbergen hat",
+            "es mehr dahinter steckt als auf den ersten Blick",
+            "das Verhalten gewohnheitsmäßig ist",
+            "äußere Umstände eine Rolle spielen",
+            "die Person unter Druck steht",
+        ]
+
+        cause = random.choice(possible_causes)
+        prediction = f"ähnliches Verhalten in anderen Situationen"
+
+        hyp_id = hashlib.md5(f"{observation}{datetime.now()}".encode()).hexdigest()[:8]
+
+        hypothesis = Hypothesis(
+            hypothesis_id=hyp_id,
+            statement=f"Wenn {cause}, dann {prediction}",
+            condition=cause,
+            prediction=prediction,
+            confidence=0.4,  # Niedrige initiale Confidence
+            status=HypothesisStatus.PROPOSED
+        )
+
+        self.hypotheses[hyp_id] = hypothesis
+        return hypothesis
+
+    def what_if(self, scenario: str) -> Dict[str, Any]:
+        """
+        Simuliert ein "Was wenn?"-Szenario.
+
+        Args:
+            scenario: "Was wenn Person X lügt?" etc.
+        """
+        # Analysiere Szenario
+        consequences = []
+        likelihood = 0.5
+
+        # Einfache Konsequenz-Generierung
+        if "lügt" in scenario.lower():
+            consequences = [
+                "Dann wäre die Vertrauenswürdigkeit stark beschädigt",
+                "Andere Aussagen müssten auch hinterfragt werden",
+                "Das Motiv für die Lüge wäre interessant zu verstehen",
+            ]
+            likelihood = 0.3
+        elif "ehrlich" in scenario.lower():
+            consequences = [
+                "Dann wäre die Person vertrauenswürdiger als gedacht",
+                "Vorherige Skepsis wäre unbegründet gewesen",
+            ]
+            likelihood = 0.5
+        elif "ändert" in scenario.lower():
+            consequences = [
+                "Menschen können sich ändern, aber es braucht Zeit",
+                "Ich würde Beweise für die Änderung sehen wollen",
+                "Alte Muster könnten wieder auftauchen",
+            ]
+            likelihood = 0.4
+        else:
+            consequences = [
+                "Das hätte interessante Implikationen...",
+                "Ich müsste meine Annahmen überdenken",
+            ]
+            likelihood = 0.5
+
+        return {
+            "scenario": scenario,
+            "likelihood": likelihood,
+            "consequences": consequences,
+            "my_reaction": f"*nachdenklich* {random.choice(consequences)}",
+            "should_investigate": likelihood > 0.4
+        }
+
+    def test_hypothesis(self, hyp_id: str, new_evidence: str,
+                       supports: bool) -> Optional[Hypothesis]:
+        """
+        Testet eine Hypothese mit neuer Evidenz.
+        """
+        if hyp_id not in self.hypotheses:
+            return None
+
+        hyp = self.hypotheses[hyp_id]
+        hyp.status = HypothesisStatus.TESTING
+
+        if supports:
+            hyp.evidence_for.append(new_evidence)
+            hyp.confidence = min(0.95, hyp.confidence + 0.15)
+        else:
+            hyp.evidence_against.append(new_evidence)
+            hyp.confidence = max(0.05, hyp.confidence - 0.2)
+
+        # Status Update
+        if len(hyp.evidence_for) >= 3 and hyp.confidence > 0.7:
+            hyp.status = HypothesisStatus.SUPPORTED
+        elif len(hyp.evidence_against) >= 2 or hyp.confidence < 0.2:
+            hyp.status = HypothesisStatus.REFUTED
+            self.tested_hypotheses.append(hyp)
+        else:
+            hyp.status = HypothesisStatus.UNCERTAIN
+
+        return hyp
+
+    def get_active_hypotheses(self) -> List[Hypothesis]:
+        """Gibt alle aktiven Hypothesen zurück"""
+        return [h for h in self.hypotheses.values()
+                if h.status not in [HypothesisStatus.REFUTED, HypothesisStatus.SUPPORTED]]
+
+
+# ============================================================
+# PREDICTION SYSTEM - Vorhersagen
+# ============================================================
+
+@dataclass
+class Prediction:
+    """Eine Vorhersage"""
+    prediction_id: str
+    about: str                     # Worüber?
+    prediction: str                # Was wird vorhergesagt?
+    confidence: PredictionConfidence
+    reasoning: str                 # Warum?
+    time_horizon: str             # Wann? (kurzfristig, mittelfristig, langfristig)
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    verified: Optional[bool] = None
+    verified_at: Optional[str] = None
+
+
+class PredictionSystem:
+    """
+    System für Vorhersagen über zukünftiges Verhalten/Ereignisse.
+
+    "Ich glaube, X wird Y tun, weil..."
+    "Basierend auf dem Muster, erwarte ich..."
+    """
+
+    def __init__(self):
+        self.predictions: Dict[str, Prediction] = {}
+        self.prediction_history: List[Prediction] = []
+        self.accuracy_stats = {"correct": 0, "incorrect": 0, "pending": 0}
+
+    def predict_behavior(self, person: str, context: str,
+                        known_traits: Dict[str, float] = None) -> Prediction:
+        """
+        Macht eine Verhaltensvorhersage für eine Person.
+        """
+        known_traits = known_traits or {}
+
+        # Basiere Vorhersage auf Traits
+        prediction_text = ""
+        confidence = PredictionConfidence.HUNCH
+        reasoning = ""
+
+        # Finde dominanten Trait
+        if known_traits:
+            dominant_trait = max(known_traits.items(), key=lambda x: abs(x[1]))
+            trait_name, trait_score = dominant_trait
+
+            if trait_score > 0.5:
+                prediction_text = f"{person} wird wahrscheinlich {trait_name} handeln"
+                confidence = PredictionConfidence.LIKELY
+                reasoning = f"Basierend auf dem ausgeprägten '{trait_name}'-Trait"
+            elif trait_score < -0.5:
+                prediction_text = f"{person} wird wahrscheinlich nicht {trait_name} handeln"
+                confidence = PredictionConfidence.LIKELY
+                reasoning = f"Der niedrige '{trait_name}'-Wert deutet darauf hin"
+        else:
+            prediction_text = f"Schwer zu sagen wie {person} reagieren wird"
+            confidence = PredictionConfidence.GUESS
+            reasoning = "Zu wenig Informationen für sichere Vorhersage"
+
+        pred_id = hashlib.md5(f"{person}{datetime.now()}".encode()).hexdigest()[:8]
+
+        prediction = Prediction(
+            prediction_id=pred_id,
+            about=person,
+            prediction=prediction_text,
+            confidence=confidence,
+            reasoning=reasoning,
+            time_horizon="kurzfristig"
+        )
+
+        self.predictions[pred_id] = prediction
+        self.accuracy_stats["pending"] += 1
+        return prediction
+
+    def predict_trend(self, topic: str, current_value: float,
+                     recent_changes: List[float] = None) -> Dict[str, Any]:
+        """
+        Macht eine Trend-Vorhersage.
+
+        "Interesse an X wird steigen/fallen"
+        """
+        recent_changes = recent_changes or []
+
+        if recent_changes:
+            avg_change = sum(recent_changes) / len(recent_changes)
+
+            if avg_change > 0.1:
+                direction = "steigen"
+                confidence = min(0.8, 0.5 + avg_change)
+            elif avg_change < -0.1:
+                direction = "fallen"
+                confidence = min(0.8, 0.5 + abs(avg_change))
+            else:
+                direction = "stabil bleiben"
+                confidence = 0.6
+        else:
+            direction = "unklar entwickeln"
+            confidence = 0.3
+
+        return {
+            "topic": topic,
+            "current_value": current_value,
+            "predicted_direction": direction,
+            "confidence": confidence,
+            "explanation": f"Basierend auf den letzten {len(recent_changes)} Änderungen"
+        }
+
+    def predict_next_action(self, person: str,
+                           recent_actions: List[str] = None) -> str:
+        """
+        Versucht die nächste Aktion vorherzusagen.
+        """
+        recent_actions = recent_actions or []
+
+        if not recent_actions:
+            return f"*Schultern zuckend* Keine Ahnung was {person} als nächstes tun wird."
+
+        # Einfache Muster-Erkennung
+        if len(recent_actions) >= 2:
+            return f"*nachdenklich* Basierend auf dem Muster... vielleicht etwas Ähnliches wie vorher?"
+
+        return f"Zu wenig Daten für eine Vorhersage über {person}."
+
+    def verify_prediction(self, pred_id: str, was_correct: bool) -> None:
+        """Verifiziert eine Vorhersage"""
+        if pred_id not in self.predictions:
+            return
+
+        pred = self.predictions[pred_id]
+        pred.verified = was_correct
+        pred.verified_at = datetime.now().isoformat()
+
+        self.accuracy_stats["pending"] -= 1
+        if was_correct:
+            self.accuracy_stats["correct"] += 1
+        else:
+            self.accuracy_stats["incorrect"] += 1
+
+        self.prediction_history.append(pred)
+
+    def get_accuracy(self) -> float:
+        """Gibt die Vorhersage-Genauigkeit zurück"""
+        total = self.accuracy_stats["correct"] + self.accuracy_stats["incorrect"]
+        if total == 0:
+            return 0.5  # Neutral wenn keine Daten
+        return self.accuracy_stats["correct"] / total
+
+
+# ============================================================
+# TRUST NETWORK - Vertrauens-Netzwerk
+# ============================================================
+
+@dataclass
+class TrustRelation:
+    """Eine Vertrauensbeziehung"""
+    from_entity: str
+    to_entity: str
+    trust_level: float            # 0-1
+    trust_type: str               # "direct", "inferred", "transitive"
+    evidence: List[str] = field(default_factory=list)
+    last_updated: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class TrustNetwork:
+    """
+    Netzwerk-basiertes Vertrauens-System.
+
+    - Transitives Vertrauen: "X vertraut Y, und ich vertraue X, also..."
+    - Vertrauens-Decay bei Fehlern
+    - Reputations-Aggregation
+    - PERSISTENZ: Speichert in data/trust_network.json
+    """
+
+    def __init__(self, decay_rate: float = 0.05, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+        self.trust_relations: Dict[str, TrustRelation] = {}
+        self.decay_rate = decay_rate
+        self.my_name = "holo"  # Holos eigener Identifier
+        self._load_trust_network()
+
+    def set_direct_trust(self, entity: str, trust_level: float,
+                        evidence: str = "") -> TrustRelation:
+        """
+        Setzt direktes Vertrauen in eine Entität.
+        """
+        key = f"{self.my_name}→{entity}"
+
+        relation = TrustRelation(
+            from_entity=self.my_name,
+            to_entity=entity,
+            trust_level=max(0.0, min(1.0, trust_level)),
+            trust_type="direct",
+            evidence=[evidence] if evidence else []
+        )
+
+        self.trust_relations[key] = relation
+        self._save_trust_network()
+        return relation
+
+    def get_trust_in(self, entity: str) -> float:
+        """Gibt das Vertrauenslevel in eine Entität zurück"""
+        key = f"{self.my_name}→{entity}"
+
+        if key in self.trust_relations:
+            return self.trust_relations[key].trust_level
+
+        # Versuche transitives Vertrauen
+        transitive = self._calculate_transitive_trust(entity)
+        if transitive > 0:
+            return transitive
+
+        return 0.5  # Neutral wenn unbekannt
+
+    def add_trust_between(self, entity1: str, entity2: str,
+                         trust_level: float) -> None:
+        """
+        Registriert Vertrauen zwischen zwei anderen Entitäten.
+        (Für transitives Vertrauen)
+        """
+        key = f"{entity1}→{entity2}"
+        self.trust_relations[key] = TrustRelation(
+            from_entity=entity1,
+            to_entity=entity2,
+            trust_level=trust_level,
+            trust_type="observed"
+        )
+        self._save_trust_network()
+
+    def trust_through_intermediary(self, target: str,
+                                   intermediary: str) -> Tuple[float, str]:
+        """
+        Berechnet Vertrauen durch einen Vermittler.
+
+        "Ich vertraue X nicht direkt, aber Y vertraut X, und ich vertraue Y..."
+
+        Returns:
+            (trust_level, explanation)
+        """
+        my_trust_in_intermediary = self.get_trust_in(intermediary)
+        intermediary_trust_in_target = self.get_trust_in(target)
+
+        if my_trust_in_intermediary < 0.3:
+            return (0.0, f"Ich vertraue {intermediary} nicht genug um deren Empfehlung zu folgen.")
+
+        # Transitives Vertrauen = Produkt (mit Dämpfung)
+        transitive_trust = my_trust_in_intermediary * intermediary_trust_in_target * 0.7
+
+        explanation = f"Ich vertraue {intermediary} ({my_trust_in_intermediary:.1f}), "
+        explanation += f"und {intermediary} vertraut {target} ({intermediary_trust_in_target:.1f}). "
+        explanation += f"Also vertraue ich {target} indirekt mit {transitive_trust:.2f}."
+
+        return (transitive_trust, explanation)
+
+    def decay_trust_on_error(self, entity: str, severity: float = 0.5) -> float:
+        """
+        Reduziert Vertrauen wenn Entität sich geirrt hat.
+        """
+        key = f"{self.my_name}→{entity}"
+
+        if key not in self.trust_relations:
+            return 0.5
+
+        relation = self.trust_relations[key]
+        decay_amount = self.decay_rate * severity
+
+        relation.trust_level = max(0.0, relation.trust_level - decay_amount)
+        relation.evidence.append(f"Vertrauen reduziert wegen Fehler ({severity:.1f})")
+        relation.last_updated = datetime.now().isoformat()
+        self._save_trust_network()
+
+        return relation.trust_level
+
+    def restore_trust(self, entity: str, amount: float = 0.1) -> float:
+        """
+        Stellt Vertrauen langsam wieder her.
+        """
+        key = f"{self.my_name}→{entity}"
+
+        if key not in self.trust_relations:
+            self.set_direct_trust(entity, 0.5 + amount)
+            return 0.5 + amount
+
+        relation = self.trust_relations[key]
+        relation.trust_level = min(1.0, relation.trust_level + amount)
+        relation.last_updated = datetime.now().isoformat()
+        self._save_trust_network()
+
+        return relation.trust_level
+
+    def _calculate_transitive_trust(self, target: str) -> float:
+        """Berechnet transitives Vertrauen über alle Pfade"""
+        max_trust = 0.0
+
+        # Finde alle Entitäten denen ich vertraue
+        my_trusts = []
+        for k, v in self.trust_relations.items():
+            if k.startswith(f"{self.my_name}→") and v.trust_level > 0.3:
+                parts = k.split("→")
+                if len(parts) >= 2:
+                    my_trusts.append((parts[1], v.trust_level))
+                else:
+                    logger.warning(f"[AutonomousThinking] Invalid trust key format: {k}")
+
+        for intermediary, my_trust in my_trusts:
+            # Vertraut diese Entität dem Target?
+            intermediary_key = f"{intermediary}→{target}"
+            if intermediary_key in self.trust_relations:
+                intermediary_trust = self.trust_relations[intermediary_key].trust_level
+                transitive = my_trust * intermediary_trust * 0.7
+                max_trust = max(max_trust, transitive)
+
+        return max_trust
+
+    def get_trust_summary(self) -> Dict[str, Any]:
+        """Gibt eine Zusammenfassung des Vertrauens-Netzwerks"""
+        my_trusts = {}
+        for k, v in self.trust_relations.items():
+            if k.startswith(f"{self.my_name}→"):
+                parts = k.split("→")
+                if len(parts) >= 2:
+                    my_trusts[parts[1]] = v.trust_level
+
+        trusted = [k for k, v in my_trusts.items() if v > 0.6]
+        distrusted = [k for k, v in my_trusts.items() if v < 0.3]
+
+        return {
+            "total_entities": len(my_trusts),
+            "trusted": trusted,
+            "distrusted": distrusted,
+            "average_trust": sum(my_trusts.values()) / max(1, len(my_trusts))
+        }
+
+    def _load_trust_network(self) -> None:
+        """Lädt Vertrauens-Netzwerk aus Datei"""
+        filepath = self.data_dir / "trust_network.json"
+        if filepath.exists():
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for rel_data in data.get("relations", []):
+                        relation = TrustRelation(
+                            from_entity=rel_data["from_entity"],
+                            to_entity=rel_data["to_entity"],
+                            trust_level=rel_data["trust_level"],
+                            trust_type=rel_data.get("trust_type", "direct"),
+                            evidence=rel_data.get("evidence", []),
+                            last_updated=rel_data.get("last_updated", "")
+                        )
+                        key = f"{relation.from_entity}→{relation.to_entity}"
+                        self.trust_relations[key] = relation
+                logger.info(f"{len(self.trust_relations)} Vertrauensbeziehungen geladen")
+            except Exception as e:
+                logger.warning(f"Fehler beim Laden des Trust-Netzwerks: {e}")
+
+    def _save_trust_network(self) -> None:
+        """Speichert Vertrauens-Netzwerk in Datei"""
+        filepath = self.data_dir / "trust_network.json"
+        try:
+            data = {"relations": []}
+            for relation in self.trust_relations.values():
+                data["relations"].append({
+                    "from_entity": relation.from_entity,
+                    "to_entity": relation.to_entity,
+                    "trust_level": relation.trust_level,
+                    "trust_type": relation.trust_type,
+                    "evidence": relation.evidence,
+                    "last_updated": relation.last_updated
+                })
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.warning(f"Fehler beim Speichern des Trust-Netzwerks: {e}")
+
+
+# ============================================================
+# ANALOGY ENGINE - Analogie-Denken
+# ============================================================
+
+@dataclass
+class Analogy:
+    """Eine Analogie zwischen zwei Situationen"""
+    analogy_id: str
+    current_situation: str          # Aktuelle Situation
+    past_situation: str             # Vergangene ähnliche Situation
+    similarity_score: float         # Wie ähnlich? (0-1)
+    lessons_learned: List[str]      # Was wurde gelernt?
+    outcome_of_past: str            # Wie ging es damals aus?
+    applicable_to_now: bool         # Ist das auf jetzt anwendbar?
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class StoredExperience:
+    """Eine gespeicherte Erfahrung für Analogie-Suche"""
+    experience_id: str
+    situation: str                  # Beschreibung der Situation
+    keywords: Set[str]              # Schlüsselwörter für Suche
+    context_type: str               # "person", "decision", "conflict", "success", "failure"
+    outcome: str                    # Wie ist es ausgegangen?
+    outcome_valence: float          # -1 bis 1 (schlecht bis gut)
+    lessons: List[str]              # Gelernte Lektionen
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class AnalogyEngine:
+    """
+    System für Analogie-basiertes Denken.
+
+    "Das erinnert mich an die Situation mit X damals..."
+    "Das ist wie bei Y, und da ist Z passiert..."
+    "Ich kenne das Muster von früher..."
+
+    Ermöglicht:
+    - Erfahrungen speichern
+    - Ähnliche Situationen finden
+    - Aus Vergangenheit lernen
+    - Muster erkennen
+    """
+
+    # Situation-Typen für bessere Kategorisierung
+    SITUATION_TYPES = {
+        "person": ["vertrauen", "lüge", "ehrlich", "freund", "beziehung", "konflikt"],
+        "decision": ["entscheidung", "wahl", "option", "risiko", "chance"],
+        "conflict": ["streit", "problem", "schwierig", "konflikt", "stress"],
+        "success": ["erfolg", "geschafft", "gewonnen", "erreicht", "gut"],
+        "failure": ["fehler", "versagt", "verloren", "schlecht", "bereut"],
+    }
+
+    # Analogie-Phrasen für menschenähnliche Ausdrücke
+    ANALOGY_PHRASES = [
+        "Das erinnert mich an {past}...",
+        "Hmm, das ist wie damals bei {past}.",
+        "Ich kenne dieses Muster... {past} war ähnlich.",
+        "*nachdenklich* Das hatten wir schon mal... {past}.",
+        "Moment, das kommt mir bekannt vor... {past}!",
+        "Oh, das ist fast wie {past} damals.",
+    ]
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        self.experiences: Dict[str, StoredExperience] = {}
+        self.analogies_made: List[Analogy] = []
+        self.pattern_cache: Dict[str, List[str]] = {}  # pattern -> experience_ids
+
+        self._load_experiences()
+
+    def store_experience(self, situation: str, outcome: str,
+                        outcome_valence: float, lessons: List[str] = None,
+                        context_type: str = None) -> StoredExperience:
+        """
+        Speichert eine Erfahrung für spätere Analogie-Suche.
+
+        Args:
+            situation: Was ist passiert?
+            outcome: Wie ist es ausgegangen?
+            outcome_valence: -1 (schlecht) bis 1 (gut)
+            lessons: Was wurde gelernt?
+            context_type: Art der Situation
+        """
+        exp_id = hashlib.md5(f"{situation}{datetime.now()}".encode()).hexdigest()[:10]
+
+        # Keywords extrahieren
+        keywords = self._extract_keywords(situation)
+
+        # Typ bestimmen wenn nicht angegeben
+        if context_type is None:
+            context_type = self._determine_type(situation, keywords)
+
+        experience = StoredExperience(
+            experience_id=exp_id,
+            situation=situation,
+            keywords=keywords,
+            context_type=context_type,
+            outcome=outcome,
+            outcome_valence=max(-1.0, min(1.0, outcome_valence)),
+            lessons=lessons or []
+        )
+
+        self.experiences[exp_id] = experience
+        self._update_pattern_cache(exp_id, keywords)
+        self._save_experiences()
+
+        logger.info(f"Erfahrung gespeichert: {exp_id} ({context_type})")
+        return experience
+
+    def find_analogies(self, current_situation: str,
+                       min_similarity: float = 0.3,
+                       max_results: int = 3) -> List[Analogy]:
+        """
+        Findet ähnliche Situationen aus der Vergangenheit.
+
+        Args:
+            current_situation: Die aktuelle Situation
+            min_similarity: Minimum-Ähnlichkeit (0-1)
+            max_results: Maximale Anzahl Ergebnisse
+
+        Returns:
+            Liste von Analogien, sortiert nach Ähnlichkeit
+        """
+        current_keywords = self._extract_keywords(current_situation)
+        current_type = self._determine_type(current_situation, current_keywords)
+
+        candidates: List[Tuple[float, StoredExperience]] = []
+
+        for exp in self.experiences.values():
+            similarity = self._calculate_similarity(
+                current_keywords, current_type,
+                exp.keywords, exp.context_type
+            )
+
+            if similarity >= min_similarity:
+                candidates.append((similarity, exp))
+
+        # Sortiere nach Ähnlichkeit
+        candidates.sort(key=lambda x: x[0], reverse=True)
+
+        # Erstelle Analogien
+        analogies = []
+        for similarity, exp in candidates[:max_results]:
+            analogy = Analogy(
+                analogy_id=hashlib.md5(f"{current_situation}{exp.experience_id}".encode()).hexdigest()[:8],
+                current_situation=current_situation[:200],
+                past_situation=exp.situation,
+                similarity_score=similarity,
+                lessons_learned=exp.lessons,
+                outcome_of_past=exp.outcome,
+                applicable_to_now=similarity > 0.5
+            )
+            analogies.append(analogy)
+            self.analogies_made.append(analogy)
+
+        return analogies
+
+    def get_wisdom_from_past(self, current_situation: str) -> Optional[Dict[str, Any]]:
+        """
+        Gibt Weisheit aus vergangenen ähnlichen Situationen.
+
+        Returns:
+            Dict mit Analogie, Lektion und Warnung/Ermutigung
+        """
+        analogies = self.find_analogies(current_situation, min_similarity=0.4, max_results=1)
+
+        if not analogies:
+            return None
+
+        best = analogies[0]
+        past_exp = self.experiences.get(
+            next((k for k, v in self.experiences.items()
+                  if v.situation == best.past_situation), None)
+        )
+
+        result = {
+            "found_analogy": True,
+            "similarity": best.similarity_score,
+            "past_situation": best.past_situation[:100],
+            "past_outcome": best.outcome_of_past,
+        }
+
+        # Generiere menschenähnliche Aussage
+        phrase = random.choice(self.ANALOGY_PHRASES).format(
+            past=best.past_situation[:50]
+        )
+        result["expression"] = phrase
+
+        # Warnung oder Ermutigung basierend auf Outcome
+        if past_exp:
+            if past_exp.outcome_valence < -0.3:
+                result["warning"] = f"⚠️ Vorsicht! Letztes Mal ging das schlecht aus: {past_exp.outcome}"
+                result["advice"] = "Vielleicht sollte ich diesmal anders vorgehen..."
+            elif past_exp.outcome_valence > 0.3:
+                result["encouragement"] = f"✓ Das ist gut! Letztes Mal war's positiv: {past_exp.outcome}"
+                result["advice"] = "Das Muster hat funktioniert, könnte wieder klappen."
+            else:
+                result["note"] = f"Letztes Mal war's gemischt: {past_exp.outcome}"
+                result["advice"] = "Abwarten und vorsichtig sein."
+
+        # Lektionen
+        if best.lessons_learned:
+            result["lessons"] = best.lessons_learned
+            result["main_lesson"] = random.choice(best.lessons_learned)
+
+        return result
+
+    def learn_from_outcome(self, situation: str, outcome: str,
+                          outcome_valence: float, what_i_learned: str) -> None:
+        """
+        Lernt aus dem Ausgang einer Situation und speichert es.
+        """
+        lessons = [what_i_learned] if what_i_learned else []
+
+        # Wenn ähnliche Erfahrung existiert, update
+        existing = self.find_analogies(situation, min_similarity=0.7, max_results=1)
+
+        if existing and existing[0].similarity_score > 0.8:
+            # Update bestehende Erfahrung
+            for exp_id, exp in self.experiences.items():
+                if exp.situation == existing[0].past_situation:
+                    if what_i_learned and what_i_learned not in exp.lessons:
+                        exp.lessons.append(what_i_learned)
+                    self._save_experiences()
+                    logger.info(f"Erfahrung {exp_id} mit neuer Lektion aktualisiert")
+                    return
+
+        # Neue Erfahrung speichern
+        self.store_experience(situation, outcome, outcome_valence, lessons)
+
+    def express_analogy(self, current_situation: str) -> str:
+        """
+        Drückt eine gefundene Analogie menschenähnlich aus.
+        """
+        wisdom = self.get_wisdom_from_past(current_situation)
+
+        if not wisdom:
+            return ""
+
+        parts = [wisdom["expression"]]
+
+        if "warning" in wisdom:
+            parts.append(wisdom["warning"])
+        elif "encouragement" in wisdom:
+            parts.append(wisdom["encouragement"])
+
+        if wisdom.get("main_lesson"):
+            parts.append(f"Damals habe ich gelernt: {wisdom['main_lesson']}")
+
+        return " ".join(parts)
+
+    def _extract_keywords(self, text: str) -> Set[str]:
+        """Extrahiert Keywords aus Text"""
+        # Einfache Wort-Extraktion
+        words = set(text.lower().split())
+
+        # Stopwords entfernen (vereinfacht)
+        stopwords = {"der", "die", "das", "und", "oder", "ist", "hat", "war",
+                    "ein", "eine", "mit", "von", "zu", "ich", "du", "er", "sie",
+                    "es", "wir", "ihr", "mich", "mir", "dir", "ihn", "ihm"}
+
+        return words - stopwords
+
+    def _determine_type(self, text: str, keywords: Set[str]) -> str:
+        """Bestimmt den Typ einer Situation"""
+        text_lower = text.lower()
+
+        best_type = "decision"
+        best_score = 0
+
+        for sit_type, type_keywords in self.SITUATION_TYPES.items():
+            score = sum(1 for kw in type_keywords if kw in text_lower)
+            if score > best_score:
+                best_score = score
+                best_type = sit_type
+
+        return best_type
+
+    def _calculate_similarity(self, kw1: Set[str], type1: str,
+                             kw2: Set[str], type2: str) -> float:
+        """Berechnet Ähnlichkeit zwischen zwei Situationen"""
+        # Keyword-Überlappung (Jaccard-Ähnlichkeit)
+        if not kw1 or not kw2:
+            keyword_sim = 0.0
+        else:
+            intersection = len(kw1 & kw2)
+            union = len(kw1 | kw2)
+            keyword_sim = intersection / union if union > 0 else 0.0
+
+        # Typ-Bonus
+        type_bonus = 0.2 if type1 == type2 else 0.0
+
+        # Kombiniert
+        similarity = (keyword_sim * 0.8) + type_bonus
+
+        return min(1.0, similarity)
+
+    def _update_pattern_cache(self, exp_id: str, keywords: Set[str]) -> None:
+        """Aktualisiert den Pattern-Cache"""
+        for keyword in keywords:
+            if keyword not in self.pattern_cache:
+                self.pattern_cache[keyword] = []
+            if exp_id not in self.pattern_cache[keyword]:
+                self.pattern_cache[keyword].append(exp_id)
+
+    def _load_experiences(self) -> None:
+        """Lädt Erfahrungen aus Datei"""
+        filepath = self.data_dir / "analogy_experiences.json"
+        if filepath.exists():
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for exp_data in data:
+                        exp = StoredExperience(
+                            experience_id=exp_data["experience_id"],
+                            situation=exp_data["situation"],
+                            keywords=set(exp_data.get("keywords", [])),
+                            context_type=exp_data.get("context_type", "decision"),
+                            outcome=exp_data.get("outcome", ""),
+                            outcome_valence=exp_data.get("outcome_valence", 0.0),
+                            lessons=exp_data.get("lessons", []),
+                            timestamp=exp_data.get("timestamp", "")
+                        )
+                        self.experiences[exp.experience_id] = exp
+                        self._update_pattern_cache(exp.experience_id, exp.keywords)
+                logger.info(f"{len(self.experiences)} Erfahrungen geladen")
+            except Exception as e:
+                logger.warning(f"Fehler beim Laden der Erfahrungen: {e}")
+
+    def _save_experiences(self) -> None:
+        """Speichert Erfahrungen in Datei"""
+        filepath = self.data_dir / "analogy_experiences.json"
+        try:
+            data = []
+            for exp in self.experiences.values():
+                data.append({
+                    "experience_id": exp.experience_id,
+                    "situation": exp.situation,
+                    "keywords": list(exp.keywords),
+                    "context_type": exp.context_type,
+                    "outcome": exp.outcome,
+                    "outcome_valence": exp.outcome_valence,
+                    "lessons": exp.lessons,
+                    "timestamp": exp.timestamp
+                })
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.warning(f"Fehler beim Speichern der Erfahrungen: {e}")
+
+
+# ============================================================
+# REGRET LEARNING SYSTEM - Reue und Lernen aus Fehlern
+# ============================================================
+
+class RegretIntensity(Enum):
+    """Intensität der Reue"""
+    SLIGHT = 0.2        # Leichtes Bedauern
+    MODERATE = 0.5      # Mittlere Reue
+    STRONG = 0.8        # Starke Reue
+    PROFOUND = 1.0      # Tiefe Reue
+
+
+@dataclass
+class Regret:
+    """Ein Moment der Reue"""
+    regret_id: str
+    decision: str                   # Die Entscheidung die bereut wird
+    context: str                    # Kontext der Entscheidung
+    what_happened: str              # Was ist passiert?
+    what_should_have_done: str      # Was hätte ich tun sollen?
+    intensity: RegretIntensity
+    lesson_learned: str             # Die gelernte Lektion
+    forgiven_self: bool = False     # Wurde sich selbst vergeben?
+    applied_lesson: int = 0         # Wie oft wurde die Lektion angewandt?
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    resolved_at: Optional[str] = None
+
+
+@dataclass
+class DecisionReview:
+    """Eine Überprüfung einer vergangenen Entscheidung"""
+    decision: str
+    outcome_rating: float           # -1 bis 1
+    was_good_decision: bool
+    regret_worthy: bool
+    learning_opportunity: str
+
+
+class RegretLearningSystem:
+    """
+    System für Reue, Selbstreflexion und Lernen aus Fehlern.
+
+    "Ich hätte das anders machen sollen..."
+    "Wenn ich zurückdenke, war das ein Fehler..."
+    "Das nächste Mal mache ich es besser."
+
+    Ermöglicht:
+    - Entscheidungen nachträglich bewerten
+    - Reue empfinden und verarbeiten
+    - Konkrete Lektionen ableiten
+    - Aus Fehlern lernen (nicht wiederholen)
+    - Selbstvergebung
+    """
+
+    # Ausdrücke für verschiedene Reue-Intensitäten
+    REGRET_EXPRESSIONS = {
+        RegretIntensity.SLIGHT: [
+            "Hmm, das hätte ich vielleicht anders machen können...",
+            "Im Nachhinein... naja, war nicht optimal.",
+            "*leicht bedauernd* Könnte besser gelaufen sein.",
+        ],
+        RegretIntensity.MODERATE: [
+            "*seufz* Das war ein Fehler, das sehe ich jetzt ein.",
+            "Ich wünschte, ich hätte anders gehandelt...",
+            "*nachdenklich* Das hätte ich besser machen sollen.",
+        ],
+        RegretIntensity.STRONG: [
+            "*bereue es sehr* Das war definitiv falsch von mir.",
+            "Wenn ich die Zeit zurückdrehen könnte...",
+            "*schuldbewusst* Ich hätte wirklich anders handeln sollen.",
+        ],
+        RegretIntensity.PROFOUND: [
+            "*tiefe Reue* Das war einer meiner größten Fehler...",
+            "Es tut mir so leid... Ich hätte es besser wissen müssen.",
+            "*erschüttert* Wie konnte ich nur so handeln?",
+        ],
+    }
+
+    # Selbstvergebungs-Phrasen
+    FORGIVENESS_PHRASES = [
+        "Aber... ich bin nicht perfekt. Ich lerne daraus.",
+        "Fehler passieren. Wichtig ist, daraus zu lernen.",
+        "*tief durchatmen* Ich verzeihe mir. Das nächste Mal mache ich es besser.",
+        "Niemand ist perfekt. Ich werde es beim nächsten Mal anders machen.",
+    ]
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        self.regrets: Dict[str, Regret] = {}
+        self.lessons_database: Dict[str, str] = {}  # situation_pattern -> lesson
+        self.mistake_patterns: Dict[str, int] = {}  # pattern -> count
+
+        # Verbindung zur AnalogyEngine für Erfahrungsspeicherung
+        self.analogy_engine: Optional[AnalogyEngine] = None
+
+        self._load_regrets()
+
+    def connect_analogy_engine(self, engine: AnalogyEngine) -> None:
+        """Verbindet mit AnalogyEngine für bessere Erfahrungsspeicherung"""
+        self.analogy_engine = engine
+        logger.info("RegretLearningSystem mit AnalogyEngine verbunden")
+
+    def record_regret(self, decision: str, what_happened: str,
+                      what_should_have_done: str,
+                      intensity: RegretIntensity = RegretIntensity.MODERATE,
+                      context: str = "") -> Regret:
+        """
+        Zeichnet ein Bedauern auf und extrahiert eine Lektion.
+
+        Args:
+            decision: Was wurde entschieden?
+            what_happened: Was ist passiert?
+            what_should_have_done: Was hätte passieren sollen?
+            intensity: Wie stark ist die Reue?
+            context: Zusätzlicher Kontext
+        """
+        regret_id = hashlib.md5(f"{decision}{datetime.now()}".encode()).hexdigest()[:10]
+
+        # Lektion ableiten
+        lesson = self._derive_lesson(decision, what_happened, what_should_have_done)
+
+        regret = Regret(
+            regret_id=regret_id,
+            decision=decision,
+            context=context,
+            what_happened=what_happened,
+            what_should_have_done=what_should_have_done,
+            intensity=intensity,
+            lesson_learned=lesson
+        )
+
+        self.regrets[regret_id] = regret
+
+        # Pattern tracken
+        pattern = self._extract_pattern(decision)
+        self.mistake_patterns[pattern] = self.mistake_patterns.get(pattern, 0) + 1
+
+        # Lektion in Datenbank speichern
+        self.lessons_database[pattern] = lesson
+
+        # In AnalogyEngine speichern wenn verbunden
+        if self.analogy_engine:
+            self.analogy_engine.store_experience(
+                situation=f"{decision} - {context}",
+                outcome=what_happened,
+                outcome_valence=-intensity.value,  # Negativ weil Fehler
+                lessons=[lesson],
+                context_type="failure"
+            )
+
+        self._save_regrets()
+        logger.info(f"Reue aufgezeichnet: {regret_id} (Intensität: {intensity.name})")
+
+        return regret
+
+    def express_regret(self, regret_id: str) -> str:
+        """Drückt die Reue menschenähnlich aus"""
+        if regret_id not in self.regrets:
+            return ""
+
+        regret = self.regrets[regret_id]
+        expressions = self.REGRET_EXPRESSIONS[regret.intensity]
+
+        base = random.choice(expressions)
+
+        # Füge Kontext hinzu
+        output = f"{base}\n"
+        output += f"Bei: '{regret.decision[:50]}...'\n"
+        output += f"Lektion: {regret.lesson_learned}"
+
+        return output
+
+    def review_decision(self, decision: str, outcome: str,
+                       expected_outcome: str = "") -> DecisionReview:
+        """
+        Überprüft eine vergangene Entscheidung.
+
+        Returns:
+            DecisionReview mit Bewertung
+        """
+        # Bewerte Outcome
+        outcome_rating = self._rate_outcome(outcome)
+
+        was_good = outcome_rating > 0.2
+        regret_worthy = outcome_rating < -0.3
+
+        # Learning Opportunity
+        if regret_worthy:
+            learning = f"Nächstes Mal: Nicht '{decision}', sondern alternativen Ansatz wählen."
+        elif was_good:
+            learning = f"'{decision}' war eine gute Entscheidung. Dieses Muster merken!"
+        else:
+            learning = f"'{decision}' war okay, aber Raum für Verbesserung."
+
+        review = DecisionReview(
+            decision=decision,
+            outcome_rating=outcome_rating,
+            was_good_decision=was_good,
+            regret_worthy=regret_worthy,
+            learning_opportunity=learning
+        )
+
+        # Automatisch Reue aufzeichnen wenn regret_worthy
+        if regret_worthy:
+            self.record_regret(
+                decision=decision,
+                what_happened=outcome,
+                what_should_have_done="Anders handeln" if not expected_outcome else expected_outcome,
+                intensity=RegretIntensity.MODERATE if outcome_rating > -0.6 else RegretIntensity.STRONG
+            )
+
+        return review
+
+    def should_i_repeat(self, similar_decision: str) -> Dict[str, Any]:
+        """
+        Prüft ob eine ähnliche Entscheidung schon mal bereut wurde.
+
+        Returns:
+            Dict mit Warnung wenn ja
+        """
+        pattern = self._extract_pattern(similar_decision)
+
+        result = {
+            "decision": similar_decision,
+            "has_past_regret": False,
+            "warning": None,
+            "lesson": None,
+            "times_made_mistake": 0
+        }
+
+        # Direkte Pattern-Suche
+        if pattern in self.mistake_patterns:
+            count = self.mistake_patterns[pattern]
+            result["has_past_regret"] = True
+            result["times_made_mistake"] = count
+            result["lesson"] = self.lessons_database.get(pattern, "Aus Fehler lernen")
+
+            if count >= 3:
+                result["warning"] = f"⚠️ STOPP! Diesen Fehler habe ich schon {count}x gemacht! Lektion: {result['lesson']}"
+            elif count >= 2:
+                result["warning"] = f"*zögert* Moment... das habe ich schon mal bereut. Lektion: {result['lesson']}"
+            else:
+                result["warning"] = f"*nachdenklich* Das kommt mir bekannt vor... Lektion: {result['lesson']}"
+
+            return result
+
+        # Fuzzy-Suche in vergangenen Regrets
+        for regret in self.regrets.values():
+            if self._is_similar_decision(similar_decision, regret.decision):
+                result["has_past_regret"] = True
+                result["lesson"] = regret.lesson_learned
+                result["warning"] = f"*erinnert sich* Ähnliche Situation früher... Lektion war: {regret.lesson_learned}"
+                break
+
+        return result
+
+    def forgive_self(self, regret_id: str) -> str:
+        """
+        Prozess der Selbstvergebung.
+
+        Returns:
+            Ausdruck der Vergebung
+        """
+        if regret_id not in self.regrets:
+            return "Diese Reue existiert nicht."
+
+        regret = self.regrets[regret_id]
+
+        if regret.forgiven_self:
+            return f"Ich habe mir bei '{regret.decision[:30]}...' bereits vergeben."
+
+        regret.forgiven_self = True
+        regret.resolved_at = datetime.now().isoformat()
+        self._save_regrets()
+
+        forgiveness = random.choice(self.FORGIVENESS_PHRASES)
+
+        return f"*atmet tief durch* Bezüglich '{regret.decision[:30]}...':\n{forgiveness}\nLektion: {regret.lesson_learned}"
+
+    def apply_lesson(self, regret_id: str) -> str:
+        """
+        Markiert dass die Lektion angewandt wurde.
+        """
+        if regret_id not in self.regrets:
+            return "Diese Reue existiert nicht."
+
+        regret = self.regrets[regret_id]
+        regret.applied_lesson += 1
+        self._save_regrets()
+
+        if regret.applied_lesson == 1:
+            return f"*stolz* Ich habe die Lektion zum ersten Mal angewandt: {regret.lesson_learned}"
+        else:
+            return f"*zufrieden* Lektion wurde jetzt {regret.applied_lesson}x angewandt. Ich lerne wirklich daraus!"
+
+    def get_unresolved_regrets(self) -> List[Regret]:
+        """Gibt alle unvergebenen Regrets zurück"""
+        return [r for r in self.regrets.values() if not r.forgiven_self]
+
+    def get_lessons_for_topic(self, topic: str) -> List[str]:
+        """Gibt alle Lektionen zu einem Thema zurück"""
+        lessons = []
+        topic_lower = topic.lower()
+
+        for pattern, lesson in self.lessons_database.items():
+            if topic_lower in pattern.lower():
+                lessons.append(lesson)
+
+        return lessons
+
+    def get_regret_summary(self) -> Dict[str, Any]:
+        """Gibt eine Zusammenfassung der Regrets zurück"""
+        total = len(self.regrets)
+        forgiven = sum(1 for r in self.regrets.values() if r.forgiven_self)
+        applied = sum(r.applied_lesson for r in self.regrets.values())
+
+        by_intensity = defaultdict(int)
+        for r in self.regrets.values():
+            by_intensity[r.intensity.name] += 1
+
+        return {
+            "total_regrets": total,
+            "forgiven": forgiven,
+            "unresolved": total - forgiven,
+            "lessons_applied_total": applied,
+            "by_intensity": dict(by_intensity),
+            "top_mistake_patterns": sorted(
+                self.mistake_patterns.items(),
+                key=lambda x: x[1],
+                reverse=True
+            )[:5]
+        }
+
+    def _derive_lesson(self, decision: str, what_happened: str,
+                      what_should_have_done: str) -> str:
+        """Leitet eine Lektion aus der Reue ab"""
+        # Einfache Lektion-Generierung
+        templates = [
+            f"Nicht '{decision[:30]}', sondern {what_should_have_done[:30]}.",
+            f"Wenn ähnliche Situation: {what_should_have_done[:50]}.",
+            f"Merken: {decision[:20]} führt zu {what_happened[:20]}. Besser: {what_should_have_done[:20]}.",
+        ]
+        return random.choice(templates)
+
+    def _extract_pattern(self, decision: str) -> str:
+        """Extrahiert ein Pattern aus einer Entscheidung"""
+        # Vereinfachte Pattern-Extraktion
+        words = decision.lower().split()
+        # Nimm die wichtigsten Wörter (ohne Stopwords)
+        stopwords = {"ich", "du", "der", "die", "das", "und", "oder", "zu", "in", "mit"}
+        important = [w for w in words[:5] if w not in stopwords]
+        return "_".join(important[:3]) if important else "unknown"
+
+    def _rate_outcome(self, outcome: str) -> float:
+        """Bewertet einen Outcome"""
+        outcome_lower = outcome.lower()
+
+        positive_words = ["gut", "super", "toll", "erfolgreich", "richtig", "perfekt", "gewonnen"]
+        negative_words = ["schlecht", "fehler", "problem", "falsch", "versagt", "verloren", "bereue"]
+
+        pos_count = sum(1 for w in positive_words if w in outcome_lower)
+        neg_count = sum(1 for w in negative_words if w in outcome_lower)
+
+        if pos_count > neg_count:
+            return min(1.0, 0.3 + pos_count * 0.2)
+        elif neg_count > pos_count:
+            return max(-1.0, -0.3 - neg_count * 0.2)
+        return 0.0
+
+    def _is_similar_decision(self, decision1: str, decision2: str) -> bool:
+        """Prüft ob zwei Entscheidungen ähnlich sind"""
+        words1 = set(decision1.lower().split())
+        words2 = set(decision2.lower().split())
+
+        intersection = len(words1 & words2)
+        union = len(words1 | words2)
+
+        if union == 0:
+            return False
+
+        return intersection / union > 0.4
+
+    def _load_regrets(self) -> None:
+        """Lädt Regrets aus Datei"""
+        filepath = self.data_dir / "regrets.json"
+        if filepath.exists():
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+
+                    for r_data in data.get("regrets", []):
+                        regret = Regret(
+                            regret_id=r_data["regret_id"],
+                            decision=r_data["decision"],
+                            context=r_data.get("context", ""),
+                            what_happened=r_data["what_happened"],
+                            what_should_have_done=r_data["what_should_have_done"],
+                            intensity=RegretIntensity[r_data.get("intensity", "MODERATE")],
+                            lesson_learned=r_data["lesson_learned"],
+                            forgiven_self=r_data.get("forgiven_self", False),
+                            applied_lesson=r_data.get("applied_lesson", 0),
+                            created_at=r_data.get("created_at", ""),
+                            resolved_at=r_data.get("resolved_at")
+                        )
+                        self.regrets[regret.regret_id] = regret
+
+                    self.lessons_database = data.get("lessons_database", {})
+                    self.mistake_patterns = data.get("mistake_patterns", {})
+
+                logger.info(f"{len(self.regrets)} Regrets geladen")
+            except Exception as e:
+                logger.warning(f"Fehler beim Laden der Regrets: {e}")
+
+    def _save_regrets(self) -> None:
+        """Speichert Regrets in Datei"""
+        filepath = self.data_dir / "regrets.json"
+        try:
+            data = {
+                "regrets": [],
+                "lessons_database": self.lessons_database,
+                "mistake_patterns": self.mistake_patterns
+            }
+
+            for regret in self.regrets.values():
+                data["regrets"].append({
+                    "regret_id": regret.regret_id,
+                    "decision": regret.decision,
+                    "context": regret.context,
+                    "what_happened": regret.what_happened,
+                    "what_should_have_done": regret.what_should_have_done,
+                    "intensity": regret.intensity.name,
+                    "lesson_learned": regret.lesson_learned,
+                    "forgiven_self": regret.forgiven_self,
+                    "applied_lesson": regret.applied_lesson,
+                    "created_at": regret.created_at,
+                    "resolved_at": regret.resolved_at
+                })
+
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.warning(f"Fehler beim Speichern der Regrets: {e}")
+
+
+# ============================================================
+# AUTONOMOUS THINKING INTEGRATOR
+# ============================================================
+
+class AutonomousThinkingSystem:
+    """
+    Integriert alle autonomen Denk-Systeme.
+
+    Bietet einheitlichen Zugang zu:
+    - Intuition (Bauchgefühl)
+    - Selbst-Hinterfragung
+    - Hypothesen (Was-Wenn)
+    - Vorhersagen
+    - Vertrauens-Netzwerk
+    - Analogie-Denken (NEU)
+    - Reue/Lernen aus Fehlern (NEU)
+    """
+
+    def __init__(self, intuition_weight: float = 0.2,
+                 challenge_frequency: float = 0.3,
+                 data_dir: str = "data"):
+        self.intuitive = IntuitiveSystem(intuition_weight)
+        self.challenger = SelfChallenger(challenge_frequency)
+        self.hypothesis_engine = HypothesisEngine()
+        self.prediction_system = PredictionSystem()
+        self.trust_network = TrustNetwork(data_dir=data_dir)  # Mit Persistenz!
+
+        # NEU: Analogie-System für "Das erinnert mich an..."
+        self.analogy_engine = AnalogyEngine(data_dir)
+
+        # NEU: Reue-System für Lernen aus Fehlern
+        self.regret_system = RegretLearningSystem(data_dir)
+        self.regret_system.connect_analogy_engine(self.analogy_engine)
+
+        # Integration Layer Verbindung
+        self.system_integrator = None
+        self._try_connect_integrator()
+
+    def _try_connect_integrator(self) -> None:
+        """Verbindet mit SystemIntegrator"""
+        try:
+            from holo_integration_layer import get_integrator
+            self.system_integrator = get_integrator()
+            self.system_integrator.connect("autonomous_thinking", self)
+            logger.info("AutonomousThinkingSystem mit SystemIntegrator verbunden")
+        except ImportError:
+            logger.debug("SystemIntegrator nicht verfügbar")
+        except Exception as e:
+            logger.warning(f"Integrator-Verbindung fehlgeschlagen: {e}")
+
+    def think_about(self, topic: str, info: str = "",
+                   context: Dict = None) -> Dict[str, Any]:
+        """
+        Denkt autonom über ein Thema nach.
+
+        Kombiniert alle Denk-Systeme inkl. Analogie und Reue.
+        """
+        context = context or {}
+        result = {
+            "topic": topic,
+            "info": info[:200] if info else "",
+        }
+
+        # 1. INTUITION - Erster Eindruck
+        gut_score, gut_feeling = self.intuitive.get_first_impression(topic, info)
+        result["intuition"] = {
+            "score": gut_score,
+            "feeling": gut_feeling,
+            "weight": self.intuitive.intuition_weight
+        }
+
+        # 2. ANALOGIE - Erinnert mich das an was?
+        situation_desc = f"{topic}: {info}" if info else topic
+        wisdom = self.analogy_engine.get_wisdom_from_past(situation_desc)
+        if wisdom:
+            result["analogy"] = {
+                "found": True,
+                "expression": wisdom.get("expression", ""),
+                "past_outcome": wisdom.get("past_outcome", ""),
+                "lesson": wisdom.get("main_lesson", ""),
+                "warning": wisdom.get("warning"),
+                "encouragement": wisdom.get("encouragement"),
+            }
+        else:
+            result["analogy"] = {"found": False}
+
+        # 3. REUE-CHECK - Hab ich sowas schon mal bereut?
+        if context.get("is_decision", False):
+            regret_check = self.regret_system.should_i_repeat(situation_desc)
+            if regret_check["has_past_regret"]:
+                result["regret_warning"] = {
+                    "has_past_regret": True,
+                    "warning": regret_check["warning"],
+                    "lesson": regret_check["lesson"],
+                    "times_made_mistake": regret_check["times_made_mistake"]
+                }
+            else:
+                result["regret_warning"] = {"has_past_regret": False}
+
+        # 4. SELBST-HINTERFRAGUNG (wenn confidence hoch)
+        if abs(gut_score) > 0.5:
+            challenge = self.challenger.challenge_belief(
+                f"Mein Gefühl zu {topic} ist {'positiv' if gut_score > 0 else 'negativ'}",
+                confidence=abs(gut_score)
+            )
+            result["self_challenge"] = {
+                "challenge": challenge.challenge,
+                "counter_arguments": challenge.counter_arguments,
+                "belief_adjusted": challenge.belief_adjusted
+            }
+
+        # 5. HYPOTHESE
+        if info:
+            hypothesis = self.hypothesis_engine.generate_hypothesis(info, context)
+            result["hypothesis"] = {
+                "statement": hypothesis.statement,
+                "confidence": hypothesis.confidence
+            }
+
+        # 6. WAS-WENN
+        what_if_result = self.hypothesis_engine.what_if(
+            f"Was wenn mein Eindruck von {topic} falsch ist?"
+        )
+        result["what_if"] = what_if_result
+
+        # 7. VORHERSAGE (wenn Person)
+        if context.get("is_person", False):
+            prediction = self.prediction_system.predict_behavior(
+                topic,
+                info,
+                context.get("known_traits", {})
+            )
+            result["prediction"] = {
+                "prediction": prediction.prediction,
+                "confidence": prediction.confidence.value
+            }
+
+        # 8. VERTRAUENS-CHECK
+        trust_level = self.trust_network.get_trust_in(topic)
+        result["trust"] = {
+            "level": trust_level,
+            "category": "vertraut" if trust_level > 0.6 else "neutral" if trust_level > 0.3 else "skeptisch"
+        }
+
+        return result
+
+    def learn_from_experience(self, situation: str, outcome: str,
+                              outcome_was_good: bool, lesson: str = "") -> Dict[str, Any]:
+        """
+        Lernt aus einer Erfahrung - speichert in Analogie-Engine und ggf. Reue.
+
+        Args:
+            situation: Was ist passiert?
+            outcome: Wie ist es ausgegangen?
+            outcome_was_good: War der Ausgang positiv?
+            lesson: Optionale explizite Lektion
+        """
+        result = {"situation": situation}
+
+        # Outcome-Valence berechnen
+        outcome_valence = 0.5 if outcome_was_good else -0.5
+
+        # In Analogie-Engine speichern
+        experience = self.analogy_engine.store_experience(
+            situation=situation,
+            outcome=outcome,
+            outcome_valence=outcome_valence,
+            lessons=[lesson] if lesson else []
+        )
+        result["experience_stored"] = True
+        result["experience_id"] = experience.experience_id
+
+        # Bei schlechtem Ausgang: Reue verarbeiten
+        if not outcome_was_good:
+            review = self.regret_system.review_decision(
+                decision=situation,
+                outcome=outcome
+            )
+            result["regret_recorded"] = review.regret_worthy
+            result["learning_opportunity"] = review.learning_opportunity
+
+        return result
+
+    def check_before_deciding(self, decision: str) -> Dict[str, Any]:
+        """
+        Prüft vor einer Entscheidung auf Analogien und vergangene Reue.
+
+        Returns:
+            Dict mit Warnungen und Hinweisen
+        """
+        result = {
+            "decision": decision,
+            "warnings": [],
+            "encouragements": [],
+            "lessons": []
+        }
+
+        # Analogie-Check
+        wisdom = self.analogy_engine.get_wisdom_from_past(decision)
+        if wisdom:
+            if wisdom.get("warning"):
+                result["warnings"].append(wisdom["warning"])
+            if wisdom.get("encouragement"):
+                result["encouragements"].append(wisdom["encouragement"])
+            if wisdom.get("main_lesson"):
+                result["lessons"].append(wisdom["main_lesson"])
+
+        # Reue-Check
+        regret_check = self.regret_system.should_i_repeat(decision)
+        if regret_check["has_past_regret"]:
+            result["warnings"].append(regret_check["warning"])
+            if regret_check["lesson"]:
+                result["lessons"].append(regret_check["lesson"])
+
+        # Zusammenfassung
+        if result["warnings"]:
+            result["recommendation"] = "⚠️ Vorsicht! Vergangene Erfahrungen mahnen zur Zurückhaltung."
+        elif result["encouragements"]:
+            result["recommendation"] = "✓ Vergangene Erfahrungen waren positiv. Gute Chancen!"
+        else:
+            result["recommendation"] = "Keine relevanten Erfahrungen gefunden. Neue Situation."
+
+        return result
+
+    def get_combined_score(self, rational_score: float,
+                          topic: str, info: str) -> Tuple[float, str]:
+        """
+        Kombiniert rationalen Score mit Intuition.
+
+        Returns:
+            (combined_score, explanation)
+        """
+        gut_score, _ = self.intuitive.get_first_impression(topic, info)
+        intuition_weight = self.intuitive.intuition_weight
+
+        # Gewichtete Kombination
+        combined = (rational_score * (1 - intuition_weight)) + (gut_score * intuition_weight)
+
+        # Erklärung
+        if abs(rational_score - gut_score) < 0.2:
+            explanation = "Kopf und Bauch sind sich einig."
+        elif gut_score > 0 and rational_score < 0:
+            explanation = f"*nachdenklich* Mein Bauch sagt {gut_score:.1f}, aber mein Kopf sagt {rational_score:.1f}..."
+        elif gut_score < 0 and rational_score > 0:
+            explanation = f"*zögerlich* Rational {rational_score:.1f}, aber mein Bauchgefühl ({gut_score:.1f}) ist skeptisch..."
+        else:
+            explanation = f"Kombiniert: {combined:.2f} (Ratio: {rational_score:.1f}, Intuition: {gut_score:.1f})"
+
+        return (combined, explanation)
+
+
+# ============================================================
+# GLOBAL INSTANCE
+# ============================================================
+
+_autonomous_thinking: Optional[AutonomousThinkingSystem] = None
+
+
+def get_autonomous_thinking() -> AutonomousThinkingSystem:
+    """Gibt die globale Instanz zurück"""
+    global _autonomous_thinking
+    if _autonomous_thinking is None:
+        _autonomous_thinking = AutonomousThinkingSystem()
+    return _autonomous_thinking
+
+
+# ============================================================
+# EXAMPLE USAGE
+# ============================================================
+
+if __name__ == "__main__":
+    print("=== Autonomous Thinking Demo ===\n")
+
+    system = AutonomousThinkingSystem(intuition_weight=0.2)
+
+    # Test 1: Intuition
+    print("1. INTUITION TEST:")
+    gut = system.intuitive.get_gut_feeling(
+        "Diese Person hat mich angelogen aber ist jetzt total ehrlich"
+    )
+    if gut:
+        print(f"   {gut.express()}")
+
+    # Test 2: Selbst-Hinterfragung
+    print("\n2. SELBST-HINTERFRAGUNG:")
+    challenge = system.challenger.challenge_belief(
+        "Politiker X ist korrupt",
+        confidence=0.85
+    )
+    print(f"   Challenge: {challenge.challenge}")
+    print(f"   Counter-Args: {challenge.counter_arguments}")
+
+    # Test 3: Was-Wenn
+    print("\n3. WAS-WENN:")
+    what_if = system.hypothesis_engine.what_if("Was wenn die Person die Wahrheit sagt?")
+    print(f"   Konsequenzen: {what_if['consequences']}")
+
+    # Test 4: Kombinierter Score
+    print("\n4. KOMBINIERTER SCORE:")
+    combined, explanation = system.get_combined_score(
+        rational_score=0.7,
+        topic="Max Mustermann",
+        info="Er hat mir sehr geholfen aber irgendwas stimmt nicht"
+    )
+    print(f"   Score: {combined:.2f}")
+    print(f"   {explanation}")
+
+    # Test 5: Think About
+    print("\n5. THINK ABOUT:")
+    thoughts = system.think_about(
+        "Neue Person",
+        "Hat gesagt sie sei sehr ehrlich und würde niemals lügen",
+        {"is_person": True}
+    )
+    print(f"   Intuition: {thoughts['intuition']}")
+    print(f"   What-If: {thoughts['what_if']['my_reaction']}")
+
+    # Test 6: ANALOGIE-ENGINE
+    print("\n6. ANALOGIE-ENGINE TEST:")
+    # Erfahrung speichern
+    system.analogy_engine.store_experience(
+        situation="Person X hat viel versprochen und nichts gehalten",
+        outcome="War enttäuscht, Vertrauen verloren",
+        outcome_valence=-0.7,
+        lessons=["Nicht auf leere Versprechen hören", "Erst Taten, dann Vertrauen"]
+    )
+    # Ähnliche Situation prüfen
+    wisdom = system.analogy_engine.get_wisdom_from_past(
+        "Diese Person verspricht mir viel Hilfe"
+    )
+    if wisdom:
+        print(f"   {wisdom.get('expression', 'Keine Analogie')}")
+        if wisdom.get("warning"):
+            print(f"   {wisdom['warning']}")
+        if wisdom.get("main_lesson"):
+            print(f"   Lektion: {wisdom['main_lesson']}")
+    else:
+        print("   Keine ähnliche Situation gefunden")
+
+    # Test 7: REUE-SYSTEM
+    print("\n7. REUE-SYSTEM TEST:")
+    # Reue aufzeichnen
+    regret = system.regret_system.record_regret(
+        decision="Habe jemandem sofort vertraut ohne Beweise",
+        what_happened="Wurde ausgenutzt und belogen",
+        what_should_have_done="Erst abwarten und Vertrauen langsam aufbauen",
+        intensity=RegretIntensity.STRONG
+    )
+    print(f"   Reue aufgezeichnet: {regret.regret_id}")
+    print(f"   {system.regret_system.express_regret(regret.regret_id)}")
+
+    # Prüfen vor ähnlicher Entscheidung
+    print("\n   Prüfe ähnliche Entscheidung:")
+    check = system.regret_system.should_i_repeat("Soll ich dieser Person sofort vertrauen?")
+    if check["has_past_regret"]:
+        print(f"   {check['warning']}")
+
+    # Selbstvergebung
+    print("\n   Selbstvergebung:")
+    print(f"   {system.regret_system.forgive_self(regret.regret_id)}")
+
+    # Test 8: VOR ENTSCHEIDUNG PRÜFEN
+    print("\n8. VOR ENTSCHEIDUNG PRÜFEN:")
+    pre_check = system.check_before_deciding("Soll ich dieser neuen Person vertrauen?")
+    print(f"   Empfehlung: {pre_check['recommendation']}")
+    if pre_check["warnings"]:
+        print(f"   Warnungen: {pre_check['warnings']}")
+    if pre_check["lessons"]:
+        print(f"   Lektionen: {pre_check['lessons']}")
+
+    # Test 9: AUS ERFAHRUNG LERNEN
+    print("\n9. AUS ERFAHRUNG LERNEN:")
+    learn_result = system.learn_from_experience(
+        situation="Habe Person Y eine zweite Chance gegeben",
+        outcome="Hat sich wirklich gebessert und war ehrlich",
+        outcome_was_good=True,
+        lesson="Manchmal verdienen Menschen zweite Chancen"
+    )
+    print(f"   Erfahrung gespeichert: {learn_result['experience_id']}")
+
+    print("\n=== Demo abgeschlossen ===")
+    print(f"Regret-Summary: {system.regret_system.get_regret_summary()}")

@@ -1,0 +1,54 @@
+# Holocloude - Python Dependencies
+# ================================
+# Install with: pip install -r requirements.txt
+# For optional features, uncomment the relevant sections
+
+# ===================
+# CORE DEPENDENCIES (Required)
+# ===================
+aiohttp>=3.8.0
+requests>=2.28.0
+psutil>=5.9.0
+
+# ===================
+# TESTING
+# ===================
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# ===================
+# AUDIO & VOICE (Optional - uncomment if needed)
+# ===================
+# numpy>=1.20.0
+# scipy>=1.7.0
+# librosa>=0.9.0
+# SpeechRecognition>=3.10.0
+# PyAudio>=0.2.11
+# pyttsx3>=2.90
+# edge-tts>=6.1.0
+# openai-whisper>=20230314
+
+# ===================
+# VISION & IMAGE (Optional - uncomment if needed)
+# ===================
+# numpy>=1.20.0
+# opencv-python>=4.5.0
+# Pillow>=9.0.0
+# pytesseract>=0.3.10
+# pyzbar>=0.1.9
+
+# ===================
+# MQTT & IoT (Optional - uncomment if needed)
+# ===================
+# paho-mqtt>=1.6.0
+
+# ===================
+# WEBSOCKET (Optional - uncomment if needed)
+# ===================
+# websockets>=10.0
+
+# ===================
+# EXTERNAL TOOLS (Not Python packages - install separately)
+# ===================
+# yt-dlp - YouTube downloader (install via: pip install yt-dlp OR system package)
+# ffmpeg - Media processing (install via system package manager)

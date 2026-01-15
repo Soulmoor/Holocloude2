@@ -1,0 +1,31 @@
+{
+  "host": "192.168.178.28",
+  "port": 8188,
+  "use_https": false,
+  "timeout": 180,
+  "save_locally": true,
+  "output_dir": "outputs/comfyui",
+
+  "default_checkpoint": "pornmasterPro_noob.safetensors",
+  "default_vae": null,
+
+  "loras": [],
+
+  "generation_defaults": {
+    "width": 1688,
+    "height": 944,
+    "steps": 22,
+    "cfg": 2.4,
+    "sampler": "dpmpp_2s_ancestral_cfg_pp",
+    "scheduler": "karras"
+  },
+
+  "quality_prompt_prefix": "(masterpiece, amazing quality, best quality, ultra-detailed, 8K, illustrating, CG, detailed background) very aesthetic, high contrast, high texture, depth of field, detailed illustration, cinematic, absolutely eye-catching, intricate cinematic background, glossy textures, particles",
+
+  "quality_negative": "ugly, blurry, low quality, deformed, bad anatomy, bad hands, missing fingers, extra fingers, watermark, signature, text, logo, cropped, out of frame, worst quality, low resolution, jpeg artifacts",
+
+  "style_checkpoints": {},
+  "style_loras": {
+    "holo": []
+  }
+}

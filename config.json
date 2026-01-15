@@ -1,0 +1,120 @@
+{
+    "_comment": "Zentrale Konfiguration fuer Holocloude - NICHT in Git committen wenn sensible Daten!",
+    "_version": "1.0.0",
+
+    "network": {
+        "ollama": {
+            "host": "http://192.168.178.42:11434",
+            "local_host": "http://192.168.178.42:11434",
+            "remote_host": "http://192.168.178.42:11434"
+        },
+        "mqtt": {
+            "broker_ip": "192.168.178.99",
+            "broker_port": 1883,
+            "username": "",
+            "password": ""
+        },
+        "home_assistant": {
+            "api_url": "http://192.168.178.99:8123/api",
+            "token": ""
+        },
+        "nas": {
+            "ip": "192.168.178.40",
+            "mac": "",
+            "ssh_user": "admin",
+            "ssh_port": 22
+        },
+        "comfyui": {
+            "host": "192.168.1.100",
+            "port": 8188
+        }
+    },
+
+    "devices": {
+        "tracked_devices": {
+            "tv_wohnzimmer": "192.168.178.29",
+            "workstation_pc": "192.168.178.31",
+            "tablet_kira": "192.168.178.35",
+            "kira_phone": "192.168.178.34"
+        },
+        "wake_detection_devices": ["tv_wohnzimmer", "workstation_pc"],
+        "media_sources": [
+            {"name": "nas", "display_name": "NAS", "ip": "192.168.178.100", "type": "nas"},
+            {"name": "mini-pc", "display_name": "Mini-PC", "ip": "192.168.178.102", "type": "pc"},
+            {"name": "pi", "display_name": "Raspberry Pi", "ip": "192.168.178.103", "type": "pi"}
+        ],
+        "rooms": {
+            "wohnzimmer": ["tv_wohnzimmer", "workstation_pc"],
+            "schlafzimmer": ["kira_phone", "tablet_kira"]
+        }
+    },
+
+    "llm": {
+        "local_model": "nemotron-3-nano:latest",
+        "remote_model": "nemotron-3-nano:latest",
+        "fallback_model": "nemotron-3-nano:latest",
+        "embedding_model": "nomic-embed-text",
+        "max_context_tokens": 8192,
+        "temperature": 0.7,
+        "timeout_seconds": 120
+    },
+
+    "behavior": {
+        "bedtime_reminder_hour": 23,
+        "wake_up_hour": 7,
+        "energy_save_start_hour": 23,
+        "energy_save_end_hour": 6
+    },
+
+    "watchlist": {
+        "news_topics": ["Russland", "Ukraine", "KI", "Klimawandel", "USA", "China", "Deutschland"],
+        "priority_sources": ["tagesschau", "zeit", "spiegel"]
+    },
+
+    "storage": {
+        "data_dir": "data",
+        "db_file": "holo_brain_v12.db",
+        "knowledge_db": "holo_knowledge.db",
+        "max_core_storage_gb": 4,
+        "max_knowledge_storage_gb": 10,
+        "cleanup_enabled": false,
+        "ram_cache_mb": 500,
+        "sd_storage_gb": 16
+    },
+
+    "logging": {
+        "level": "INFO",
+        "file": "logs/holocloude.log",
+        "max_size_mb": 10,
+        "backup_count": 5
+    },
+
+    "features": {
+        "enable_voice": true,
+        "enable_media_discovery": true,
+        "enable_proactive_messages": true,
+        "enable_autonomous_activity": true,
+        "enable_web_curiosity": true
+    },
+
+    "presence_rules": [
+        {
+            "name": "Gaming_Session",
+            "time_range": [18, 2],
+            "conditions": {"workstation_pc_online": true},
+            "result_zone": "wohnzimmer"
+        },
+        {
+            "name": "TV_Abend",
+            "time_range": [19, 24],
+            "conditions": {"tv_wohnzimmer_online": true},
+            "result_zone": "wohnzimmer"
+        },
+        {
+            "name": "Night_Mode",
+            "time_range": [22, 7],
+            "conditions": {"tv_wohnzimmer_online": false, "workstation_pc_online": false},
+            "result_zone": "schlafzimmer"
+        }
+    ]
+}
