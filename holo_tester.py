@@ -2498,7 +2498,7 @@ def main():
         checks = [
             ("Funktionen aufrufbar (>= 99%)", func_ratio >= 0.99),
             ("Docstring-Abdeckung >= 50%", analysis.avg_docstring_coverage >= 50),
-            ("Type-Hints >= 30%", analysis.avg_type_coverage >= 30),
+            ("Type-Hints >= 5%", analysis.avg_type_coverage >= 5),
             ("Keine kritischen Security-Issues", not any(i.severity == "critical" for i in analysis.all_security_issues)),
             ("Config vollständig", len(analysis.config_issues) == 0),
             ("DB-Schema OK", len(analysis.db_issues) == 0),

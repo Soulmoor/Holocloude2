@@ -1,6 +1,6 @@
 {
     "_comment": "Zentrale Konfiguration fuer Holocloude - NICHT in Git committen wenn sensible Daten!",
-    "_version": "1.0.0",
+    "_version": "1.1.0",
 
     "network": {
         "ollama": {
@@ -12,22 +12,50 @@
             "broker_ip": "192.168.178.99",
             "broker_port": 1883,
             "username": "",
-            "password": ""
+            "password": "",
+            "base_topic": "holocloude",
+            "topic_prefix": "holo"
         },
         "home_assistant": {
             "api_url": "http://192.168.178.99:8123/api",
-            "token": ""
+            "token": "",
+            "api_token": "",
+            "weather_entity": "weather.home",
+            "calendar_entity": "calendar.personal"
         },
         "nas": {
             "ip": "192.168.178.40",
             "mac": "",
             "ssh_user": "admin",
-            "ssh_port": 22
+            "ssh_port": 22,
+            "path": "/volume1/media",
+            "list_subfolders": true
         },
         "comfyui": {
             "host": "192.168.1.100",
             "port": 8188
         }
+    },
+
+    "health_checks": {
+        "health_timeout_ollama": 10,
+        "health_timeout_mqtt": 5,
+        "health_timeout_ha": 10,
+        "health_timeout_nas": 15,
+        "health_timeout_db": 5
+    },
+
+    "system_monitoring": {
+        "cpu_busy_threshold": 80,
+        "memory_warning_mb": 500,
+        "memory_critical_mb": 200,
+        "disk_warning_percent": 80,
+        "disk_critical_percent": 95,
+        "include_cpu": true,
+        "include_ram": true,
+        "include_disk": true,
+        "include_temperature": true,
+        "include_size": true
     },
 
     "devices": {
@@ -46,6 +74,18 @@
         "rooms": {
             "wohnzimmer": ["tv_wohnzimmer", "workstation_pc"],
             "schlafzimmer": ["kira_phone", "tablet_kira"]
+        },
+        "device_defaults": {
+            "icon": "mdi:devices",
+            "type": "generic",
+            "hostname": "",
+            "location": "unknown",
+            "display_name": "",
+            "description": "",
+            "role": "secondary",
+            "idle_timeout_minutes": 30,
+            "can_wake": false,
+            "can_sleep": false
         }
     },
 
@@ -63,7 +103,35 @@
         "bedtime_reminder_hour": 23,
         "wake_up_hour": 7,
         "energy_save_start_hour": 23,
-        "energy_save_end_hour": 6
+        "energy_save_end_hour": 6,
+        "mood_tendency": "neutral",
+        "response_type": "balanced",
+        "quick_response": false,
+        "energy_saving": false,
+        "energy_mult": 1.0,
+        "stability": 0.8,
+        "responsiveness": 0.7,
+        "cognitive_load": 0.5,
+        "user_comfort": 0.8
+    },
+
+    "activities": {
+        "defaults": {
+            "weight": 1.0,
+            "time_required": 5,
+            "suitable_for": ["all"],
+            "triggers": [],
+            "steps": [],
+            "keywords": [],
+            "actors": [],
+            "capabilities": [],
+            "patterns": [],
+            "hours": [0, 24],
+            "optimal": "anytime",
+            "impulse": 0.5,
+            "learning": true,
+            "prompt": ""
+        }
     },
 
     "watchlist": {
