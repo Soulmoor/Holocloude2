@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v4.0                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v5.0                        ║
 ║                                                                              ║
 ║  INTELLIGENT - Versteht das Projekt:                                         ║
 ║    • Analysiert Modul-Zweck aus Namen und Docstrings                         ║
@@ -13,20 +13,26 @@
 ║    • Erkennt fehlende Funktionen basierend auf Konventionen                  ║
 ║    • Validiert Config gegen tatsächliche Nutzung                             ║
 ║                                                                              ║
-║  NEU in v4.0:                                                                ║
-║    • ECHTER Import-Test - Lädt jedes Modul wirklich                          ║
-║    • Redundanz-Erkennung - Findet doppelte Funktionen/Klassen                ║
-║    • Toter Code - Findet ungenutzte Funktionen                               ║
-║    • Syntax-Prüfung - Kompiliert jeden Modul-Code                            ║
-║    • Schnellstart-Modus - Prüft ob alles startet                             ║
+║  NEU in v5.0:                                                                ║
+║    • TIEFE IMPORT-ANALYSE - Verfolgt Import-Ketten                           ║
+║    • IMPORT-TRACE - Zeigt wer was importiert (--trace MODULE)                ║
+║    • VERFÜGBARKEITS-CHECK - Prüft ob importierte Items existieren            ║
+║    • IMPORT-REIHENFOLGE - Topologische Sortierung                            ║
+║    • KAPUTTE KETTEN - Findet unterbrochene Import-Pfade                      ║
+║                                                                              ║
+║  Bereits in v4.0:                                                            ║
+║    • Echter Import-Test, Redundanz-Erkennung, Toter Code                     ║
+║    • Syntax-Prüfung, Schnellstart-Modus                                      ║
 ║                                                                              ║
 ║  Verwendung:                                                                 ║
-║      python holo_tester.py                 # Intelligente Analyse            ║
-║      python holo_tester.py --quick         # Schneller Start-Check           ║
-║      python holo_tester.py --explain       # Erklärt was jedes Modul tut     ║
-║      python holo_tester.py --graph         # Zeigt Dependency-Graph          ║
-║      python holo_tester.py --problems      # Nur Probleme anzeigen           ║
-║      python holo_tester.py --redundancy    # Zeigt Redundanzen               ║
+║      python holo_tester.py                     # Intelligente Analyse        ║
+║      python holo_tester.py --quick             # Schneller Start-Check       ║
+║      python holo_tester.py --imports           # Import-Analyse              ║
+║      python holo_tester.py --trace holo_brain  # Verfolge Modul-Imports      ║
+║      python holo_tester.py --explain           # Erklärt Module              ║
+║      python holo_tester.py --graph             # Dependency-Graph            ║
+║      python holo_tester.py --problems          # Nur Probleme                ║
+║      python holo_tester.py --redundancy        # Redundanzen                 ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
@@ -128,6 +134,17 @@ class Issue:
 
 
 @dataclass
+class ImportedItem:
+    """Ein importiertes Element (Funktion, Klasse, Variable)"""
+    name: str
+    source_module: str
+    import_type: str  # "import", "from_import", "star_import"
+    exists: bool = False
+    is_callable: bool = False
+    actual_type: str = ""  # "function", "class", "module", "variable"
+
+
+@dataclass
 class ModuleAnalysis:
     """Tiefe Analyse eines Moduls"""
     name: str
@@ -175,6 +192,12 @@ class ModuleAnalysis:
     internal_calls: Set[str] = field(default_factory=set)  # Funktionen die intern aufgerufen werden
     potentially_unused: List[str] = field(default_factory=list)  # Evtl. ungenutzte Funktionen
 
+    # NEU: Import-Ketten Tracking
+    imported_items: List[ImportedItem] = field(default_factory=list)  # Was wird importiert
+    import_chain: List[str] = field(default_factory=list)  # Reihenfolge der Imports
+    failed_imports: List[Tuple[str, str]] = field(default_factory=list)  # (modul, fehler)
+    missing_imported_items: List[str] = field(default_factory=list)  # Items die nicht existieren
+
 
 @dataclass
 class ProjectAnalysis:
@@ -200,6 +223,11 @@ class ProjectAnalysis:
     # Import-Test Ergebnisse
     import_failures: List[Tuple[str, str]] = field(default_factory=list)  # (modul, error)
     import_successes: List[str] = field(default_factory=list)
+
+    # NEU: Import-Ketten Analyse
+    import_tree: Dict[str, List[str]] = field(default_factory=dict)  # modul -> [importiert von]
+    broken_import_chains: List[Tuple[str, str, str]] = field(default_factory=list)  # (modul, import, fehler)
+    missing_items_report: List[Tuple[str, str, str]] = field(default_factory=list)  # (modul, item, source)
 
 
 # =============================================================================
@@ -237,6 +265,12 @@ class IntelligentAnalyzer:
         self._find_redundancy()
         self._find_unused_code()
         self._real_import_test()
+
+        # NEU: Tiefe Import-Analyse nach dem Import-Test
+        self._deep_import_analysis()
+        self._verify_import_chains()
+        self._build_import_order()
+
         self._calculate_statistics()
 
         return self.analysis
@@ -810,6 +844,215 @@ class IntelligentAnalyzer:
                 ))
 
     # =========================================================================
+    # TIEFE IMPORT-ANALYSE
+    # =========================================================================
+
+    def _deep_import_analysis(self):
+        """Führt tiefe Import-Analyse durch: Verfolgt Ketten, prüft Verfügbarkeit"""
+        project_modules = set(self.analysis.modules.keys())
+        project_str = str(self.project_dir)
+
+        if project_str not in sys.path:
+            sys.path.insert(0, project_str)
+
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                continue
+
+            self._analyze_module_imports(name, module, project_modules)
+
+    def _analyze_module_imports(self, name: str, module: ModuleAnalysis, project_modules: Set[str]):
+        """Analysiert alle Imports eines Moduls im Detail"""
+        try:
+            source = module.path.read_text(encoding="utf-8", errors="ignore")
+            tree = ast.parse(source)
+        except Exception:
+            return
+
+        # Analysiere jeden Import-Statement
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    self._check_import(name, module, alias.name, None, "import")
+
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    for alias in node.names:
+                        import_name = alias.name
+                        if import_name == "*":
+                            self._check_star_import(name, module, node.module)
+                        else:
+                            self._check_import(name, module, node.module, import_name, "from_import")
+
+    def _check_import(self, module_name: str, module: ModuleAnalysis,
+                      source_module: str, item_name: Optional[str], import_type: str):
+        """Prüft einen einzelnen Import auf Verfügbarkeit"""
+        project_modules = set(self.analysis.modules.keys())
+        base_module = source_module.split(".")[0]
+
+        # Erstelle ImportedItem
+        imported_item = ImportedItem(
+            name=item_name or source_module,
+            source_module=source_module,
+            import_type=import_type
+        )
+
+        # Versuche zu importieren und zu prüfen
+        try:
+            # Stille Imports
+            old_stdout, old_stderr = sys.stdout, sys.stderr
+            sys.stdout, sys.stderr = StringIO(), StringIO()
+
+            try:
+                if base_module in project_modules:
+                    # Projekt-internes Modul
+                    project_module = self.analysis.modules.get(base_module)
+                    if project_module and project_module.import_ok:
+                        imported_item.exists = True
+
+                        # Prüfe ob spezifisches Item existiert
+                        if item_name:
+                            loaded_mod = sys.modules.get(base_module)
+                            if loaded_mod and hasattr(loaded_mod, item_name):
+                                imported_item.exists = True
+                                attr = getattr(loaded_mod, item_name)
+                                imported_item.is_callable = callable(attr)
+                                if isinstance(attr, type):
+                                    imported_item.actual_type = "class"
+                                elif callable(attr):
+                                    imported_item.actual_type = "function"
+                                else:
+                                    imported_item.actual_type = "variable"
+                            else:
+                                imported_item.exists = False
+                                module.missing_imported_items.append(f"{source_module}.{item_name}")
+                                self.analysis.missing_items_report.append(
+                                    (module_name, item_name, source_module)
+                                )
+                    else:
+                        # Source-Modul lädt nicht
+                        module.failed_imports.append((source_module, "Modul lädt nicht"))
+                        self.analysis.broken_import_chains.append(
+                            (module_name, source_module, "Basis-Modul fehlerhaft")
+                        )
+                else:
+                    # Externes Modul
+                    try:
+                        ext_mod = importlib.import_module(source_module)
+                        imported_item.exists = True
+
+                        if item_name:
+                            if hasattr(ext_mod, item_name):
+                                imported_item.exists = True
+                                attr = getattr(ext_mod, item_name)
+                                imported_item.is_callable = callable(attr)
+                            else:
+                                imported_item.exists = False
+                                module.missing_imported_items.append(f"{source_module}.{item_name}")
+
+                    except ImportError as e:
+                        imported_item.exists = False
+                        # Nur warnen bei Nicht-Standard-Modulen
+                        if base_module not in self.stdlib_modules:
+                            module.failed_imports.append((source_module, str(e)[:50]))
+
+            finally:
+                sys.stdout, sys.stderr = old_stdout, old_stderr
+
+        except Exception as e:
+            imported_item.exists = False
+
+        module.imported_items.append(imported_item)
+
+        # Baue Import-Baum
+        if source_module not in self.analysis.import_tree:
+            self.analysis.import_tree[source_module] = []
+        if module_name not in self.analysis.import_tree[source_module]:
+            self.analysis.import_tree[source_module].append(module_name)
+
+    def _check_star_import(self, module_name: str, module: ModuleAnalysis, source_module: str):
+        """Prüft einen Star-Import (from X import *)"""
+        imported_item = ImportedItem(
+            name="*",
+            source_module=source_module,
+            import_type="star_import"
+        )
+
+        project_modules = set(self.analysis.modules.keys())
+        base_module = source_module.split(".")[0]
+
+        if base_module in project_modules:
+            project_module = self.analysis.modules.get(base_module)
+            if project_module:
+                imported_item.exists = project_module.import_ok
+                if not project_module.import_ok:
+                    module.failed_imports.append((f"{source_module}.*", "Basis-Modul fehlerhaft"))
+        else:
+            try:
+                importlib.import_module(source_module)
+                imported_item.exists = True
+            except ImportError:
+                imported_item.exists = False
+
+        module.imported_items.append(imported_item)
+
+    def _verify_import_chains(self):
+        """Verifiziert dass Import-Ketten vollständig funktionieren"""
+        project_modules = set(self.analysis.modules.keys())
+
+        for name, module in self.analysis.modules.items():
+            if not module.import_ok:
+                continue
+
+            # Prüfe alle Projekt-internen Imports
+            for imp_module in module.uses_modules:
+                if imp_module in project_modules:
+                    dep_module = self.analysis.modules.get(imp_module)
+                    if dep_module and not dep_module.import_ok:
+                        # Abhängigkeit ist kaputt
+                        self.analysis.broken_import_chains.append(
+                            (name, imp_module, dep_module.import_error or "Import fehlerhaft")
+                        )
+                        module.issues.append(Issue(
+                            severity="warning",
+                            category="import_chain",
+                            module=name,
+                            message=f"Import-Kette unterbrochen: {name} -> {imp_module}",
+                            suggestion=f"Prüfe {imp_module}: {dep_module.import_error[:50] if dep_module.import_error else 'unbekannter Fehler'}"
+                        ))
+
+    def _build_import_order(self):
+        """Bestimmt die korrekte Import-Reihenfolge (topologische Sortierung)"""
+        # Kahn's Algorithmus für topologische Sortierung
+        in_degree = {name: 0 for name in self.analysis.modules}
+        project_modules = set(self.analysis.modules.keys())
+
+        for name, module in self.analysis.modules.items():
+            for dep in module.uses_modules:
+                if dep in project_modules:
+                    in_degree[name] += 1
+
+        # Starte mit Modulen ohne Abhängigkeiten
+        queue = [name for name, degree in in_degree.items() if degree == 0]
+        order = []
+
+        while queue:
+            current = queue.pop(0)
+            order.append(current)
+
+            # Reduziere in_degree für abhängige Module
+            for name, module in self.analysis.modules.items():
+                if current in module.uses_modules and current in project_modules:
+                    in_degree[name] -= 1
+                    if in_degree[name] == 0:
+                        queue.append(name)
+
+        # Speichere Import-Reihenfolge
+        for i, name in enumerate(order):
+            if name in self.analysis.modules:
+                self.analysis.modules[name].import_chain = order[:i]
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -1214,7 +1457,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude Intelligent System Tester v4.0 - Versteht und testet das Projekt"
+        description="Holocloude Intelligent System Tester v5.0 - Import-Ketten, Struktur-Analyse, echte Tests"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Mehr Details")
     parser.add_argument("--no-color", action="store_true", help="Keine Farben")
@@ -1223,6 +1466,8 @@ def main():
     parser.add_argument("--problems", action="store_true", help="Nur Probleme anzeigen")
     parser.add_argument("--graph", action="store_true", help="Zeigt Dependency-Graph")
     parser.add_argument("--redundancy", action="store_true", help="Zeigt Redundanzen und doppelten Code")
+    parser.add_argument("--imports", action="store_true", help="Zeigt Import-Ketten und -Abhängigkeiten")
+    parser.add_argument("--trace", type=str, metavar="MODULE", help="Verfolgt alle Imports eines bestimmten Moduls")
 
     args = parser.parse_args()
 
@@ -1231,7 +1476,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v4.0               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v5.0               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
@@ -1325,6 +1570,100 @@ def main():
 
         if not analysis.duplicate_functions and not multi_funcs and unused_total == 0:
             print(f"\n{Colors.GREEN}Keine signifikanten Redundanzen gefunden!{Colors.RESET}")
+
+        sys.exit(0)
+
+    # Imports-Modus: Zeigt Import-Ketten
+    if args.imports:
+        print()
+        print(f"{Colors.BOLD}IMPORT-ANALYSE:{Colors.RESET}")
+
+        # Zeige kaputte Import-Ketten
+        if analysis.broken_import_chains:
+            print(f"\n{Colors.RED}Unterbrochene Import-Ketten ({len(analysis.broken_import_chains)}):{Colors.RESET}")
+            for module, dep, error in analysis.broken_import_chains[:15]:
+                print(f"  {Colors.RED}✗ {module} → {dep}: {error[:50]}{Colors.RESET}")
+
+        # Zeige fehlende importierte Items
+        if analysis.missing_items_report:
+            print(f"\n{Colors.YELLOW}Fehlende importierte Items ({len(analysis.missing_items_report)}):{Colors.RESET}")
+            for module, item, source in analysis.missing_items_report[:15]:
+                print(f"  {Colors.YELLOW}⚠ {module}: '{item}' nicht in {source}{Colors.RESET}")
+
+        # Zeige meistgenutzte Module (Import-Baum)
+        if analysis.import_tree:
+            print(f"\n{Colors.CYAN}Meistgenutzte Module (wer importiert was):{Colors.RESET}")
+            sorted_imports = sorted(analysis.import_tree.items(), key=lambda x: len(x[1]), reverse=True)
+            for source, importers in sorted_imports[:15]:
+                if source.startswith("holo_"):
+                    print(f"  {Colors.CYAN}{source}{Colors.RESET} wird importiert von {len(importers)} Modulen")
+                    if len(importers) <= 5:
+                        print(f"      → {', '.join(importers)}")
+
+        # Statistik
+        total_imports = sum(len(m.imported_items) for m in analysis.modules.values())
+        failed_imports = sum(len(m.failed_imports) for m in analysis.modules.values())
+        missing_items = sum(len(m.missing_imported_items) for m in analysis.modules.values())
+
+        print(f"\n{Colors.BOLD}Statistik:{Colors.RESET}")
+        print(f"  Gesamt Imports: {total_imports}")
+        print(f"  Fehlgeschlagen: {failed_imports}")
+        print(f"  Fehlende Items: {missing_items}")
+
+        if failed_imports == 0 and missing_items == 0:
+            print(f"\n  {Colors.GREEN}✓ ALLE IMPORT-KETTEN INTAKT{Colors.RESET}")
+        else:
+            print(f"\n  {Colors.YELLOW}⚠ {failed_imports + missing_items} PROBLEME GEFUNDEN{Colors.RESET}")
+
+        sys.exit(0)
+
+    # Trace-Modus: Verfolgt Imports eines bestimmten Moduls
+    if args.trace:
+        module_name = args.trace
+        print()
+        print(f"{Colors.BOLD}IMPORT-TRACE für '{module_name}':{Colors.RESET}")
+
+        if module_name not in analysis.modules:
+            print(f"{Colors.RED}Modul '{module_name}' nicht gefunden!{Colors.RESET}")
+            print(f"Verfügbare Module: {', '.join(sorted(analysis.modules.keys())[:10])}...")
+            sys.exit(1)
+
+        module = analysis.modules[module_name]
+
+        # Zeige was dieses Modul importiert
+        print(f"\n{Colors.CYAN}Was '{module_name}' importiert:{Colors.RESET}")
+        if module.imported_items:
+            for item in module.imported_items:
+                status = f"{Colors.GREEN}✓{Colors.RESET}" if item.exists else f"{Colors.RED}✗{Colors.RESET}"
+                type_info = f" [{item.actual_type}]" if item.actual_type else ""
+                print(f"  {status} from {item.source_module} import {item.name}{type_info}")
+        else:
+            print(f"  {Colors.DIM}(keine Projekt-internen Imports gefunden){Colors.RESET}")
+
+        # Zeige wer dieses Modul importiert
+        print(f"\n{Colors.CYAN}Wer '{module_name}' importiert:{Colors.RESET}")
+        if module.used_by_modules:
+            for user in sorted(module.used_by_modules):
+                print(f"  ← {user}")
+        else:
+            print(f"  {Colors.DIM}(wird von keinem Modul importiert){Colors.RESET}")
+
+        # Zeige fehlgeschlagene Imports
+        if module.failed_imports:
+            print(f"\n{Colors.RED}Fehlgeschlagene Imports:{Colors.RESET}")
+            for imp, error in module.failed_imports:
+                print(f"  {Colors.RED}✗ {imp}: {error}{Colors.RESET}")
+
+        # Zeige fehlende Items
+        if module.missing_imported_items:
+            print(f"\n{Colors.YELLOW}Fehlende importierte Items:{Colors.RESET}")
+            for item in module.missing_imported_items:
+                print(f"  {Colors.YELLOW}⚠ {item}{Colors.RESET}")
+
+        # Zeige Import-Kette (Reihenfolge)
+        if module.import_chain:
+            print(f"\n{Colors.DIM}Import-Reihenfolge (muss vor {module_name} geladen sein):{Colors.RESET}")
+            print(f"  {' → '.join(module.import_chain[-5:])}{' → ...' if len(module.import_chain) > 5 else ''}")
 
         sys.exit(0)
 
