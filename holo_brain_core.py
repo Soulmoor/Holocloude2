@@ -44,9 +44,9 @@ class BrainConfig:
     HOLO_NAME = "Holo"
     HOLO_VERSION = "15"
 
-    # KI Backend
-    OLLAMA_HOST = "http://192.168.178.42:11434"  # Remote (Mini-PC)
-    LOCAL_HOST = "http://192.168.178.42:11434"   # Local (Pi)
+    # KI Backend (aus Umgebungsvariablen oder config.json)
+    OLLAMA_HOST = os.getenv("HOLO_LLM_REMOTE_HOST", "http://localhost:11434")
+    LOCAL_HOST = os.getenv("HOLO_LLM_LOCAL_HOST", "http://localhost:11434")
 
     TEMPERATURE = 0.3
     NUM_CTX = 8192

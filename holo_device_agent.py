@@ -62,13 +62,15 @@ CONFIG = {
     },
     
     # === MQTT ===
+    # WICHTIG: Credentials ueber Umgebungsvariablen setzen!
+    # HOLO_MQTT_BROKER, HOLO_MQTT_PORT, HOLO_MQTT_USER, HOLO_MQTT_PASSWORD
     "mqtt": {
         "enabled": True,
-        "broker_ip": "192.168.178.99",    # IP des MQTT Brokers
-        "broker_port": 1883,
-        "username": "kira",                # Falls Auth nötig
-        "password": "123",
-        "base_topic": "holo/devices/",     # Topic-Prefix
+        "broker_ip": os.getenv("HOLO_MQTT_BROKER", "localhost"),
+        "broker_port": int(os.getenv("HOLO_MQTT_PORT", "1883")),
+        "username": os.getenv("HOLO_MQTT_USER", ""),
+        "password": os.getenv("HOLO_MQTT_PASSWORD", ""),  # NIEMALS hardcoded!
+        "base_topic": "holo/devices/",
     },
     
     # === SYSTEM MONITORING ===
@@ -531,10 +533,11 @@ def setup_wizard():
     if not device_type:
         device_type = "pc"
     
-    # MQTT Broker
-    broker = input("\n4. MQTT Broker IP [192.168.178.99]: ").strip()
+    # MQTT Broker (Default aus Umgebungsvariable oder localhost)
+    default_broker = os.getenv("HOLO_MQTT_BROKER", "localhost")
+    broker = input(f"\n4. MQTT Broker IP [{default_broker}]: ").strip()
     if not broker:
-        broker = "192.168.178.99"
+        broker = default_broker
     
     # Generiere Config
     config = f'''

@@ -67,8 +67,8 @@ class VoiceConfig:
     
     # === REMOTE SERVER (EMPFOHLEN für Pi4) ===
     USE_REMOTE = True  # True = Mini-PC, False = Lokal
-    REMOTE_HOST = "192.168.178.42"  # Mini-PC IP
-    REMOTE_PORT = 5007
+    REMOTE_HOST = os.getenv("HOLO_VOICE_HOST", "localhost")  # Aus Umgebungsvariable
+    REMOTE_PORT = int(os.getenv("HOLO_VOICE_PORT", "5007"))
     REMOTE_TIMEOUT = 30  # Sekunden
     
     # Pfade

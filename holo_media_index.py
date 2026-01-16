@@ -103,12 +103,13 @@ class HoloMediaIndex:
         # Zentrale Datenbank (falls vorhanden)
         self.db_manager = db_manager
 
+        # MQTT-Konfiguration aus Umgebungsvariablen
         self.mqtt_config = mqtt_config or {
             "enabled": True,
-            "broker_ip": "192.168.178.99",
-            "broker_port": 1883,
-            "username": "kira",
-            "password": "123",
+            "broker_ip": os.getenv("HOLO_MQTT_BROKER", "localhost"),
+            "broker_port": int(os.getenv("HOLO_MQTT_PORT", "1883")),
+            "username": os.getenv("HOLO_MQTT_USER", ""),
+            "password": os.getenv("HOLO_MQTT_PASSWORD", ""),  # Aus Umgebungsvariable!
             "topics": ["nas_brain/media_index", "nas_brain/disk_status", "nas_brain/status"]
         }
 
@@ -173,16 +174,27 @@ class HoloMediaIndex:
             logger.warning("⚠️ Kein db_manager - Device-Tracking nicht verfügbar")
 
     def _init_default_devices(self):
-        """Initialisiert Standard-Geräte in NetworkDatabase"""
+        """
+        Initialisiert Standard-Geraete in NetworkDatabase.
+
+        HINWEIS: Diese Default-IPs sind Platzhalter!
+        Tatsaechliche IPs sollten ueber die Geraeteverwaltung oder
+        Umgebungsvariablen konfiguriert werden:
+            HOLO_NAS_IP, HOLO_MINIPC_IP, HOLO_PI_IP
+        """
         if not self.db_manager:
             return
 
+        # IPs aus Umgebungsvariablen oder Platzhalter
         default_devices = [
-            {"name": "nas", "display_name": "NAS", "ip": "192.168.178.100",
+            {"name": "nas", "display_name": "NAS",
+             "ip": os.getenv("HOLO_NAS_IP", "0.0.0.0"),
              "device_type": "storage", "icon": "💾"},
-            {"name": "mini-pc", "display_name": "Mini-PC", "ip": "192.168.178.102",
+            {"name": "mini-pc", "display_name": "Mini-PC",
+             "ip": os.getenv("HOLO_MINIPC_IP", "0.0.0.0"),
              "device_type": "computer", "icon": "🖥️"},
-            {"name": "pi", "display_name": "Raspberry Pi", "ip": "192.168.178.103",
+            {"name": "pi", "display_name": "Raspberry Pi",
+             "ip": os.getenv("HOLO_PI_IP", "0.0.0.0"),
              "device_type": "computer", "icon": "🍓"},
         ]
 
@@ -302,7 +314,7 @@ class HoloMediaIndex:
                     status="online" if self.nas_online else "offline",
                     device_type="storage",
                     display_name="NAS",
-                    ip_address="192.168.178.100"
+                    ip_address=os.getenv("HOLO_NAS_IP", "0.0.0.0")
                 )
             except Exception as e:
                 logger.error(f"Fehler beim NAS-Status Update in NetworkDatabase: {e}")

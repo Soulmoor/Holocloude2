@@ -114,12 +114,13 @@ class HoloDeviceReceiver:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.data_dir / "device_registry.db"
         
+        # MQTT-Konfiguration aus Umgebungsvariablen oder Parameter
         self.mqtt_config = mqtt_config or {
             "enabled": True,
-            "broker_ip": "192.168.178.99",
-            "broker_port": 1883,
-            "username": "mqtt",
-            "password": "Penis",
+            "broker_ip": os.getenv("HOLO_MQTT_BROKER", "localhost"),
+            "broker_port": int(os.getenv("HOLO_MQTT_PORT", "1883")),
+            "username": os.getenv("HOLO_MQTT_USER", "mqtt"),
+            "password": os.getenv("HOLO_MQTT_PASSWORD", ""),  # Aus Umgebungsvariable!
             "topic_prefix": "holo/devices/#",
         }
         
