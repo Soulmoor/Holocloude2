@@ -22,7 +22,6 @@ import os
 import gc
 import sys
 import time
-import psutil
 import logging
 import threading
 import traceback
@@ -33,7 +32,36 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
 
+# psutil ist optional - Fallback wenn nicht installiert
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    # Stub-Klasse für psutil wenn nicht verfügbar
+    class _PsutilStub:
+        @staticmethod
+        def virtual_memory():
+            class _Memory:
+                total = 8 * 1024 * 1024 * 1024  # 8GB default
+                available = 4 * 1024 * 1024 * 1024
+                percent = 50.0
+                used = 4 * 1024 * 1024 * 1024
+            return _Memory()
+        @staticmethod
+        def Process(pid=None):
+            class _Process:
+                def memory_info(self):
+                    class _MemInfo:
+                        rss = 100 * 1024 * 1024  # 100MB default
+                    return _MemInfo()
+            return _Process()
+    psutil = _PsutilStub()
+
 logger = logging.getLogger(__name__)
+
+if not PSUTIL_AVAILABLE:
+    logger.warning("psutil nicht installiert - Memory-Monitoring eingeschränkt (pip install psutil)")
 
 # =============================================================================
 # KONFIGURATION

@@ -31,9 +31,29 @@ from typing import Dict, List, Optional, Callable, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
-import psutil
+
+# psutil ist optional - Fallback wenn nicht installiert
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    # Stub-Klasse für psutil wenn nicht verfügbar
+    class _PsutilStub:
+        @staticmethod
+        def cpu_percent(interval=None):
+            return 25.0  # Default 25% CPU
+        @staticmethod
+        def virtual_memory():
+            class _Memory:
+                percent = 50.0
+            return _Memory()
+    psutil = _PsutilStub()
 
 logger = logging.getLogger(__name__)
+
+if not PSUTIL_AVAILABLE:
+    logger.warning("psutil nicht installiert - Process-Monitoring eingeschränkt (pip install psutil)")
 
 # =============================================================================
 # ENUMS & DATACLASSES

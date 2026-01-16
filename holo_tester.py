@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v3.0                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v4.0                        ║
 ║                                                                              ║
 ║  INTELLIGENT - Versteht das Projekt:                                         ║
 ║    • Analysiert Modul-Zweck aus Namen und Docstrings                         ║
@@ -13,11 +13,20 @@
 ║    • Erkennt fehlende Funktionen basierend auf Konventionen                  ║
 ║    • Validiert Config gegen tatsächliche Nutzung                             ║
 ║                                                                              ║
+║  NEU in v4.0:                                                                ║
+║    • ECHTER Import-Test - Lädt jedes Modul wirklich                          ║
+║    • Redundanz-Erkennung - Findet doppelte Funktionen/Klassen                ║
+║    • Toter Code - Findet ungenutzte Funktionen                               ║
+║    • Syntax-Prüfung - Kompiliert jeden Modul-Code                            ║
+║    • Schnellstart-Modus - Prüft ob alles startet                             ║
+║                                                                              ║
 ║  Verwendung:                                                                 ║
 ║      python holo_tester.py                 # Intelligente Analyse            ║
+║      python holo_tester.py --quick         # Schneller Start-Check           ║
 ║      python holo_tester.py --explain       # Erklärt was jedes Modul tut     ║
 ║      python holo_tester.py --graph         # Zeigt Dependency-Graph          ║
 ║      python holo_tester.py --problems      # Nur Probleme anzeigen           ║
+║      python holo_tester.py --redundancy    # Zeigt Redundanzen               ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
@@ -32,12 +41,18 @@ import sqlite3
 import re
 import importlib
 import importlib.util
+import subprocess
+import traceback
+import py_compile
+import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Tuple, Optional, Set, Any, NamedTuple
 from dataclasses import dataclass, field
-from collections import defaultdict
+from collections import defaultdict, Counter
 from enum import Enum, auto
+from io import StringIO
+from contextlib import redirect_stdout, redirect_stderr
 
 # =============================================================================
 # TERMINAL FARBEN
@@ -143,12 +158,22 @@ class ModuleAnalysis:
 
     # Status
     syntax_ok: bool = True
+    compile_ok: bool = True
     import_ok: bool = False
+    import_error: str = ""
     issues: List[Issue] = field(default_factory=list)
 
     # Erwartungen
     expected_items: List[str] = field(default_factory=list)
     missing_items: List[str] = field(default_factory=list)
+
+    # Funktions-Signaturen für Redundanz-Check
+    function_signatures: Dict[str, str] = field(default_factory=dict)  # name -> signature hash
+    class_methods: Dict[str, List[str]] = field(default_factory=dict)  # class -> [methods]
+
+    # Ungenutzte Funktionen
+    internal_calls: Set[str] = field(default_factory=set)  # Funktionen die intern aufgerufen werden
+    potentially_unused: List[str] = field(default_factory=list)  # Evtl. ungenutzte Funktionen
 
 
 @dataclass
@@ -167,6 +192,15 @@ class ProjectAnalysis:
     total_classes: int = 0
     total_functions: int = 0
 
+    # Redundanz-Info
+    duplicate_functions: List[Tuple[str, str, str]] = field(default_factory=list)  # (name, modul1, modul2)
+    similar_functions: List[Tuple[str, str, str, float]] = field(default_factory=list)  # (name1, name2, modul, similarity)
+    global_function_names: Dict[str, List[str]] = field(default_factory=dict)  # func_name -> [modules]
+
+    # Import-Test Ergebnisse
+    import_failures: List[Tuple[str, str]] = field(default_factory=list)  # (modul, error)
+    import_successes: List[str] = field(default_factory=list)
+
 
 # =============================================================================
 # INTELLIGENTER PROJEKT-ANALYZER
@@ -180,12 +214,19 @@ class IntelligentAnalyzer:
         self.analysis = ProjectAnalysis()
         self.stdlib_modules = self._get_stdlib_modules()
 
-    def analyze(self) -> ProjectAnalysis:
+    def analyze(self, quick_mode: bool = False) -> ProjectAnalysis:
         """Führt komplette intelligente Analyse durch"""
         print(f"\n{Colors.DIM}Analysiere Projekt intelligent...{Colors.RESET}")
 
         self._load_config()
         self._discover_modules()
+
+        if quick_mode:
+            # Schneller Modus: Nur Syntax und Import prüfen
+            self._quick_syntax_check()
+            self._real_import_test()
+            return self.analysis
+
         self._analyze_all_modules()
         self._build_dependency_graph()
         self._find_circular_dependencies()
@@ -193,9 +234,100 @@ class IntelligentAnalyzer:
         self._check_module_expectations()
         self._validate_imports()
         self._check_config_usage()
+        self._find_redundancy()
+        self._find_unused_code()
+        self._real_import_test()
         self._calculate_statistics()
 
         return self.analysis
+
+    # =========================================================================
+    # SCHNELLE SYNTAX-PRÜFUNG
+    # =========================================================================
+
+    def _quick_syntax_check(self):
+        """Schnelle Syntax-Prüfung aller Module via py_compile"""
+        for name, module in self.analysis.modules.items():
+            try:
+                # Versuche zu kompilieren
+                py_compile.compile(str(module.path), doraise=True)
+                module.syntax_ok = True
+                module.compile_ok = True
+            except py_compile.PyCompileError as e:
+                module.syntax_ok = False
+                module.compile_ok = False
+                module.issues.append(Issue(
+                    severity="error",
+                    category="syntax",
+                    module=name,
+                    message=f"Kompilierungsfehler: {str(e)[:100]}",
+                    line=getattr(e, 'lineno', 0) or 0
+                ))
+
+    # =========================================================================
+    # ECHTER IMPORT-TEST
+    # =========================================================================
+
+    def _real_import_test(self):
+        """Testet ob jedes Modul wirklich importiert werden kann"""
+        # Projekt-Verzeichnis zu sys.path hinzufügen
+        project_str = str(self.project_dir)
+        if project_str not in sys.path:
+            sys.path.insert(0, project_str)
+
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                module.import_ok = False
+                module.import_error = "Syntax-Fehler"
+                self.analysis.import_failures.append((name, "Syntax-Fehler"))
+                continue
+
+            try:
+                # Stille Import-Versuche
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                sys.stdout = StringIO()
+                sys.stderr = StringIO()
+
+                try:
+                    # Entferne vorher importierte Version
+                    if name in sys.modules:
+                        del sys.modules[name]
+
+                    # Versuche Import
+                    spec = importlib.util.spec_from_file_location(name, module.path)
+                    if spec and spec.loader:
+                        mod = importlib.util.module_from_spec(spec)
+                        sys.modules[name] = mod
+                        spec.loader.exec_module(mod)
+                        module.import_ok = True
+                        self.analysis.import_successes.append(name)
+                    else:
+                        raise ImportError(f"Konnte {name} nicht laden")
+
+                finally:
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+
+            except Exception as e:
+                module.import_ok = False
+                error_msg = str(e)[:200]
+                # Traceback für bessere Fehlerdiagnose
+                tb = traceback.format_exc()
+                # Finde die relevante Zeile
+                for line in tb.split('\n'):
+                    if name in line and 'line' in line.lower():
+                        error_msg = f"{error_msg} | {line.strip()}"
+                        break
+                module.import_error = error_msg
+                self.analysis.import_failures.append((name, error_msg))
+                module.issues.append(Issue(
+                    severity="error",
+                    category="import",
+                    module=name,
+                    message=f"Import fehlgeschlagen: {error_msg}",
+                    suggestion="Prüfe fehlende Abhängigkeiten oder Syntax-Fehler"
+                ))
 
     # =========================================================================
     # CONFIG
@@ -396,33 +528,43 @@ class IntelligentAnalyzer:
                     self.analysis.modules[dep].used_by_modules.add(name)
 
     def _find_circular_dependencies(self):
-        """Findet zirkuläre Abhängigkeiten"""
-        visited = set()
-        rec_stack = set()
+        """Findet zirkuläre Abhängigkeiten - KORRIGIERTE VERSION"""
+        found_cycles = set()  # Verhindere Duplikate
 
-        def dfs(node: str, path: List[str]) -> Optional[List[str]]:
-            visited.add(node)
-            rec_stack.add(node)
-            path.append(node)
+        def find_cycle(start: str) -> Optional[List[str]]:
+            """Findet einen Zyklus ausgehend von start"""
+            visited = set()
+            path = []
 
-            for neighbor in self.analysis.dependency_graph.get(node, set()):
-                if neighbor not in visited:
-                    cycle = dfs(neighbor, path)
-                    if cycle:
-                        return cycle
-                elif neighbor in rec_stack:
-                    # Zyklus gefunden
-                    cycle_start = path.index(neighbor)
-                    return path[cycle_start:] + [neighbor]
+            def dfs(node: str) -> Optional[List[str]]:
+                if node in path:
+                    # Zyklus gefunden!
+                    cycle_start = path.index(node)
+                    return path[cycle_start:] + [node]
 
-            path.pop()
-            rec_stack.remove(node)
-            return None
+                if node in visited:
+                    return None
+
+                visited.add(node)
+                path.append(node)
+
+                for neighbor in self.analysis.dependency_graph.get(node, set()):
+                    result = dfs(neighbor)
+                    if result:
+                        return result
+
+                path.pop()
+                return None
+
+            return dfs(start)
 
         for module in self.analysis.modules:
-            if module not in visited:
-                cycle = dfs(module, [])
-                if cycle:
+            cycle = find_cycle(module)
+            if cycle:
+                # Normalisiere Zyklus für Duplikat-Check
+                cycle_key = tuple(sorted(cycle[:-1]))  # Ohne das doppelte Ende-Element
+                if cycle_key not in found_cycles:
+                    found_cycles.add(cycle_key)
                     self.analysis.circular_deps.append(cycle)
                     self.analysis.all_issues.append(Issue(
                         severity="warning",
@@ -556,6 +698,116 @@ class IntelligentAnalyzer:
                         message=f"Config-Key '{used_key}' nicht in config.json gefunden",
                         suggestion="Prüfe ob der Key korrekt ist oder füge ihn zur Config hinzu"
                     ))
+
+    # =========================================================================
+    # REDUNDANZ-ERKENNUNG
+    # =========================================================================
+
+    def _find_redundancy(self):
+        """Findet redundante/doppelte Funktionen und Klassen"""
+        # Sammle alle Funktionsnamen mit ihren Modulen
+        func_to_modules: Dict[str, List[str]] = defaultdict(list)
+        class_to_modules: Dict[str, List[str]] = defaultdict(list)
+
+        for name, module in self.analysis.modules.items():
+            for func in module.functions:
+                # Ignoriere private Funktionen und common patterns
+                if not func.startswith('_') and func not in {'main', 'setup', 'run', 'start', 'stop', 'init'}:
+                    func_to_modules[func].append(name)
+
+            for cls in module.classes:
+                if not cls.startswith('_'):
+                    class_to_modules[cls].append(name)
+
+        # Finde doppelte Funktionsnamen
+        for func, modules in func_to_modules.items():
+            if len(modules) > 1:
+                self.analysis.global_function_names[func] = modules
+                # Nur warnen wenn es wirklich identisch aussieht
+                if len(modules) <= 3:
+                    self.analysis.duplicate_functions.append((func, modules[0], modules[1]))
+                    self.analysis.all_issues.append(Issue(
+                        severity="info",
+                        category="redundancy",
+                        module=modules[0],
+                        message=f"Funktion '{func}' existiert auch in: {', '.join(modules[1:])}",
+                        suggestion="Prüfe ob Konsolidierung sinnvoll ist"
+                    ))
+
+        # Finde doppelte Klassennamen
+        for cls, modules in class_to_modules.items():
+            if len(modules) > 1 and cls not in {'Config', 'Logger', 'Handler', 'Error', 'Exception'}:
+                self.analysis.all_issues.append(Issue(
+                    severity="info",
+                    category="redundancy",
+                    module=modules[0],
+                    message=f"Klasse '{cls}' existiert auch in: {', '.join(modules[1:])}",
+                    suggestion="Prüfe ob gemeinsame Basisklasse sinnvoll ist"
+                ))
+
+    def _find_unused_code(self):
+        """Findet potenziell ungenutzten Code"""
+        # Sammle alle Funktions-Aufrufe im Projekt
+        all_calls: Set[str] = set()
+
+        for name, module in self.analysis.modules.items():
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+                tree = ast.parse(source)
+
+                for node in ast.walk(tree):
+                    # Finde Funktionsaufrufe
+                    if isinstance(node, ast.Call):
+                        if isinstance(node.func, ast.Name):
+                            all_calls.add(node.func.id)
+                        elif isinstance(node.func, ast.Attribute):
+                            all_calls.add(node.func.attr)
+
+                    # Finde Attribut-Zugriffe (für Methoden)
+                    if isinstance(node, ast.Attribute):
+                        all_calls.add(node.attr)
+
+                module.internal_calls = all_calls.copy()
+
+            except Exception:
+                pass
+
+        # Prüfe welche Funktionen nie aufgerufen werden
+        for name, module in self.analysis.modules.items():
+            for func in module.functions:
+                # Ignoriere typische Entry-Points und Magic Methods
+                if func in {'main', '__init__', '__call__', '__enter__', '__exit__',
+                           'setup', 'run', 'start', 'stop', 'handle', 'process'}:
+                    continue
+                if func.startswith('_'):
+                    continue
+
+                # Prüfe ob diese Funktion irgendwo aufgerufen wird
+                if func not in all_calls:
+                    # Zusätzlicher Check: Wird sie als Callback referenziert?
+                    found_as_ref = False
+                    for other_module in self.analysis.modules.values():
+                        try:
+                            source = other_module.path.read_text(encoding="utf-8", errors="ignore")
+                            # Suche nach Referenzen wie "callback=func" oder "handler=func"
+                            if re.search(rf'\b{func}\b', source):
+                                found_as_ref = True
+                                break
+                        except:
+                            pass
+
+                    if not found_as_ref:
+                        module.potentially_unused.append(func)
+
+            # Nur warnen wenn mehrere ungenutzte Funktionen
+            if len(module.potentially_unused) >= 3:
+                self.analysis.all_issues.append(Issue(
+                    severity="info",
+                    category="unused",
+                    module=name,
+                    message=f"{len(module.potentially_unused)} potenziell ungenutzte Funktionen: {', '.join(module.potentially_unused[:5])}",
+                    suggestion="Prüfe ob diese Funktionen noch benötigt werden"
+                ))
 
     # =========================================================================
     # STATISTIKEN
@@ -962,13 +1214,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude Intelligent System Tester - Versteht und testet das Projekt"
+        description="Holocloude Intelligent System Tester v4.0 - Versteht und testet das Projekt"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Mehr Details")
     parser.add_argument("--no-color", action="store_true", help="Keine Farben")
+    parser.add_argument("--quick", "-q", action="store_true", help="Schneller Start-Check (nur Syntax + Import)")
     parser.add_argument("--explain", action="store_true", help="Erklärt was jedes Modul tut")
     parser.add_argument("--problems", action="store_true", help="Nur Probleme anzeigen")
     parser.add_argument("--graph", action="store_true", help="Zeigt Dependency-Graph")
+    parser.add_argument("--redundancy", action="store_true", help="Zeigt Redundanzen und doppelten Code")
 
     args = parser.parse_args()
 
@@ -977,17 +1231,49 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v3.0               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v4.0               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
     # Analyse
     analyzer = IntelligentAnalyzer()
-    analysis = analyzer.analyze()
+    analysis = analyzer.analyze(quick_mode=args.quick)
 
-    print(f"{Colors.DIM}  Gefunden: {len(analysis.modules)} Module, "
-          f"{analysis.total_classes} Klassen, "
-          f"{analysis.total_functions} Funktionen{Colors.RESET}")
+    if not args.quick:
+        print(f"{Colors.DIM}  Gefunden: {len(analysis.modules)} Module, "
+              f"{analysis.total_classes} Klassen, "
+              f"{analysis.total_functions} Funktionen{Colors.RESET}")
+    else:
+        print(f"{Colors.DIM}  Gefunden: {len(analysis.modules)} Module{Colors.RESET}")
+
+    # Quick-Modus: Nur Import-Test Ergebnisse
+    if args.quick:
+        print()
+        print(f"{Colors.BOLD}SCHNELLER START-CHECK:{Colors.RESET}")
+
+        success_count = len(analysis.import_successes)
+        fail_count = len(analysis.import_failures)
+        total = success_count + fail_count
+
+        print(f"\n{Colors.BOLD}Import-Test Ergebnisse:{Colors.RESET}")
+        print(f"  {Colors.GREEN}✓ {success_count}/{total} Module erfolgreich importiert{Colors.RESET}")
+
+        if analysis.import_failures:
+            print(f"  {Colors.RED}✗ {fail_count} Module fehlgeschlagen:{Colors.RESET}")
+            for module, error in analysis.import_failures[:15]:
+                short_error = error[:80] + "..." if len(error) > 80 else error
+                print(f"      {Colors.RED}• {module}: {short_error}{Colors.RESET}")
+
+            if len(analysis.import_failures) > 15:
+                print(f"      {Colors.DIM}... und {len(analysis.import_failures) - 15} weitere{Colors.RESET}")
+
+        print()
+        if fail_count == 0:
+            print(f"  {Colors.GREEN}{Colors.BOLD}✓ ALLE MODULE STARTEN OHNE FEHLER{Colors.RESET}")
+        else:
+            print(f"  {Colors.RED}{Colors.BOLD}✗ {fail_count} MODULE HABEN PROBLEME{Colors.RESET}")
+
+        sys.exit(1 if fail_count > 0 else 0)
 
     # Explain-Modus
     if args.explain:
@@ -1008,6 +1294,38 @@ def main():
         for name, deps in sorted(analysis.dependency_graph.items()):
             if deps:
                 print(f"  {name} → {', '.join(sorted(deps))}")
+        sys.exit(0)
+
+    # Redundancy-Modus
+    if args.redundancy:
+        print()
+        print(f"{Colors.BOLD}REDUNDANZ-ANALYSE:{Colors.RESET}")
+
+        if analysis.duplicate_functions:
+            print(f"\n{Colors.YELLOW}Doppelte Funktionsnamen ({len(analysis.duplicate_functions)}):{Colors.RESET}")
+            for func, mod1, mod2 in analysis.duplicate_functions[:20]:
+                print(f"  • {func}: {mod1}, {mod2}")
+
+        # Zeige alle Funktionen die in mehreren Modulen vorkommen
+        multi_funcs = {k: v for k, v in analysis.global_function_names.items() if len(v) > 2}
+        if multi_funcs:
+            print(f"\n{Colors.YELLOW}Funktionen in 3+ Modulen:{Colors.RESET}")
+            for func, modules in sorted(multi_funcs.items(), key=lambda x: -len(x[1]))[:10]:
+                print(f"  • {func} ({len(modules)}x): {', '.join(modules[:5])}")
+
+        # Zeige potenziell ungenutzten Code
+        unused_total = sum(len(m.potentially_unused) for m in analysis.modules.values())
+        if unused_total > 0:
+            print(f"\n{Colors.YELLOW}Potenziell ungenutzter Code ({unused_total} Funktionen):{Colors.RESET}")
+            for name, module in analysis.modules.items():
+                if module.potentially_unused:
+                    print(f"  {name}: {', '.join(module.potentially_unused[:5])}")
+                    if len(module.potentially_unused) > 5:
+                        print(f"          ... und {len(module.potentially_unused) - 5} weitere")
+
+        if not analysis.duplicate_functions and not multi_funcs and unused_total == 0:
+            print(f"\n{Colors.GREEN}Keine signifikanten Redundanzen gefunden!{Colors.RESET}")
+
         sys.exit(0)
 
     # Problems-Modus
