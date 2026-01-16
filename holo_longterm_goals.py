@@ -1064,6 +1064,14 @@ def quick_goal_check(goal_title: str, current_progress: float) -> str:
 
 
 # ============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# ============================================================================
+
+# holo_brain.py erwartet diesen Namen
+LongtermGoalManager = LongTermGoalsEngine
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -1084,6 +1092,7 @@ __all__ = [
 
     # Main class
     "LongTermGoalsEngine",
+    "LongtermGoalManager",  # Alias
 
     # Helper functions
     "create_smart_goal",

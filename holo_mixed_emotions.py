@@ -1037,6 +1037,15 @@ def describe_emotional_blend(
 
 
 # ============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# ============================================================================
+
+# holo_brain.py erwartet diese Namen
+MixedEmotionAnalyzer = MixedEmotionsEngine
+EmotionalBlend = MixedEmotion
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -1051,9 +1060,11 @@ __all__ = [
     "MixedEmotion",
     "NostalgiaExperience",
     "AmbivalentState",
+    "EmotionalBlend",  # Alias
 
     # Main class
     "MixedEmotionsEngine",
+    "MixedEmotionAnalyzer",  # Alias
 
     # Helper functions
     "is_emotion_mixed",

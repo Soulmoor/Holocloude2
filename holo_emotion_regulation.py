@@ -1181,6 +1181,14 @@ def suggest_regulation_strategy(
 
 
 # ============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# ============================================================================
+
+# holo_brain.py erwartet diese Namen
+EmotionRegulator = EmotionRegulationEngine
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -1200,6 +1208,7 @@ __all__ = [
 
     # Main class
     "EmotionRegulationEngine",
+    "EmotionRegulator",  # Alias
 
     # Helper functions
     "quick_regulate",

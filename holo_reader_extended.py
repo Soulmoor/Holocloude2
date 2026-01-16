@@ -1201,6 +1201,39 @@ SCHWIERIGKEIT: [leicht/mittel/schwer]
 
 
 # =============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# =============================================================================
+
+# holo_brain.py erwartet diesen Namen
+ExtendedReader = HoloReaderExtended
+
+
+# =============================================================================
+# EXPORTS
+# =============================================================================
+
+__all__ = [
+    # Enums
+    "WritingStyle",
+    "ChapterType",
+
+    # Dataclasses
+    "Chapter",
+    "Quote",
+    "ReadabilityResult",
+    "StyleAnalysisResult",
+    "TopicCluster",
+    "GeneratedQuestion",
+    "ExtractedFact",
+    "TextComparisonResult",
+
+    # Main class
+    "HoloReaderExtended",
+    "ExtendedReader",  # Alias
+]
+
+
+# =============================================================================
 # STANDALONE TEST
 # =============================================================================
 

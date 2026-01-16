@@ -915,6 +915,14 @@ def check_consistency(statements: List[str], speaker: str = "unknown") -> List[s
 
 
 # ============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# ============================================================================
+
+# holo_brain.py erwartet diesen Namen
+DeceptionDetector = DeceptionDetectionEngine
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -935,6 +943,7 @@ __all__ = [
 
     # Main class
     "DeceptionDetectionEngine",
+    "DeceptionDetector",  # Alias
 
     # Helper functions
     "quick_deception_check",

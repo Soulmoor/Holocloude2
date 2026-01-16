@@ -888,6 +888,14 @@ def analyze_what_if(scenario: str, change: str) -> Dict[str, Any]:
 
 
 # ============================================================================
+# ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
+# ============================================================================
+
+# holo_brain.py erwartet diesen Namen
+CounterfactualReasoner = CounterfactualReasoningEngine
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -909,6 +917,7 @@ __all__ = [
     # Classes
     "EventAnalyzer",
     "CounterfactualReasoningEngine",
+    "CounterfactualReasoner",  # Alias
 
     # Helper functions
     "quick_counterfactual",
