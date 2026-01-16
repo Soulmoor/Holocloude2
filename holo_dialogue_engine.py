@@ -1651,6 +1651,519 @@ class ResponseQualityChecker:
         }
 
 
+# =============================================================================
+# ADVANCED DIALOGUE: Topic Tracker
+# =============================================================================
+
+class TopicTracker:
+    """
+    Trackt Topic-Progression durch die Konversation.
+
+    Ermöglicht:
+    - Erkennen von Topic-Shifts
+    - Kohärenz-Prüfung
+    - Topic-Bridges vorschlagen
+    """
+
+    def __init__(self):
+        # Topic-Historie
+        self.topic_history: List[Dict] = []
+
+        # Aktives Topic
+        self.current_topic: Optional[str] = None
+        self.topic_depth: int = 0
+
+        # Topic-Beziehungen (gelernt)
+        self.topic_relations: Dict[str, List[str]] = {}
+
+        # Shift-Detection
+        self.shift_threshold: float = 0.5
+
+        logger.info("📌 TopicTracker initialisiert")
+
+    def detect_topic(self, message: str, context: Dict = None) -> Dict:
+        """Erkennt das Topic einer Nachricht"""
+        message_lower = message.lower()
+
+        # Topic-Keywords
+        topic_keywords = {
+            "anime": ["anime", "manga", "staffel", "episode", "studio", "japanisch"],
+            "gaming": ["spiel", "game", "zocken", "gameplay", "steam", "playstation", "xbox"],
+            "tech": ["computer", "software", "code", "programmieren", "app", "website"],
+            "personal": ["ich", "mein", "mir", "fühle", "denke", "glaube"],
+            "question": ["was", "wie", "warum", "wann", "wo", "wer", "kannst du"],
+            "smalltalk": ["hey", "hallo", "wie geht", "was machst", "schönes wetter"],
+        }
+
+        # Topic-Scores berechnen
+        scores = {}
+        for topic, keywords in topic_keywords.items():
+            score = sum(1 for kw in keywords if kw in message_lower)
+            if score > 0:
+                scores[topic] = score
+
+        # Bestes Topic wählen
+        if scores:
+            best_topic = max(scores.items(), key=lambda x: x[1])
+            detected = best_topic[0]
+            confidence = min(1.0, best_topic[1] / 3)
+        else:
+            detected = "general"
+            confidence = 0.3
+
+        return {
+            "topic": detected,
+            "confidence": confidence,
+            "all_scores": scores,
+        }
+
+    def update(self, message: str, context: Dict = None) -> Dict:
+        """Aktualisiert Topic-Tracking"""
+        detection = self.detect_topic(message, context)
+        new_topic = detection["topic"]
+
+        # Topic-Shift erkennen
+        is_shift = False
+        if self.current_topic and new_topic != self.current_topic:
+            is_shift = True
+            self.topic_depth = 0
+        else:
+            self.topic_depth += 1
+
+        # Historie aktualisieren
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "topic": new_topic,
+            "confidence": detection["confidence"],
+            "is_shift": is_shift,
+            "previous_topic": self.current_topic,
+            "depth": self.topic_depth,
+        }
+        self.topic_history.append(entry)
+
+        # Topic-Relation lernen
+        if is_shift and self.current_topic:
+            if self.current_topic not in self.topic_relations:
+                self.topic_relations[self.current_topic] = []
+            if new_topic not in self.topic_relations[self.current_topic]:
+                self.topic_relations[self.current_topic].append(new_topic)
+
+        self.current_topic = new_topic
+
+        # Nur letzte 100
+        if len(self.topic_history) > 100:
+            self.topic_history = self.topic_history[-100:]
+
+        return entry
+
+    def get_topic_sequence(self) -> List[str]:
+        """Gibt Topic-Sequenz zurück"""
+        return [h["topic"] for h in self.topic_history]
+
+    def is_coherent(self, new_topic: str = None) -> bool:
+        """Prüft ob Topic-Übergang kohärent ist"""
+        if not self.current_topic:
+            return True
+
+        if new_topic == self.current_topic:
+            return True
+
+        # Prüfen ob bekannte Relation
+        related = self.topic_relations.get(self.current_topic, [])
+        return new_topic in related
+
+    def suggest_bridge(self, from_topic: str, to_topic: str) -> Optional[str]:
+        """Schlägt eine Topic-Bridge vor"""
+        bridges = {
+            ("anime", "gaming"): "Apropos, hast du auch Anime-Spiele gespielt?",
+            ("gaming", "anime"): "Das erinnert mich an einen Anime...",
+            ("personal", "anime"): "Was schaust du denn so in deiner Freizeit?",
+            ("smalltalk", "anime"): "Übrigens, läuft gerade eine interessante Anime-Season!",
+            ("tech", "gaming"): "Hast du auch Game-Development Erfahrung?",
+        }
+
+        return bridges.get((from_topic, to_topic)) or \
+               f"Wollen wir über {to_topic} sprechen?"
+
+    def get_stats(self) -> Dict:
+        return {
+            "current_topic": self.current_topic,
+            "topic_depth": self.topic_depth,
+            "total_shifts": sum(1 for h in self.topic_history if h.get("is_shift")),
+            "learned_relations": len(self.topic_relations),
+        }
+
+
+# =============================================================================
+# ADVANCED DIALOGUE: Conversation Memory
+# =============================================================================
+
+class ConversationMemory:
+    """
+    Multi-Turn Memory für Konversationen.
+
+    Ermöglicht:
+    - Kontext-Fenster über mehrere Turns
+    - Vermeidung von Wiederholungen
+    - Callback auf frühere Punkte
+    """
+
+    def __init__(self, max_size: int = 50):
+        self.max_size = max_size
+
+        # Exchange-History: (user_msg, holo_response, context)
+        self.exchanges: List[Dict] = []
+
+        # Mention-Tracking: Was wurde schon erwähnt
+        self.mentioned_topics: Dict[str, int] = {}  # topic -> count
+        self.mentioned_entities: Dict[str, int] = {}
+
+        # Repetition-Tracking
+        self.recent_responses: List[str] = []
+
+        logger.info("🧠 ConversationMemory initialisiert")
+
+    def add_exchange(self, user_message: str, holo_response: str,
+                     context: Dict = None):
+        """Fügt einen Exchange hinzu"""
+        exchange = {
+            "timestamp": datetime.now().isoformat(),
+            "user": user_message,
+            "holo": holo_response,
+            "context": context or {},
+        }
+        self.exchanges.append(exchange)
+
+        # Entities/Topics tracken
+        self._track_mentions(user_message)
+        self._track_mentions(holo_response)
+
+        # Response-Tracking
+        self.recent_responses.append(holo_response[:100])
+        if len(self.recent_responses) > 20:
+            self.recent_responses = self.recent_responses[-20:]
+
+        # Memory begrenzen
+        if len(self.exchanges) > self.max_size:
+            self.exchanges = self.exchanges[-self.max_size:]
+
+    def _track_mentions(self, text: str):
+        """Trackt erwähnte Topics/Entities"""
+        text_lower = text.lower()
+
+        # Einfaches Keyword-Tracking
+        keywords = ["anime", "manga", "game", "spiel", "arbeit", "schule", "musik", "film"]
+        for kw in keywords:
+            if kw in text_lower:
+                self.mentioned_topics[kw] = self.mentioned_topics.get(kw, 0) + 1
+
+    def get_context_window(self, depth: int = 5) -> List[Dict]:
+        """Gibt die letzten N Exchanges zurück"""
+        return self.exchanges[-depth:]
+
+    def detect_repetition(self, response: str, threshold: float = 0.7) -> bool:
+        """Prüft ob eine Response zu ähnlich zu kürzlichen ist"""
+        response_lower = response.lower()[:100]
+
+        for recent in self.recent_responses[-5:]:
+            recent_lower = recent.lower()
+
+            # Einfache Ähnlichkeit (Wort-Overlap)
+            response_words = set(response_lower.split())
+            recent_words = set(recent_lower.split())
+
+            if not response_words or not recent_words:
+                continue
+
+            overlap = len(response_words & recent_words)
+            similarity = overlap / max(len(response_words), len(recent_words))
+
+            if similarity >= threshold:
+                return True
+
+        return False
+
+    def recall_related(self, query: str, limit: int = 3) -> List[Dict]:
+        """Findet verwandte frühere Exchanges"""
+        query_lower = query.lower()
+        query_words = set(query_lower.split())
+
+        scored = []
+        for exchange in self.exchanges:
+            # Relevanz berechnen
+            exchange_text = (exchange["user"] + " " + exchange["holo"]).lower()
+            exchange_words = set(exchange_text.split())
+
+            overlap = len(query_words & exchange_words)
+            if overlap > 0:
+                scored.append((exchange, overlap))
+
+        # Nach Relevanz sortieren
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return [s[0] for s in scored[:limit]]
+
+    def get_callback_opportunity(self) -> Optional[Dict]:
+        """Findet Gelegenheit auf früheren Punkt zurückzukommen"""
+        if len(self.exchanges) < 5:
+            return None
+
+        # Suche nach unbeantworteten Fragen
+        for exchange in self.exchanges[-10:-3]:
+            user_msg = exchange["user"]
+            if "?" in user_msg and len(exchange["holo"]) < 50:
+                return {
+                    "type": "unanswered_question",
+                    "original": user_msg,
+                    "suggestion": f"Übrigens, du hattest gefragt: '{user_msg[:50]}...'",
+                }
+
+        return None
+
+    def get_summary(self) -> Dict:
+        """Gibt Zusammenfassung der Konversation"""
+        return {
+            "total_exchanges": len(self.exchanges),
+            "mentioned_topics": dict(self.mentioned_topics),
+            "duration_turns": len(self.exchanges),
+        }
+
+    def get_stats(self) -> Dict:
+        return {
+            "exchanges": len(self.exchanges),
+            "topics_mentioned": len(self.mentioned_topics),
+            "entities_mentioned": len(self.mentioned_entities),
+        }
+
+
+# =============================================================================
+# ADVANCED DIALOGUE: Turn Predictor
+# =============================================================================
+
+class TurnPredictor:
+    """
+    Sagt vorher was der User als nächstes tun wird.
+
+    Ermöglicht proaktive Response-Vorbereitung.
+    """
+
+    def __init__(self):
+        # Intent-Transition-Matrix
+        self.transition_counts: Dict[str, Dict[str, int]] = {}
+
+        # Pattern-History
+        self.pattern_history: List[Dict] = []
+
+        # Prediction-Tracking
+        self.predictions: List[Dict] = []
+        self.correct_predictions: int = 0
+        self.total_predictions: int = 0
+
+        logger.info("🔮 TurnPredictor initialisiert")
+
+    def record_transition(self, from_intent: str, to_intent: str):
+        """Zeichnet Intent-Übergang auf"""
+        if from_intent not in self.transition_counts:
+            self.transition_counts[from_intent] = {}
+
+        self.transition_counts[from_intent][to_intent] = \
+            self.transition_counts[from_intent].get(to_intent, 0) + 1
+
+    def predict_next_intent(self, current_intent: str,
+                            context: Dict = None) -> Tuple[str, float]:
+        """Sagt nächsten Intent vorher"""
+        # Basierend auf Übergängen
+        transitions = self.transition_counts.get(current_intent, {})
+
+        if not transitions:
+            # Default-Vorhersagen
+            defaults = {
+                "greeting": ("question", 0.6),
+                "question": ("followup", 0.5),
+                "statement": ("question", 0.4),
+                "gratitude": ("farewell", 0.7),
+            }
+            return defaults.get(current_intent, ("statement", 0.3))
+
+        # Wahrscheinlichsten Übergang finden
+        total = sum(transitions.values())
+        best_intent = max(transitions.items(), key=lambda x: x[1])
+
+        confidence = best_intent[1] / total
+
+        # Prediction speichern
+        self.predictions.append({
+            "timestamp": datetime.now().isoformat(),
+            "current_intent": current_intent,
+            "predicted_intent": best_intent[0],
+            "confidence": confidence,
+        })
+        self.total_predictions += 1
+
+        return best_intent[0], confidence
+
+    def predict_emotional_trajectory(self, recent_sentiments: List[float]) -> str:
+        """Sagt emotionalen Trend vorher"""
+        if len(recent_sentiments) < 2:
+            return "stable"
+
+        # Trend berechnen
+        recent = recent_sentiments[-5:]
+        if len(recent) < 2:
+            return "stable"
+
+        trend = recent[-1] - recent[0]
+
+        if trend > 0.2:
+            return "improving"
+        elif trend < -0.2:
+            return "declining"
+        else:
+            return "stable"
+
+    def suggest_proactive_response(self, prediction: str,
+                                    confidence: float) -> Optional[str]:
+        """Schlägt proaktive Response vor"""
+        if confidence < 0.5:
+            return None
+
+        suggestions = {
+            "question": "Bereite eine informative Antwort vor",
+            "followup": "Sei bereit für Vertiefung des Themas",
+            "farewell": "Bereite einen herzlichen Abschied vor",
+            "gratitude": "Bereite eine bescheidene Antwort vor",
+            "complaint": "Bereite empathische Reaktion vor",
+        }
+
+        return suggestions.get(prediction)
+
+    def verify_prediction(self, predicted: str, actual: str):
+        """Verifiziert eine Vorhersage"""
+        if predicted == actual:
+            self.correct_predictions += 1
+
+    def get_accuracy(self) -> float:
+        """Gibt Vorhersage-Genauigkeit zurück"""
+        if self.total_predictions == 0:
+            return 0.0
+        return self.correct_predictions / self.total_predictions
+
+    def get_stats(self) -> Dict:
+        return {
+            "total_predictions": self.total_predictions,
+            "accuracy": self.get_accuracy(),
+            "transitions_learned": len(self.transition_counts),
+        }
+
+
+# =============================================================================
+# ADVANCED DIALOGUE: Coherence Validator
+# =============================================================================
+
+class CoherenceValidator:
+    """
+    Validiert Kohärenz über mehrere Turns hinweg.
+
+    Erkennt:
+    - Widersprüche
+    - Themen-Sprünge
+    - Logische Inkonsistenzen
+    """
+
+    def __init__(self):
+        # Statement-Tracking
+        self.statements: List[Dict] = []
+
+        # Coherence-History
+        self.coherence_scores: List[float] = []
+
+        logger.info("✅ CoherenceValidator initialisiert")
+
+    def add_statement(self, statement: str, speaker: str, topic: str = None):
+        """Fügt ein Statement hinzu"""
+        self.statements.append({
+            "timestamp": datetime.now().isoformat(),
+            "statement": statement,
+            "speaker": speaker,
+            "topic": topic,
+        })
+
+        # Nur letzte 50 behalten
+        if len(self.statements) > 50:
+            self.statements = self.statements[-50:]
+
+    def check_coherence(self, new_statement: str, context: Dict = None) -> Dict:
+        """Prüft Kohärenz eines neuen Statements"""
+        result = {
+            "is_coherent": True,
+            "score": 1.0,
+            "issues": [],
+            "suggestions": [],
+        }
+
+        if len(self.statements) < 2:
+            return result
+
+        # Topic-Kohärenz prüfen
+        recent_topics = [s.get("topic") for s in self.statements[-5:] if s.get("topic")]
+        if recent_topics and context:
+            current_topic = context.get("topic")
+            if current_topic and current_topic not in recent_topics:
+                result["issues"].append("topic_shift")
+                result["score"] -= 0.2
+                result["suggestions"].append("Consider adding a transition")
+
+        # Längen-Kohärenz (plötzlich viel länger/kürzer)
+        recent_lengths = [len(s["statement"]) for s in self.statements[-5:]]
+        avg_length = sum(recent_lengths) / len(recent_lengths)
+        new_length = len(new_statement)
+
+        if new_length > avg_length * 3 or new_length < avg_length * 0.2:
+            result["issues"].append("length_inconsistency")
+            result["score"] -= 0.1
+
+        # Final score
+        result["is_coherent"] = result["score"] >= 0.7
+        self.coherence_scores.append(result["score"])
+
+        return result
+
+    def get_conversation_coherence(self) -> float:
+        """Gibt durchschnittliche Kohärenz der Konversation"""
+        if not self.coherence_scores:
+            return 1.0
+        return sum(self.coherence_scores) / len(self.coherence_scores)
+
+    def detect_contradiction(self, statement_a: str, statement_b: str) -> bool:
+        """Erkennt Widersprüche zwischen zwei Statements (vereinfacht)"""
+        # Einfache Negations-Erkennung
+        negations = ["nicht", "kein", "nie", "niemals", "nein"]
+
+        a_lower = statement_a.lower()
+        b_lower = statement_b.lower()
+
+        # Wenn eines negiert und ähnliche Wörter
+        a_has_neg = any(neg in a_lower for neg in negations)
+        b_has_neg = any(neg in b_lower for neg in negations)
+
+        if a_has_neg != b_has_neg:
+            # Prüfe Wort-Overlap
+            a_words = set(a_lower.split()) - set(negations)
+            b_words = set(b_lower.split()) - set(negations)
+
+            overlap = len(a_words & b_words)
+            if overlap > 3:  # Signifikanter Overlap mit unterschiedlicher Negation
+                return True
+
+        return False
+
+    def get_stats(self) -> Dict:
+        return {
+            "statements_tracked": len(self.statements),
+            "avg_coherence": self.get_conversation_coherence(),
+            "checks_performed": len(self.coherence_scores),
+        }
+
+
 # Exports
 __all__ = [
     'HoloDialogueEngine',
@@ -1670,6 +2183,11 @@ __all__ = [
     'EngagementTracker',
     'ResponseGenerator',
     'ResponseQualityChecker',
+    # NEU v3.0: Advanced Dialogue
+    'TopicTracker',
+    'ConversationMemory',
+    'TurnPredictor',
+    'CoherenceValidator',
 ]
 
 

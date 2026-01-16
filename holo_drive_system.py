@@ -16,8 +16,9 @@ import time
 import logging
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Dict, Optional, List, Callable, Any
+from typing import Dict, Optional, List, Callable, Any, Tuple
 from enum import Enum
+from collections import defaultdict
 
 logger = logging.getLogger("HoloDriveSystem")
 
@@ -1709,6 +1710,432 @@ class PsycheTheory:
             parts.append("*sehnt sich nach Nähe*")
 
         return " ".join(parts) if parts else "*innerlich ruhig*"
+
+
+# =============================================================================
+# ADVANCED DRIVE SYSTEM: Conflict Resolution
+# =============================================================================
+
+class ConflictingDriveResolver:
+    """
+    Löst Konflikte zwischen konkurrierenden Antrieben.
+
+    Beispiel: CREATIVITY vs RELAXATION - beide wollen Aufmerksamkeit
+    """
+
+    # Konflikt-Paare und ihre typischen Auflösungen
+    KNOWN_CONFLICTS = {
+        (DriveType.CURIOSITY, DriveType.ENTERTAINMENT): "merge",     # Neugier vs Unterhaltung
+        (DriveType.CREATIVITY, DriveType.SOCIAL): "sublimate",       # Kreativität vs Sozial
+        (DriveType.SOCIAL, DriveType.MASTERY): "compromise",         # Sozial vs Meisterschaft
+        (DriveType.ENTERTAINMENT, DriveType.MASTERY): "schedule",    # Unterhaltung vs Üben
+        (DriveType.CURIOSITY, DriveType.CREATIVITY): "merge",        # Neugier vs Kreativität
+        (DriveType.NOVELTY, DriveType.MASTERY): "schedule",          # Neuheit vs Meisterschaft
+    }
+
+    def __init__(self, drive_system: 'HoloDriveSystem' = None):
+        self.drive_system = drive_system
+
+        # Konflikt-History
+        self.conflict_history: List[Dict] = []
+        self.resolution_outcomes: Dict[str, List[float]] = defaultdict(list)
+
+        logger.info("⚔️ ConflictingDriveResolver initialisiert")
+
+    def detect_conflicts(self, threshold: float = 0.6) -> List[Tuple[DriveType, DriveType, float]]:
+        """Erkennt aktive Konflikte zwischen Drives"""
+        conflicts = []
+
+        if not self.drive_system:
+            return conflicts
+
+        drives = self.drive_system.drives
+
+        # Alle Paare von hohen Drives prüfen
+        high_drives = []
+        for drive_type in DriveType:
+            level = getattr(drives, drive_type.value, 0)
+            if level >= threshold:
+                high_drives.append((drive_type, level))
+
+        # Konflikte zwischen hohen Drives
+        for i, (drive_a, level_a) in enumerate(high_drives):
+            for drive_b, level_b in high_drives[i+1:]:
+                # Prüfen ob bekannter Konflikt
+                pair = (drive_a, drive_b)
+                reverse_pair = (drive_b, drive_a)
+
+                if pair in self.KNOWN_CONFLICTS or reverse_pair in self.KNOWN_CONFLICTS:
+                    conflict_intensity = (level_a + level_b) / 2
+                    conflicts.append((drive_a, drive_b, conflict_intensity))
+
+        return conflicts
+
+    def resolve(self, drive_a: DriveType, drive_b: DriveType,
+                strategy: str = "auto") -> Dict:
+        """
+        Löst einen Konflikt zwischen zwei Drives.
+
+        Strategien:
+        - compromise: Beide teilweise befriedigen
+        - prioritize: Einen bevorzugen
+        - sublimate: In produktive Aktivität umleiten
+        - schedule: Zeitlich aufteilen
+        - merge: Aktivität finden die beide befriedigt
+        """
+        pair = (drive_a, drive_b)
+        reverse_pair = (drive_b, drive_a)
+
+        # Auto-Strategie wählen
+        if strategy == "auto":
+            strategy = self.KNOWN_CONFLICTS.get(pair) or \
+                       self.KNOWN_CONFLICTS.get(reverse_pair) or "compromise"
+
+        result = {
+            "drives": [drive_a.value, drive_b.value],
+            "strategy": strategy,
+            "success": True,
+            "recommendation": "",
+            "activity_suggestion": None,
+        }
+
+        if strategy == "compromise":
+            result["recommendation"] = f"Versuche beide zu befriedigen: " \
+                                       f"Kurze {drive_a.value}-Aktivität, dann {drive_b.value}"
+            result["activity_suggestion"] = self._find_balanced_activity(drive_a, drive_b)
+
+        elif strategy == "prioritize":
+            # Wähle den dringenderen
+            if self.drive_system:
+                level_a = getattr(self.drive_system.drives, drive_a.value, 0)
+                level_b = getattr(self.drive_system.drives, drive_b.value, 0)
+                winner = drive_a if level_a > level_b else drive_b
+            else:
+                winner = drive_a
+            result["recommendation"] = f"Priorisiere {winner.value} - ist dringender"
+            result["priority"] = winner.value
+
+        elif strategy == "sublimate":
+            result["recommendation"] = f"Leite Energie von {drive_a.value} in {drive_b.value} um"
+            result["activity_suggestion"] = self._find_sublimation_activity(drive_a, drive_b)
+
+        elif strategy == "schedule":
+            result["recommendation"] = f"Plane: Jetzt {drive_a.value}, später {drive_b.value}"
+            result["schedule"] = [drive_a.value, drive_b.value]
+
+        elif strategy == "merge":
+            result["recommendation"] = f"Finde Aktivität die {drive_a.value} UND {drive_b.value} befriedigt"
+            result["activity_suggestion"] = self._find_merged_activity(drive_a, drive_b)
+
+        # History speichern
+        self.conflict_history.append({
+            "timestamp": datetime.now().isoformat(),
+            "drives": [drive_a.value, drive_b.value],
+            "strategy": strategy,
+        })
+
+        return result
+
+    def _find_balanced_activity(self, drive_a: DriveType, drive_b: DriveType) -> Optional[str]:
+        """Findet Aktivität die beide teilweise befriedigt"""
+        merged = self._find_merged_activity(drive_a, drive_b)
+        if merged:
+            return merged
+        return f"Wechsle zwischen {drive_a.value} und {drive_b.value} Aktivitäten"
+
+    def _find_sublimation_activity(self, drive_a: DriveType, drive_b: DriveType) -> Optional[str]:
+        """Findet Aktivität zur Sublimierung"""
+        sublimation_map = {
+            DriveType.CREATIVITY: "kreatives Schreiben",
+            DriveType.CURIOSITY: "Recherche",
+            DriveType.SOCIAL: "Diskussion",
+            DriveType.ENTERTAINMENT: "interaktives Spiel",
+        }
+        return sublimation_map.get(drive_a) or sublimation_map.get(drive_b)
+
+    def _find_merged_activity(self, drive_a: DriveType, drive_b: DriveType) -> Optional[str]:
+        """Findet Aktivität die beide Drives befriedigt"""
+        merge_map = {
+            frozenset([DriveType.CURIOSITY, DriveType.ENTERTAINMENT]): "interessantes Video schauen",
+            frozenset([DriveType.CREATIVITY, DriveType.SOCIAL]): "gemeinsam etwas erschaffen",
+            frozenset([DriveType.SOCIAL, DriveType.ENTERTAINMENT]): "zusammen spielen",
+            frozenset([DriveType.CURIOSITY, DriveType.CREATIVITY]): "neues Projekt erforschen",
+        }
+        return merge_map.get(frozenset([drive_a, drive_b]))
+
+    def record_outcome(self, drive_a: DriveType, drive_b: DriveType,
+                       strategy: str, satisfaction: float):
+        """Zeichnet Ergebnis einer Auflösung auf"""
+        key = f"{drive_a.value}_{drive_b.value}_{strategy}"
+        self.resolution_outcomes[key].append(satisfaction)
+
+        # Nur letzte 20 behalten
+        if len(self.resolution_outcomes[key]) > 20:
+            self.resolution_outcomes[key] = self.resolution_outcomes[key][-20:]
+
+    def get_best_strategy(self, drive_a: DriveType, drive_b: DriveType) -> str:
+        """Gibt beste bekannte Strategie für dieses Konfliktpaar zurück"""
+        best_strategy = "compromise"
+        best_score = 0.0
+
+        for strategy in ["compromise", "prioritize", "sublimate", "schedule", "merge"]:
+            key = f"{drive_a.value}_{drive_b.value}_{strategy}"
+            outcomes = self.resolution_outcomes.get(key, [])
+            if outcomes:
+                avg = sum(outcomes) / len(outcomes)
+                if avg > best_score:
+                    best_score = avg
+                    best_strategy = strategy
+
+        return best_strategy
+
+    def get_stats(self) -> Dict:
+        return {
+            "conflicts_resolved": len(self.conflict_history),
+            "strategies_learned": len(self.resolution_outcomes),
+        }
+
+
+# =============================================================================
+# ADVANCED DRIVE SYSTEM: Priority Learning
+# =============================================================================
+
+class DrivePriorityLearner:
+    """
+    Lernt welche Drives für den User am wichtigsten sind.
+
+    Basiert auf:
+    - Emotionale Reaktionen auf Drive-Befriedigung
+    - Wie oft User bestimmte Aktivitäten wählt
+    - Explizites Feedback
+    """
+
+    def __init__(self):
+        # Gelernte Prioritäten: drive -> (priority_score, confidence)
+        self.priorities: Dict[str, Tuple[float, float]] = {}
+
+        # Satisfaction-Tracking: drive -> [satisfaction_scores]
+        self.satisfaction_history: Dict[str, List[float]] = defaultdict(list)
+
+        # Activity-Tracking: drive -> activity_count
+        self.activity_counts: Dict[str, int] = defaultdict(int)
+
+        # Emotional Response Tracking: drive -> [emotional_responses]
+        self.emotional_responses: Dict[str, List[float]] = defaultdict(list)
+
+        # Initial priorities (gleich gewichtet)
+        for drive_type in DriveType:
+            self.priorities[drive_type.value] = (0.5, 0.0)  # (priority, confidence)
+
+        logger.info("📊 DrivePriorityLearner initialisiert")
+
+    def record_satisfaction(self, drive: DriveType, satisfaction: float,
+                            emotional_response: float = 0.0):
+        """Zeichnet Satisfaction-Event auf"""
+        drive_name = drive.value
+
+        self.satisfaction_history[drive_name].append(satisfaction)
+        if emotional_response != 0:
+            self.emotional_responses[drive_name].append(emotional_response)
+
+        # Nur letzte 50 behalten
+        if len(self.satisfaction_history[drive_name]) > 50:
+            self.satisfaction_history[drive_name] = self.satisfaction_history[drive_name][-50:]
+        if len(self.emotional_responses[drive_name]) > 50:
+            self.emotional_responses[drive_name] = self.emotional_responses[drive_name][-50:]
+
+        # Priorität neu berechnen
+        self._update_priority(drive_name)
+
+    def record_activity(self, drive: DriveType, activity_name: str):
+        """Zeichnet auf dass eine Aktivität für diesen Drive gewählt wurde"""
+        self.activity_counts[drive.value] += 1
+        self._update_priority(drive.value)
+
+    def _update_priority(self, drive_name: str):
+        """Aktualisiert Priorität basierend auf allen Daten"""
+        # Satisfaction-Score
+        satisfactions = self.satisfaction_history.get(drive_name, [])
+        avg_satisfaction = sum(satisfactions) / max(1, len(satisfactions))
+
+        # Emotional-Score
+        emotions = self.emotional_responses.get(drive_name, [])
+        avg_emotion = sum(emotions) / max(1, len(emotions)) if emotions else 0.5
+
+        # Activity-Score (normalisiert)
+        total_activities = sum(self.activity_counts.values())
+        activity_ratio = self.activity_counts[drive_name] / max(1, total_activities)
+
+        # Kombinierter Score
+        priority = (
+            avg_satisfaction * 0.4 +
+            (avg_emotion + 1) / 2 * 0.3 +  # Normalize -1..1 to 0..1
+            activity_ratio * 0.3
+        )
+
+        # Confidence basiert auf Datenmenge
+        data_points = len(satisfactions) + len(emotions) + self.activity_counts[drive_name]
+        confidence = min(1.0, data_points / 30)  # 30 data points = full confidence
+
+        self.priorities[drive_name] = (priority, confidence)
+
+    def get_priority(self, drive: DriveType) -> float:
+        """Gibt gelernte Priorität für einen Drive zurück"""
+        priority, _ = self.priorities.get(drive.value, (0.5, 0.0))
+        return priority
+
+    def get_hierarchy(self) -> List[Tuple[str, float, float]]:
+        """Gibt Drive-Hierarchie sortiert nach Priorität zurück"""
+        return sorted(
+            [(drive, prio, conf) for drive, (prio, conf) in self.priorities.items()],
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+    def adjust_drive_weights(self, drive_system: 'HoloDriveSystem'):
+        """Passt Drive-Gewichte im System basierend auf gelernten Prioritäten an"""
+        for drive_type in DriveType:
+            priority = self.get_priority(drive_type)
+            # Höhere Priorität = schnellere Regeneration
+            if hasattr(drive_system, '_regeneration_rates'):
+                base_rate = drive_system._regeneration_rates.get(drive_type, 0.001)
+                adjusted_rate = base_rate * (0.5 + priority)  # 0.5x to 1.5x
+                drive_system._regeneration_rates[drive_type] = adjusted_rate
+
+    def get_stats(self) -> Dict:
+        """Statistiken"""
+        return {
+            "drives_tracked": len(self.priorities),
+            "total_satisfactions": sum(len(s) for s in self.satisfaction_history.values()),
+            "hierarchy": self.get_hierarchy()[:5],
+        }
+
+
+# =============================================================================
+# ADVANCED DRIVE SYSTEM: Motivation Fatigue
+# =============================================================================
+
+class MotivationFatigueTracker:
+    """
+    Trackt kumulative Ermüdung wenn Drives wiederholt unbefriedigt bleiben.
+
+    Verhindert "Burnout" bei chronisch unerfüllten Bedürfnissen.
+    """
+
+    def __init__(self, fatigue_threshold: float = 0.7):
+        self.fatigue_threshold = fatigue_threshold
+
+        # Fatigue pro Drive: drive -> fatigue_level (0-1)
+        self.fatigue_levels: Dict[str, float] = defaultdict(float)
+
+        # Unfulfillment streaks: drive -> consecutive_unfulfilled_cycles
+        self.unfulfillment_streaks: Dict[str, int] = defaultdict(int)
+
+        # Recovery tracking
+        self.recovery_history: Dict[str, List[Dict]] = defaultdict(list)
+
+        # Fatigue events
+        self.fatigue_events: List[Dict] = []
+
+        logger.info("😴 MotivationFatigueTracker initialisiert")
+
+    def update(self, drive: DriveType, was_fulfilled: bool, intensity: float = 0.5):
+        """Aktualisiert Fatigue-Status für einen Drive"""
+        drive_name = drive.value
+
+        if was_fulfilled:
+            # Fulfillment reduziert Fatigue
+            self.unfulfillment_streaks[drive_name] = 0
+            recovery = intensity * 0.2
+            self.fatigue_levels[drive_name] = max(0, self.fatigue_levels[drive_name] - recovery)
+
+            self.recovery_history[drive_name].append({
+                "timestamp": datetime.now().isoformat(),
+                "recovery_amount": recovery,
+            })
+        else:
+            # Unfulfillment erhöht Fatigue
+            self.unfulfillment_streaks[drive_name] += 1
+            streak = self.unfulfillment_streaks[drive_name]
+
+            # Fatigue steigt exponentiell mit Streak
+            fatigue_increase = 0.05 * (1 + streak * 0.1) * intensity
+            self.fatigue_levels[drive_name] = min(1.0, self.fatigue_levels[drive_name] + fatigue_increase)
+
+            # Fatigue-Event wenn Threshold überschritten
+            if self.fatigue_levels[drive_name] >= self.fatigue_threshold:
+                self._record_fatigue_event(drive, streak)
+
+    def _record_fatigue_event(self, drive: DriveType, streak: int):
+        """Zeichnet Fatigue-Event auf"""
+        event = {
+            "timestamp": datetime.now().isoformat(),
+            "drive": drive.value,
+            "fatigue_level": self.fatigue_levels[drive.value],
+            "unfulfillment_streak": streak,
+        }
+        self.fatigue_events.append(event)
+
+        # Nur letzte 100 Events
+        if len(self.fatigue_events) > 100:
+            self.fatigue_events = self.fatigue_events[-100:]
+
+        logger.warning(f"[Fatigue] {drive.value} erreicht Fatigue-Level {event['fatigue_level']:.2f}")
+
+    def get_fatigue(self, drive: DriveType) -> float:
+        """Gibt aktuelles Fatigue-Level zurück"""
+        return self.fatigue_levels.get(drive.value, 0.0)
+
+    def is_fatigued(self, drive: DriveType) -> bool:
+        """Prüft ob Drive erschöpft ist"""
+        return self.get_fatigue(drive) >= self.fatigue_threshold
+
+    def get_fatigued_drives(self) -> List[DriveType]:
+        """Gibt alle erschöpften Drives zurück"""
+        return [
+            DriveType(drive) for drive, level in self.fatigue_levels.items()
+            if level >= self.fatigue_threshold
+        ]
+
+    def suggest_recovery(self, drive: DriveType) -> Dict:
+        """Schlägt Recovery-Strategie vor"""
+        fatigue = self.get_fatigue(drive)
+        streak = self.unfulfillment_streaks.get(drive.value, 0)
+
+        suggestion = {
+            "drive": drive.value,
+            "fatigue_level": fatigue,
+            "streak": streak,
+            "urgency": "high" if fatigue > 0.8 else ("medium" if fatigue > 0.5 else "low"),
+            "recommendations": [],
+        }
+
+        if fatigue > 0.8:
+            suggestion["recommendations"].append(f"DRINGEND: {drive.value} sofort befriedigen")
+            suggestion["recommendations"].append("Andere Aktivitäten pausieren")
+        elif fatigue > 0.5:
+            suggestion["recommendations"].append(f"{drive.value} bald einplanen")
+            suggestion["recommendations"].append("Kleine Erfüllungen helfen auch")
+        else:
+            suggestion["recommendations"].append(f"{drive.value} im Auge behalten")
+
+        return suggestion
+
+    def apply_fatigue_modifier(self, drive: DriveType, base_value: float) -> float:
+        """Wendet Fatigue-Modifier auf einen Wert an"""
+        fatigue = self.get_fatigue(drive)
+        # Hohe Fatigue reduziert Effektivität
+        modifier = 1.0 - (fatigue * 0.5)  # Max 50% Reduktion
+        return base_value * modifier
+
+    def get_stats(self) -> Dict:
+        """Statistiken"""
+        return {
+            "fatigued_drives": len(self.get_fatigued_drives()),
+            "total_fatigue_events": len(self.fatigue_events),
+            "current_levels": dict(self.fatigue_levels),
+            "max_streak": max(self.unfulfillment_streaks.values()) if self.unfulfillment_streaks else 0,
+        }
 
 
 # =============================================================================

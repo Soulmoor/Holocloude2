@@ -1833,6 +1833,458 @@ class HoloPerceptionUnified:
 # CONVENIENCE FUNCTIONS
 # =============================================================================
 
+# =============================================================================
+# ADVANCED PERCEPTION: Attention Mechanism
+# =============================================================================
+
+class AttentionMechanism:
+    """
+    Attention-basierte Wahrnehmung - fokussiert auf relevante Inhalte.
+
+    Lernt was für den User wichtig ist und gewichtet Analyse entsprechend.
+    """
+
+    def __init__(self):
+        # Attention-Weights pro Content-Typ
+        self.content_weights: Dict[str, float] = {
+            "sentiment": 0.8,
+            "entities": 0.7,
+            "keywords": 0.7,
+            "emotion": 0.9,
+            "facts": 0.6,
+            "style": 0.5,
+            "structure": 0.4,
+        }
+
+        # Kontext-basierte Modifikatoren
+        self.context_modifiers: Dict[str, Dict[str, float]] = {
+            "emotional_conversation": {"emotion": 1.5, "sentiment": 1.3, "facts": 0.5},
+            "technical_discussion": {"facts": 1.5, "keywords": 1.3, "emotion": 0.5},
+            "casual_chat": {"sentiment": 1.2, "style": 1.2, "structure": 0.3},
+            "question_answering": {"facts": 1.5, "entities": 1.3, "keywords": 1.2},
+        }
+
+        # Gelernte User-Präferenzen
+        self.user_preferences: Dict[str, float] = {}
+
+        # Attention History für Lernen
+        self.attention_history: List[Dict] = []
+
+        logger.info("👁️ AttentionMechanism initialisiert")
+
+    def compute_attention(self, context: Dict = None) -> Dict[str, float]:
+        """Berechnet Attention-Weights basierend auf Kontext"""
+        weights = dict(self.content_weights)
+
+        # Kontext-Modifikatoren anwenden
+        if context:
+            context_type = context.get("conversation_type", "casual_chat")
+            modifiers = self.context_modifiers.get(context_type, {})
+
+            for feature, modifier in modifiers.items():
+                if feature in weights:
+                    weights[feature] *= modifier
+
+            # User-Mood berücksichtigen
+            user_mood = context.get("user_mood", 0)
+            if isinstance(user_mood, (int, float)):
+                if user_mood < -0.3:  # Negativ
+                    weights["emotion"] *= 1.3
+                    weights["sentiment"] *= 1.2
+
+        # User-Präferenzen anwenden
+        for feature, pref in self.user_preferences.items():
+            if feature in weights:
+                weights[feature] *= (0.5 + pref)  # 0.5x to 1.5x
+
+        # Normalisieren
+        total = sum(weights.values())
+        if total > 0:
+            weights = {k: v / total for k, v in weights.items()}
+
+        return weights
+
+    def focus_analysis(self, analysis_result: Dict, context: Dict = None) -> Dict:
+        """Filtert Analyse-Ergebnis basierend auf Attention"""
+        weights = self.compute_attention(context)
+
+        focused = {
+            "weights_applied": weights,
+            "priority_features": [],
+            "filtered_result": {},
+        }
+
+        # Features nach Gewicht sortieren
+        sorted_features = sorted(weights.items(), key=lambda x: x[1], reverse=True)
+        focused["priority_features"] = [f[0] for f in sorted_features[:5]]
+
+        # Relevante Features extrahieren
+        for feature, weight in sorted_features:
+            if weight > 0.1 and feature in analysis_result:
+                focused["filtered_result"][feature] = analysis_result[feature]
+
+        return focused
+
+    def learn_preference(self, feature: str, was_useful: bool, feedback_strength: float = 0.5):
+        """Lernt User-Präferenzen aus Feedback"""
+        current = self.user_preferences.get(feature, 0.5)
+
+        if was_useful:
+            new_pref = current + (1 - current) * 0.1 * feedback_strength
+        else:
+            new_pref = current - current * 0.1 * feedback_strength
+
+        self.user_preferences[feature] = max(0.1, min(1.0, new_pref))
+
+        # History speichern
+        self.attention_history.append({
+            "timestamp": datetime.now().isoformat(),
+            "feature": feature,
+            "was_useful": was_useful,
+            "new_preference": self.user_preferences[feature],
+        })
+
+    def get_stats(self) -> Dict:
+        return {
+            "learned_preferences": dict(self.user_preferences),
+            "history_size": len(self.attention_history),
+        }
+
+
+# =============================================================================
+# ADVANCED PERCEPTION: Perception Learner
+# =============================================================================
+
+class PerceptionLearner:
+    """
+    Lernt was für den User bei der Wahrnehmung wichtig ist.
+
+    Basiert auf:
+    - Welche Analyse-Ergebnisse der User nutzt
+    - Feedback auf Zusammenfassungen
+    - Implizite Signale (Nachfragen, Reaktionen)
+    """
+
+    def __init__(self):
+        # Feature-Relevanz pro Kategorie
+        self.feature_relevance: Dict[str, Dict[str, float]] = {}
+
+        # Kategorie-Tracking
+        self.category_interactions: Dict[str, int] = {}
+
+        # Feedback-History
+        self.feedback_history: List[Dict] = []
+
+        logger.info("📚 PerceptionLearner initialisiert")
+
+    def record_usage(self, category: str, features_used: List[str],
+                     features_ignored: List[str]):
+        """Zeichnet auf welche Features genutzt wurden"""
+        if category not in self.feature_relevance:
+            self.feature_relevance[category] = {}
+
+        # Used features werden wichtiger
+        for feature in features_used:
+            current = self.feature_relevance[category].get(feature, 0.5)
+            self.feature_relevance[category][feature] = min(1.0, current + 0.1)
+
+        # Ignored features werden unwichtiger
+        for feature in features_ignored:
+            current = self.feature_relevance[category].get(feature, 0.5)
+            self.feature_relevance[category][feature] = max(0.1, current - 0.05)
+
+        self.category_interactions[category] = self.category_interactions.get(category, 0) + 1
+
+    def record_feedback(self, category: str, feature: str,
+                        feedback: str, value: float = 0.0):
+        """Zeichnet explizites Feedback auf"""
+        self.feedback_history.append({
+            "timestamp": datetime.now().isoformat(),
+            "category": category,
+            "feature": feature,
+            "feedback": feedback,
+            "value": value,
+        })
+
+        # Relevanz anpassen
+        if category not in self.feature_relevance:
+            self.feature_relevance[category] = {}
+
+        current = self.feature_relevance[category].get(feature, 0.5)
+        adjustment = value * 0.2  # -1 to +1 -> -0.2 to +0.2
+        self.feature_relevance[category][feature] = max(0.1, min(1.0, current + adjustment))
+
+    def get_recommended_features(self, category: str, limit: int = 5) -> List[str]:
+        """Gibt empfohlene Features für eine Kategorie zurück"""
+        relevance = self.feature_relevance.get(category, {})
+        if not relevance:
+            return ["sentiment", "keywords", "entities", "emotion", "summary"]
+
+        sorted_features = sorted(relevance.items(), key=lambda x: x[1], reverse=True)
+        return [f[0] for f in sorted_features[:limit]]
+
+    def should_include_feature(self, category: str, feature: str) -> bool:
+        """Prüft ob ein Feature für diese Kategorie relevant ist"""
+        relevance = self.feature_relevance.get(category, {}).get(feature, 0.5)
+        return relevance > 0.3
+
+    def get_stats(self) -> Dict:
+        return {
+            "categories_learned": len(self.feature_relevance),
+            "total_interactions": sum(self.category_interactions.values()),
+            "feedback_count": len(self.feedback_history),
+        }
+
+
+# =============================================================================
+# ADVANCED PERCEPTION: Perceptual Continuity
+# =============================================================================
+
+class PerceptualContinuity:
+    """
+    Trackt wie sich Wahrnehmung über Zeit entwickelt.
+
+    Ermöglicht:
+    - Erkennen von Veränderungen
+    - Kontinuität über Turns hinweg
+    - Vorhersage von Wahrnehmungs-Trajektorien
+    """
+
+    def __init__(self, memory_size: int = 100):
+        self.memory_size = memory_size
+
+        # Perception-Memory: item_id -> [perceptions over time]
+        self.perception_memory: Dict[str, List[Dict]] = {}
+
+        # Session-Perceptions (aktuelle Konversation)
+        self.session_perceptions: List[Dict] = []
+
+        # Deltas zwischen Wahrnehmungen
+        self.perception_deltas: List[Dict] = []
+
+        logger.info("🔄 PerceptualContinuity initialisiert")
+
+    def add_perception(self, item_id: str, perception: Dict,
+                       item_type: str = "text"):
+        """Fügt neue Wahrnehmung hinzu"""
+        timestamp = datetime.now().isoformat()
+
+        entry = {
+            "timestamp": timestamp,
+            "item_type": item_type,
+            "perception": perception,
+        }
+
+        # Zum Item-Memory hinzufügen
+        if item_id not in self.perception_memory:
+            self.perception_memory[item_id] = []
+
+        old_perceptions = self.perception_memory[item_id]
+        self.perception_memory[item_id].append(entry)
+
+        # Memory begrenzen
+        if len(self.perception_memory[item_id]) > 20:
+            self.perception_memory[item_id] = self.perception_memory[item_id][-20:]
+
+        # Delta berechnen wenn vorherige Wahrnehmung existiert
+        if old_perceptions:
+            delta = self._compute_delta(old_perceptions[-1]["perception"], perception)
+            self.perception_deltas.append({
+                "item_id": item_id,
+                "timestamp": timestamp,
+                "delta": delta,
+            })
+
+        # Session-Memory
+        self.session_perceptions.append(entry)
+        if len(self.session_perceptions) > self.memory_size:
+            self.session_perceptions = self.session_perceptions[-self.memory_size:]
+
+    def _compute_delta(self, old: Dict, new: Dict) -> Dict:
+        """Berechnet Unterschied zwischen zwei Wahrnehmungen"""
+        delta = {
+            "changed_features": [],
+            "sentiment_change": 0.0,
+            "overall_change": 0.0,
+        }
+
+        # Sentiment-Änderung
+        old_sent = old.get("sentiment", 0)
+        new_sent = new.get("sentiment", 0)
+        delta["sentiment_change"] = new_sent - old_sent
+
+        # Feature-Änderungen zählen
+        changes = 0
+        for key in set(list(old.keys()) + list(new.keys())):
+            if old.get(key) != new.get(key):
+                delta["changed_features"].append(key)
+                changes += 1
+
+        delta["overall_change"] = changes / max(1, len(set(list(old.keys()) + list(new.keys()))))
+
+        return delta
+
+    def get_perception_history(self, item_id: str) -> List[Dict]:
+        """Gibt Wahrnehmungs-Historie für ein Item zurück"""
+        return self.perception_memory.get(item_id, [])
+
+    def detect_significant_change(self, item_id: str, threshold: float = 0.3) -> Optional[Dict]:
+        """Erkennt signifikante Wahrnehmungs-Änderungen"""
+        history = self.perception_memory.get(item_id, [])
+        if len(history) < 2:
+            return None
+
+        # Letzte Änderung prüfen
+        old = history[-2]["perception"]
+        new = history[-1]["perception"]
+        delta = self._compute_delta(old, new)
+
+        if delta["overall_change"] >= threshold:
+            return {
+                "item_id": item_id,
+                "change_detected": True,
+                "delta": delta,
+                "previous": old,
+                "current": new,
+            }
+
+        return None
+
+    def get_session_summary(self) -> Dict:
+        """Gibt Zusammenfassung der Session-Wahrnehmungen"""
+        if not self.session_perceptions:
+            return {"count": 0}
+
+        sentiments = []
+        for p in self.session_perceptions:
+            sent = p["perception"].get("sentiment", 0)
+            if sent:
+                sentiments.append(sent)
+
+        return {
+            "count": len(self.session_perceptions),
+            "avg_sentiment": sum(sentiments) / max(1, len(sentiments)),
+            "sentiment_trend": "rising" if len(sentiments) > 1 and sentiments[-1] > sentiments[0] else "falling",
+            "types": list(set(p["item_type"] for p in self.session_perceptions)),
+        }
+
+    def get_stats(self) -> Dict:
+        return {
+            "items_tracked": len(self.perception_memory),
+            "session_perceptions": len(self.session_perceptions),
+            "deltas_recorded": len(self.perception_deltas),
+        }
+
+
+# =============================================================================
+# ADVANCED PERCEPTION: Salience Predictor
+# =============================================================================
+
+class SaliencePredictor:
+    """
+    Sagt vorher was für den User wichtig sein wird.
+
+    Ermöglicht proaktive Analyse der relevanten Aspekte.
+    """
+
+    def __init__(self):
+        # Gelernte Salience-Patterns
+        self.salience_patterns: Dict[str, Dict[str, float]] = {
+            "default": {"emotion": 0.8, "sentiment": 0.7, "entities": 0.6},
+        }
+
+        # Kontext-zu-Salience Mapping
+        self.context_salience: Dict[str, List[str]] = {
+            "anime": ["characters", "emotion", "story"],
+            "gaming": ["gameplay", "graphics", "story"],
+            "tech": ["features", "specs", "comparison"],
+            "personal": ["emotion", "sentiment", "empathy"],
+        }
+
+        # Prediction History
+        self.predictions: List[Dict] = []
+        self.prediction_accuracy: List[float] = []
+
+        logger.info("🎯 SaliencePredictor initialisiert")
+
+    def predict_salience(self, context: Dict, content_preview: str = "") -> Dict:
+        """Sagt vorher welche Aspekte salient sein werden"""
+        prediction = {
+            "high_salience": [],
+            "medium_salience": [],
+            "low_salience": [],
+            "confidence": 0.5,
+        }
+
+        # Kontext-basierte Vorhersage
+        topic = context.get("topic", "").lower()
+        user_interest = context.get("user_interest", "default")
+
+        # Pattern matching
+        for category, features in self.context_salience.items():
+            if category in topic or category in user_interest:
+                prediction["high_salience"].extend(features)
+                prediction["confidence"] += 0.1
+
+        # Content-basierte Hinweise
+        if content_preview:
+            if "?" in content_preview:
+                prediction["high_salience"].append("answer_quality")
+            if any(word in content_preview.lower() for word in ["gefühl", "fühle", "traurig", "freue"]):
+                prediction["high_salience"].append("emotion")
+                prediction["confidence"] += 0.1
+
+        # Default wenn nichts gefunden
+        if not prediction["high_salience"]:
+            prediction["high_salience"] = ["sentiment", "keywords", "summary"]
+
+        # Confidence begrenzen
+        prediction["confidence"] = min(0.95, prediction["confidence"])
+
+        # Speichern
+        self.predictions.append({
+            "timestamp": datetime.now().isoformat(),
+            "context": context,
+            "prediction": prediction,
+        })
+
+        return prediction
+
+    def record_accuracy(self, prediction: Dict, actual_salience: List[str]):
+        """Zeichnet auf wie genau die Vorhersage war"""
+        predicted = set(prediction.get("high_salience", []))
+        actual = set(actual_salience)
+
+        if not predicted:
+            accuracy = 0.0
+        else:
+            overlap = len(predicted & actual)
+            accuracy = overlap / len(predicted)
+
+        self.prediction_accuracy.append(accuracy)
+
+        # Nur letzte 100
+        if len(self.prediction_accuracy) > 100:
+            self.prediction_accuracy = self.prediction_accuracy[-100:]
+
+    def get_recommended_analysis(self, context: Dict) -> List[str]:
+        """Gibt empfohlene Analyse-Features basierend auf Vorhersage"""
+        prediction = self.predict_salience(context)
+        return prediction["high_salience"] + prediction["medium_salience"]
+
+    def get_stats(self) -> Dict:
+        avg_accuracy = sum(self.prediction_accuracy) / max(1, len(self.prediction_accuracy))
+        return {
+            "total_predictions": len(self.predictions),
+            "avg_accuracy": avg_accuracy,
+            "patterns_count": len(self.salience_patterns),
+        }
+
+
+# =============================================================================
+# FACTORY FUNCTION
+# =============================================================================
+
 def create_perception(mode: str = "hybrid", llm=None) -> HoloPerceptionUnified:
     """Erstellt eine HoloPerceptionUnified-Instanz"""
     mode_map = {
