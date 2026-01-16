@@ -2786,6 +2786,760 @@ class RealLearningEngine:
 
 
 # =============================================================================
+# ADVANCED LEARNING: REINFORCEMENT LEARNER
+# =============================================================================
+
+class ReinforcementLearner:
+    """
+    Q-Learning basiertes Reinforcement Learning für Holo.
+
+    Lernt aus Rewards welche Aktionen in welchen Situationen optimal sind.
+    Optimiert für langfristige Zufriedenheit statt kurzfristiger Reaktionen.
+    """
+
+    def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.95,
+                 exploration_rate: float = 0.2):
+        self.learning_rate = learning_rate      # α - wie schnell lernen
+        self.discount_factor = discount_factor  # γ - Wichtigkeit zukünftiger Rewards
+        self.exploration_rate = exploration_rate  # ε - Exploration vs Exploitation
+
+        # Q-Table: state -> action -> expected_reward
+        self.q_table: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
+
+        # Reward-History für Analyse
+        self.reward_history: List[Dict] = []
+        self.episode_rewards: List[float] = []
+
+        # Action-Definitionen
+        self.actions = {
+            "empathisch": ["trösten", "mitfühlen", "validieren", "zuhören"],
+            "informativ": ["erklären", "fakten_teilen", "recherchieren", "analysieren"],
+            "spielerisch": ["scherzen", "necken", "spielen", "kreativ_sein"],
+            "unterstützend": ["helfen", "ermutigen", "loben", "motivieren"],
+            "neugierig": ["nachfragen", "erkunden", "vertiefen", "interesse_zeigen"],
+            "zurückhaltend": ["abwarten", "beobachten", "kurz_antworten", "raum_geben"],
+        }
+
+        # State-Features
+        self.state_features = [
+            "user_mood",      # positiv/neutral/negativ
+            "topic_type",     # persönlich/faktisch/kreativ
+            "conversation_depth",  # flach/mittel/tief
+            "time_of_day",    # morgen/tag/abend/nacht
+            "energy_level",   # niedrig/mittel/hoch
+        ]
+
+        logger.info("🎯 ReinforcementLearner initialisiert")
+
+    def get_state_key(self, context: Dict) -> str:
+        """Extrahiert State-Key aus Kontext"""
+        features = []
+
+        # User Mood
+        mood = context.get("user_mood", "neutral")
+        if isinstance(mood, (int, float)):
+            mood = "positiv" if mood > 0.3 else ("negativ" if mood < -0.3 else "neutral")
+        features.append(f"mood:{mood}")
+
+        # Topic Type
+        topic = context.get("topic_type", "allgemein")
+        features.append(f"topic:{topic}")
+
+        # Conversation Depth
+        depth = context.get("message_count", 1)
+        depth_cat = "tief" if depth > 10 else ("mittel" if depth > 3 else "flach")
+        features.append(f"depth:{depth_cat}")
+
+        # Energy (Holo's)
+        energy = context.get("energy", 0.7)
+        energy_cat = "hoch" if energy > 0.7 else ("niedrig" if energy < 0.3 else "mittel")
+        features.append(f"energy:{energy_cat}")
+
+        return "|".join(sorted(features))
+
+    def choose_action(self, state: str, available_actions: List[str] = None) -> str:
+        """Wählt Aktion basierend auf Q-Values (ε-greedy)"""
+        if available_actions is None:
+            available_actions = list(self.actions.keys())
+
+        # Exploration: zufällige Aktion
+        if random.random() < self.exploration_rate:
+            return random.choice(available_actions)
+
+        # Exploitation: beste bekannte Aktion
+        state_q = self.q_table[state]
+
+        if not state_q:
+            # Noch keine Erfahrung - zufällig
+            return random.choice(available_actions)
+
+        # Beste Aktion für diesen State
+        best_action = max(available_actions, key=lambda a: state_q.get(a, 0))
+        return best_action
+
+    def learn(self, state: str, action: str, reward: float, next_state: str):
+        """Q-Learning Update"""
+        # Aktueller Q-Wert
+        current_q = self.q_table[state][action]
+
+        # Maximaler Q-Wert im nächsten State
+        next_max_q = max(self.q_table[next_state].values()) if self.q_table[next_state] else 0
+
+        # Q-Learning Formel: Q(s,a) = Q(s,a) + α * (r + γ * max(Q(s',a')) - Q(s,a))
+        new_q = current_q + self.learning_rate * (
+            reward + self.discount_factor * next_max_q - current_q
+        )
+
+        self.q_table[state][action] = new_q
+
+        # History speichern
+        self.reward_history.append({
+            "timestamp": datetime.now().isoformat(),
+            "state": state,
+            "action": action,
+            "reward": reward,
+            "q_before": current_q,
+            "q_after": new_q,
+        })
+
+        # Nur letzte 1000 behalten
+        if len(self.reward_history) > 1000:
+            self.reward_history = self.reward_history[-1000:]
+
+    def record_reward(self, context: Dict, action: str, reward: float,
+                      next_context: Dict = None):
+        """Externe API: Reward aufzeichnen und lernen"""
+        state = self.get_state_key(context)
+        next_state = self.get_state_key(next_context) if next_context else state
+
+        self.learn(state, action, reward, next_state)
+        self.episode_rewards.append(reward)
+
+        logger.debug(f"[RL] Reward {reward:+.2f} für {action} in {state[:30]}...")
+
+    def get_recommended_action(self, context: Dict) -> Tuple[str, float]:
+        """Empfiehlt beste Aktion für aktuellen Kontext"""
+        state = self.get_state_key(context)
+        action = self.choose_action(state)
+        confidence = self.q_table[state].get(action, 0)
+
+        return action, confidence
+
+    def get_action_values(self, context: Dict) -> Dict[str, float]:
+        """Gibt alle Action-Values für einen Kontext zurück"""
+        state = self.get_state_key(context)
+        return dict(self.q_table[state])
+
+    def decay_exploration(self, min_rate: float = 0.05):
+        """Reduziert Exploration-Rate über Zeit"""
+        self.exploration_rate = max(min_rate, self.exploration_rate * 0.995)
+
+    def get_stats(self) -> Dict:
+        """Statistiken über das Lernen"""
+        total_states = len(self.q_table)
+        total_updates = len(self.reward_history)
+        avg_reward = sum(self.episode_rewards[-100:]) / max(1, len(self.episode_rewards[-100:]))
+
+        return {
+            "total_states_learned": total_states,
+            "total_updates": total_updates,
+            "exploration_rate": self.exploration_rate,
+            "avg_recent_reward": avg_reward,
+            "best_actions": self._get_best_actions(),
+        }
+
+    def _get_best_actions(self) -> Dict[str, str]:
+        """Beste Aktion pro häufigem State"""
+        best = {}
+        for state, actions in list(self.q_table.items())[:10]:
+            if actions:
+                best_action = max(actions.items(), key=lambda x: x[1])
+                best[state[:40]] = f"{best_action[0]} ({best_action[1]:.2f})"
+        return best
+
+
+# =============================================================================
+# ADVANCED LEARNING: TRANSFER ENGINE
+# =============================================================================
+
+class TransferEngine:
+    """
+    Transfer Learning - überträgt Wissen zwischen verwandten Domains.
+
+    Beispiel: Wissen über Anime → hilft bei Manga-Verständnis
+    """
+
+    # Domain-Beziehungen (Quelle → Ziele mit Transfer-Stärke)
+    DOMAIN_RELATIONS = {
+        "anime": [("manga", 0.85), ("japan", 0.7), ("gaming", 0.4), ("serien", 0.3)],
+        "manga": [("anime", 0.85), ("japan", 0.6), ("comics", 0.5)],
+        "gaming": [("technik", 0.5), ("anime", 0.4), ("esports", 0.8)],
+        "japan": [("anime", 0.6), ("manga", 0.6), ("kultur", 0.7)],
+        "technik": [("gaming", 0.4), ("wissenschaft", 0.5), ("software", 0.8)],
+        "serien": [("filme", 0.7), ("anime", 0.3), ("entertainment", 0.8)],
+        "filme": [("serien", 0.7), ("anime", 0.2), ("entertainment", 0.8)],
+        "musik": [("entertainment", 0.6), ("japan", 0.3), ("kultur", 0.4)],
+        "wissenschaft": [("technik", 0.6), ("medizin", 0.5), ("weltraum", 0.7)],
+    }
+
+    # Konzept-Abstraktionen (spezifisch → allgemein)
+    CONCEPT_ABSTRACTIONS = {
+        # Studio-Wissen
+        "mappa": ["anime_studio", "animation", "japan_entertainment"],
+        "ufotable": ["anime_studio", "animation", "japan_entertainment"],
+        "kyoto_animation": ["anime_studio", "animation", "japan_entertainment"],
+        "wit_studio": ["anime_studio", "animation", "japan_entertainment"],
+
+        # Publisher
+        "shueisha": ["manga_publisher", "publisher", "japan_media"],
+        "kodansha": ["manga_publisher", "publisher", "japan_media"],
+        "square_enix": ["game_publisher", "publisher", "japan_media"],
+
+        # Genres (übertragbar)
+        "isekai": ["fantasy", "adventure", "fiction"],
+        "shonen": ["action", "adventure", "youth_media"],
+        "seinen": ["mature", "drama", "adult_media"],
+        "rpg": ["gaming", "story_driven", "character_progression"],
+        "jrpg": ["rpg", "japan_gaming", "story_driven"],
+
+        # Plattformen
+        "crunchyroll": ["streaming", "anime_platform", "subscription"],
+        "netflix": ["streaming", "platform", "subscription"],
+        "steam": ["gaming_platform", "pc_gaming", "digital_store"],
+        "playstation": ["gaming_platform", "console", "sony"],
+        "nintendo": ["gaming_platform", "console", "japan_gaming"],
+    }
+
+    def __init__(self):
+        # Transfer-History
+        self.transfers: List[Dict] = []
+        self.successful_transfers = 0
+        self.total_transfers = 0
+
+        # Gelernte Verbindungen (dynamisch)
+        self.learned_relations: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
+
+        logger.info("🔄 TransferEngine initialisiert")
+
+    def get_related_domains(self, domain: str) -> List[Tuple[str, float]]:
+        """Gibt verwandte Domains mit Transfer-Stärke zurück"""
+        domain_lower = domain.lower()
+
+        # Statische + dynamisch gelernte Relationen
+        static = self.DOMAIN_RELATIONS.get(domain_lower, [])
+        learned = self.learned_relations.get(domain_lower, [])
+
+        # Kombinieren und deduplizieren
+        combined = {}
+        for target, strength in static + learned:
+            if target in combined:
+                combined[target] = max(combined[target], strength)
+            else:
+                combined[target] = strength
+
+        return sorted(combined.items(), key=lambda x: x[1], reverse=True)
+
+    def get_abstract_concepts(self, specific: str) -> List[str]:
+        """Gibt abstrakte Konzepte für spezifischen Begriff zurück"""
+        specific_lower = specific.lower().replace(" ", "_")
+        return self.CONCEPT_ABSTRACTIONS.get(specific_lower, [])
+
+    def transfer_knowledge(self, fact: 'LearnedFact', target_domain: str) -> Optional['LearnedFact']:
+        """Überträgt ein Faktum in eine andere Domain"""
+        source_domain = fact.category.value if hasattr(fact.category, 'value') else str(fact.category)
+
+        # Transfer-Stärke ermitteln
+        relations = self.get_related_domains(source_domain)
+        transfer_strength = 0.0
+
+        for domain, strength in relations:
+            if domain == target_domain.lower():
+                transfer_strength = strength
+                break
+
+        if transfer_strength < 0.2:
+            return None  # Zu schwache Verbindung
+
+        self.total_transfers += 1
+
+        # Neues Faktum mit reduzierter Wichtigkeit
+        try:
+            target_category = FactCategory(target_domain.lower())
+        except ValueError:
+            target_category = FactCategory.GENERAL
+
+        transferred = LearnedFact(
+            fact_id=f"transfer_{fact.fact_id}_{target_domain}",
+            content=f"[Transfer] {fact.content}",
+            category=target_category,
+            topic=fact.topic,
+            keywords=fact.keywords + [f"transfer_from_{source_domain}"],
+            source_title=f"Transfer: {fact.source_title}",
+            source_url=fact.source_url,
+            source_feed="TransferEngine",
+            importance=fact.importance * transfer_strength,
+            trust_score=fact.trust_score * 0.8,  # Leicht reduziert
+            tags=fact.tags + ["transferred"],
+            related_facts=[fact.fact_id],
+        )
+
+        self.successful_transfers += 1
+        self.transfers.append({
+            "timestamp": datetime.now().isoformat(),
+            "source_domain": source_domain,
+            "target_domain": target_domain,
+            "transfer_strength": transfer_strength,
+            "fact_id": fact.fact_id,
+        })
+
+        logger.debug(f"[Transfer] {source_domain} → {target_domain} (Stärke: {transfer_strength:.2f})")
+
+        return transferred
+
+    def learn_relation(self, domain_a: str, domain_b: str, strength: float):
+        """Lernt neue Domain-Beziehung aus Erfahrung"""
+        domain_a = domain_a.lower()
+        domain_b = domain_b.lower()
+
+        # Bestehende Relation aktualisieren oder neue hinzufügen
+        existing = dict(self.learned_relations[domain_a])
+        existing[domain_b] = max(existing.get(domain_b, 0), strength)
+        self.learned_relations[domain_a] = list(existing.items())
+
+        # Bidirektional (etwas schwächer)
+        existing_b = dict(self.learned_relations[domain_b])
+        existing_b[domain_a] = max(existing_b.get(domain_a, 0), strength * 0.8)
+        self.learned_relations[domain_b] = list(existing_b.items())
+
+    def suggest_transfers(self, facts: List['LearnedFact'],
+                          target_domain: str) -> List['LearnedFact']:
+        """Schlägt relevante Transfers für eine Domain vor"""
+        suggestions = []
+
+        for fact in facts:
+            transferred = self.transfer_knowledge(fact, target_domain)
+            if transferred and transferred.importance > 0.3:
+                suggestions.append(transferred)
+
+        # Nach Wichtigkeit sortieren
+        return sorted(suggestions, key=lambda f: f.importance, reverse=True)[:10]
+
+    def get_stats(self) -> Dict:
+        """Transfer-Statistiken"""
+        return {
+            "total_transfers": self.total_transfers,
+            "successful_transfers": self.successful_transfers,
+            "success_rate": self.successful_transfers / max(1, self.total_transfers),
+            "learned_relations": len(self.learned_relations),
+            "recent_transfers": self.transfers[-10:],
+        }
+
+
+# =============================================================================
+# ADVANCED LEARNING: KNOWLEDGE GENERALIZER
+# =============================================================================
+
+class KnowledgeGeneralizer:
+    """
+    Extrahiert allgemeine Regeln und Muster aus spezifischen Fakten.
+
+    Beispiel:
+    - Fakt 1: "Anime X hat 12 Episoden"
+    - Fakt 2: "Anime Y hat 13 Episoden"
+    - Fakt 3: "Anime Z hat 12 Episoden"
+    → Regel: "Die meisten Anime-Staffeln haben 12-13 Episoden"
+    """
+
+    def __init__(self):
+        # Generalisierte Regeln
+        self.rules: Dict[str, Dict] = {}  # rule_id -> rule_data
+
+        # Pattern-Templates
+        self.patterns = {
+            "quantity": r'(\d+(?:\.\d+)?)\s*(episoden?|staffeln?|millionen?|prozent|jahre?|monate?|wochen?|tage?)',
+            "entity_action": r'([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)*)\s+(wird|hat|ist|erhält|startet|erscheint)',
+            "comparison": r'(größte|beste|erste|schnellste|meiste|höchste|niedrigste)',
+            "temporal": r'(in\s+\d{4}|ab\s+\w+|seit\s+\d{4}|bis\s+\d{4})',
+        }
+
+        # Statistik-Aggregatoren pro Kategorie
+        self.category_stats: Dict[str, Dict] = defaultdict(lambda: {
+            "quantities": defaultdict(list),  # unit -> [values]
+            "entities": Counter(),
+            "actions": Counter(),
+            "temporals": [],
+        })
+
+        logger.info("📊 KnowledgeGeneralizer initialisiert")
+
+    def analyze_fact(self, fact: 'LearnedFact'):
+        """Analysiert ein Faktum und extrahiert Muster"""
+        content = fact.content
+        category = fact.category.value if hasattr(fact.category, 'value') else str(fact.category)
+        stats = self.category_stats[category]
+
+        # Quantitäten extrahieren
+        quantity_matches = re.findall(self.patterns["quantity"], content.lower())
+        for value, unit in quantity_matches:
+            try:
+                num_value = float(value.replace(",", "."))
+                stats["quantities"][unit].append(num_value)
+            except ValueError:
+                pass
+
+        # Entitäten extrahieren
+        entity_matches = re.findall(self.patterns["entity_action"], content)
+        for entity, action in entity_matches:
+            stats["entities"][entity] += 1
+            stats["actions"][action] += 1
+
+        # Temporale Muster
+        temporal_matches = re.findall(self.patterns["temporal"], content.lower())
+        stats["temporals"].extend(temporal_matches)
+
+    def generate_rules(self, category: str, min_samples: int = 5) -> List[Dict]:
+        """Generiert Regeln aus gesammelten Statistiken"""
+        stats = self.category_stats.get(category, {})
+        if not stats:
+            return []
+
+        rules = []
+
+        # Quantitäts-Regeln
+        for unit, values in stats.get("quantities", {}).items():
+            if len(values) >= min_samples:
+                avg_val = sum(values) / len(values)
+                min_val = min(values)
+                max_val = max(values)
+
+                # Regel erstellen
+                rule = {
+                    "rule_id": f"qty_{category}_{unit}",
+                    "type": "quantity_pattern",
+                    "category": category,
+                    "description": f"Typische {unit} in {category}: {avg_val:.1f} (Bereich: {min_val:.0f}-{max_val:.0f})",
+                    "confidence": min(0.95, len(values) / 20),  # Mehr Samples = höheres Vertrauen
+                    "samples": len(values),
+                    "statistics": {
+                        "mean": avg_val,
+                        "min": min_val,
+                        "max": max_val,
+                        "median": sorted(values)[len(values)//2],
+                    },
+                    "created": datetime.now().isoformat(),
+                }
+                rules.append(rule)
+                self.rules[rule["rule_id"]] = rule
+
+        # Häufige Entitäten
+        top_entities = stats.get("entities", Counter()).most_common(5)
+        if top_entities and top_entities[0][1] >= min_samples:
+            rule = {
+                "rule_id": f"entity_{category}_frequent",
+                "type": "frequent_entities",
+                "category": category,
+                "description": f"Häufig erwähnte Entitäten in {category}",
+                "entities": [{"name": e, "count": c} for e, c in top_entities],
+                "confidence": 0.8,
+                "created": datetime.now().isoformat(),
+            }
+            rules.append(rule)
+            self.rules[rule["rule_id"]] = rule
+
+        return rules
+
+    def apply_rule(self, rule_id: str, context: Dict) -> Optional[str]:
+        """Wendet eine Regel an um Vorhersagen zu machen"""
+        rule = self.rules.get(rule_id)
+        if not rule:
+            return None
+
+        if rule["type"] == "quantity_pattern":
+            stats = rule["statistics"]
+            return f"Basierend auf {rule['samples']} Beispielen: erwarteter Wert ~{stats['mean']:.1f}"
+
+        return None
+
+    def get_rules_for_category(self, category: str) -> List[Dict]:
+        """Gibt alle Regeln für eine Kategorie zurück"""
+        return [r for r in self.rules.values() if r.get("category") == category]
+
+    def predict(self, category: str, attribute: str) -> Optional[Dict]:
+        """Macht eine Vorhersage basierend auf gelernten Regeln"""
+        rule_id = f"qty_{category}_{attribute}"
+        rule = self.rules.get(rule_id)
+
+        if rule and rule["type"] == "quantity_pattern":
+            stats = rule["statistics"]
+            return {
+                "predicted_value": stats["mean"],
+                "confidence": rule["confidence"],
+                "range": (stats["min"], stats["max"]),
+                "based_on": rule["samples"],
+            }
+
+        return None
+
+    def process_facts_batch(self, facts: List['LearnedFact']) -> Dict:
+        """Verarbeitet eine Batch von Fakten und generiert Regeln"""
+        # Alle Fakten analysieren
+        for fact in facts:
+            self.analyze_fact(fact)
+
+        # Regeln für alle Kategorien generieren
+        all_rules = []
+        categories_processed = set()
+
+        for fact in facts:
+            category = fact.category.value if hasattr(fact.category, 'value') else str(fact.category)
+            if category not in categories_processed:
+                rules = self.generate_rules(category)
+                all_rules.extend(rules)
+                categories_processed.add(category)
+
+        return {
+            "facts_processed": len(facts),
+            "categories": list(categories_processed),
+            "rules_generated": len(all_rules),
+            "rules": all_rules,
+        }
+
+    def get_stats(self) -> Dict:
+        """Statistiken über Generalisierung"""
+        return {
+            "total_rules": len(self.rules),
+            "categories_analyzed": len(self.category_stats),
+            "rules_by_type": Counter(r["type"] for r in self.rules.values()),
+            "avg_confidence": sum(r.get("confidence", 0) for r in self.rules.values()) / max(1, len(self.rules)),
+        }
+
+
+# =============================================================================
+# ADVANCED LEARNING: ACTIVE LEARNER
+# =============================================================================
+
+class ActiveLearner:
+    """
+    Active Learning - stellt strategische Fragen um effizienter zu lernen.
+
+    Identifiziert Wissenslücken und generiert gezielte Fragen.
+    """
+
+    # Frage-Templates nach Typ
+    QUESTION_TEMPLATES = {
+        "clarification": [
+            "Was genau meinst du mit {topic}?",
+            "Kannst du mir mehr über {topic} erzählen?",
+            "Wie würdest du {topic} beschreiben?",
+        ],
+        "preference": [
+            "Welche Art von {category} magst du am liebsten?",
+            "Was gefällt dir besonders an {topic}?",
+            "Hast du einen Favoriten bei {category}?",
+        ],
+        "experience": [
+            "Wie lange beschäftigst du dich schon mit {topic}?",
+            "Was war dein erstes Erlebnis mit {category}?",
+            "Wie bist du zu {topic} gekommen?",
+        ],
+        "opinion": [
+            "Was hältst du von {topic}?",
+            "Findest du {topic} interessant?",
+            "Wie siehst du {topic}?",
+        ],
+        "factual": [
+            "Weißt du, wann {topic} erschienen ist?",
+            "Kennst du weitere Details zu {topic}?",
+            "Was weißt du über {topic}?",
+        ],
+        "connection": [
+            "Gibt es andere {category}, die dir ähnlich gefallen wie {topic}?",
+            "Verbindest du {topic} mit anderen Dingen?",
+            "Erinnert dich {topic} an etwas?",
+        ],
+    }
+
+    def __init__(self, knowledge_db: 'LearningKnowledgeDB' = None):
+        self.knowledge_db = knowledge_db
+
+        # Unsicherheits-Tracking
+        self.uncertainty_scores: Dict[str, float] = defaultdict(lambda: 1.0)
+
+        # Fragen-History (um Wiederholungen zu vermeiden)
+        self.asked_questions: List[Dict] = []
+        self.question_cooldown: Dict[str, float] = {}  # topic -> timestamp
+
+        # Lern-Prioritäten
+        self.learning_priorities: Dict[str, float] = {}
+
+        logger.info("❓ ActiveLearner initialisiert")
+
+    def calculate_uncertainty(self, topic: str, category: str = None) -> float:
+        """Berechnet Unsicherheit über ein Thema (0=sicher, 1=unsicher)"""
+        if not self.knowledge_db:
+            return 0.5
+
+        # Fakten zu diesem Thema suchen
+        facts = self.knowledge_db.search(topic, limit=20)
+
+        if not facts:
+            return 1.0  # Keine Fakten = maximale Unsicherheit
+
+        # Faktoren für Unsicherheit
+        fact_count = len(facts)
+        avg_importance = sum(f.importance for f in facts) / fact_count
+        avg_trust = sum(f.trust_score for f in facts) / fact_count
+        source_diversity = len(set(f.source_feed for f in facts))
+
+        # Unsicherheit berechnen
+        uncertainty = 1.0
+        uncertainty -= min(0.4, fact_count * 0.04)      # Mehr Fakten = weniger unsicher
+        uncertainty -= avg_importance * 0.2             # Wichtigere Fakten = weniger unsicher
+        uncertainty -= avg_trust * 0.2                  # Vertrauenswürdiger = weniger unsicher
+        uncertainty -= min(0.2, source_diversity * 0.05)  # Mehr Quellen = weniger unsicher
+
+        return max(0.0, min(1.0, uncertainty))
+
+    def identify_knowledge_gaps(self, recent_topics: List[str],
+                                 threshold: float = 0.6) -> List[Dict]:
+        """Identifiziert Wissenslücken basierend auf kürzlich besprochenen Themen"""
+        gaps = []
+
+        for topic in recent_topics:
+            uncertainty = self.calculate_uncertainty(topic)
+            self.uncertainty_scores[topic] = uncertainty
+
+            if uncertainty >= threshold:
+                gaps.append({
+                    "topic": topic,
+                    "uncertainty": uncertainty,
+                    "priority": uncertainty * self.learning_priorities.get(topic, 1.0),
+                })
+
+        # Nach Priorität sortieren
+        return sorted(gaps, key=lambda x: x["priority"], reverse=True)
+
+    def generate_question(self, topic: str, category: str = None,
+                          question_type: str = None) -> Optional[Dict]:
+        """Generiert eine strategische Frage zu einem Thema"""
+        # Cooldown prüfen (nicht zu oft zum gleichen Thema fragen)
+        cooldown_until = self.question_cooldown.get(topic, 0)
+        if time.time() < cooldown_until:
+            return None
+
+        # Unsicherheit bestimmt Fragentyp
+        uncertainty = self.uncertainty_scores.get(topic, self.calculate_uncertainty(topic))
+
+        if question_type is None:
+            if uncertainty > 0.8:
+                question_type = "clarification"
+            elif uncertainty > 0.6:
+                question_type = random.choice(["factual", "experience"])
+            elif uncertainty > 0.4:
+                question_type = random.choice(["preference", "opinion"])
+            else:
+                question_type = random.choice(["connection", "opinion"])
+
+        # Template auswählen
+        templates = self.QUESTION_TEMPLATES.get(question_type, self.QUESTION_TEMPLATES["clarification"])
+        template = random.choice(templates)
+
+        # Frage formatieren
+        question = template.format(
+            topic=topic,
+            category=category or "diesem Thema"
+        )
+
+        # Cooldown setzen (10 Minuten)
+        self.question_cooldown[topic] = time.time() + 600
+
+        result = {
+            "question": question,
+            "topic": topic,
+            "category": category,
+            "type": question_type,
+            "uncertainty_before": uncertainty,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        self.asked_questions.append(result)
+
+        # Nur letzte 100 Fragen behalten
+        if len(self.asked_questions) > 100:
+            self.asked_questions = self.asked_questions[-100:]
+
+        return result
+
+    def process_answer(self, question_data: Dict, answer: str,
+                       satisfaction: float = 0.7):
+        """Verarbeitet eine Antwort und aktualisiert Unsicherheit"""
+        topic = question_data.get("topic")
+        if not topic:
+            return
+
+        # Unsicherheit reduzieren basierend auf Antwort-Qualität
+        old_uncertainty = self.uncertainty_scores.get(topic, 1.0)
+
+        # Längere, detailliertere Antworten reduzieren Unsicherheit mehr
+        answer_quality = min(1.0, len(answer) / 200) * satisfaction
+        reduction = answer_quality * 0.3
+
+        new_uncertainty = max(0.1, old_uncertainty - reduction)
+        self.uncertainty_scores[topic] = new_uncertainty
+
+        logger.debug(f"[ActiveLearner] {topic}: Unsicherheit {old_uncertainty:.2f} → {new_uncertainty:.2f}")
+
+    def should_ask_question(self, context: Dict) -> bool:
+        """Entscheidet ob jetzt ein guter Zeitpunkt für eine Frage ist"""
+        # Nicht zu oft fragen
+        recent_questions = [q for q in self.asked_questions
+                          if time.time() - datetime.fromisoformat(q["timestamp"]).timestamp() < 300]
+        if len(recent_questions) >= 2:
+            return False
+
+        # Nicht in negativer Stimmung fragen
+        user_mood = context.get("user_mood", 0)
+        if isinstance(user_mood, (int, float)) and user_mood < -0.3:
+            return False
+
+        # Nicht bei sehr kurzen Nachrichten
+        message_length = context.get("message_length", 50)
+        if message_length < 10:
+            return False
+
+        return True
+
+    def get_next_question(self, context: Dict, recent_topics: List[str]) -> Optional[Dict]:
+        """Gibt die nächste beste Frage zurück (oder None)"""
+        if not self.should_ask_question(context):
+            return None
+
+        # Wissenslücken finden
+        gaps = self.identify_knowledge_gaps(recent_topics)
+
+        if not gaps:
+            return None
+
+        # Beste Lücke auswählen
+        best_gap = gaps[0]
+        return self.generate_question(best_gap["topic"])
+
+    def set_priority(self, topic: str, priority: float):
+        """Setzt Lern-Priorität für ein Thema"""
+        self.learning_priorities[topic] = max(0.1, min(2.0, priority))
+
+    def get_stats(self) -> Dict:
+        """Statistiken über Active Learning"""
+        return {
+            "total_questions_asked": len(self.asked_questions),
+            "topics_with_uncertainty": len(self.uncertainty_scores),
+            "avg_uncertainty": sum(self.uncertainty_scores.values()) / max(1, len(self.uncertainty_scores)),
+            "high_uncertainty_topics": [t for t, u in self.uncertainty_scores.items() if u > 0.7],
+            "recent_questions": self.asked_questions[-5:],
+        }
+
+
+# =============================================================================
 # HAUPT-KLASSE: HOLO LEARNING SYSTEM
 # =============================================================================
 
@@ -2802,6 +3556,12 @@ class HoloLearningSystem:
     - HoloDatabaseManager Integration für persistente Speicherung
     - Automatisches Logging von Learning Sessions
     - Synchronisation von Topics mit Database
+
+    NEU in v3.0 (Advanced Learning):
+    - ReinforcementLearner: Q-Learning für optimale Aktionen
+    - TransferEngine: Wissenstransfer zwischen Domains
+    - KnowledgeGeneralizer: Regeln aus Fakten extrahieren
+    - ActiveLearner: Strategische Fragen stellen
     """
 
     def __init__(self, data_dir: Path = None, db: 'HoloDatabaseManager' = None):
@@ -2829,7 +3589,15 @@ class HoloLearningSystem:
         self.meta_observer = None  # HoloMetaObserver (wird von außen gesetzt)
         self.sandbox = None        # HoloSandbox für Entscheidungen
 
-        logger.info("🧠 HoloLearningSystem v2.0 initialisiert")
+        # =====================================================================
+        # NEU v3.0: Advanced Learning Komponenten
+        # =====================================================================
+        self.reinforcement = ReinforcementLearner()
+        self.transfer = TransferEngine()
+        self.generalizer = KnowledgeGeneralizer()
+        self.active_learner = ActiveLearner(self.knowledge)
+
+        logger.info("🧠 HoloLearningSystem v3.0 initialisiert (mit Advanced Learning)")
 
     def connect_database(self, db: 'HoloDatabaseManager'):
         """Verbindet Database nachträglich an alle Komponenten"""
@@ -2994,6 +3762,261 @@ class HoloLearningSystem:
         ]
 
     # =========================================================================
+    # ADVANCED LEARNING: REINFORCEMENT
+    # =========================================================================
+
+    def record_reward(self, context: Dict, action: str, reward: float,
+                      next_context: Dict = None):
+        """
+        Zeichnet Reward für eine Aktion auf (Reinforcement Learning).
+
+        Args:
+            context: Aktueller Kontext (user_mood, topic_type, etc.)
+            action: Durchgeführte Aktion (empathisch, informativ, etc.)
+            reward: Reward-Wert (-1.0 bis +1.0)
+            next_context: Optional - Kontext nach der Aktion
+        """
+        self.reinforcement.record_reward(context, action, reward, next_context)
+
+        # Auch an Meta-Observer melden
+        if self.meta_observer:
+            try:
+                from holo_meta_cognition import ObservationType
+                self.meta_observer.observe(
+                    ObservationType.LEARNING,
+                    component="reinforcement_learner",
+                    action=f"reward_recorded:{action}",
+                    context=context,
+                    outcome=f"Reward: {reward:+.2f}",
+                    success=reward > 0,
+                )
+            except Exception:
+                pass
+
+    def get_recommended_action(self, context: Dict) -> Tuple[str, float]:
+        """
+        Gibt empfohlene Aktion für aktuellen Kontext zurück.
+
+        Returns:
+            Tuple[action_name, confidence]
+        """
+        return self.reinforcement.get_recommended_action(context)
+
+    def get_action_values(self, context: Dict) -> Dict[str, float]:
+        """Gibt Q-Values für alle Aktionen im Kontext zurück"""
+        return self.reinforcement.get_action_values(context)
+
+    # =========================================================================
+    # ADVANCED LEARNING: TRANSFER
+    # =========================================================================
+
+    def transfer_knowledge(self, source_domain: str, target_domain: str,
+                           limit: int = 10) -> List[LearnedFact]:
+        """
+        Überträgt Wissen von einer Domain in eine andere.
+
+        Args:
+            source_domain: Quell-Kategorie (z.B. "anime")
+            target_domain: Ziel-Kategorie (z.B. "manga")
+            limit: Max. Anzahl zu übertragender Fakten
+
+        Returns:
+            Liste der übertragenen Fakten
+        """
+        # Fakten aus Quell-Domain holen
+        try:
+            source_cat = FactCategory(source_domain.lower())
+        except ValueError:
+            source_cat = FactCategory.GENERAL
+
+        source_facts = self.knowledge.get_by_category(source_cat, limit=limit * 2)
+
+        # Transfer durchführen
+        transferred = self.transfer.suggest_transfers(source_facts, target_domain)
+
+        # Übertragene Fakten speichern
+        added = 0
+        for fact in transferred[:limit]:
+            is_new, _ = self.knowledge.add_fact(fact)
+            if is_new:
+                added += 1
+
+        logger.info(f"[Transfer] {source_domain} → {target_domain}: {added} Fakten übertragen")
+        return transferred[:limit]
+
+    def get_related_domains(self, domain: str) -> List[Tuple[str, float]]:
+        """Gibt verwandte Domains mit Transfer-Stärke zurück"""
+        return self.transfer.get_related_domains(domain)
+
+    def learn_domain_relation(self, domain_a: str, domain_b: str, strength: float):
+        """Lernt eine neue Domain-Beziehung aus Erfahrung"""
+        self.transfer.learn_relation(domain_a, domain_b, strength)
+
+    # =========================================================================
+    # ADVANCED LEARNING: GENERALIZATION
+    # =========================================================================
+
+    def generalize_knowledge(self, category: str = None) -> Dict:
+        """
+        Generalisiert Wissen zu Regeln.
+
+        Args:
+            category: Optional - nur diese Kategorie analysieren
+
+        Returns:
+            Dict mit generierten Regeln
+        """
+        # Fakten sammeln
+        if category:
+            try:
+                cat_enum = FactCategory(category.lower())
+            except ValueError:
+                cat_enum = FactCategory.GENERAL
+            facts = self.knowledge.get_by_category(cat_enum, limit=500)
+        else:
+            facts = self.knowledge.get_recent(limit=500)
+
+        # Generalisieren
+        result = self.generalizer.process_facts_batch(facts)
+
+        logger.info(f"[Generalize] {result['rules_generated']} Regeln aus {result['facts_processed']} Fakten")
+        return result
+
+    def get_rules(self, category: str = None) -> List[Dict]:
+        """Gibt generalisierte Regeln zurück"""
+        if category:
+            return self.generalizer.get_rules_for_category(category)
+        return list(self.generalizer.rules.values())
+
+    def predict_from_rules(self, category: str, attribute: str) -> Optional[Dict]:
+        """
+        Macht eine Vorhersage basierend auf gelernten Regeln.
+
+        Beispiel: predict_from_rules("anime", "episoden")
+        → {"predicted_value": 12.5, "confidence": 0.8, ...}
+        """
+        return self.generalizer.predict(category, attribute)
+
+    # =========================================================================
+    # ADVANCED LEARNING: ACTIVE LEARNING
+    # =========================================================================
+
+    def should_ask_question(self, context: Dict) -> bool:
+        """Prüft ob jetzt ein guter Zeitpunkt für eine Frage ist"""
+        return self.active_learner.should_ask_question(context)
+
+    def get_learning_question(self, context: Dict,
+                               recent_topics: List[str] = None) -> Optional[Dict]:
+        """
+        Generiert eine strategische Lern-Frage.
+
+        Args:
+            context: Aktueller Kontext
+            recent_topics: Kürzlich besprochene Themen
+
+        Returns:
+            Dict mit Frage oder None
+        """
+        if recent_topics is None:
+            # Aktive Topics als Fallback
+            active = self.topic_tracker.get_active_topics(10)
+            recent_topics = [t.topic for t in active]
+
+        return self.active_learner.get_next_question(context, recent_topics)
+
+    def process_question_answer(self, question_data: Dict, answer: str,
+                                 satisfaction: float = 0.7):
+        """Verarbeitet eine Antwort auf eine Lern-Frage"""
+        self.active_learner.process_answer(question_data, answer, satisfaction)
+
+    def get_knowledge_gaps(self, topics: List[str] = None,
+                           threshold: float = 0.6) -> List[Dict]:
+        """
+        Identifiziert Wissenslücken.
+
+        Returns:
+            Liste von Topics mit hoher Unsicherheit
+        """
+        if topics is None:
+            active = self.topic_tracker.get_active_topics(20)
+            topics = [t.topic for t in active]
+
+        return self.active_learner.identify_knowledge_gaps(topics, threshold)
+
+    def set_learning_priority(self, topic: str, priority: float):
+        """Setzt Lern-Priorität für ein Thema (0.1-2.0)"""
+        self.active_learner.set_priority(topic, priority)
+
+    # =========================================================================
+    # ADVANCED LEARNING: KOMBINIERTE METHODEN
+    # =========================================================================
+
+    def smart_learn(self, message: str, context: Dict) -> Dict:
+        """
+        Intelligentes Lernen aus einer Nachricht.
+
+        Kombiniert alle Advanced Learning Komponenten:
+        1. Extraktion von Fakten
+        2. Generalisierung zu Regeln
+        3. Transfer zu verwandten Domains
+        4. Identifikation von Wissenslücken
+
+        Returns:
+            Dict mit allen Lern-Ergebnissen
+        """
+        results = {
+            "facts_extracted": 0,
+            "rules_updated": 0,
+            "transfers": 0,
+            "knowledge_gaps": [],
+            "suggested_question": None,
+        }
+
+        # 1. Fakten extrahieren
+        extracted = self.learning.extractor.extract_facts(message, max_facts=3)
+        for fact_data in extracted:
+            topic = fact_data.get("topic", "allgemein")
+            fact = LearnedFact(
+                fact_id="",
+                content=fact_data["content"],
+                category=FactCategory.GENERAL,
+                topic=topic,
+                keywords=fact_data.get("keywords", []),
+                source_title="Conversation",
+                source_url="",
+                source_feed="User",
+                importance=fact_data.get("importance", 0.5),
+            )
+            is_new, _ = self.knowledge.add_fact(fact)
+            if is_new:
+                results["facts_extracted"] += 1
+
+                # 2. Generalisieren
+                self.generalizer.analyze_fact(fact)
+
+        # 3. Wissenslücken identifizieren
+        topics_mentioned = [f.get("topic", "") for f in extracted if f.get("topic")]
+        if topics_mentioned:
+            gaps = self.active_learner.identify_knowledge_gaps(topics_mentioned)
+            results["knowledge_gaps"] = gaps[:3]
+
+            # 4. Frage vorschlagen
+            if gaps and self.active_learner.should_ask_question(context):
+                question = self.active_learner.generate_question(gaps[0]["topic"])
+                results["suggested_question"] = question
+
+        return results
+
+    def get_advanced_stats(self) -> Dict:
+        """Statistiken über Advanced Learning"""
+        return {
+            "reinforcement": self.reinforcement.get_stats(),
+            "transfer": self.transfer.get_stats(),
+            "generalization": self.generalizer.get_stats(),
+            "active_learning": self.active_learner.get_stats(),
+        }
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -3003,6 +4026,7 @@ class HoloLearningSystem:
             "learning": self.learning.get_stats(),
             "emotional_memories": self.emotional_memory.get_stats(),
             "mood": self.mood.get_mood_trend(),
+            "advanced_learning": self.get_advanced_stats(),
         }
 
     def get_knowledge_stats(self) -> Dict:

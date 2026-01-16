@@ -2085,6 +2085,282 @@ class HoloMetaObserver:
 
 
 # =============================================================================
+# META-LEARNING OPTIMIZER
+# =============================================================================
+
+class MetaLearningOptimizer:
+    """
+    Meta-Learning: Lernt wie man am besten lernt.
+
+    Analysiert Lernstrategien und optimiert:
+    - Welche Lernmethoden für welche Domains am besten funktionieren
+    - Optimale Lernraten und Parameter
+    - Zeitpunkte für Wiederholung (Spaced Repetition)
+    - Effektivität verschiedener Fragentypen
+    """
+
+    def __init__(self, observer: 'HoloMetaObserver' = None):
+        self.observer = observer
+
+        # Lernstrategie-Performance pro Domain
+        self.strategy_performance: Dict[str, Dict[str, List[float]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
+
+        # Verfügbare Strategien
+        self.strategies = {
+            "active_questioning": {
+                "description": "Aktiv Fragen stellen",
+                "best_for": ["persönlich", "meinung", "erfahrung"],
+            },
+            "fact_extraction": {
+                "description": "Fakten aus Text extrahieren",
+                "best_for": ["news", "technik", "wissenschaft"],
+            },
+            "spaced_repetition": {
+                "description": "Wiederholung mit Abständen",
+                "best_for": ["vokabeln", "fakten", "namen"],
+            },
+            "transfer_learning": {
+                "description": "Wissen übertragen",
+                "best_for": ["anime", "manga", "gaming", "japan"],
+            },
+            "generalization": {
+                "description": "Regeln ableiten",
+                "best_for": ["muster", "statistik", "trends"],
+            },
+            "reinforcement": {
+                "description": "Aus Feedback lernen",
+                "best_for": ["interaktion", "verhalten", "kommunikation"],
+            },
+        }
+
+        # Optimierte Parameter pro Domain
+        self.domain_parameters: Dict[str, Dict] = defaultdict(lambda: {
+            "learning_rate": 0.1,
+            "exploration_rate": 0.2,
+            "repetition_interval_hours": 24,
+            "min_confidence_threshold": 0.5,
+        })
+
+        # Spaced Repetition Schedule
+        self.repetition_schedule: Dict[str, List[Dict]] = defaultdict(list)
+
+        # Performance-History
+        self.learning_outcomes: List[Dict] = []
+
+        logger.info("🎓 MetaLearningOptimizer initialisiert")
+
+    def record_learning_outcome(self, domain: str, strategy: str,
+                                 success: bool, details: Dict = None):
+        """Zeichnet ein Lernergebnis auf"""
+        outcome = {
+            "timestamp": datetime.now().isoformat(),
+            "domain": domain,
+            "strategy": strategy,
+            "success": success,
+            "score": 1.0 if success else 0.0,
+            "details": details or {},
+        }
+        self.learning_outcomes.append(outcome)
+
+        # Performance für Domain+Strategy aktualisieren
+        self.strategy_performance[domain][strategy].append(outcome["score"])
+
+        # Nur letzte 100 pro Kombination
+        if len(self.strategy_performance[domain][strategy]) > 100:
+            self.strategy_performance[domain][strategy] = \
+                self.strategy_performance[domain][strategy][-100:]
+
+        # Parameter anpassen wenn genug Daten
+        if len(self.strategy_performance[domain][strategy]) >= 10:
+            self._optimize_parameters(domain, strategy)
+
+    def _optimize_parameters(self, domain: str, strategy: str):
+        """Optimiert Parameter basierend auf Performance"""
+        scores = self.strategy_performance[domain][strategy]
+        recent_avg = sum(scores[-20:]) / len(scores[-20:])
+        overall_avg = sum(scores) / len(scores)
+
+        params = self.domain_parameters[domain]
+
+        # Learning Rate anpassen
+        if recent_avg > overall_avg:
+            # Gut - Learning Rate beibehalten oder leicht erhöhen
+            params["learning_rate"] = min(0.3, params["learning_rate"] * 1.05)
+        else:
+            # Schlecht - Learning Rate senken
+            params["learning_rate"] = max(0.01, params["learning_rate"] * 0.9)
+
+        # Exploration anpassen
+        if recent_avg > 0.7:
+            # Gut genug - weniger explorieren
+            params["exploration_rate"] = max(0.05, params["exploration_rate"] * 0.95)
+        elif recent_avg < 0.4:
+            # Schlecht - mehr explorieren
+            params["exploration_rate"] = min(0.4, params["exploration_rate"] * 1.1)
+
+    def get_best_strategy(self, domain: str) -> Tuple[str, float]:
+        """Gibt beste Strategie für eine Domain zurück"""
+        domain_strategies = self.strategy_performance.get(domain, {})
+
+        if not domain_strategies:
+            # Keine Daten - nutze Default basierend auf Domain-Typ
+            for strategy, info in self.strategies.items():
+                if domain.lower() in info["best_for"]:
+                    return strategy, 0.5  # Default-Confidence
+
+            return "fact_extraction", 0.5  # Allgemeiner Fallback
+
+        # Beste Strategie basierend auf Performance
+        best_strategy = None
+        best_score = 0.0
+
+        for strategy, scores in domain_strategies.items():
+            if scores:
+                avg_score = sum(scores[-20:]) / len(scores[-20:])
+                if avg_score > best_score:
+                    best_score = avg_score
+                    best_strategy = strategy
+
+        return best_strategy or "fact_extraction", best_score
+
+    def get_domain_parameters(self, domain: str) -> Dict:
+        """Gibt optimierte Parameter für eine Domain zurück"""
+        return dict(self.domain_parameters[domain])
+
+    def schedule_repetition(self, topic: str, domain: str, importance: float = 0.5):
+        """Plant Wiederholung für ein Thema (Spaced Repetition)"""
+        params = self.domain_parameters[domain]
+        base_interval = params["repetition_interval_hours"]
+
+        # Wichtigere Themen öfter wiederholen
+        interval = base_interval / (importance + 0.5)
+
+        schedule_entry = {
+            "topic": topic,
+            "domain": domain,
+            "scheduled_at": datetime.now().isoformat(),
+            "due_at": (datetime.now() + timedelta(hours=interval)).isoformat(),
+            "repetition_count": 0,
+            "importance": importance,
+        }
+
+        self.repetition_schedule[domain].append(schedule_entry)
+        logger.debug(f"[MetaLearning] Repetition geplant: {topic} in {interval:.1f}h")
+
+    def get_due_repetitions(self, domain: str = None) -> List[Dict]:
+        """Gibt fällige Wiederholungen zurück"""
+        now = datetime.now()
+        due = []
+
+        domains = [domain] if domain else list(self.repetition_schedule.keys())
+
+        for d in domains:
+            for entry in self.repetition_schedule.get(d, []):
+                due_at = datetime.fromisoformat(entry["due_at"])
+                if now >= due_at:
+                    due.append(entry)
+
+        return sorted(due, key=lambda x: x["importance"], reverse=True)
+
+    def complete_repetition(self, topic: str, domain: str, success: bool):
+        """Markiert Wiederholung als abgeschlossen"""
+        for entry in self.repetition_schedule.get(domain, []):
+            if entry["topic"] == topic:
+                entry["repetition_count"] += 1
+
+                if success:
+                    # Erfolg - Intervall verdoppeln (Spaced Repetition)
+                    params = self.domain_parameters[domain]
+                    new_interval = params["repetition_interval_hours"] * (2 ** entry["repetition_count"])
+                    entry["due_at"] = (datetime.now() + timedelta(hours=new_interval)).isoformat()
+                else:
+                    # Misserfolg - bald wiederholen
+                    entry["due_at"] = (datetime.now() + timedelta(hours=4)).isoformat()
+
+                break
+
+    def suggest_learning_approach(self, domain: str, context: Dict = None) -> Dict:
+        """Schlägt optimalen Lernansatz für eine Situation vor"""
+        best_strategy, confidence = self.get_best_strategy(domain)
+        params = self.get_domain_parameters(domain)
+
+        suggestion = {
+            "strategy": best_strategy,
+            "strategy_description": self.strategies.get(best_strategy, {}).get("description", ""),
+            "confidence": confidence,
+            "parameters": params,
+            "tips": [],
+        }
+
+        # Kontextbasierte Tipps
+        if context:
+            user_mood = context.get("user_mood", 0)
+            if isinstance(user_mood, (int, float)) and user_mood < 0:
+                suggestion["tips"].append("User-Stimmung negativ - sanftere Fragen stellen")
+
+            energy = context.get("energy", 0.7)
+            if energy < 0.3:
+                suggestion["tips"].append("Energie niedrig - kurze Lerneinheiten bevorzugen")
+
+        # Performance-basierte Tipps
+        if confidence < 0.5:
+            suggestion["tips"].append(f"Strategie '{best_strategy}' noch unsicher - mehr Exploration empfohlen")
+        elif confidence > 0.8:
+            suggestion["tips"].append(f"Strategie '{best_strategy}' funktioniert gut in diesem Bereich")
+
+        return suggestion
+
+    def get_learning_insights(self) -> Dict:
+        """Gibt Insights über das Meta-Learning zurück"""
+        insights = {
+            "total_outcomes_recorded": len(self.learning_outcomes),
+            "domains_optimized": len(self.domain_parameters),
+            "strategies_evaluated": {},
+            "best_strategies_per_domain": {},
+            "pending_repetitions": 0,
+        }
+
+        # Beste Strategie pro Domain
+        for domain in self.strategy_performance.keys():
+            strategy, score = self.get_best_strategy(domain)
+            insights["best_strategies_per_domain"][domain] = {
+                "strategy": strategy,
+                "score": score,
+            }
+
+        # Strategie-Statistiken
+        for strategy in self.strategies.keys():
+            total_uses = sum(
+                len(domain_strats.get(strategy, []))
+                for domain_strats in self.strategy_performance.values()
+            )
+            insights["strategies_evaluated"][strategy] = total_uses
+
+        # Fällige Wiederholungen
+        insights["pending_repetitions"] = len(self.get_due_repetitions())
+
+        return insights
+
+    def get_stats(self) -> Dict:
+        """Statistiken über Meta-Learning"""
+        return {
+            "learning_outcomes": len(self.learning_outcomes),
+            "domains_tracked": len(self.strategy_performance),
+            "avg_success_rate": self._calculate_avg_success(),
+            "insights": self.get_learning_insights(),
+        }
+
+    def _calculate_avg_success(self) -> float:
+        """Berechnet durchschnittliche Erfolgsrate"""
+        if not self.learning_outcomes:
+            return 0.0
+        recent = self.learning_outcomes[-100:]
+        return sum(o["score"] for o in recent) / len(recent)
+
+
+# =============================================================================
 # FACTORY FUNKTION
 # =============================================================================
 
@@ -2103,13 +2379,15 @@ def create_meta_cognition_system(pi_interface=None, db=None, data_dir: Path = No
     presence = HoloPresenceAwareness(pi_interface=pi_interface, db=db, data_dir=data_dir)
     sandbox = HoloSandbox(db=db, data_dir=data_dir)
     observer = HoloMetaObserver(db=db, data_dir=data_dir)
+    meta_learner = MetaLearningOptimizer(observer=observer)
 
-    logger.info("[MetaCognition] System erstellt mit Presence, Sandbox, Observer")
+    logger.info("[MetaCognition] System erstellt mit Presence, Sandbox, Observer, MetaLearner")
 
     return {
         "presence": presence,
         "sandbox": sandbox,
         "observer": observer,
+        "meta_learner": meta_learner,
     }
 
 

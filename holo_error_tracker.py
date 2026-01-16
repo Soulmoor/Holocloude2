@@ -757,6 +757,278 @@ def safe_split_access(
 
 
 # =============================================================================
+# ERROR PATTERN ANALYZER - Lernt aus Fehlern
+# =============================================================================
+
+class ErrorPatternAnalyzer:
+    """
+    Analysiert Fehlermuster und lernt Präventionsstrategien.
+
+    Identifiziert:
+    - Wiederkehrende Fehlermuster
+    - Fehler-Vorläufer (was passiert vor einem Fehler)
+    - Kausale Zusammenhänge
+    - Erfolgreiche Workarounds
+    """
+
+    def __init__(self, error_tracker: HoloErrorTracker = None):
+        self.tracker = error_tracker or get_error_tracker()
+
+        # Fehler-Patterns: pattern_id -> pattern_data
+        self.patterns: Dict[str, Dict] = {}
+
+        # Fehler-Sequenzen (was passiert vor/nach einem Fehler)
+        self.error_sequences: List[Dict] = []
+
+        # Gelernte Präventionen: error_type -> prevention_strategy
+        self.preventions: Dict[str, List[Dict]] = defaultdict(list)
+
+        # Erfolgreiche Recoveries
+        self.recoveries: Dict[str, List[Dict]] = defaultdict(list)
+
+        # Kontext-Bedingungen die zu Fehlern führen
+        self.error_conditions: Dict[str, List[Dict]] = defaultdict(list)
+
+        logger.info("🔍 ErrorPatternAnalyzer initialisiert")
+
+    def analyze_error(self, error: TrackedError, context: Dict = None):
+        """Analysiert einen einzelnen Fehler für Muster"""
+        error_key = f"{error.module}:{error.error_type}"
+        context = context or {}
+
+        # Pattern aktualisieren oder erstellen
+        if error_key not in self.patterns:
+            self.patterns[error_key] = {
+                "error_type": error.error_type,
+                "module": error.module,
+                "occurrences": 0,
+                "first_seen": error.timestamp,
+                "last_seen": error.timestamp,
+                "common_functions": defaultdict(int),
+                "common_contexts": [],
+                "time_patterns": defaultdict(int),  # Stunde -> Anzahl
+            }
+
+        pattern = self.patterns[error_key]
+        pattern["occurrences"] += 1
+        pattern["last_seen"] = error.timestamp
+        pattern["common_functions"][error.function] += 1
+
+        # Zeitliche Muster
+        try:
+            error_time = datetime.fromisoformat(error.timestamp)
+            hour = error_time.hour
+            pattern["time_patterns"][hour] += 1
+        except (ValueError, AttributeError):
+            pass
+
+        # Kontext-Bedingungen speichern
+        if context:
+            self.error_conditions[error_key].append({
+                "context": context,
+                "timestamp": error.timestamp,
+            })
+            # Nur letzte 50 pro Error-Typ
+            if len(self.error_conditions[error_key]) > 50:
+                self.error_conditions[error_key] = self.error_conditions[error_key][-50:]
+
+    def record_sequence(self, events: List[Dict], error_event: Dict):
+        """Zeichnet eine Event-Sequenz auf die zu einem Fehler führte"""
+        sequence = {
+            "preceding_events": events[-10:],  # Letzte 10 Events vor Fehler
+            "error": error_event,
+            "timestamp": datetime.now().isoformat(),
+        }
+        self.error_sequences.append(sequence)
+
+        # Nur letzte 200 Sequenzen behalten
+        if len(self.error_sequences) > 200:
+            self.error_sequences = self.error_sequences[-200:]
+
+    def record_recovery(self, error_type: str, recovery_action: str,
+                        success: bool, details: Dict = None):
+        """Zeichnet eine Recovery-Strategie auf"""
+        recovery = {
+            "action": recovery_action,
+            "success": success,
+            "timestamp": datetime.now().isoformat(),
+            "details": details or {},
+        }
+        self.recoveries[error_type].append(recovery)
+
+        # Nur letzte 20 pro Error-Typ
+        if len(self.recoveries[error_type]) > 20:
+            self.recoveries[error_type] = self.recoveries[error_type][-20:]
+
+    def suggest_prevention(self, error_type: str, module: str = None) -> Optional[Dict]:
+        """Schlägt Prävention basierend auf gelernten Mustern vor"""
+        error_key = f"{module}:{error_type}" if module else error_type
+
+        # Suche passende Patterns
+        matching_patterns = [
+            (key, pattern) for key, pattern in self.patterns.items()
+            if error_type in key or (module and module in key)
+        ]
+
+        if not matching_patterns:
+            return None
+
+        # Bestes Pattern wählen (meiste Occurrences)
+        best_key, best_pattern = max(matching_patterns, key=lambda x: x[1]["occurrences"])
+
+        # Analyse der Bedingungen
+        conditions = self.error_conditions.get(best_key, [])
+
+        suggestion = {
+            "error_type": error_type,
+            "occurrences": best_pattern["occurrences"],
+            "common_function": max(
+                best_pattern["common_functions"].items(),
+                key=lambda x: x[1]
+            )[0] if best_pattern["common_functions"] else "unknown",
+            "peak_hours": self._get_peak_hours(best_pattern),
+            "prevention_tips": [],
+        }
+
+        # Tipps generieren
+        if suggestion["peak_hours"]:
+            suggestion["prevention_tips"].append(
+                f"Fehler tritt häufig um {suggestion['peak_hours']} Uhr auf - erhöhte Aufmerksamkeit"
+            )
+
+        if best_pattern["occurrences"] > 10:
+            suggestion["prevention_tips"].append(
+                "Wiederkehrender Fehler - systematische Behebung empfohlen"
+            )
+
+        # Erfolgreiche Recoveries
+        recoveries = self.recoveries.get(error_type, [])
+        successful = [r for r in recoveries if r["success"]]
+        if successful:
+            best_recovery = max(successful, key=lambda x: x["timestamp"])
+            suggestion["recommended_recovery"] = best_recovery["action"]
+            suggestion["prevention_tips"].append(
+                f"Bewährte Recovery: {best_recovery['action']}"
+            )
+
+        return suggestion
+
+    def _get_peak_hours(self, pattern: Dict) -> Optional[str]:
+        """Identifiziert Stunden mit den meisten Fehlern"""
+        time_patterns = pattern.get("time_patterns", {})
+        if not time_patterns:
+            return None
+
+        peak_hour = max(time_patterns.items(), key=lambda x: x[1])
+        if peak_hour[1] >= 3:  # Mindestens 3 Fehler in dieser Stunde
+            return f"{peak_hour[0]:02d}:00"
+        return None
+
+    def get_common_error_precursors(self, error_type: str) -> List[Dict]:
+        """Findet häufige Events die vor einem bestimmten Fehler auftreten"""
+        precursors = defaultdict(int)
+
+        for sequence in self.error_sequences:
+            if error_type in str(sequence["error"]):
+                for event in sequence["preceding_events"]:
+                    event_type = event.get("type", "unknown")
+                    precursors[event_type] += 1
+
+        # Sortiert nach Häufigkeit
+        return [
+            {"event": event, "frequency": count}
+            for event, count in sorted(precursors.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+
+    def get_error_correlations(self) -> List[Dict]:
+        """Findet Fehler die oft zusammen auftreten"""
+        correlations = []
+
+        # Zeitfenster-basierte Korrelation (Fehler innerhalb von 60 Sekunden)
+        error_times = []
+        for key, pattern in self.patterns.items():
+            if pattern["occurrences"] >= 3:
+                error_times.append((key, pattern["last_seen"]))
+
+        # Vereinfachte Korrelation basierend auf Patterns
+        module_errors = defaultdict(list)
+        for key, pattern in self.patterns.items():
+            module = pattern["module"]
+            module_errors[module].append({
+                "error_type": pattern["error_type"],
+                "count": pattern["occurrences"],
+            })
+
+        # Module mit mehreren Fehlertypen
+        for module, errors in module_errors.items():
+            if len(errors) >= 2:
+                correlations.append({
+                    "module": module,
+                    "error_types": [e["error_type"] for e in errors],
+                    "total_errors": sum(e["count"] for e in errors),
+                })
+
+        return sorted(correlations, key=lambda x: x["total_errors"], reverse=True)[:5]
+
+    def learn_from_tracker(self):
+        """Analysiert alle Fehler vom Tracker"""
+        if not self.tracker:
+            return
+
+        for error in self.tracker.errors:
+            self.analyze_error(error)
+
+        logger.info(f"[ErrorAnalyzer] {len(self.patterns)} Patterns aus {len(self.tracker.errors)} Fehlern gelernt")
+
+    def get_insights(self) -> Dict:
+        """Gibt Insights über Fehlermuster zurück"""
+        return {
+            "total_patterns": len(self.patterns),
+            "most_frequent_errors": self._get_most_frequent(),
+            "problem_modules": self._get_problem_modules(),
+            "correlations": self.get_error_correlations(),
+            "has_prevention_suggestions": len(self.preventions) > 0,
+        }
+
+    def _get_most_frequent(self, limit: int = 5) -> List[Dict]:
+        """Gibt die häufigsten Fehler zurück"""
+        sorted_patterns = sorted(
+            self.patterns.items(),
+            key=lambda x: x[1]["occurrences"],
+            reverse=True
+        )
+        return [
+            {
+                "error_key": key,
+                "occurrences": pattern["occurrences"],
+                "module": pattern["module"],
+            }
+            for key, pattern in sorted_patterns[:limit]
+        ]
+
+    def _get_problem_modules(self, threshold: int = 5) -> List[Dict]:
+        """Identifiziert Module mit vielen Fehlern"""
+        module_errors = defaultdict(int)
+        for pattern in self.patterns.values():
+            module_errors[pattern["module"]] += pattern["occurrences"]
+
+        return [
+            {"module": module, "total_errors": count}
+            for module, count in sorted(module_errors.items(), key=lambda x: x[1], reverse=True)
+            if count >= threshold
+        ][:5]
+
+    def get_stats(self) -> Dict:
+        """Statistiken über Error-Analyse"""
+        return {
+            "patterns_found": len(self.patterns),
+            "sequences_recorded": len(self.error_sequences),
+            "recoveries_learned": sum(len(r) for r in self.recoveries.values()),
+            "insights": self.get_insights(),
+        }
+
+
+# =============================================================================
 # ASYNC VERSIONEN
 # =============================================================================
 

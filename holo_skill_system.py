@@ -21,9 +21,10 @@ import hashlib
 import threading
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any, Callable
+from typing import Dict, List, Optional, Tuple, Any, Callable, Set
 from dataclasses import dataclass, field
 from datetime import datetime
+from collections import defaultdict
 import json
 import re
 
@@ -900,6 +901,175 @@ class HoloSkillSelector:
 
 
 # ============================================================================
+# SKILL COMPOSER - Lernt Skill-Kombinationen
+# ============================================================================
+
+class SkillComposer:
+    """
+    Lernt welche Skills gut zusammen funktionieren und erstellt Skill-Ketten.
+
+    Beispiel:
+    - User fragt nach "Anime-Review mit Bild"
+    - Composer erkennt: write_review + generate_image = besseres Ergebnis
+    """
+
+    def __init__(self, bridge: HoloSkillBridge = None):
+        self.bridge = bridge
+
+        # Gelernte Skill-Kombinationen: (skill_a, skill_b) -> performance
+        self.combinations: Dict[Tuple[str, str], Dict] = {}
+
+        # Erfolgreiche Sequenzen
+        self.successful_sequences: List[Dict] = []
+
+        # Skill-Abhängigkeiten (skill_a sollte vor skill_b laufen)
+        self.dependencies: Dict[str, Set[str]] = defaultdict(set)
+
+        # Skill-Synergien (verstärken sich gegenseitig)
+        self.synergies: Dict[str, Set[str]] = defaultdict(set)
+
+        logger.info("🔗 SkillComposer initialisiert")
+
+    def record_sequence(self, skills: List[str], success: bool,
+                        quality_score: float = 0.5, context: Dict = None):
+        """Zeichnet eine Skill-Sequenz auf"""
+        if len(skills) < 2:
+            return
+
+        # Sequenz speichern
+        sequence = {
+            "skills": skills,
+            "success": success,
+            "quality": quality_score,
+            "context": context or {},
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        if success:
+            self.successful_sequences.append(sequence)
+            # Nur letzte 200 behalten
+            if len(self.successful_sequences) > 200:
+                self.successful_sequences = self.successful_sequences[-200:]
+
+        # Paarweise Kombinationen lernen
+        for i in range(len(skills) - 1):
+            skill_a, skill_b = skills[i], skills[i + 1]
+            combo_key = (skill_a, skill_b)
+
+            if combo_key not in self.combinations:
+                self.combinations[combo_key] = {
+                    "uses": 0,
+                    "successes": 0,
+                    "total_quality": 0,
+                }
+
+            self.combinations[combo_key]["uses"] += 1
+            if success:
+                self.combinations[combo_key]["successes"] += 1
+            self.combinations[combo_key]["total_quality"] += quality_score
+
+            # Abhängigkeit lernen (A kommt vor B)
+            if success and quality_score > 0.6:
+                self.dependencies[skill_b].add(skill_a)
+
+    def get_combination_score(self, skill_a: str, skill_b: str) -> float:
+        """Gibt Score für eine Skill-Kombination zurück"""
+        combo = self.combinations.get((skill_a, skill_b))
+        if not combo or combo["uses"] < 3:
+            return 0.5  # Unbekannt
+
+        success_rate = combo["successes"] / combo["uses"]
+        avg_quality = combo["total_quality"] / combo["uses"]
+
+        return (success_rate * 0.6) + (avg_quality * 0.4)
+
+    def suggest_composition(self, primary_skill: str,
+                            available_skills: List[str] = None) -> List[Dict]:
+        """Schlägt Skills vor die gut mit dem primären Skill zusammenarbeiten"""
+        suggestions = []
+
+        if available_skills is None and self.bridge:
+            available_skills = list(self.bridge._skills.keys())
+        elif available_skills is None:
+            return []
+
+        for other_skill in available_skills:
+            if other_skill == primary_skill:
+                continue
+
+            # Score in beide Richtungen prüfen
+            score_after = self.get_combination_score(primary_skill, other_skill)
+            score_before = self.get_combination_score(other_skill, primary_skill)
+
+            best_score = max(score_after, score_before)
+            if best_score > 0.6:
+                suggestions.append({
+                    "skill": other_skill,
+                    "score": best_score,
+                    "position": "after" if score_after >= score_before else "before",
+                    "synergy": other_skill in self.synergies.get(primary_skill, set()),
+                })
+
+        return sorted(suggestions, key=lambda x: x["score"], reverse=True)[:5]
+
+    def compose_chain(self, request: str, max_skills: int = 3) -> List[str]:
+        """Erstellt eine optimale Skill-Kette für eine Anfrage"""
+        if not self.bridge:
+            return []
+
+        # Primären Skill finden
+        primary_skill, _ = self.bridge.find_best_skill(request)
+        if not primary_skill:
+            return []
+
+        chain = [primary_skill.name]
+
+        # Beste Ergänzungen finden
+        suggestions = self.suggest_composition(primary_skill.name)
+
+        for suggestion in suggestions[:max_skills - 1]:
+            if suggestion["position"] == "before":
+                chain.insert(0, suggestion["skill"])
+            else:
+                chain.append(suggestion["skill"])
+
+        return chain
+
+    def mark_synergy(self, skill_a: str, skill_b: str):
+        """Markiert zwei Skills als synergistisch"""
+        self.synergies[skill_a].add(skill_b)
+        self.synergies[skill_b].add(skill_a)
+
+    def get_prerequisites(self, skill: str) -> List[str]:
+        """Gibt Skills zurück die vor diesem laufen sollten"""
+        return list(self.dependencies.get(skill, set()))
+
+    def get_stats(self) -> Dict:
+        """Statistiken über Skill-Komposition"""
+        return {
+            "combinations_learned": len(self.combinations),
+            "successful_sequences": len(self.successful_sequences),
+            "dependencies_found": sum(len(d) for d in self.dependencies.values()),
+            "synergies_found": sum(len(s) for s in self.synergies.values()) // 2,
+            "top_combinations": self._get_top_combinations(),
+        }
+
+    def _get_top_combinations(self, limit: int = 5) -> List[Dict]:
+        """Gibt die besten Skill-Kombinationen zurück"""
+        scored = []
+        for (skill_a, skill_b), data in self.combinations.items():
+            if data["uses"] >= 3:
+                score = self.get_combination_score(skill_a, skill_b)
+                scored.append({
+                    "skills": f"{skill_a} → {skill_b}",
+                    "score": score,
+                    "uses": data["uses"],
+                })
+
+        return sorted(scored, key=lambda x: x["score"], reverse=True)[:limit]
+
+
+# ============================================================================
 # FACTORY FUNCTION
 # ============================================================================
 
@@ -907,7 +1077,7 @@ def create_holo_skill_system(skill_manager=None,
                               skills_dir: Path = None,
                               database_manager=None,
                               auto_watch: bool = True,
-                              watch_interval: float = 30.0) -> Tuple[HoloSkillBridge, HoloSkillSelector]:
+                              watch_interval: float = 30.0) -> Tuple[HoloSkillBridge, HoloSkillSelector, SkillComposer]:
     """
     Erstellt das komplette Holo Skill System.
 
@@ -919,7 +1089,7 @@ def create_holo_skill_system(skill_manager=None,
         watch_interval: Prüf-Intervall in Sekunden (default: 30s)
 
     Returns:
-        (HoloSkillBridge, HoloSkillSelector)
+        (HoloSkillBridge, HoloSkillSelector, SkillComposer)
     """
     bridge = HoloSkillBridge(
         skill_manager=skill_manager,
@@ -930,5 +1100,6 @@ def create_holo_skill_system(skill_manager=None,
     )
 
     selector = HoloSkillSelector(bridge)
+    composer = SkillComposer(bridge)
 
-    return (bridge, selector)
+    return (bridge, selector, composer)
