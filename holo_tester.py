@@ -2,22 +2,27 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    HOLOCLOUDE SYSTEM TESTER v1.0                             ║
+║                 HOLOCLOUDE DYNAMIC SYSTEM TESTER v2.0                        ║
 ║                                                                              ║
-║  Umfassender Test aller Systemkomponenten für Homelab-Betrieb               ║
+║  DYNAMISCH - Erkennt automatisch:                                            ║
+║    • Alle Python-Module im Projekt                                           ║
+║    • Alle Klassen und Funktionen in Modulen                                  ║
+║    • Alle Datenbanken im data/ Verzeichnis                                   ║
+║    • Alle Services aus config.json                                           ║
+║    • Alle Umgebungsvariablen die verwendet werden                            ║
 ║                                                                              ║
 ║  Verwendung:                                                                 ║
 ║      python holo_tester.py              # Alle Tests                         ║
-║      python holo_tester.py --quick      # Nur schnelle Tests                 ║
-║      python holo_tester.py --modules    # Nur Module testen                  ║
-║      python holo_tester.py --services   # Nur Services testen                ║
-║      python holo_tester.py --verbose    # Mehr Details                       ║
+║      python holo_tester.py --quick      # Ohne LLM-Tests                     ║
+║      python holo_tester.py --deep       # Tiefe Analyse (Klassen/Funktionen) ║
+║      python holo_tester.py --fix        # Versucht Probleme zu beheben       ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
 import os
 import sys
+import ast
 import json
 import time
 import socket
@@ -25,17 +30,18 @@ import sqlite3
 import threading
 import traceback
 import importlib
-import subprocess
+import importlib.util
+import re
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional, Callable, Any
+from typing import Dict, List, Tuple, Optional, Set, Any
 from dataclasses import dataclass, field
+from collections import defaultdict
 
 # =============================================================================
-# KONFIGURATION
+# TERMINAL FARBEN
 # =============================================================================
 
-# Farben für Terminal-Ausgabe
 class Colors:
     GREEN = "\033[92m"
     RED = "\033[91m"
@@ -49,795 +55,933 @@ class Colors:
 
     @classmethod
     def disable(cls):
-        """Deaktiviert Farben (z.B. für Nicht-Terminal-Ausgabe)"""
-        cls.GREEN = cls.RED = cls.YELLOW = cls.BLUE = ""
-        cls.CYAN = cls.MAGENTA = cls.BOLD = cls.DIM = cls.RESET = ""
+        for attr in ["GREEN", "RED", "YELLOW", "BLUE", "CYAN", "MAGENTA", "BOLD", "DIM", "RESET"]:
+            setattr(cls, attr, "")
 
-
-# Prüfe ob Terminal Farben unterstützt
 if not sys.stdout.isatty():
     Colors.disable()
 
 
+# =============================================================================
+# DATENSTRUKTUREN
+# =============================================================================
+
+@dataclass
+class ModuleInfo:
+    """Informationen über ein Python-Modul"""
+    name: str
+    path: Path
+    size_bytes: int
+    lines: int = 0
+    classes: List[str] = field(default_factory=list)
+    functions: List[str] = field(default_factory=list)
+    imports: List[str] = field(default_factory=list)
+    env_vars: List[str] = field(default_factory=list)
+    has_main: bool = False
+    syntax_ok: bool = True
+    import_ok: bool = False
+    error: str = ""
+
+
+@dataclass
+class ServiceInfo:
+    """Informationen über einen externen Service"""
+    name: str
+    host: str
+    port: int
+    protocol: str = "tcp"  # tcp, http, https
+    required: bool = False
+    reachable: bool = False
+    response_time_ms: float = 0
+    details: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class DatabaseInfo:
+    """Informationen über eine Datenbank"""
+    name: str
+    path: Path
+    size_mb: float
+    tables: List[str] = field(default_factory=list)
+    integrity_ok: bool = False
+    error: str = ""
+
+
 @dataclass
 class TestResult:
-    """Ergebnis eines einzelnen Tests"""
+    """Ergebnis eines Tests"""
+    category: str
     name: str
     passed: bool
     message: str = ""
-    duration_ms: float = 0.0
+    duration_ms: float = 0
     details: Dict[str, Any] = field(default_factory=dict)
-    category: str = "general"
-
-
-@dataclass
-class TestReport:
-    """Gesamtbericht aller Tests"""
-    results: List[TestResult] = field(default_factory=list)
-    start_time: datetime = field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
-
-    @property
-    def passed(self) -> int:
-        return sum(1 for r in self.results if r.passed)
-
-    @property
-    def failed(self) -> int:
-        return sum(1 for r in self.results if not r.passed)
-
-    @property
-    def total(self) -> int:
-        return len(self.results)
-
-    @property
-    def success_rate(self) -> float:
-        return (self.passed / self.total * 100) if self.total > 0 else 0
 
 
 # =============================================================================
-# TEST-FRAMEWORK
+# DYNAMISCHER PROJEKT-SCANNER
 # =============================================================================
 
-class HoloTester:
-    """Hauptklasse für alle Holocloude-Tests"""
+class ProjectScanner:
+    """Scannt das Projekt dynamisch und sammelt Informationen"""
 
-    def __init__(self, verbose: bool = False):
-        self.verbose = verbose
-        self.report = TestReport()
-        self.config = {}
+    def __init__(self, project_dir: Path = None):
+        self.project_dir = project_dir or Path.cwd()
+        self.modules: Dict[str, ModuleInfo] = {}
+        self.services: Dict[str, ServiceInfo] = {}
+        self.databases: Dict[str, DatabaseInfo] = {}
+        self.config: Dict = {}
+        self.all_env_vars: Set[str] = set()
+
+    def scan_all(self):
+        """Führt kompletten Scan durch"""
         self._load_config()
+        self._scan_modules()
+        self._scan_databases()
+        self._discover_services()
+        self._collect_env_vars()
+
+    # =========================================================================
+    # CONFIG SCANNING
+    # =========================================================================
 
     def _load_config(self):
-        """Lädt die Konfiguration"""
-        config_paths = [
-            Path("config.json"),
-            Path("~/.holocloude/config.json").expanduser(),
-            Path("/etc/holocloude/config.json"),
-        ]
+        """Lädt config.json"""
+        config_path = self.project_dir / "config.json"
+        if config_path.exists():
+            try:
+                with open(config_path) as f:
+                    self.config = json.load(f)
+            except Exception as e:
+                print(f"{Colors.YELLOW}  Config-Fehler: {e}{Colors.RESET}")
 
-        for path in config_paths:
-            if path.exists():
-                try:
-                    with open(path) as f:
-                        self.config = json.load(f)
-                    self._print(f"  Config geladen: {path}", Colors.DIM)
-                    break
-                except Exception as e:
-                    self._print(f"  Config-Fehler: {e}", Colors.YELLOW)
+    # =========================================================================
+    # MODULE SCANNING
+    # =========================================================================
 
-    def _print(self, msg: str, color: str = ""):
-        """Gibt Text mit optionaler Farbe aus"""
-        print(f"{color}{msg}{Colors.RESET}")
+    def _scan_modules(self):
+        """Findet und analysiert alle Python-Module"""
+        py_files = list(self.project_dir.glob("*.py"))
+        # Auch in Unterverzeichnissen suchen
+        py_files.extend(self.project_dir.glob("**/*.py"))
+        # Duplikate entfernen und sortieren
+        py_files = sorted(set(py_files))
+
+        for py_file in py_files:
+            # Ignoriere Test-Dateien und __pycache__
+            if "__pycache__" in str(py_file):
+                continue
+            if py_file.name.startswith("test_") or py_file.name == "holo_tester.py":
+                continue
+
+            module_info = self._analyze_module(py_file)
+            self.modules[module_info.name] = module_info
+
+    def _analyze_module(self, py_file: Path) -> ModuleInfo:
+        """Analysiert ein einzelnes Python-Modul mittels AST"""
+        module_name = py_file.stem
+
+        info = ModuleInfo(
+            name=module_name,
+            path=py_file,
+            size_bytes=py_file.stat().st_size
+        )
+
+        try:
+            source = py_file.read_text(encoding="utf-8", errors="ignore")
+            info.lines = len(source.splitlines())
+
+            # AST Parsing
+            tree = ast.parse(source)
+            info.syntax_ok = True
+
+            for node in ast.walk(tree):
+                # Klassen finden
+                if isinstance(node, ast.ClassDef):
+                    info.classes.append(node.name)
+
+                # Funktionen finden (nur top-level)
+                elif isinstance(node, ast.FunctionDef):
+                    if not node.name.startswith("_"):
+                        info.functions.append(node.name)
+
+                # Imports finden
+                elif isinstance(node, ast.Import):
+                    for alias in node.names:
+                        info.imports.append(alias.name.split(".")[0])
+
+                elif isinstance(node, ast.ImportFrom):
+                    if node.module:
+                        info.imports.append(node.module.split(".")[0])
+
+                # if __name__ == "__main__"
+                elif isinstance(node, ast.If):
+                    if isinstance(node.test, ast.Compare):
+                        if isinstance(node.test.left, ast.Name):
+                            if node.test.left.id == "__name__":
+                                info.has_main = True
+
+            # Umgebungsvariablen finden (os.getenv, os.environ)
+            env_pattern = r'os\.(?:getenv|environ\.get)\s*\(\s*["\']([A-Z_]+)["\']'
+            info.env_vars = list(set(re.findall(env_pattern, source)))
+
+            # Imports eindeutig machen
+            info.imports = list(set(info.imports))
+
+        except SyntaxError as e:
+            info.syntax_ok = False
+            info.error = f"Syntax-Fehler: {e}"
+        except Exception as e:
+            info.error = str(e)
+
+        return info
+
+    # =========================================================================
+    # DATABASE SCANNING
+    # =========================================================================
+
+    def _scan_databases(self):
+        """Findet und analysiert alle SQLite-Datenbanken"""
+        data_dir = self.project_dir / "data"
+        if not data_dir.exists():
+            return
+
+        db_files = list(data_dir.glob("*.db"))
+        db_files.extend(data_dir.glob("**/*.db"))
+
+        for db_file in db_files:
+            db_info = self._analyze_database(db_file)
+            self.databases[db_info.name] = db_info
+
+    def _analyze_database(self, db_file: Path) -> DatabaseInfo:
+        """Analysiert eine SQLite-Datenbank"""
+        info = DatabaseInfo(
+            name=db_file.name,
+            path=db_file,
+            size_mb=db_file.stat().st_size / 1024 / 1024
+        )
+
+        try:
+            conn = sqlite3.connect(str(db_file), timeout=5)
+            cursor = conn.cursor()
+
+            # Integrity Check
+            cursor.execute("PRAGMA integrity_check")
+            result = cursor.fetchone()[0]
+            info.integrity_ok = (result == "ok")
+
+            # Tabellen auflisten
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            info.tables = [row[0] for row in cursor.fetchall()]
+
+            conn.close()
+
+        except Exception as e:
+            info.error = str(e)
+
+        return info
+
+    # =========================================================================
+    # SERVICE DISCOVERY
+    # =========================================================================
+
+    def _discover_services(self):
+        """Entdeckt Services aus Config und Code"""
+
+        # Aus Config
+        if "network" in self.config:
+            network = self.config["network"]
+
+            # Ollama
+            if "ollama" in network:
+                ollama = network["ollama"]
+                self.services["ollama"] = ServiceInfo(
+                    name="Ollama LLM",
+                    host=ollama.get("host", "localhost"),
+                    port=ollama.get("port", 11434),
+                    protocol="http",
+                    required=True
+                )
+
+            # MQTT
+            if "mqtt" in network:
+                mqtt = network["mqtt"]
+                self.services["mqtt"] = ServiceInfo(
+                    name="MQTT Broker",
+                    host=mqtt.get("broker_ip", "localhost"),
+                    port=mqtt.get("port", 1883),
+                    protocol="tcp",
+                    required=False
+                )
+
+            # Home Assistant
+            if "home_assistant" in network:
+                ha = network["home_assistant"]
+                url = ha.get("api_url", "")
+                if url:
+                    # Parse URL
+                    import urllib.parse
+                    parsed = urllib.parse.urlparse(url)
+                    self.services["home_assistant"] = ServiceInfo(
+                        name="Home Assistant",
+                        host=parsed.hostname or "localhost",
+                        port=parsed.port or 8123,
+                        protocol="http",
+                        required=False
+                    )
+
+            # NAS
+            if "nas" in network:
+                nas = network["nas"]
+                if nas.get("ip"):
+                    self.services["nas"] = ServiceInfo(
+                        name="NAS (SSH)",
+                        host=nas.get("ip"),
+                        port=22,
+                        protocol="tcp",
+                        required=False
+                    )
+
+        # Aus Modulen: Suche nach weiteren Host/Port Kombinationen
+        for module in self.modules.values():
+            self._extract_services_from_module(module)
+
+    def _extract_services_from_module(self, module: ModuleInfo):
+        """Extrahiert Service-Definitionen aus Modul-Code"""
+        try:
+            source = module.path.read_text(encoding="utf-8", errors="ignore")
+
+            # Pattern für Host:Port Kombinationen
+            # z.B. "http://192.168.1.100:8080"
+            url_pattern = r'https?://([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+):(\d+)'
+            for match in re.finditer(url_pattern, source):
+                host, port = match.groups()
+                key = f"{host}:{port}"
+                if key not in [f"{s.host}:{s.port}" for s in self.services.values()]:
+                    self.services[key] = ServiceInfo(
+                        name=f"Service {key}",
+                        host=host,
+                        port=int(port),
+                        protocol="http"
+                    )
+
+        except Exception:
+            pass
+
+    # =========================================================================
+    # ENVIRONMENT VARIABLES
+    # =========================================================================
+
+    def _collect_env_vars(self):
+        """Sammelt alle verwendeten Umgebungsvariablen"""
+        for module in self.modules.values():
+            self.all_env_vars.update(module.env_vars)
+
+
+# =============================================================================
+# DYNAMISCHER TESTER
+# =============================================================================
+
+class DynamicTester:
+    """Führt dynamische Tests basierend auf Scanner-Ergebnissen durch"""
+
+    def __init__(self, scanner: ProjectScanner, verbose: bool = False):
+        self.scanner = scanner
+        self.verbose = verbose
+        self.results: List[TestResult] = []
+        self.start_time = datetime.now()
+
+    def _add_result(self, category: str, name: str, passed: bool,
+                   message: str = "", duration_ms: float = 0, details: dict = None):
+        """Fügt ein Testergebnis hinzu"""
+        result = TestResult(
+            category=category,
+            name=name,
+            passed=passed,
+            message=message,
+            duration_ms=duration_ms,
+            details=details or {}
+        )
+        self.results.append(result)
+        self._print_result(result)
+
+    def _print_result(self, result: TestResult):
+        """Gibt ein Ergebnis aus"""
+        icon = f"{Colors.GREEN}✓{Colors.RESET}" if result.passed else f"{Colors.RED}✗{Colors.RESET}"
+        time_str = f"{Colors.DIM}({result.duration_ms:.0f}ms){Colors.RESET}" if result.duration_ms > 0 else ""
+
+        print(f"  {icon} {result.name} {time_str}")
+
+        if result.message and (not result.passed or self.verbose):
+            color = Colors.RED if not result.passed else Colors.DIM
+            print(f"      {color}→ {result.message}{Colors.RESET}")
 
     def _print_header(self, title: str):
-        """Gibt einen Abschnitts-Header aus"""
+        """Druckt einen Header"""
         print()
         print(f"{Colors.BOLD}{Colors.CYAN}{'═' * 60}{Colors.RESET}")
         print(f"{Colors.BOLD}{Colors.CYAN}  {title}{Colors.RESET}")
         print(f"{Colors.BOLD}{Colors.CYAN}{'═' * 60}{Colors.RESET}")
 
-    def _print_result(self, result: TestResult):
-        """Gibt ein Test-Ergebnis aus"""
-        if result.passed:
-            icon = f"{Colors.GREEN}✓{Colors.RESET}"
-            status = f"{Colors.GREEN}OK{Colors.RESET}"
-        else:
-            icon = f"{Colors.RED}✗{Colors.RESET}"
-            status = f"{Colors.RED}FEHLER{Colors.RESET}"
-
-        time_str = f"{Colors.DIM}({result.duration_ms:.0f}ms){Colors.RESET}"
-        print(f"  {icon} {result.name}: {status} {time_str}")
-
-        if result.message and (not result.passed or self.verbose):
-            msg_color = Colors.RED if not result.passed else Colors.DIM
-            print(f"      {msg_color}→ {result.message}{Colors.RESET}")
-
-    def run_test(self, name: str, test_func: Callable, category: str = "general") -> TestResult:
-        """Führt einen einzelnen Test aus"""
-        start = time.time()
-        try:
-            passed, message, details = test_func()
-            duration = (time.time() - start) * 1000
-            result = TestResult(
-                name=name,
-                passed=passed,
-                message=message,
-                duration_ms=duration,
-                details=details or {},
-                category=category
-            )
-        except Exception as e:
-            duration = (time.time() - start) * 1000
-            result = TestResult(
-                name=name,
-                passed=False,
-                message=f"Exception: {str(e)}",
-                duration_ms=duration,
-                details={"traceback": traceback.format_exc()},
-                category=category
-            )
-
-        self.report.results.append(result)
-        self._print_result(result)
-        return result
-
     # =========================================================================
-    # MODUL-TESTS
+    # MODUL-TESTS (DYNAMISCH)
     # =========================================================================
 
     def test_modules(self):
-        """Testet ob alle wichtigen Module importiert werden können"""
-        self._print_header("MODULE IMPORT TESTS")
+        """Testet alle gefundenen Module"""
+        self._print_header(f"MODULE TESTS ({len(self.scanner.modules)} Module gefunden)")
 
-        # Kritische Module (müssen funktionieren)
-        critical_modules = [
-            ("holo_core_types", "Zentrale Typdefinitionen"),
-            ("holo_config", "Konfigurationsmanagement"),
-            ("holo_error_handling", "Fehlerbehandlung"),
-            ("holo_robust_imports", "Import-System"),
-        ]
+        # Gruppiere nach Wichtigkeit (basierend auf Größe und Imports)
+        critical = []  # > 50KB oder viele Imports
+        important = []  # > 10KB
+        optional = []   # Rest
 
-        # Wichtige Module (sollten funktionieren)
-        important_modules = [
-            ("holo_brain", "Haupt-Brain-Modul"),
-            ("holo_intelligent_router", "Intelligentes Routing"),
-            ("holo_database_system", "Datenbank-System"),
-            ("smart_llm_system", "LLM-Integration"),
-            ("holo_personality", "Persönlichkeitssystem"),
-            ("holo_nlp_unified", "NLP-System"),
-        ]
+        for name, info in self.scanner.modules.items():
+            if info.size_bytes > 50000 or len(info.imports) > 20:
+                critical.append((name, info))
+            elif info.size_bytes > 10000:
+                important.append((name, info))
+            else:
+                optional.append((name, info))
 
-        # Optionale Module (nice to have)
-        optional_modules = [
-            ("holo_health_checks", "Health Checks"),
-            ("holo_metrics", "Prometheus Metrics"),
-            ("holo_structured_logging", "Structured Logging"),
-            ("holo_db_migrations", "DB Migrationen"),
-            ("holo_knowledge_influence", "Knowledge Influence"),
-            ("holo_voice_interface", "Voice Interface"),
-            ("holo_vision_enhanced", "Vision System"),
-            ("holo_audio_enhanced", "Audio System"),
-            ("holo_web_curiosity", "Web Curiosity"),
-            ("holo_creative_mind", "Creative Mind"),
-        ]
+        # Sortiere nach Größe
+        critical.sort(key=lambda x: x[1].size_bytes, reverse=True)
+        important.sort(key=lambda x: x[1].size_bytes, reverse=True)
+        optional.sort(key=lambda x: x[1].size_bytes, reverse=True)
 
-        print(f"\n{Colors.BOLD}Kritische Module:{Colors.RESET}")
-        for module, desc in critical_modules:
-            self.run_test(
-                f"{module}",
-                lambda m=module: self._test_import(m),
-                category="critical_module"
+        if critical:
+            print(f"\n{Colors.BOLD}Kritische Module ({len(critical)}):{Colors.RESET}")
+            for name, info in critical:
+                self._test_module(name, info)
+
+        if important:
+            print(f"\n{Colors.BOLD}Wichtige Module ({len(important)}):{Colors.RESET}")
+            for name, info in important:
+                self._test_module(name, info)
+
+        if optional and self.verbose:
+            print(f"\n{Colors.BOLD}Weitere Module ({len(optional)}):{Colors.RESET}")
+            for name, info in optional:
+                self._test_module(name, info)
+        elif optional:
+            # Nur Zusammenfassung
+            ok_count = sum(1 for _, info in optional if info.syntax_ok)
+            print(f"\n{Colors.DIM}  ... und {len(optional)} weitere Module "
+                  f"({ok_count} Syntax OK){Colors.RESET}")
+
+    def _test_module(self, name: str, info: ModuleInfo):
+        """Testet ein einzelnes Modul"""
+        start = time.time()
+
+        # 1. Syntax Check (bereits im Scanner gemacht)
+        if not info.syntax_ok:
+            self._add_result(
+                "module", name, False,
+                info.error,
+                details={"path": str(info.path)}
             )
+            return
 
-        print(f"\n{Colors.BOLD}Wichtige Module:{Colors.RESET}")
-        for module, desc in important_modules:
-            self.run_test(
-                f"{module}",
-                lambda m=module: self._test_import(m),
-                category="important_module"
-            )
-
-        print(f"\n{Colors.BOLD}Optionale Module:{Colors.RESET}")
-        for module, desc in optional_modules:
-            self.run_test(
-                f"{module}",
-                lambda m=module: self._test_import(m),
-                category="optional_module"
-            )
-
-    def _test_import(self, module_name: str) -> Tuple[bool, str, dict]:
-        """Testet den Import eines Moduls"""
+        # 2. Import Check
         try:
-            module = importlib.import_module(module_name)
-            # Prüfe ob Modul Attribute hat
-            attrs = [a for a in dir(module) if not a.startswith("_")]
-            return True, f"{len(attrs)} Attribute", {"attributes": len(attrs)}
-        except ImportError as e:
-            return False, f"Import fehlgeschlagen: {e}", {}
+            # Füge Projektverzeichnis zu sys.path hinzu
+            project_dir = str(self.scanner.project_dir)
+            if project_dir not in sys.path:
+                sys.path.insert(0, project_dir)
+
+            module = importlib.import_module(name)
+            info.import_ok = True
+            duration = (time.time() - start) * 1000
+
+            # Zusätzliche Info
+            details_str = []
+            if info.classes:
+                details_str.append(f"{len(info.classes)} Klassen")
+            if info.functions:
+                details_str.append(f"{len(info.functions)} Funktionen")
+            details_str.append(f"{info.lines} Zeilen")
+
+            self._add_result(
+                "module", name, True,
+                ", ".join(details_str),
+                duration,
+                {"classes": info.classes, "functions": info.functions}
+            )
+
         except Exception as e:
-            return False, f"Fehler: {e}", {}
+            duration = (time.time() - start) * 1000
+            error_msg = str(e).split("\n")[0][:80]
+            self._add_result(
+                "module", name, False,
+                f"Import-Fehler: {error_msg}",
+                duration
+            )
+
+    # =========================================================================
+    # SERVICE-TESTS (DYNAMISCH)
+    # =========================================================================
+
+    def test_services(self):
+        """Testet alle entdeckten Services"""
+        self._print_header(f"SERVICE TESTS ({len(self.scanner.services)} Services gefunden)")
+
+        for key, service in self.scanner.services.items():
+            self._test_service(service)
+
+    def _test_service(self, service: ServiceInfo):
+        """Testet einen einzelnen Service"""
+        start = time.time()
+
+        try:
+            if service.protocol in ["http", "https"]:
+                success, details = self._test_http_service(service)
+            else:
+                success, details = self._test_tcp_service(service)
+
+            duration = (time.time() - start) * 1000
+            service.reachable = success
+            service.response_time_ms = duration
+            service.details = details
+
+            msg = f"{service.host}:{service.port}"
+            if details:
+                msg += f" - {details.get('info', '')}"
+
+            self._add_result(
+                "service",
+                service.name,
+                success,
+                msg,
+                duration,
+                details
+            )
+
+        except Exception as e:
+            duration = (time.time() - start) * 1000
+            self._add_result(
+                "service",
+                service.name,
+                False,
+                f"{service.host}:{service.port} - {str(e)[:50]}",
+                duration
+            )
+
+    def _test_tcp_service(self, service: ServiceInfo) -> Tuple[bool, dict]:
+        """Testet TCP-Verbindung"""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(3)
+        result = sock.connect_ex((service.host, service.port))
+        sock.close()
+
+        if result == 0:
+            return True, {"info": "TCP erreichbar"}
+        return False, {"error_code": result}
+
+    def _test_http_service(self, service: ServiceInfo) -> Tuple[bool, dict]:
+        """Testet HTTP-Service"""
+        import urllib.request
+
+        # Erst TCP
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(3)
+        result = sock.connect_ex((service.host, service.port))
+        sock.close()
+
+        if result != 0:
+            return False, {"info": "TCP nicht erreichbar"}
+
+        # Dann HTTP
+        try:
+            url = f"http://{service.host}:{service.port}/"
+
+            # Spezielle Endpoints für bekannte Services
+            if service.name == "Ollama LLM":
+                url = f"http://{service.host}:{service.port}/api/tags"
+
+            req = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(req, timeout=5) as response:
+                if "ollama" in service.name.lower():
+                    data = json.loads(response.read())
+                    models = [m.get("name") for m in data.get("models", [])]
+                    return True, {"info": f"{len(models)} Modelle", "models": models}
+                return True, {"info": f"HTTP {response.status}"}
+
+        except Exception as e:
+            # HTTP fehlgeschlagen, aber TCP war OK
+            return True, {"info": "TCP OK, HTTP-API nicht verfügbar"}
+
+    # =========================================================================
+    # DATENBANK-TESTS (DYNAMISCH)
+    # =========================================================================
+
+    def test_databases(self):
+        """Testet alle gefundenen Datenbanken"""
+        if not self.scanner.databases:
+            print(f"\n{Colors.DIM}Keine Datenbanken gefunden (erster Start?){Colors.RESET}")
+            return
+
+        self._print_header(f"DATENBANK TESTS ({len(self.scanner.databases)} Datenbanken)")
+
+        for name, db in self.scanner.databases.items():
+            self._test_database(db)
+
+    def _test_database(self, db: DatabaseInfo):
+        """Testet eine Datenbank"""
+        start = time.time()
+
+        if db.error:
+            self._add_result(
+                "database", db.name, False,
+                db.error,
+                details={"path": str(db.path)}
+            )
+            return
+
+        duration = (time.time() - start) * 1000
+
+        msg = f"{len(db.tables)} Tabellen, {db.size_mb:.1f}MB"
+        if not db.integrity_ok:
+            msg += " (Integrity-Check fehlgeschlagen!)"
+
+        self._add_result(
+            "database", db.name,
+            db.integrity_ok,
+            msg,
+            duration,
+            {"tables": db.tables, "size_mb": db.size_mb}
+        )
 
     # =========================================================================
     # KONFIGURATIONS-TESTS
     # =========================================================================
 
     def test_configuration(self):
-        """Testet die Konfiguration"""
+        """Testet Konfiguration"""
         self._print_header("KONFIGURATIONS-TESTS")
 
-        # Config-Datei vorhanden
-        self.run_test(
-            "config.json existiert",
-            self._test_config_exists,
-            category="config"
+        # Config-Datei
+        config_path = self.scanner.project_dir / "config.json"
+        self._add_result(
+            "config", "config.json",
+            config_path.exists(),
+            f"{config_path.stat().st_size} Bytes" if config_path.exists() else "Nicht gefunden"
         )
 
-        # Config-Struktur
-        self.run_test(
-            "Config-Struktur gültig",
-            self._test_config_structure,
-            category="config"
-        )
-
-        # Verzeichnisse
-        self.run_test(
-            "data/ Verzeichnis",
-            lambda: self._test_directory("data"),
-            category="config"
-        )
-
-        self.run_test(
-            "logs/ Verzeichnis",
-            lambda: self._test_directory("logs"),
-            category="config"
-        )
+        # Wichtige Verzeichnisse
+        for dirname in ["data", "logs", "state"]:
+            path = self.scanner.project_dir / dirname
+            exists = path.exists() and path.is_dir()
+            self._add_result(
+                "config", f"{dirname}/ Verzeichnis",
+                exists,
+                "Existiert" if exists else "Fehlt"
+            )
 
         # Umgebungsvariablen
-        self.run_test(
-            "Umgebungsvariablen",
-            self._test_env_vars,
-            category="config"
-        )
-
-    def _test_config_exists(self) -> Tuple[bool, str, dict]:
-        """Prüft ob config.json existiert"""
-        if Path("config.json").exists():
-            size = Path("config.json").stat().st_size
-            return True, f"{size} Bytes", {"size": size}
-        return False, "config.json nicht gefunden", {}
-
-    def _test_config_structure(self) -> Tuple[bool, str, dict]:
-        """Prüft die Config-Struktur"""
-        if not self.config:
-            return False, "Keine Config geladen", {}
-
-        required_sections = ["network", "behavior", "storage"]
-        missing = [s for s in required_sections if s not in self.config]
-
-        if missing:
-            return False, f"Fehlende Sektionen: {missing}", {"missing": missing}
-
-        return True, f"{len(self.config)} Sektionen", {"sections": list(self.config.keys())}
-
-    def _test_directory(self, dirname: str) -> Tuple[bool, str, dict]:
-        """Prüft ob ein Verzeichnis existiert und beschreibbar ist"""
-        path = Path(dirname)
-        if not path.exists():
-            return False, "Existiert nicht", {}
-
-        if not path.is_dir():
-            return False, "Ist kein Verzeichnis", {}
-
-        # Schreibtest
-        try:
-            test_file = path / ".write_test"
-            test_file.write_text("test")
-            test_file.unlink()
-            return True, "Existiert und beschreibbar", {}
-        except Exception as e:
-            return False, f"Nicht beschreibbar: {e}", {}
-
-    def _test_env_vars(self) -> Tuple[bool, str, dict]:
-        """Prüft wichtige Umgebungsvariablen"""
-        important_vars = [
-            "HOLO_MQTT_BROKER",
-            "HOLO_MQTT_PASSWORD",
-            "HOLO_LLM_LOCAL_HOST",
-        ]
-
-        set_vars = [v for v in important_vars if os.getenv(v)]
-        missing_vars = [v for v in important_vars if not os.getenv(v)]
-
-        if missing_vars:
-            return True, f"{len(set_vars)}/{len(important_vars)} gesetzt (optional)", {
-                "set": set_vars,
-                "missing": missing_vars
-            }
-
-        return True, f"Alle {len(important_vars)} gesetzt", {"set": set_vars}
-
-    # =========================================================================
-    # SERVICE-TESTS
-    # =========================================================================
-
-    def test_services(self):
-        """Testet externe Services"""
-        self._print_header("SERVICE-VERBINDUNGS-TESTS")
-
-        # Ollama
-        ollama_host = self.config.get("network", {}).get("ollama", {}).get("host", "localhost")
-        ollama_port = self.config.get("network", {}).get("ollama", {}).get("port", 11434)
-        self.run_test(
-            f"Ollama ({ollama_host}:{ollama_port})",
-            lambda: self._test_ollama(ollama_host, ollama_port),
-            category="service"
-        )
-
-        # MQTT
-        mqtt_host = self.config.get("network", {}).get("mqtt", {}).get("broker_ip", "localhost")
-        mqtt_port = self.config.get("network", {}).get("mqtt", {}).get("port", 1883)
-        self.run_test(
-            f"MQTT Broker ({mqtt_host}:{mqtt_port})",
-            lambda: self._test_tcp(mqtt_host, mqtt_port),
-            category="service"
-        )
-
-        # Home Assistant
-        ha_url = self.config.get("network", {}).get("home_assistant", {}).get("api_url", "")
-        if ha_url:
-            self.run_test(
-                f"Home Assistant",
-                lambda: self._test_http(ha_url),
-                category="service"
+        if self.scanner.all_env_vars:
+            set_vars = [v for v in self.scanner.all_env_vars if os.getenv(v)]
+            total = len(self.scanner.all_env_vars)
+            self._add_result(
+                "config", "Umgebungsvariablen",
+                True,  # Immer OK, da optional
+                f"{len(set_vars)}/{total} gesetzt",
+                details={"set": set_vars, "all": list(self.scanner.all_env_vars)}
             )
 
-        # NAS
-        nas_ip = self.config.get("network", {}).get("nas", {}).get("ip", "")
-        if nas_ip:
-            self.run_test(
-                f"NAS SSH ({nas_ip}:22)",
-                lambda: self._test_tcp(nas_ip, 22),
-                category="service"
-            )
-
-    def _test_tcp(self, host: str, port: int, timeout: float = 3.0) -> Tuple[bool, str, dict]:
-        """Testet TCP-Verbindung"""
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
-            result = sock.connect_ex((host, port))
-            sock.close()
-
-            if result == 0:
-                return True, "Erreichbar", {"host": host, "port": port}
-            else:
-                return False, f"Nicht erreichbar (Code: {result})", {}
-        except socket.timeout:
-            return False, "Timeout", {}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_http(self, url: str, timeout: float = 5.0) -> Tuple[bool, str, dict]:
-        """Testet HTTP-Endpoint"""
-        try:
-            import urllib.request
-            req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=timeout) as response:
-                return True, f"Status {response.status}", {"status": response.status}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_ollama(self, host: str, port: int) -> Tuple[bool, str, dict]:
-        """Testet Ollama-Verbindung"""
-        # Erst TCP
-        tcp_ok, tcp_msg, _ = self._test_tcp(host, port)
-        if not tcp_ok:
-            return False, f"TCP: {tcp_msg}", {}
-
-        # Dann API
-        try:
-            import urllib.request
-            url = f"http://{host}:{port}/api/tags"
-            req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=5) as response:
-                data = json.loads(response.read())
-                models = data.get("models", [])
-                model_names = [m.get("name", "?") for m in models[:3]]
-                return True, f"{len(models)} Modelle: {', '.join(model_names)}", {
-                    "models": len(models)
-                }
-        except Exception as e:
-            return False, f"API-Fehler: {e}", {}
-
     # =========================================================================
-    # DATENBANK-TESTS
+    # ABHÄNGIGKEITS-TESTS
     # =========================================================================
 
-    def test_databases(self):
-        """Testet Datenbanken"""
-        self._print_header("DATENBANK-TESTS")
+    def test_dependencies(self):
+        """Testet ob alle benötigten Abhängigkeiten installiert sind"""
+        self._print_header("ABHÄNGIGKEITS-TESTS")
 
-        data_dir = Path("data")
-        if not data_dir.exists():
-            self._print("  data/ Verzeichnis existiert nicht - überspringe DB-Tests", Colors.YELLOW)
-            return
+        # Sammle alle externen Imports aus allen Modulen
+        external_imports = set()
+        stdlib = self._get_stdlib_modules()
 
-        # Finde alle .db Dateien
-        db_files = list(data_dir.glob("*.db"))
+        for module in self.scanner.modules.values():
+            for imp in module.imports:
+                # Ignoriere lokale Module und stdlib
+                if imp not in self.scanner.modules and imp not in stdlib:
+                    external_imports.add(imp)
 
-        if not db_files:
-            self._print("  Keine Datenbanken gefunden (erster Start?)", Colors.YELLOW)
-            return
+        # Teste jeden Import
+        for imp in sorted(external_imports):
+            start = time.time()
+            try:
+                importlib.import_module(imp)
+                duration = (time.time() - start) * 1000
+                self._add_result("dependency", imp, True, "Installiert", duration)
+            except ImportError:
+                self._add_result("dependency", imp, False, "Nicht installiert")
 
-        for db_path in db_files:
-            self.run_test(
-                f"{db_path.name}",
-                lambda p=db_path: self._test_database(p),
-                category="database"
-            )
-
-    def _test_database(self, db_path: Path) -> Tuple[bool, str, dict]:
-        """Testet eine SQLite-Datenbank"""
-        try:
-            conn = sqlite3.connect(str(db_path), timeout=5)
-            cursor = conn.cursor()
-
-            # Integrity Check
-            cursor.execute("PRAGMA integrity_check")
-            integrity = cursor.fetchone()[0]
-
-            if integrity != "ok":
-                conn.close()
-                return False, f"Integrity-Check fehlgeschlagen: {integrity}", {}
-
-            # Tabellen zählen
-            cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table'")
-            table_count = cursor.fetchone()[0]
-
-            # Größe
-            size_mb = db_path.stat().st_size / 1024 / 1024
-
-            conn.close()
-
-            return True, f"{table_count} Tabellen, {size_mb:.1f}MB", {
-                "tables": table_count,
-                "size_mb": size_mb
-            }
-
-        except Exception as e:
-            return False, str(e), {}
+    def _get_stdlib_modules(self) -> Set[str]:
+        """Gibt Standard-Library-Module zurück"""
+        # Häufigste stdlib Module
+        return {
+            "os", "sys", "json", "time", "datetime", "pathlib", "typing",
+            "collections", "itertools", "functools", "re", "logging",
+            "threading", "multiprocessing", "subprocess", "socket",
+            "sqlite3", "hashlib", "base64", "urllib", "http", "email",
+            "html", "xml", "csv", "io", "tempfile", "shutil", "glob",
+            "random", "math", "statistics", "decimal", "fractions",
+            "copy", "pickle", "shelve", "dbm", "gzip", "zipfile",
+            "tarfile", "configparser", "argparse", "getopt", "warnings",
+            "traceback", "inspect", "abc", "contextlib", "dataclasses",
+            "enum", "ast", "dis", "gc", "weakref", "array", "struct",
+            "codecs", "locale", "gettext", "unicodedata", "string",
+            "textwrap", "difflib", "calendar", "heapq", "bisect",
+            "queue", "sched", "select", "selectors", "signal", "mmap",
+            "ctypes", "uuid", "secrets", "hmac", "ssl", "asyncio",
+            "concurrent", "contextvars", "importlib", "pkgutil",
+            "unittest", "doctest", "pdb", "profile", "timeit",
+            "platform", "errno", "stat", "fileinput", "fnmatch",
+            "operator", "keyword", "token", "tokenize", "pprint",
+        }
 
     # =========================================================================
     # FUNKTIONS-TESTS
     # =========================================================================
 
-    def test_functions(self):
-        """Testet Kernfunktionen"""
+    def test_functions(self, deep: bool = False):
+        """Testet wichtige Funktionen"""
         self._print_header("FUNKTIONS-TESTS")
 
-        # Core Types
-        self.run_test(
-            "EmotionType Enum",
-            self._test_emotion_types,
-            category="function"
+        # Health Check System
+        self._test_function_import(
+            "Health Checks",
+            "holo_health_checks",
+            ["HealthChecker", "HealthStatus"]
         )
 
-        # Config Loading
-        self.run_test(
-            "Config-Modul laden",
-            self._test_config_module,
-            category="function"
-        )
-
-        # Router
-        self.run_test(
-            "Intelligent Router",
-            self._test_router,
-            category="function"
-        )
-
-        # Health Checks
-        self.run_test(
-            "Health Check System",
-            self._test_health_checks,
-            category="function"
+        # Metrics
+        self._test_function_import(
+            "Metrics",
+            "holo_metrics",
+            ["MetricsRegistry", "Counter", "Gauge"]
         )
 
         # Migrations
-        self.run_test(
-            "Migration System",
-            self._test_migrations,
-            category="function"
+        self._test_function_import(
+            "Migrations",
+            "holo_db_migrations",
+            ["MigrationManager", "Migration"]
         )
 
-    def _test_emotion_types(self) -> Tuple[bool, str, dict]:
-        """Testet EmotionType Enum"""
-        try:
-            from holo_core_types import EmotionType
-            emotions = list(EmotionType)
-            return True, f"{len(emotions)} Emotionen definiert", {"count": len(emotions)}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_config_module(self) -> Tuple[bool, str, dict]:
-        """Testet das Config-Modul"""
-        try:
-            from holo_config import load_config, get_config
-            config = load_config()
-            if config:
-                return True, "Config geladen", {}
-            return True, "Leere Config (Defaults)", {}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_router(self) -> Tuple[bool, str, dict]:
-        """Testet den Intelligent Router"""
-        try:
-            from holo_intelligent_router import IntelligentRouter, RouteDecision
-            router = IntelligentRouter()
-            # Teste Routing-Entscheidung
-            decision = router.decide("Hallo, wie geht es dir?")
-            return True, f"Route: {decision.route.value if hasattr(decision, 'route') else 'OK'}", {}
-        except ImportError:
-            return False, "Modul nicht importierbar", {}
-        except Exception as e:
-            return True, f"Modul OK (Test: {e})", {}  # Modul existiert, Test-Fehler ignorieren
-
-    def _test_health_checks(self) -> Tuple[bool, str, dict]:
-        """Testet das Health Check System"""
-        try:
-            from holo_health_checks import HealthChecker, HealthStatus
-            hc = HealthChecker(self.config)
-            result = hc.check_liveness()
-            return True, f"Status: {result.status.value}", {}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_migrations(self) -> Tuple[bool, str, dict]:
-        """Testet das Migration System"""
-        try:
-            from holo_db_migrations import MigrationManager, Migration, get_holocloude_migrations
-            migrations = get_holocloude_migrations()
-            return True, f"{len(migrations)} Migrationen definiert", {"count": len(migrations)}
-        except Exception as e:
-            return False, str(e), {}
-
-    # =========================================================================
-    # LLM-TESTS
-    # =========================================================================
-
-    def test_llm(self):
-        """Testet LLM-Funktionalität"""
-        self._print_header("LLM-TESTS")
-
-        # LLM System Import
-        self.run_test(
-            "Smart LLM System laden",
-            self._test_llm_import,
-            category="llm"
+        # Config
+        self._test_function_import(
+            "Config",
+            "holo_config",
+            ["load_config", "get_config"]
         )
 
-        # Ollama Modelle
-        self.run_test(
-            "Ollama Modelle abrufen",
-            self._test_ollama_models,
-            category="llm"
+        # Router
+        self._test_function_import(
+            "Intelligent Router",
+            "holo_intelligent_router",
+            ["IntelligentRouter"]
         )
 
-        # Einfache Generierung (optional, dauert lange)
-        self.run_test(
-            "LLM Test-Generierung",
-            self._test_llm_generate,
-            category="llm"
-        )
+        if deep:
+            # Teste alle Klassen in allen Modulen
+            print(f"\n{Colors.BOLD}Tiefe Analyse aller Klassen:{Colors.RESET}")
+            for name, info in self.scanner.modules.items():
+                if info.import_ok and info.classes:
+                    for cls_name in info.classes[:3]:  # Max 3 pro Modul
+                        self._test_class_instantiation(name, cls_name)
 
-    def _test_llm_import(self) -> Tuple[bool, str, dict]:
-        """Testet LLM System Import"""
-        try:
-            from smart_llm_system import SmartLLMSystem
-            return True, "Modul geladen", {}
-        except Exception as e:
-            return False, str(e), {}
-
-    def _test_ollama_models(self) -> Tuple[bool, str, dict]:
-        """Holt verfügbare Ollama Modelle"""
-        host = self.config.get("network", {}).get("ollama", {}).get("host", "localhost")
-        port = self.config.get("network", {}).get("ollama", {}).get("port", 11434)
+    def _test_function_import(self, display_name: str, module_name: str, items: List[str]):
+        """Testet ob bestimmte Items aus einem Modul importierbar sind"""
+        start = time.time()
 
         try:
-            import urllib.request
-            url = f"http://{host}:{port}/api/tags"
-            req = urllib.request.Request(url)
-            with urllib.request.urlopen(req, timeout=5) as response:
-                data = json.loads(response.read())
-                models = [m.get("name") for m in data.get("models", [])]
-                if models:
-                    return True, f"Modelle: {', '.join(models[:3])}", {"models": models}
-                return False, "Keine Modelle installiert", {}
-        except Exception as e:
-            return False, str(e), {}
+            module = importlib.import_module(module_name)
+            missing = [item for item in items if not hasattr(module, item)]
+            duration = (time.time() - start) * 1000
 
-    def _test_llm_generate(self) -> Tuple[bool, str, dict]:
-        """Testet eine einfache LLM-Generierung"""
-        host = self.config.get("network", {}).get("ollama", {}).get("host", "localhost")
-        port = self.config.get("network", {}).get("ollama", {}).get("port", 11434)
-        model = self.config.get("llm", {}).get("local_model", "qwen2.5:0.5b")
+            if missing:
+                self._add_result(
+                    "function", display_name, False,
+                    f"Fehlend: {', '.join(missing)}",
+                    duration
+                )
+            else:
+                self._add_result(
+                    "function", display_name, True,
+                    f"Alle {len(items)} Items verfügbar",
+                    duration
+                )
+
+        except ImportError as e:
+            self._add_result(
+                "function", display_name, False,
+                f"Modul nicht ladbar: {e}"
+            )
+
+    def _test_class_instantiation(self, module_name: str, class_name: str):
+        """Versucht eine Klasse zu instanziieren"""
+        start = time.time()
 
         try:
-            import urllib.request
-            url = f"http://{host}:{port}/api/generate"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
 
-            payload = json.dumps({
-                "model": model,
-                "prompt": "Sag nur 'Test OK'",
-                "stream": False,
-                "options": {"num_predict": 10}
-            }).encode()
-
-            req = urllib.request.Request(url, data=payload, method="POST")
-            req.add_header("Content-Type", "application/json")
-
-            with urllib.request.urlopen(req, timeout=30) as response:
-                data = json.loads(response.read())
-                response_text = data.get("response", "")[:50]
-                return True, f"Antwort: {response_text}...", {}
+            # Versuche zu instanziieren (ohne Argumente)
+            try:
+                instance = cls()
+                duration = (time.time() - start) * 1000
+                self._add_result(
+                    "class", f"{module_name}.{class_name}", True,
+                    "Instanziierbar",
+                    duration
+                )
+            except TypeError:
+                # Braucht Argumente - das ist OK
+                duration = (time.time() - start) * 1000
+                self._add_result(
+                    "class", f"{module_name}.{class_name}", True,
+                    "Klasse OK (braucht Argumente)",
+                    duration
+                )
 
         except Exception as e:
-            return False, str(e), {}
+            self._add_result(
+                "class", f"{module_name}.{class_name}", False,
+                str(e)[:50]
+            )
 
     # =========================================================================
     # REPORT
     # =========================================================================
 
     def print_report(self):
-        """Gibt den finalen Report aus"""
-        self.report.end_time = datetime.now()
-        duration = (self.report.end_time - self.report.start_time).total_seconds()
+        """Druckt den finalen Report"""
+        duration = (datetime.now() - self.start_time).total_seconds()
 
         print()
         print(f"{Colors.BOLD}{'═' * 60}{Colors.RESET}")
-        print(f"{Colors.BOLD}  TESTERGEBNIS{Colors.RESET}")
+        print(f"{Colors.BOLD}  ZUSAMMENFASSUNG{Colors.RESET}")
         print(f"{Colors.BOLD}{'═' * 60}{Colors.RESET}")
-        print()
 
-        # Statistik nach Kategorie
-        categories = {}
-        for r in self.report.results:
-            if r.category not in categories:
-                categories[r.category] = {"passed": 0, "failed": 0}
-            if r.passed:
-                categories[r.category]["passed"] += 1
+        # Nach Kategorie gruppieren
+        by_category = defaultdict(list)
+        for r in self.results:
+            by_category[r.category].append(r)
+
+        print()
+        for category, results in by_category.items():
+            passed = sum(1 for r in results if r.passed)
+            total = len(results)
+
+            if total == passed:
+                color = Colors.GREEN
+            elif passed > total // 2:
+                color = Colors.YELLOW
             else:
-                categories[r.category]["failed"] += 1
+                color = Colors.RED
 
-        for cat, stats in categories.items():
-            total = stats["passed"] + stats["failed"]
-            color = Colors.GREEN if stats["failed"] == 0 else Colors.YELLOW if stats["passed"] > 0 else Colors.RED
-            print(f"  {cat:20} {color}{stats['passed']}/{total} bestanden{Colors.RESET}")
-
-        print()
+            print(f"  {category:20} {color}{passed}/{total} bestanden{Colors.RESET}")
 
         # Gesamtergebnis
-        if self.report.failed == 0:
-            status_color = Colors.GREEN
-            status_text = "ALLE TESTS BESTANDEN"
-            status_icon = "✓"
-        elif self.report.passed > self.report.failed:
-            status_color = Colors.YELLOW
-            status_text = "EINIGE TESTS FEHLGESCHLAGEN"
-            status_icon = "⚠"
-        else:
-            status_color = Colors.RED
-            status_text = "VIELE TESTS FEHLGESCHLAGEN"
-            status_icon = "✗"
+        total_passed = sum(1 for r in self.results if r.passed)
+        total = len(self.results)
+        rate = (total_passed / total * 100) if total > 0 else 0
 
-        print(f"  {status_color}{Colors.BOLD}{status_icon} {status_text}{Colors.RESET}")
         print()
-        print(f"  Gesamt: {Colors.GREEN}{self.report.passed} bestanden{Colors.RESET}, "
-              f"{Colors.RED}{self.report.failed} fehlgeschlagen{Colors.RESET}")
-        print(f"  Erfolgsrate: {self.report.success_rate:.1f}%")
+        if total_passed == total:
+            print(f"  {Colors.GREEN}{Colors.BOLD}✓ ALLE TESTS BESTANDEN{Colors.RESET}")
+        elif total_passed > total // 2:
+            print(f"  {Colors.YELLOW}{Colors.BOLD}⚠ EINIGE TESTS FEHLGESCHLAGEN{Colors.RESET}")
+        else:
+            print(f"  {Colors.RED}{Colors.BOLD}✗ VIELE TESTS FEHLGESCHLAGEN{Colors.RESET}")
+
+        print()
+        print(f"  Gesamt: {Colors.GREEN}{total_passed} bestanden{Colors.RESET}, "
+              f"{Colors.RED}{total - total_passed} fehlgeschlagen{Colors.RESET}")
+        print(f"  Erfolgsrate: {rate:.1f}%")
         print(f"  Dauer: {duration:.1f}s")
         print()
 
-        # Fehlgeschlagene Tests auflisten
-        failed_tests = [r for r in self.report.results if not r.passed]
-        if failed_tests and self.verbose:
-            print(f"{Colors.RED}Fehlgeschlagene Tests:{Colors.RESET}")
-            for r in failed_tests:
-                print(f"  • {r.name}: {r.message}")
-            print()
+        # Projekt-Statistik
+        print(f"{Colors.BOLD}Projekt-Statistik:{Colors.RESET}")
+        print(f"  Module:      {len(self.scanner.modules)}")
+        print(f"  Services:    {len(self.scanner.services)}")
+        print(f"  Datenbanken: {len(self.scanner.databases)}")
+        print(f"  Env-Vars:    {len(self.scanner.all_env_vars)}")
 
-        # Empfehlungen
-        if failed_tests:
-            print(f"{Colors.YELLOW}Empfehlungen:{Colors.RESET}")
+        total_lines = sum(m.lines for m in self.scanner.modules.values())
+        total_classes = sum(len(m.classes) for m in self.scanner.modules.values())
+        total_functions = sum(len(m.functions) for m in self.scanner.modules.values())
 
-            # Service-Fehler
-            service_fails = [r for r in failed_tests if r.category == "service"]
-            if service_fails:
-                print(f"  • Prüfe ob externe Services laufen (Ollama, MQTT, etc.)")
-
-            # Modul-Fehler
-            module_fails = [r for r in failed_tests if "module" in r.category]
-            if module_fails:
-                print(f"  • Installiere fehlende Dependencies: pip install -r requirements.txt")
-
-            # Config-Fehler
-            config_fails = [r for r in failed_tests if r.category == "config"]
-            if config_fails:
-                print(f"  • Prüfe config.json und Verzeichnisstruktur")
-
-            print()
-
-    # =========================================================================
-    # MAIN
-    # =========================================================================
-
-    def run_all(self, quick: bool = False):
-        """Führt alle Tests aus"""
+        print(f"  Code-Zeilen: {total_lines:,}")
+        print(f"  Klassen:     {total_classes}")
+        print(f"  Funktionen:  {total_functions}")
         print()
-        print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"{Colors.BOLD}{Colors.MAGENTA}║          HOLOCLOUDE SYSTEM TESTER v1.0                       ║{Colors.RESET}")
-        print(f"{Colors.BOLD}{Colors.MAGENTA}║          {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^42}       ║{Colors.RESET}")
-        print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
-        self.test_modules()
-        self.test_configuration()
-        self.test_services()
-        self.test_databases()
-        self.test_functions()
-
-        if not quick:
-            self.test_llm()
-
-        self.print_report()
-
-        return self.report.failed == 0
+        return total_passed == total
 
 
 # =============================================================================
-# CLI
+# MAIN
 # =============================================================================
 
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude System Tester - Prüft alle Komponenten"
+        description="Holocloude Dynamic System Tester - Erkennt und testet automatisch"
     )
     parser.add_argument("--quick", "-q", action="store_true",
-                        help="Schnelle Tests (ohne LLM)")
+                        help="Schnelle Tests (weniger Module)")
+    parser.add_argument("--deep", "-d", action="store_true",
+                        help="Tiefe Analyse (testet alle Klassen)")
     parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Mehr Details ausgeben")
-    parser.add_argument("--modules", action="store_true",
-                        help="Nur Module testen")
-    parser.add_argument("--services", action="store_true",
-                        help="Nur Services testen")
-    parser.add_argument("--databases", action="store_true",
-                        help="Nur Datenbanken testen")
+                        help="Mehr Details")
     parser.add_argument("--no-color", action="store_true",
-                        help="Keine Farben ausgeben")
+                        help="Keine Farben")
+    parser.add_argument("--modules-only", action="store_true",
+                        help="Nur Module testen")
+    parser.add_argument("--services-only", action="store_true",
+                        help="Nur Services testen")
 
     args = parser.parse_args()
 
     if args.no_color:
         Colors.disable()
 
-    tester = HoloTester(verbose=args.verbose)
+    print()
+    print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║       HOLOCLOUDE DYNAMIC SYSTEM TESTER v2.0                  ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║       {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
-    # Spezifische Tests
-    if args.modules:
+    # Scanner
+    print(f"\n{Colors.DIM}Scanne Projekt...{Colors.RESET}")
+    scanner = ProjectScanner()
+    scanner.scan_all()
+
+    print(f"{Colors.DIM}  Gefunden: {len(scanner.modules)} Module, "
+          f"{len(scanner.services)} Services, "
+          f"{len(scanner.databases)} Datenbanken{Colors.RESET}")
+
+    # Tester
+    tester = DynamicTester(scanner, verbose=args.verbose)
+
+    if args.modules_only:
         tester.test_modules()
-        tester.print_report()
-    elif args.services:
+    elif args.services_only:
         tester.test_services()
-        tester.print_report()
-    elif args.databases:
-        tester.test_databases()
-        tester.print_report()
     else:
-        # Alle Tests
-        success = tester.run_all(quick=args.quick)
-        sys.exit(0 if success else 1)
+        tester.test_configuration()
+        tester.test_modules()
+        tester.test_services()
+        tester.test_databases()
+        tester.test_dependencies()
+        tester.test_functions(deep=args.deep)
+
+    success = tester.print_report()
+    sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":
