@@ -49,28 +49,7 @@ try:
     PROCESS_CONTROLLER_AVAILABLE = True
 except ImportError:
     PROCESS_CONTROLLER_AVAILABLE = False
-    logger.warning("Process Controller nicht verfügbar")
-    # Fallback Enums wenn Process Controller nicht verfügbar
-    from enum import Enum, auto
-    class ProcessCategory(Enum):
-        CORE = auto()
-        COMMUNICATION = auto()
-        LEARNING = auto()
-        CREATIVE = auto()
-        MAINTENANCE = auto()
-        OPTIONAL = auto()
-    class ProcessPriority(Enum):
-        CRITICAL = auto()
-        HIGH = auto()
-        NORMAL = auto()
-        LOW = auto()
-        BACKGROUND = auto()
-    class ProcessState(Enum):
-        STOPPED = auto()
-        RUNNING = auto()
-        PAUSED = auto()
-    def get_process_controller():
-        return None
+    logger.warning("Process Controller nicht verfügbar - Prozess-Management deaktiviert")
 
 # Import Memory Monitor
 try:
