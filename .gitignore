@@ -1,2 +1,32 @@
 __pycache__/
-logs/
+
+# Logs - Inhalte ignorieren, aber Verzeichnis behalten
+logs/*
+!logs/.gitkeep
+
+# Data - Inhalte ignorieren, aber Verzeichnis behalten
+data/*
+!data/.gitkeep
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+*.egg-info/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

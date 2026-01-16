@@ -3370,25 +3370,40 @@ class MemoryStore:
             ).fetchone()
 
             if existing:
-                # Update
+                # Update mit Whitelist (SQL-Injection-sicher)
+                # Erlaubte Spalten explizit definiert - keine dynamischen Spaltennamen
+                ALLOWED_COLUMNS = frozenset({
+                    "wake_time", "sleep_time", "active_devices_json", "nas_usage_minutes"
+                })
+
                 updates = []
                 params = []
                 if wake_time:
-                    updates.append("wake_time = ?")
-                    params.append(wake_time)
+                    col = "wake_time"
+                    if col in ALLOWED_COLUMNS:
+                        updates.append(f"{col} = ?")
+                        params.append(wake_time)
                 if sleep_time:
-                    updates.append("sleep_time = ?")
-                    params.append(sleep_time)
+                    col = "sleep_time"
+                    if col in ALLOWED_COLUMNS:
+                        updates.append(f"{col} = ?")
+                        params.append(sleep_time)
                 if active_devices:
-                    updates.append("active_devices_json = ?")
-                    params.append(json.dumps(active_devices))
+                    col = "active_devices_json"
+                    if col in ALLOWED_COLUMNS:
+                        updates.append(f"{col} = ?")
+                        params.append(json.dumps(active_devices))
                 if nas_minutes:
-                    updates.append("nas_usage_minutes = nas_usage_minutes + ?")
-                    params.append(nas_minutes)
+                    col = "nas_usage_minutes"
+                    if col in ALLOWED_COLUMNS:
+                        updates.append(f"{col} = {col} + ?")
+                        params.append(nas_minutes)
 
                 if updates:
                     params.append(today)
-                    conn.execute(f"UPDATE activity_patterns SET {', '.join(updates)} WHERE date = ?", params)
+                    # Sicher: updates enthaelt nur Whitelist-verifizierte Spaltennamen
+                    query = f"UPDATE activity_patterns SET {', '.join(updates)} WHERE date = ?"
+                    conn.execute(query, params)
             else:
                 # Neu anlegen
                 conn.execute("""

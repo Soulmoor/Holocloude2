@@ -38,8 +38,71 @@ import shutil
 import hashlib
 import logging
 import threading
-import pickle
 from datetime import datetime, timedelta
+
+
+# ============================================================================
+# SICHERE SERIALISIERUNG (Ersatz fuer unsicheres pickle)
+# ============================================================================
+
+class SafeJSONEncoder(json.JSONEncoder):
+    """
+    Sicherer JSON-Encoder fuer komplexe Python-Objekte.
+    Ersetzt pickle um Code-Injection-Risiken zu vermeiden.
+    """
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return {"__type__": "datetime", "value": obj.isoformat()}
+        elif isinstance(obj, timedelta):
+            return {"__type__": "timedelta", "seconds": obj.total_seconds()}
+        elif isinstance(obj, set):
+            return {"__type__": "set", "value": list(obj)}
+        elif isinstance(obj, bytes):
+            import base64
+            return {"__type__": "bytes", "value": base64.b64encode(obj).decode('ascii')}
+        elif hasattr(obj, '__dict__'):
+            # Fuer einfache Objekte mit __dict__
+            return {"__type__": "object", "class": obj.__class__.__name__, "data": obj.__dict__}
+        else:
+            # Fallback: String-Repraesentation
+            return {"__type__": "unknown", "repr": str(obj)}
+
+
+def safe_json_decode(obj: dict) -> Any:
+    """Dekodiert spezielle JSON-Typen zurueck zu Python-Objekten."""
+    if "__type__" not in obj:
+        return obj
+
+    type_name = obj["__type__"]
+
+    if type_name == "datetime":
+        return datetime.fromisoformat(obj["value"])
+    elif type_name == "timedelta":
+        return timedelta(seconds=obj["seconds"])
+    elif type_name == "set":
+        return set(obj["value"])
+    elif type_name == "bytes":
+        import base64
+        return base64.b64decode(obj["value"])
+    elif type_name == "object":
+        # Gibt dict zurueck (sichere Variante - kein willkuerliches Objekt erstellen)
+        return obj.get("data", {})
+    elif type_name == "unknown":
+        return obj.get("repr", str(obj))
+
+    return obj
+
+
+def safe_serialize(data: Any) -> bytes:
+    """Serialisiert Daten sicher als JSON (Ersatz fuer pickle.dumps)."""
+    json_str = json.dumps(data, cls=SafeJSONEncoder, ensure_ascii=False)
+    return json_str.encode('utf-8')
+
+
+def safe_deserialize(serialized: bytes) -> Any:
+    """Deserialisiert Daten sicher aus JSON (Ersatz fuer pickle.loads)."""
+    json_str = serialized.decode('utf-8')
+    return json.loads(json_str, object_hook=safe_json_decode)
 from pathlib import Path
 from collections import OrderedDict
 from dataclasses import dataclass, field, asdict
@@ -191,7 +254,7 @@ class LRUCache:
     def _estimate_size(self, value: Any) -> int:
         """Schaetzt die Groesse eines Objekts."""
         try:
-            return len(pickle.dumps(value))
+            return len(safe_serialize(value))
         except Exception:
             return sys.getsizeof(value)
 
@@ -379,8 +442,8 @@ class HoloRAMManager:
             self._stats["stores"] += 1
 
             try:
-                # Groesse schaetzen
-                serialized = pickle.dumps(data)
+                # Groesse schaetzen (sichere JSON-Serialisierung)
+                serialized = safe_serialize(data)
                 size_bytes = len(serialized)
 
                 # Versuche in RAM zu speichern
@@ -499,8 +562,8 @@ class HoloRAMManager:
             safe_key = hashlib.md5(key.encode()).hexdigest()
             file_path = os.path.join(self.storage_path, f"{safe_key}.gz")
 
-            # Komprimiert speichern
-            serialized = pickle.dumps(data)
+            # Komprimiert speichern (sichere JSON-Serialisierung)
+            serialized = safe_serialize(data)
             with gzip.open(file_path, 'wb') as f:
                 f.write(serialized)
 
@@ -546,7 +609,8 @@ class HoloRAMManager:
                 with open(entry.disk_path, 'rb') as f:
                     serialized = f.read()
 
-            data = pickle.loads(serialized)
+            # Sichere Deserialisierung (kein pickle!)
+            data = safe_deserialize(serialized)
 
             # Zugriff aktualisieren
             entry.last_access = time.time()
