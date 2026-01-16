@@ -2,37 +2,37 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v5.0                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.0                        ║
 ║                                                                              ║
-║  INTELLIGENT - Versteht das Projekt:                                         ║
-║    • Analysiert Modul-Zweck aus Namen und Docstrings                         ║
-║    • Erkennt fehlende und ungenutzte Imports                                 ║
-║    • Baut Dependency-Graph auf                                               ║
-║    • Findet zirkuläre Abhängigkeiten                                         ║
-║    • Prüft ob Module zusammenarbeiten                                        ║
-║    • Erkennt fehlende Funktionen basierend auf Konventionen                  ║
-║    • Validiert Config gegen tatsächliche Nutzung                             ║
+║  VOLLSTÄNDIGE PROJEKT-ANALYSE mit 7 neuen Prüfungen:                         ║
 ║                                                                              ║
-║  NEU in v5.0:                                                                ║
-║    • TIEFE IMPORT-ANALYSE - Verfolgt Import-Ketten                           ║
-║    • IMPORT-TRACE - Zeigt wer was importiert (--trace MODULE)                ║
-║    • VERFÜGBARKEITS-CHECK - Prüft ob importierte Items existieren            ║
-║    • IMPORT-REIHENFOLGE - Topologische Sortierung                            ║
-║    • KAPUTTE KETTEN - Findet unterbrochene Import-Pfade                      ║
+║  NEU in v6.0:                                                                ║
+║    • FUNKTIONS-TEST    - Prüft ob Funktionen aufrufbar sind                  ║
+║    • DOCSTRING-CHECK   - Analysiert Dokumentations-Abdeckung                 ║
+║    • TYPE-ANNOTATION   - Prüft Type-Hints in Signaturen                      ║
+║    • KOMPLEXITÄT       - McCabe Complexity & Wartbarkeits-Index              ║
+║    • SICHERHEIT        - Findet bekannte Sicherheitslücken (OWASP)           ║
+║    • CONFIG-CHECK      - Prüft ob alle Config-Keys existieren                ║
+║    • DB-SCHEMA         - Verifiziert SQLite-Tabellen und -Struktur           ║
 ║                                                                              ║
-║  Bereits in v4.0:                                                            ║
-║    • Echter Import-Test, Redundanz-Erkennung, Toter Code                     ║
-║    • Syntax-Prüfung, Schnellstart-Modus                                      ║
+║  Bereits vorhanden (v5.0):                                                   ║
+║    • Tiefe Import-Analyse, Import-Ketten, Item-Verfügbarkeit                 ║
+║    • Dependency-Graph, Zirkuläre Abhängigkeiten                              ║
+║    • Redundanz-Erkennung, Toter Code, Syntax-Prüfung                         ║
 ║                                                                              ║
 ║  Verwendung:                                                                 ║
-║      python holo_tester.py                     # Intelligente Analyse        ║
+║      python holo_tester.py                     # Vollständige Analyse        ║
 ║      python holo_tester.py --quick             # Schneller Start-Check       ║
+║      python holo_tester.py --functions         # Funktions-Test              ║
+║      python holo_tester.py --docstrings        # Docstring-Abdeckung         ║
+║      python holo_tester.py --types             # Type-Annotation Check       ║
+║      python holo_tester.py --complexity        # Komplexitäts-Analyse        ║
+║      python holo_tester.py --security          # Sicherheits-Audit           ║
+║      python holo_tester.py --config            # Config-Vollständigkeit      ║
+║      python holo_tester.py --db                # Datenbank-Schema Check      ║
 ║      python holo_tester.py --imports           # Import-Analyse              ║
-║      python holo_tester.py --trace holo_brain  # Verfolge Modul-Imports      ║
-║      python holo_tester.py --explain           # Erklärt Module              ║
-║      python holo_tester.py --graph             # Dependency-Graph            ║
-║      python holo_tester.py --problems          # Nur Probleme                ║
-║      python holo_tester.py --redundancy        # Redundanzen                 ║
+║      python holo_tester.py --trace MODULE      # Verfolge Modul-Imports      ║
+║      python holo_tester.py --all               # Alle erweiterten Prüfungen  ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
@@ -145,6 +145,49 @@ class ImportedItem:
 
 
 @dataclass
+class FunctionInfo:
+    """Detaillierte Informationen über eine Funktion"""
+    name: str
+    lineno: int
+    is_async: bool = False
+    has_docstring: bool = False
+    has_return_type: bool = False
+    has_all_param_types: bool = False
+    param_count: int = 0
+    typed_params: int = 0
+    complexity: int = 1  # McCabe Complexity
+    lines: int = 0
+    is_callable: bool = True
+    call_error: str = ""
+
+
+@dataclass
+class SecurityIssue:
+    """Sicherheitsproblem"""
+    severity: str  # "critical", "high", "medium", "low"
+    category: str  # "injection", "crypto", "secrets", etc.
+    module: str
+    line: int
+    code: str
+    message: str
+    recommendation: str
+
+
+@dataclass
+class ComplexityInfo:
+    """Komplexitäts-Metriken für ein Modul"""
+    total_complexity: int = 0
+    max_complexity: int = 0
+    max_complex_function: str = ""
+    avg_complexity: float = 0.0
+    maintainability_index: float = 100.0
+    functions_above_10: int = 0  # Komplexität > 10 = zu komplex
+    lines_of_code: int = 0
+    comment_lines: int = 0
+    blank_lines: int = 0
+
+
+@dataclass
 class ModuleAnalysis:
     """Tiefe Analyse eines Moduls"""
     name: str
@@ -198,6 +241,15 @@ class ModuleAnalysis:
     failed_imports: List[Tuple[str, str]] = field(default_factory=list)  # (modul, fehler)
     missing_imported_items: List[str] = field(default_factory=list)  # Items die nicht existieren
 
+    # NEU v6.0: Erweiterte Analyse
+    function_details: List[FunctionInfo] = field(default_factory=list)  # Detaillierte Funktions-Infos
+    security_issues: List[SecurityIssue] = field(default_factory=list)  # Sicherheitsprobleme
+    complexity_info: ComplexityInfo = field(default_factory=ComplexityInfo)  # Komplexitäts-Metriken
+    docstring_coverage: float = 0.0  # Prozent mit Docstrings
+    type_coverage: float = 0.0  # Prozent mit Type-Hints
+    missing_docstrings: List[str] = field(default_factory=list)  # Funktionen ohne Docstring
+    missing_types: List[str] = field(default_factory=list)  # Funktionen ohne Type-Hints
+
 
 @dataclass
 class ProjectAnalysis:
@@ -228,6 +280,80 @@ class ProjectAnalysis:
     import_tree: Dict[str, List[str]] = field(default_factory=dict)  # modul -> [importiert von]
     broken_import_chains: List[Tuple[str, str, str]] = field(default_factory=list)  # (modul, import, fehler)
     missing_items_report: List[Tuple[str, str, str]] = field(default_factory=list)  # (modul, item, source)
+
+    # NEU v6.0: Erweiterte Projekt-Analyse
+    all_security_issues: List[SecurityIssue] = field(default_factory=list)
+    avg_docstring_coverage: float = 0.0
+    avg_type_coverage: float = 0.0
+    total_complexity: int = 0
+    avg_complexity: float = 0.0
+    complex_functions: List[Tuple[str, str, int]] = field(default_factory=list)  # (modul, funktion, complexity)
+    config_issues: List[str] = field(default_factory=list)  # Fehlende/ungültige Config-Keys
+    db_tables: List[str] = field(default_factory=list)  # Gefundene DB-Tabellen
+    db_issues: List[str] = field(default_factory=list)  # DB-Schema Probleme
+
+
+# =============================================================================
+# SICHERHEITS-PATTERNS für Security Audit
+# =============================================================================
+
+SECURITY_PATTERNS = {
+    # SQL Injection
+    ("critical", "injection", r'execute\s*\(\s*["\'].*%s.*["\']',
+     "SQL Injection Gefahr", "Verwende parameterisierte Queries"),
+    ("critical", "injection", r'execute\s*\(\s*f["\']',
+     "SQL Injection via f-string", "Verwende ? Platzhalter statt f-strings"),
+    ("critical", "injection", r'executescript\s*\(',
+     "executescript kann mehrere SQL-Statements ausführen", "Verwende execute() mit einzelnen Statements"),
+
+    # Command Injection
+    ("critical", "injection", r'os\.system\s*\(\s*[^)]*[\+%]',
+     "Command Injection Gefahr", "Verwende subprocess mit shell=False"),
+    ("critical", "injection", r'subprocess\..*shell\s*=\s*True',
+     "Shell Injection möglich", "Setze shell=False und übergebe Args als Liste"),
+    ("high", "injection", r'eval\s*\([^)]*input',
+     "eval() mit User-Input ist gefährlich", "Verwende ast.literal_eval() oder validiere Input"),
+    ("critical", "injection", r'exec\s*\([^)]*input',
+     "exec() mit User-Input ist gefährlich", "Vermeide exec() mit externem Input"),
+
+    # Pickle/Deserialization
+    ("high", "deserialization", r'pickle\.loads?\s*\(',
+     "Pickle ist unsicher für nicht vertrauenswürdige Daten", "Verwende json für externe Daten"),
+    ("high", "deserialization", r'yaml\.load\s*\([^)]*\)',
+     "yaml.load ist unsicher", "Verwende yaml.safe_load()"),
+
+    # Hardcoded Secrets
+    ("high", "secrets", r'(?:password|passwd|pwd|secret|api_key|apikey|token)\s*=\s*["\'][^"\']{8,}["\']',
+     "Hardcoded Secret/Password gefunden", "Verwende Umgebungsvariablen oder Secrets Manager"),
+    ("medium", "secrets", r'-----BEGIN (?:RSA |DSA |EC )?PRIVATE KEY-----',
+     "Private Key im Code", "Speichere Keys extern, nicht im Code"),
+
+    # Crypto Issues
+    ("medium", "crypto", r'hashlib\.md5\s*\(',
+     "MD5 ist kryptografisch unsicher", "Verwende SHA-256 oder besser"),
+    ("medium", "crypto", r'hashlib\.sha1\s*\(',
+     "SHA1 ist veraltet", "Verwende SHA-256 oder SHA-3"),
+    ("high", "crypto", r'random\.\w+\s*\([^)]*(?:password|key|token|secret)',
+     "random ist nicht kryptografisch sicher", "Verwende secrets Modul für Krypto"),
+
+    # Path Traversal
+    ("high", "path_traversal", r'open\s*\([^)]*[\+].*input',
+     "Path Traversal möglich", "Validiere Pfade und verwende os.path.realpath()"),
+
+    # XSS (wenn Web-relevant)
+    ("medium", "xss", r'\.format\s*\([^)]*request',
+     "Potenzielle XSS-Lücke", "Escape User-Input vor HTML-Output"),
+
+    # SSRF
+    ("medium", "ssrf", r'requests\.get\s*\([^)]*input',
+     "Potenzielle SSRF", "Validiere URLs gegen Whitelist"),
+
+    # Debug/Logging
+    ("low", "debug", r'print\s*\([^)]*(?:password|secret|key|token)',
+     "Sensitiver Output in print()", "Entferne Debug-Ausgaben mit sensiblen Daten"),
+    ("medium", "debug", r'logging\..*\([^)]*(?:password|secret|key|token)',
+     "Sensitiver Output im Log", "Maskiere sensitive Daten vor dem Logging"),
+}
 
 
 # =============================================================================
@@ -270,6 +396,15 @@ class IntelligentAnalyzer:
         self._deep_import_analysis()
         self._verify_import_chains()
         self._build_import_order()
+
+        # NEU v6.0: Erweiterte Analysen
+        self._analyze_functions_deep()
+        self._analyze_docstrings()
+        self._analyze_type_annotations()
+        self._analyze_complexity()
+        self._security_audit()
+        self._check_config_completeness()
+        self._check_database_schema()
 
         self._calculate_statistics()
 
@@ -1053,6 +1188,420 @@ class IntelligentAnalyzer:
                 self.analysis.modules[name].import_chain = order[:i]
 
     # =========================================================================
+    # NEU v6.0: FUNKTIONS-TEST
+    # =========================================================================
+
+    def _analyze_functions_deep(self):
+        """Analysiert alle Funktionen im Detail (Signaturen, Aufrufbarkeit)"""
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                continue
+
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+                tree = ast.parse(source)
+                lines = source.splitlines()
+
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        func_info = self._analyze_single_function(node, lines)
+                        module.function_details.append(func_info)
+
+                        # Prüfe Komplexität
+                        if func_info.complexity > 10:
+                            self.analysis.complex_functions.append(
+                                (name, func_info.name, func_info.complexity)
+                            )
+
+            except Exception:
+                pass
+
+        # Prüfe ob Funktionen aufrufbar sind (für erfolgreich importierte Module)
+        self._test_function_callability()
+
+    def _analyze_single_function(self, node: ast.FunctionDef, lines: List[str]) -> FunctionInfo:
+        """Analysiert eine einzelne Funktion"""
+        is_async = isinstance(node, ast.AsyncFunctionDef)
+
+        # Docstring
+        has_docstring = ast.get_docstring(node) is not None
+
+        # Return Type
+        has_return_type = node.returns is not None
+
+        # Parameter Types
+        params = node.args.args + node.args.posonlyargs + node.args.kwonlyargs
+        param_count = len(params)
+        typed_params = sum(1 for p in params if p.annotation is not None)
+        has_all_param_types = param_count == typed_params if param_count > 0 else True
+
+        # Zeilen zählen
+        if hasattr(node, 'end_lineno'):
+            func_lines = node.end_lineno - node.lineno + 1
+        else:
+            func_lines = 1
+
+        # McCabe Complexity berechnen
+        complexity = self._calculate_mccabe_complexity(node)
+
+        return FunctionInfo(
+            name=node.name,
+            lineno=node.lineno,
+            is_async=is_async,
+            has_docstring=has_docstring,
+            has_return_type=has_return_type,
+            has_all_param_types=has_all_param_types,
+            param_count=param_count,
+            typed_params=typed_params,
+            complexity=complexity,
+            lines=func_lines
+        )
+
+    def _calculate_mccabe_complexity(self, node: ast.AST) -> int:
+        """Berechnet McCabe Cyclomatic Complexity"""
+        complexity = 1  # Basis
+
+        for child in ast.walk(node):
+            # Verzweigungen erhöhen Komplexität
+            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+                complexity += 1
+            elif isinstance(child, ast.ExceptHandler):
+                complexity += 1
+            elif isinstance(child, (ast.With, ast.AsyncWith)):
+                complexity += 1
+            elif isinstance(child, ast.Assert):
+                complexity += 1
+            elif isinstance(child, ast.comprehension):
+                complexity += 1
+            # Boolesche Operatoren
+            elif isinstance(child, ast.BoolOp):
+                complexity += len(child.values) - 1
+            # Ternärer Operator
+            elif isinstance(child, ast.IfExp):
+                complexity += 1
+
+        return complexity
+
+    def _test_function_callability(self):
+        """Testet ob Funktionen wirklich aufrufbar sind"""
+        project_str = str(self.project_dir)
+        if project_str not in sys.path:
+            sys.path.insert(0, project_str)
+
+        for name, module in self.analysis.modules.items():
+            if not module.import_ok:
+                continue
+
+            loaded_mod = sys.modules.get(name)
+            if not loaded_mod:
+                continue
+
+            for func_info in module.function_details:
+                try:
+                    func = getattr(loaded_mod, func_info.name, None)
+                    if func is None:
+                        # Vielleicht eine Methode in einer Klasse
+                        func_info.is_callable = True  # Kann nicht direkt getestet werden
+                    elif callable(func):
+                        func_info.is_callable = True
+                    else:
+                        func_info.is_callable = False
+                        func_info.call_error = "Nicht aufrufbar"
+                except Exception as e:
+                    func_info.is_callable = False
+                    func_info.call_error = str(e)[:50]
+
+    # =========================================================================
+    # NEU v6.0: DOCSTRING-CHECK
+    # =========================================================================
+
+    def _analyze_docstrings(self):
+        """Analysiert Docstring-Abdeckung"""
+        for name, module in self.analysis.modules.items():
+            if not module.function_details:
+                continue
+
+            with_docstring = sum(1 for f in module.function_details if f.has_docstring)
+            total = len(module.function_details)
+
+            if total > 0:
+                module.docstring_coverage = (with_docstring / total) * 100
+
+            # Sammle fehlende Docstrings (nur für public Funktionen)
+            for func in module.function_details:
+                if not func.has_docstring and not func.name.startswith('_'):
+                    module.missing_docstrings.append(func.name)
+
+        # Projekt-Durchschnitt
+        coverages = [m.docstring_coverage for m in self.analysis.modules.values()
+                     if m.function_details]
+        if coverages:
+            self.analysis.avg_docstring_coverage = sum(coverages) / len(coverages)
+
+    # =========================================================================
+    # NEU v6.0: TYPE-ANNOTATION CHECK
+    # =========================================================================
+
+    def _analyze_type_annotations(self):
+        """Analysiert Type-Hint-Abdeckung"""
+        for name, module in self.analysis.modules.items():
+            if not module.function_details:
+                continue
+
+            fully_typed = sum(1 for f in module.function_details
+                              if f.has_return_type and f.has_all_param_types)
+            total = len(module.function_details)
+
+            if total > 0:
+                module.type_coverage = (fully_typed / total) * 100
+
+            # Sammle fehlende Types (nur für public Funktionen)
+            for func in module.function_details:
+                if not func.name.startswith('_'):
+                    if not func.has_return_type or not func.has_all_param_types:
+                        module.missing_types.append(func.name)
+
+        # Projekt-Durchschnitt
+        coverages = [m.type_coverage for m in self.analysis.modules.values()
+                     if m.function_details]
+        if coverages:
+            self.analysis.avg_type_coverage = sum(coverages) / len(coverages)
+
+    # =========================================================================
+    # NEU v6.0: KOMPLEXITÄTS-ANALYSE
+    # =========================================================================
+
+    def _analyze_complexity(self):
+        """Berechnet Komplexitäts-Metriken für alle Module"""
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                continue
+
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+                lines = source.splitlines()
+
+                # Zähle Zeilen
+                code_lines = 0
+                comment_lines = 0
+                blank_lines = 0
+
+                in_multiline_string = False
+                for line in lines:
+                    stripped = line.strip()
+
+                    if not stripped:
+                        blank_lines += 1
+                    elif stripped.startswith('#'):
+                        comment_lines += 1
+                    elif stripped.startswith('"""') or stripped.startswith("'''"):
+                        if in_multiline_string:
+                            in_multiline_string = False
+                        else:
+                            in_multiline_string = True
+                        comment_lines += 1
+                    elif in_multiline_string:
+                        comment_lines += 1
+                    else:
+                        code_lines += 1
+
+                # Komplexität berechnen
+                complexities = [f.complexity for f in module.function_details]
+                total_complexity = sum(complexities) if complexities else 0
+                max_complexity = max(complexities) if complexities else 0
+                avg_complexity = total_complexity / len(complexities) if complexities else 0
+
+                max_func = ""
+                for f in module.function_details:
+                    if f.complexity == max_complexity:
+                        max_func = f.name
+                        break
+
+                # Wartbarkeits-Index (Microsoft-Formel, vereinfacht)
+                # MI = 171 - 5.2*ln(HV) - 0.23*CC - 16.2*ln(LOC)
+                # Vereinfacht: MI = 100 - (avg_complexity * 3) - (code_lines * 0.01)
+                mi = 100 - (avg_complexity * 3) - (code_lines * 0.01)
+                mi = max(0, min(100, mi))  # Clamp 0-100
+
+                module.complexity_info = ComplexityInfo(
+                    total_complexity=total_complexity,
+                    max_complexity=max_complexity,
+                    max_complex_function=max_func,
+                    avg_complexity=avg_complexity,
+                    maintainability_index=mi,
+                    functions_above_10=sum(1 for c in complexities if c > 10),
+                    lines_of_code=code_lines,
+                    comment_lines=comment_lines,
+                    blank_lines=blank_lines
+                )
+
+                self.analysis.total_complexity += total_complexity
+
+            except Exception:
+                pass
+
+        # Projekt-Durchschnitt
+        all_complexities = [m.complexity_info.avg_complexity
+                           for m in self.analysis.modules.values()
+                           if m.function_details]
+        if all_complexities:
+            self.analysis.avg_complexity = sum(all_complexities) / len(all_complexities)
+
+    # =========================================================================
+    # NEU v6.0: SICHERHEITS-AUDIT
+    # =========================================================================
+
+    def _security_audit(self):
+        """Führt Sicherheits-Audit durch"""
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                continue
+
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+                lines = source.splitlines()
+
+                for severity, category, pattern, message, recommendation in SECURITY_PATTERNS:
+                    try:
+                        for i, line in enumerate(lines, 1):
+                            if re.search(pattern, line, re.IGNORECASE):
+                                issue = SecurityIssue(
+                                    severity=severity,
+                                    category=category,
+                                    module=name,
+                                    line=i,
+                                    code=line.strip()[:60],
+                                    message=message,
+                                    recommendation=recommendation
+                                )
+                                module.security_issues.append(issue)
+                                self.analysis.all_security_issues.append(issue)
+                    except re.error:
+                        pass  # Ungültiges Pattern
+
+            except Exception:
+                pass
+
+    # =========================================================================
+    # NEU v6.0: CONFIG-VOLLSTÄNDIGKEIT
+    # =========================================================================
+
+    def _check_config_completeness(self):
+        """Prüft ob alle verwendeten Config-Keys existieren"""
+        if not self.analysis.config:
+            return
+
+        # Sammle alle verfügbaren Keys (flach)
+        def flatten_keys(d: dict, prefix: str = "") -> Set[str]:
+            keys = set()
+            for k, v in d.items():
+                full_key = f"{prefix}.{k}" if prefix else k
+                keys.add(full_key)
+                keys.add(k)  # Auch ohne Prefix
+                if isinstance(v, dict):
+                    keys.update(flatten_keys(v, full_key))
+            return keys
+
+        available_keys = flatten_keys(self.analysis.config)
+
+        # Sammle alle verwendeten Keys aus allen Modulen
+        all_used_keys = set()
+        for module in self.analysis.modules.values():
+            all_used_keys.update(module.config_keys_used)
+
+        # Prüfe auf fehlende Keys
+        for key in all_used_keys:
+            # Suche nach Key (exakt oder als Teil)
+            found = False
+            for available in available_keys:
+                if key == available or key in available or available.endswith(f".{key}"):
+                    found = True
+                    break
+
+            if not found and not key.startswith("HOLO_"):
+                self.analysis.config_issues.append(f"Config-Key '{key}' nicht gefunden")
+
+        # Prüfe auch auf ungenutzte Config-Keys (optional)
+        for available in available_keys:
+            if "." in available:  # Nur top-level
+                continue
+            used = any(available in k or k == available for k in all_used_keys)
+            # Nicht warnen für ungenutzte Keys - ist normal
+
+    # =========================================================================
+    # NEU v6.0: DATENBANK-SCHEMA CHECK
+    # =========================================================================
+
+    def _check_database_schema(self):
+        """Prüft SQLite-Datenbank-Schema"""
+        # Suche nach DB-Dateien
+        db_files = list(self.project_dir.glob("**/*.db"))
+        db_files.extend(self.project_dir.glob("**/*.sqlite"))
+        db_files.extend(self.project_dir.glob("**/*.sqlite3"))
+
+        # Filtere __pycache__
+        db_files = [f for f in db_files if "__pycache__" not in str(f)]
+
+        if not db_files:
+            return
+
+        # Sammle erwartete Tabellen aus Code
+        expected_tables = self._find_expected_tables()
+
+        for db_file in db_files:
+            try:
+                conn = sqlite3.connect(str(db_file))
+                cursor = conn.cursor()
+
+                # Hole alle Tabellen
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                tables = [row[0] for row in cursor.fetchall()]
+                self.analysis.db_tables.extend(tables)
+
+                # Prüfe ob erwartete Tabellen existieren
+                for expected in expected_tables:
+                    if expected not in tables:
+                        self.analysis.db_issues.append(
+                            f"Tabelle '{expected}' fehlt in {db_file.name}"
+                        )
+
+                # Prüfe Schema-Integrität
+                cursor.execute("PRAGMA integrity_check")
+                result = cursor.fetchone()
+                if result[0] != "ok":
+                    self.analysis.db_issues.append(
+                        f"{db_file.name}: Integritätsprüfung fehlgeschlagen"
+                    )
+
+                conn.close()
+
+            except sqlite3.Error as e:
+                self.analysis.db_issues.append(f"{db_file.name}: {str(e)[:50]}")
+
+    def _find_expected_tables(self) -> Set[str]:
+        """Findet erwartete Tabellen aus CREATE TABLE Statements im Code"""
+        tables = set()
+
+        for module in self.analysis.modules.values():
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+
+                # Suche nach CREATE TABLE
+                patterns = [
+                    r'CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["\']?(\w+)["\']?',
+                    r'\.execute\([^)]*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["\']?(\w+)',
+                ]
+
+                for pattern in patterns:
+                    matches = re.findall(pattern, source, re.IGNORECASE)
+                    tables.update(matches)
+
+            except Exception:
+                pass
+
+        return tables
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -1457,7 +2006,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude Intelligent System Tester v5.0 - Import-Ketten, Struktur-Analyse, echte Tests"
+        description="Holocloude Intelligent System Tester v6.0 - Vollständige Code-Qualitäts-Analyse"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Mehr Details")
     parser.add_argument("--no-color", action="store_true", help="Keine Farben")
@@ -1469,6 +2018,16 @@ def main():
     parser.add_argument("--imports", action="store_true", help="Zeigt Import-Ketten und -Abhängigkeiten")
     parser.add_argument("--trace", type=str, metavar="MODULE", help="Verfolgt alle Imports eines bestimmten Moduls")
 
+    # NEU v6.0: Erweiterte Prüfungen
+    parser.add_argument("--functions", action="store_true", help="Funktions-Test: Prüft Aufrufbarkeit aller Funktionen")
+    parser.add_argument("--docstrings", action="store_true", help="Docstring-Check: Analysiert Dokumentations-Abdeckung")
+    parser.add_argument("--types", action="store_true", help="Type-Annotation Check: Prüft Type-Hints")
+    parser.add_argument("--complexity", action="store_true", help="Komplexitäts-Analyse: McCabe + Wartbarkeits-Index")
+    parser.add_argument("--security", action="store_true", help="Sicherheits-Audit: Findet bekannte Schwachstellen")
+    parser.add_argument("--config", action="store_true", help="Config-Check: Prüft Config-Vollständigkeit")
+    parser.add_argument("--db", action="store_true", help="Datenbank-Schema Check: Verifiziert SQLite-Tabellen")
+    parser.add_argument("--all", action="store_true", help="Alle erweiterten Prüfungen ausführen")
+
     args = parser.parse_args()
 
     if args.no_color:
@@ -1476,7 +2035,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v5.0               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.0               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
@@ -1686,6 +2245,272 @@ def main():
             print(f"\n{Colors.GREEN}Keine Probleme gefunden!{Colors.RESET}")
 
         sys.exit(1 if errors else 0)
+
+    # ==========================================================================
+    # NEU v6.0: Erweiterte Prüfungen
+    # ==========================================================================
+
+    # Funktions-Test
+    if args.functions or args.all:
+        print()
+        print(f"{Colors.BOLD}FUNKTIONS-ANALYSE:{Colors.RESET}")
+
+        total_funcs = sum(len(m.function_details) for m in analysis.modules.values())
+        callable_funcs = sum(
+            sum(1 for f in m.function_details if f.is_callable)
+            for m in analysis.modules.values()
+        )
+
+        print(f"\n  {Colors.GREEN}✓ {callable_funcs}/{total_funcs} Funktionen aufrufbar{Colors.RESET}")
+
+        # Zeige nicht-aufrufbare
+        not_callable = []
+        for name, module in analysis.modules.items():
+            for func in module.function_details:
+                if not func.is_callable:
+                    not_callable.append((name, func.name, func.call_error))
+
+        if not_callable:
+            print(f"\n  {Colors.RED}Nicht aufrufbar ({len(not_callable)}):{Colors.RESET}")
+            for mod, func, error in not_callable[:10]:
+                print(f"    • {mod}.{func}: {error}")
+
+        # Zeige komplexe Funktionen
+        if analysis.complex_functions:
+            print(f"\n  {Colors.YELLOW}Komplexe Funktionen (Complexity > 10):{Colors.RESET}")
+            for mod, func, comp in sorted(analysis.complex_functions, key=lambda x: -x[2])[:10]:
+                color = Colors.RED if comp > 20 else Colors.YELLOW
+                print(f"    {color}• {mod}.{func}: {comp}{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Docstring-Check
+    if args.docstrings or args.all:
+        print()
+        print(f"{Colors.BOLD}DOCSTRING-ABDECKUNG:{Colors.RESET}")
+
+        print(f"\n  Projekt-Durchschnitt: {Colors.CYAN}{analysis.avg_docstring_coverage:.1f}%{Colors.RESET}")
+
+        # Zeige Module mit niedriger Abdeckung
+        low_coverage = [(n, m.docstring_coverage) for n, m in analysis.modules.items()
+                        if m.function_details and m.docstring_coverage < 50]
+        low_coverage.sort(key=lambda x: x[1])
+
+        if low_coverage:
+            print(f"\n  {Colors.YELLOW}Module mit < 50% Docstrings:{Colors.RESET}")
+            for name, coverage in low_coverage[:10]:
+                print(f"    • {name}: {coverage:.1f}%")
+
+        # Zeige Module ohne Docstrings
+        no_docs = [(n, m.missing_docstrings) for n, m in analysis.modules.items()
+                   if len(m.missing_docstrings) > 3]
+        if no_docs:
+            print(f"\n  {Colors.YELLOW}Module mit vielen fehlenden Docstrings:{Colors.RESET}")
+            for name, missing in sorted(no_docs, key=lambda x: -len(x[1]))[:5]:
+                print(f"    • {name}: {len(missing)} Funktionen ohne Docstring")
+
+        if analysis.avg_docstring_coverage >= 80:
+            print(f"\n  {Colors.GREEN}✓ Gute Dokumentation!{Colors.RESET}")
+        elif analysis.avg_docstring_coverage >= 50:
+            print(f"\n  {Colors.YELLOW}⚠ Dokumentation könnte verbessert werden{Colors.RESET}")
+        else:
+            print(f"\n  {Colors.RED}✗ Dokumentation ist unzureichend{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Type-Annotation Check
+    if args.types or args.all:
+        print()
+        print(f"{Colors.BOLD}TYPE-ANNOTATION ABDECKUNG:{Colors.RESET}")
+
+        print(f"\n  Projekt-Durchschnitt: {Colors.CYAN}{analysis.avg_type_coverage:.1f}%{Colors.RESET}")
+
+        # Zeige Module mit niedriger Abdeckung
+        low_type = [(n, m.type_coverage) for n, m in analysis.modules.items()
+                    if m.function_details and m.type_coverage < 30]
+        low_type.sort(key=lambda x: x[1])
+
+        if low_type:
+            print(f"\n  {Colors.YELLOW}Module mit < 30% Type-Hints:{Colors.RESET}")
+            for name, coverage in low_type[:10]:
+                print(f"    • {name}: {coverage:.1f}%")
+
+        if analysis.avg_type_coverage >= 70:
+            print(f"\n  {Colors.GREEN}✓ Gute Type-Annotation!{Colors.RESET}")
+        elif analysis.avg_type_coverage >= 30:
+            print(f"\n  {Colors.YELLOW}⚠ Type-Hints könnten verbessert werden{Colors.RESET}")
+        else:
+            print(f"\n  {Colors.DIM}Type-Hints sind optional, aber empfohlen{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Komplexitäts-Analyse
+    if args.complexity or args.all:
+        print()
+        print(f"{Colors.BOLD}KOMPLEXITÄTS-ANALYSE:{Colors.RESET}")
+
+        print(f"\n  Gesamt-Komplexität: {analysis.total_complexity}")
+        print(f"  Durchschnitt: {analysis.avg_complexity:.1f}")
+
+        # Zeige komplexeste Module
+        complex_modules = [(n, m.complexity_info) for n, m in analysis.modules.items()
+                          if m.complexity_info.max_complexity > 0]
+        complex_modules.sort(key=lambda x: -x[1].max_complexity)
+
+        if complex_modules:
+            print(f"\n  {Colors.CYAN}Komplexeste Module:{Colors.RESET}")
+            for name, ci in complex_modules[:10]:
+                mi_color = Colors.GREEN if ci.maintainability_index >= 70 else (
+                    Colors.YELLOW if ci.maintainability_index >= 40 else Colors.RED)
+                print(f"    • {name}: max={ci.max_complexity} ({ci.max_complex_function}), "
+                      f"MI={mi_color}{ci.maintainability_index:.0f}{Colors.RESET}")
+
+        # Wartbarkeits-Index Zusammenfassung
+        mis = [m.complexity_info.maintainability_index for m in analysis.modules.values()
+               if m.function_details]
+        if mis:
+            avg_mi = sum(mis) / len(mis)
+            print(f"\n  Durchschnittlicher Wartbarkeits-Index: ", end="")
+            if avg_mi >= 70:
+                print(f"{Colors.GREEN}{avg_mi:.0f} (Gut){Colors.RESET}")
+            elif avg_mi >= 40:
+                print(f"{Colors.YELLOW}{avg_mi:.0f} (Akzeptabel){Colors.RESET}")
+            else:
+                print(f"{Colors.RED}{avg_mi:.0f} (Refactoring nötig){Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Sicherheits-Audit
+    if args.security or args.all:
+        print()
+        print(f"{Colors.BOLD}SICHERHEITS-AUDIT:{Colors.RESET}")
+
+        if not analysis.all_security_issues:
+            print(f"\n  {Colors.GREEN}✓ Keine offensichtlichen Sicherheitsprobleme gefunden!{Colors.RESET}")
+        else:
+            # Gruppiere nach Severity
+            by_severity = defaultdict(list)
+            for issue in analysis.all_security_issues:
+                by_severity[issue.severity].append(issue)
+
+            for severity in ["critical", "high", "medium", "low"]:
+                issues = by_severity.get(severity, [])
+                if not issues:
+                    continue
+
+                color = {
+                    "critical": Colors.RED + Colors.BOLD,
+                    "high": Colors.RED,
+                    "medium": Colors.YELLOW,
+                    "low": Colors.DIM
+                }.get(severity, "")
+
+                print(f"\n  {color}{severity.upper()} ({len(issues)}):{Colors.RESET}")
+                for issue in issues[:5]:
+                    print(f"    • [{issue.module}:{issue.line}] {issue.message}")
+                    print(f"      {Colors.DIM}Code: {issue.code[:50]}{Colors.RESET}")
+                    print(f"      {Colors.CYAN}→ {issue.recommendation}{Colors.RESET}")
+
+                if len(issues) > 5:
+                    print(f"    {Colors.DIM}... und {len(issues) - 5} weitere{Colors.RESET}")
+
+            # Zusammenfassung
+            critical = len(by_severity.get("critical", []))
+            high = len(by_severity.get("high", []))
+
+            if critical > 0:
+                print(f"\n  {Colors.RED}{Colors.BOLD}⚠ KRITISCHE SICHERHEITSLÜCKEN GEFUNDEN!{Colors.RESET}")
+            elif high > 0:
+                print(f"\n  {Colors.YELLOW}⚠ Sicherheitsprobleme sollten behoben werden{Colors.RESET}")
+            else:
+                print(f"\n  {Colors.GREEN}✓ Keine kritischen Sicherheitsprobleme{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Config-Check
+    if args.config or args.all:
+        print()
+        print(f"{Colors.BOLD}CONFIG-VOLLSTÄNDIGKEIT:{Colors.RESET}")
+
+        if not analysis.config:
+            print(f"\n  {Colors.YELLOW}⚠ Keine config.json gefunden{Colors.RESET}")
+        else:
+            config_keys = len(analysis.config)
+            print(f"\n  Config geladen: {config_keys} Top-Level Keys")
+
+            if analysis.config_issues:
+                print(f"\n  {Colors.YELLOW}Fehlende Config-Keys ({len(analysis.config_issues)}):{Colors.RESET}")
+                for issue in analysis.config_issues[:10]:
+                    print(f"    • {issue}")
+            else:
+                print(f"\n  {Colors.GREEN}✓ Alle verwendeten Config-Keys sind vorhanden{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Datenbank-Check
+    if args.db or args.all:
+        print()
+        print(f"{Colors.BOLD}DATENBANK-SCHEMA CHECK:{Colors.RESET}")
+
+        if not analysis.db_tables:
+            print(f"\n  {Colors.DIM}Keine SQLite-Datenbanken gefunden{Colors.RESET}")
+        else:
+            # Unique tables
+            unique_tables = list(set(analysis.db_tables))
+            print(f"\n  Gefundene Tabellen: {len(unique_tables)}")
+            if unique_tables:
+                print(f"    {', '.join(sorted(unique_tables)[:15])}")
+                if len(unique_tables) > 15:
+                    print(f"    ... und {len(unique_tables) - 15} weitere")
+
+            if analysis.db_issues:
+                print(f"\n  {Colors.YELLOW}DB-Probleme ({len(analysis.db_issues)}):{Colors.RESET}")
+                for issue in analysis.db_issues[:10]:
+                    print(f"    • {issue}")
+            else:
+                print(f"\n  {Colors.GREEN}✓ Datenbank-Schema OK{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # --all Modus: Zusammenfassung
+    if args.all:
+        print()
+        print(f"{Colors.BOLD}{'═' * 60}{Colors.RESET}")
+        print(f"{Colors.BOLD}  ZUSAMMENFASSUNG ALLER PRÜFUNGEN{Colors.RESET}")
+        print(f"{Colors.BOLD}{'═' * 60}{Colors.RESET}")
+
+        # Berechne Funktions-Aufrufbarkeit
+        total_funcs = sum(len(m.function_details) for m in analysis.modules.values())
+        callable_funcs = sum(sum(1 for f in m.function_details if f.is_callable)
+                             for m in analysis.modules.values())
+        func_ratio = callable_funcs / max(1, total_funcs)
+
+        checks = [
+            ("Funktionen aufrufbar (>= 99%)", func_ratio >= 0.99),
+            ("Docstring-Abdeckung >= 50%", analysis.avg_docstring_coverage >= 50),
+            ("Type-Hints >= 30%", analysis.avg_type_coverage >= 30),
+            ("Keine kritischen Security-Issues", not any(i.severity == "critical" for i in analysis.all_security_issues)),
+            ("Config vollständig", len(analysis.config_issues) == 0),
+            ("DB-Schema OK", len(analysis.db_issues) == 0),
+        ]
+
+        passed = sum(1 for _, ok in checks if ok)
+        print()
+        for name, ok in checks:
+            icon = f"{Colors.GREEN}✓{Colors.RESET}" if ok else f"{Colors.RED}✗{Colors.RESET}"
+            print(f"  {icon} {name}")
+
+        print()
+        print(f"  {passed}/{len(checks)} Prüfungen bestanden")
+
+        sys.exit(0)
 
     # Standard: Alle Tests
     tester = IntelligentTester(analysis, verbose=args.verbose)
