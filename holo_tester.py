@@ -188,6 +188,18 @@ class ComplexityInfo:
 
 
 @dataclass
+class CodeQualityIssue:
+    """Ein Code-Qualitäts-Problem"""
+    severity: str  # "warning", "info"
+    category: str  # "bare_except", "mutable_default", etc.
+    module: str
+    line: int
+    code: str
+    message: str
+    recommendation: str
+
+
+@dataclass
 class ModuleAnalysis:
     """Tiefe Analyse eines Moduls"""
     name: str
@@ -250,6 +262,11 @@ class ModuleAnalysis:
     missing_docstrings: List[str] = field(default_factory=list)  # Funktionen ohne Docstring
     missing_types: List[str] = field(default_factory=list)  # Funktionen ohne Type-Hints
 
+    # NEU v6.1: Code-Qualitäts-Probleme
+    quality_issues: List[CodeQualityIssue] = field(default_factory=list)
+    long_functions: List[Tuple[str, int]] = field(default_factory=list)  # (name, lines)
+    too_many_params: List[Tuple[str, int]] = field(default_factory=list)  # (name, param_count)
+
 
 @dataclass
 class ProjectAnalysis:
@@ -291,6 +308,15 @@ class ProjectAnalysis:
     config_issues: List[str] = field(default_factory=list)  # Fehlende/ungültige Config-Keys
     db_tables: List[str] = field(default_factory=list)  # Gefundene DB-Tabellen
     db_issues: List[str] = field(default_factory=list)  # DB-Schema Probleme
+
+    # NEU v6.1: Code-Qualitäts-Analyse
+    all_quality_issues: List[CodeQualityIssue] = field(default_factory=list)
+    bare_excepts_count: int = 0
+    mutable_defaults_count: int = 0
+    todos_count: int = 0
+    fixmes_count: int = 0
+    long_functions_count: int = 0
+    too_many_params_count: int = 0
 
 
 # =============================================================================
@@ -360,6 +386,63 @@ SECURITY_PATTERNS = {
 
 
 # =============================================================================
+# CODE-QUALITÄTS-PATTERNS für zusätzliche Fehler-Erkennung
+# =============================================================================
+
+CODE_QUALITY_PATTERNS = {
+    # Bare except (fängt auch SystemExit, KeyboardInterrupt)
+    ("warning", "bare_except", r'except\s*:',
+     "Bare except: fängt alle Exceptions inkl. SystemExit",
+     "Verwende 'except Exception:' oder spezifische Exceptions"),
+
+    # Mutable Default Arguments
+    ("warning", "mutable_default", r'def\s+\w+\s*\([^)]*=\s*\[\s*\]',
+     "Mutable Default-Argument [] - wird zwischen Aufrufen geteilt",
+     "Verwende None als Default und initialisiere im Funktionskörper"),
+    ("warning", "mutable_default", r'def\s+\w+\s*\([^)]*=\s*\{\s*\}',
+     "Mutable Default-Argument {} - wird zwischen Aufrufen geteilt",
+     "Verwende None als Default und initialisiere im Funktionskörper"),
+
+    # TODO/FIXME/HACK/XXX Kommentare
+    ("info", "todo", r'#\s*TODO[:\s]',
+     "TODO-Kommentar gefunden", "Aufgabe sollte erledigt werden"),
+    ("warning", "fixme", r'#\s*FIXME[:\s]',
+     "FIXME-Kommentar gefunden", "Bug/Problem sollte behoben werden"),
+    ("warning", "hack", r'#\s*HACK[:\s]',
+     "HACK-Kommentar gefunden", "Workaround sollte sauber implementiert werden"),
+
+    # Debugging-Code vergessen
+    ("warning", "debug_code", r'^\s*breakpoint\s*\(\s*\)',
+     "breakpoint() im Code", "Debug-Code vor Commit entfernen"),
+    ("warning", "debug_code", r'^\s*import\s+pdb',
+     "pdb import im Code", "Debug-Import vor Commit entfernen"),
+    ("info", "debug_code", r'^\s*print\s*\(\s*["\']DEBUG',
+     "Debug-Print gefunden", "Debug-Ausgaben entfernen"),
+
+    # Potenzielle Fehler
+    ("warning", "comparison", r'==\s*True\b|==\s*False\b',
+     "Expliziter Vergleich mit True/False",
+     "Verwende 'if condition:' statt 'if condition == True:'"),
+    ("warning", "comparison", r'\bis\s+(?!None\b|not\b)',
+     "Verwendung von 'is' für nicht-None Vergleich",
+     "'is' nur für None/Singletons, '==' für Wert-Vergleiche"),
+
+    # String-Formatierung
+    ("info", "format", r'%\s*[sd]',
+     "Alte %-String-Formatierung", "Verwende f-strings oder .format()"),
+
+    # Exception Handling
+    ("warning", "exception", r'except\s+\w+\s*:\s*pass\s*$',
+     "Exception wird komplett ignoriert (except: pass)",
+     "Mindestens loggen oder re-raise für unerwartete Fehler"),
+
+    # Global keyword
+    ("info", "global", r'^\s*global\s+',
+     "global keyword verwendet", "Vermeide globalen State wenn möglich"),
+}
+
+
+# =============================================================================
 # INTELLIGENTER PROJEKT-ANALYZER
 # =============================================================================
 
@@ -408,6 +491,9 @@ class IntelligentAnalyzer:
         self._security_audit()
         self._check_config_completeness()
         self._check_database_schema()
+
+        # NEU v6.1: Code-Qualitäts-Audit
+        self._code_quality_audit()
 
         self._calculate_statistics()
 
@@ -1605,6 +1691,64 @@ class IntelligentAnalyzer:
         return tables
 
     # =========================================================================
+    # NEU v6.1: CODE-QUALITÄTS-AUDIT
+    # =========================================================================
+
+    def _code_quality_audit(self):
+        """Prüft Code auf häufige Qualitätsprobleme"""
+        for name, module in self.analysis.modules.items():
+            if not module.syntax_ok:
+                continue
+
+            try:
+                source = module.path.read_text(encoding="utf-8", errors="ignore")
+                lines = source.splitlines()
+
+                # Pattern-basierte Prüfung
+                for severity, category, pattern, message, recommendation in CODE_QUALITY_PATTERNS:
+                    try:
+                        for i, line in enumerate(lines, 1):
+                            if re.search(pattern, line):
+                                issue = CodeQualityIssue(
+                                    severity=severity,
+                                    category=category,
+                                    module=name,
+                                    line=i,
+                                    code=line.strip()[:60],
+                                    message=message,
+                                    recommendation=recommendation
+                                )
+                                module.quality_issues.append(issue)
+                                self.analysis.all_quality_issues.append(issue)
+
+                                # Zähler aktualisieren
+                                if category == "bare_except":
+                                    self.analysis.bare_excepts_count += 1
+                                elif category == "mutable_default":
+                                    self.analysis.mutable_defaults_count += 1
+                                elif category == "todo":
+                                    self.analysis.todos_count += 1
+                                elif category == "fixme":
+                                    self.analysis.fixmes_count += 1
+                    except re.error:
+                        pass
+
+                # Prüfe Funktionen auf Länge und Parameter
+                for func in module.function_details:
+                    # Lange Funktionen (> 50 Zeilen)
+                    if func.lines > 50:
+                        module.long_functions.append((func.name, func.lines))
+                        self.analysis.long_functions_count += 1
+
+                    # Zu viele Parameter (> 7)
+                    if func.param_count > 7:
+                        module.too_many_params.append((func.name, func.param_count))
+                        self.analysis.too_many_params_count += 1
+
+            except Exception:
+                pass
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -2009,7 +2153,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude Intelligent System Tester v6.0 - Vollständige Code-Qualitäts-Analyse"
+        description="Holocloude Intelligent System Tester v6.1 - Vollständige Code-Qualitäts-Analyse"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Mehr Details")
     parser.add_argument("--no-color", action="store_true", help="Keine Farben")
@@ -2029,6 +2173,10 @@ def main():
     parser.add_argument("--security", action="store_true", help="Sicherheits-Audit: Findet bekannte Schwachstellen")
     parser.add_argument("--config", action="store_true", help="Config-Check: Prüft Config-Vollständigkeit")
     parser.add_argument("--db", action="store_true", help="Datenbank-Schema Check: Verifiziert SQLite-Tabellen")
+
+    # NEU v6.1: Code-Qualitäts-Check
+    parser.add_argument("--quality", action="store_true", help="Code-Qualität: bare except, mutable defaults, TODOs, etc.")
+
     parser.add_argument("--all", action="store_true", help="Alle erweiterten Prüfungen ausführen")
 
     args = parser.parse_args()
@@ -2038,7 +2186,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.0               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.1               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
@@ -2478,6 +2626,59 @@ def main():
                     print(f"    • {issue}")
             else:
                 print(f"\n  {Colors.GREEN}✓ Datenbank-Schema OK{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # Code-Qualitäts-Check
+    if args.quality or args.all:
+        print()
+        print(f"{Colors.BOLD}CODE-QUALITÄTS-CHECK:{Colors.RESET}")
+
+        if not analysis.all_quality_issues:
+            print(f"\n  {Colors.GREEN}✓ Keine Code-Qualitätsprobleme gefunden!{Colors.RESET}")
+        else:
+            # Gruppiere nach Kategorie
+            by_category = defaultdict(list)
+            for issue in analysis.all_quality_issues:
+                by_category[issue.category].append(issue)
+
+            # Zeige Zusammenfassung
+            print(f"\n  Gefundene Probleme:")
+            if analysis.bare_excepts_count > 0:
+                print(f"    {Colors.YELLOW}• Bare except:{Colors.RESET} {analysis.bare_excepts_count}")
+            if analysis.mutable_defaults_count > 0:
+                print(f"    {Colors.YELLOW}• Mutable Defaults:{Colors.RESET} {analysis.mutable_defaults_count}")
+            if analysis.todos_count > 0:
+                print(f"    {Colors.CYAN}• TODOs:{Colors.RESET} {analysis.todos_count}")
+            if analysis.fixmes_count > 0:
+                print(f"    {Colors.YELLOW}• FIXMEs:{Colors.RESET} {analysis.fixmes_count}")
+            if analysis.long_functions_count > 0:
+                print(f"    {Colors.YELLOW}• Lange Funktionen (>50 Zeilen):{Colors.RESET} {analysis.long_functions_count}")
+            if analysis.too_many_params_count > 0:
+                print(f"    {Colors.YELLOW}• Zu viele Parameter (>7):{Colors.RESET} {analysis.too_many_params_count}")
+
+            # Zeige Details für wichtige Kategorien
+            for category in ["bare_except", "mutable_default", "fixme", "hack"]:
+                issues = by_category.get(category, [])
+                if issues:
+                    color = Colors.YELLOW if category in ["bare_except", "mutable_default", "fixme"] else Colors.DIM
+                    print(f"\n  {color}{category.upper()} ({len(issues)}):{Colors.RESET}")
+                    for issue in issues[:5]:
+                        print(f"    • [{issue.module}:{issue.line}] {issue.code[:50]}")
+                    if len(issues) > 5:
+                        print(f"    {Colors.DIM}... und {len(issues) - 5} weitere{Colors.RESET}")
+
+        # Zeige lange Funktionen
+        all_long = []
+        for m in analysis.modules.values():
+            for name, lines in m.long_functions:
+                all_long.append((m.name, name, lines))
+        if all_long:
+            all_long.sort(key=lambda x: -x[2])
+            print(f"\n  {Colors.YELLOW}Längste Funktionen:{Colors.RESET}")
+            for mod, func, lines in all_long[:5]:
+                print(f"    • {mod}.{func}: {lines} Zeilen")
 
         if not args.all:
             sys.exit(0)
