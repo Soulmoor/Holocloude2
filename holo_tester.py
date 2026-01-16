@@ -298,60 +298,63 @@ class ProjectAnalysis:
 # =============================================================================
 
 SECURITY_PATTERNS = {
-    # SQL Injection
+    # SQL Injection - nur gefährlich wenn User-Input involviert
     ("critical", "injection", r'execute\s*\(\s*["\'].*%s.*["\']',
-     "SQL Injection Gefahr", "Verwende parameterisierte Queries"),
-    ("critical", "injection", r'execute\s*\(\s*f["\']',
-     "SQL Injection via f-string", "Verwende ? Platzhalter statt f-strings"),
-    ("critical", "injection", r'executescript\s*\(',
-     "executescript kann mehrere SQL-Statements ausführen", "Verwende execute() mit einzelnen Statements"),
+     "SQL Injection via %s String-Formatierung", "Verwende parameterisierte Queries mit ?"),
+    ("critical", "injection", r'execute\s*\(\s*["\'].*\.format\s*\(',
+     "SQL Injection via .format()", "Verwende parameterisierte Queries mit ?"),
+    ("high", "injection", r'execute\s*\(\s*f["\'].*\{[^}]*input',
+     "SQL Injection - f-string mit input", "Verwende ? Platzhalter statt f-strings für User-Input"),
+    ("high", "injection", r'execute\s*\(\s*f["\'].*\{[^}]*request',
+     "SQL Injection - f-string mit request", "Verwende ? Platzhalter statt f-strings für User-Input"),
+    ("high", "injection", r'execute\s*\(\s*f["\'].*\{[^}]*user',
+     "SQL Injection - f-string mit user-Daten", "Verwende ? Platzhalter statt f-strings für User-Input"),
+    # executescript nur warnen wenn Variable übergeben wird
+    ("medium", "injection", r'executescript\s*\(\s*[a-zA-Z_][a-zA-Z0-9_]*\s*\)',
+     "executescript mit Variable - prüfe ob vertrauenswürdig", "Stelle sicher dass SQL nicht von externen Quellen kommt"),
 
     # Command Injection
     ("critical", "injection", r'os\.system\s*\(\s*[^)]*[\+%]',
      "Command Injection Gefahr", "Verwende subprocess mit shell=False"),
     ("critical", "injection", r'subprocess\..*shell\s*=\s*True',
      "Shell Injection möglich", "Setze shell=False und übergebe Args als Liste"),
-    ("high", "injection", r'eval\s*\([^)]*input',
+    ("high", "injection", r'eval\s*\(\s*[^)]*(?:input|request|user)',
      "eval() mit User-Input ist gefährlich", "Verwende ast.literal_eval() oder validiere Input"),
-    ("critical", "injection", r'exec\s*\([^)]*input',
+    ("critical", "injection", r'exec\s*\(\s*[^)]*(?:input|request|user)',
      "exec() mit User-Input ist gefährlich", "Vermeide exec() mit externem Input"),
 
     # Pickle/Deserialization
     ("high", "deserialization", r'pickle\.loads?\s*\(',
      "Pickle ist unsicher für nicht vertrauenswürdige Daten", "Verwende json für externe Daten"),
-    ("high", "deserialization", r'yaml\.load\s*\([^)]*\)',
+    ("high", "deserialization", r'yaml\.load\s*\([^)]*\)(?!\s*#\s*safe)',
      "yaml.load ist unsicher", "Verwende yaml.safe_load()"),
 
-    # Hardcoded Secrets
-    ("high", "secrets", r'(?:password|passwd|pwd|secret|api_key|apikey|token)\s*=\s*["\'][^"\']{8,}["\']',
+    # Hardcoded Secrets - genauer Pattern
+    ("high", "secrets", r'(?:password|passwd|api_key|apikey|secret_key)\s*=\s*["\'][A-Za-z0-9+/=]{16,}["\']',
      "Hardcoded Secret/Password gefunden", "Verwende Umgebungsvariablen oder Secrets Manager"),
-    ("medium", "secrets", r'-----BEGIN (?:RSA |DSA |EC )?PRIVATE KEY-----',
+    ("critical", "secrets", r'-----BEGIN (?:RSA |DSA |EC )?PRIVATE KEY-----',
      "Private Key im Code", "Speichere Keys extern, nicht im Code"),
 
-    # Crypto Issues
-    ("medium", "crypto", r'hashlib\.md5\s*\(',
-     "MD5 ist kryptografisch unsicher", "Verwende SHA-256 oder besser"),
-    ("medium", "crypto", r'hashlib\.sha1\s*\(',
-     "SHA1 ist veraltet", "Verwende SHA-256 oder SHA-3"),
-    ("high", "crypto", r'random\.\w+\s*\([^)]*(?:password|key|token|secret)',
-     "random ist nicht kryptografisch sicher", "Verwende secrets Modul für Krypto"),
+    # Crypto Issues - nur für kryptografische Zwecke relevant
+    ("low", "crypto", r'hashlib\.md5\s*\(',
+     "MD5 - nicht für kryptografische Zwecke nutzen", "Für Hashing/Checksums OK, für Security SHA-256 nutzen"),
+    ("low", "crypto", r'hashlib\.sha1\s*\(',
+     "SHA1 - veraltet für kryptografische Zwecke", "Für Checksums OK, für Security SHA-256 nutzen"),
+    ("high", "crypto", r'random\.\w+\s*\([^)]*(?:password|token|secret|auth)',
+     "random für Security-relevante Werte unsicher", "Verwende secrets Modul für Passwörter/Tokens"),
 
     # Path Traversal
-    ("high", "path_traversal", r'open\s*\([^)]*[\+].*input',
+    ("high", "path_traversal", r'open\s*\(\s*[^)]*(?:input|request|user)',
      "Path Traversal möglich", "Validiere Pfade und verwende os.path.realpath()"),
 
-    # XSS (wenn Web-relevant)
-    ("medium", "xss", r'\.format\s*\([^)]*request',
-     "Potenzielle XSS-Lücke", "Escape User-Input vor HTML-Output"),
-
     # SSRF
-    ("medium", "ssrf", r'requests\.get\s*\([^)]*input',
+    ("medium", "ssrf", r'requests\.(?:get|post)\s*\(\s*[^)]*(?:input|request|user)',
      "Potenzielle SSRF", "Validiere URLs gegen Whitelist"),
 
-    # Debug/Logging
-    ("low", "debug", r'print\s*\([^)]*(?:password|secret|key|token)',
+    # Debug/Logging - präziseres Pattern
+    ("low", "debug", r'print\s*\(.*(?:password|secret_key|api_key|auth_token)',
      "Sensitiver Output in print()", "Entferne Debug-Ausgaben mit sensiblen Daten"),
-    ("medium", "debug", r'logging\..*\([^)]*(?:password|secret|key|token)',
+    ("medium", "debug", r'logging\..*\(.*(?:password|secret_key|api_key|auth_token)',
      "Sensitiver Output im Log", "Maskiere sensitive Daten vor dem Logging"),
 }
 
