@@ -74,7 +74,7 @@ class MetricValue:
 class Metric(ABC):
     """Basis-Klasse fuer alle Metriken"""
 
-    def __init__(self, name: str, description: str, labels: List[str] = None):
+    def __init__(self, name: str, description: str, labels: List[str] = None) -> None:
         self.name = name
         self.description = description
         self.label_names = labels or []
@@ -90,7 +90,7 @@ class Metric(ABC):
         """Sammelt alle Werte dieser Metrik"""
         pass
 
-    def _validate_labels(self, labels: Dict[str, str]):
+    def _validate_labels(self, labels: Dict[str, str]) -> None:
         """Validiert Labels"""
         provided = set(labels.keys())
         expected = set(self.label_names)
@@ -117,7 +117,7 @@ class Counter(Metric):
         requests.inc({"method": "POST"}, 5)
     """
 
-    def __init__(self, name: str, description: str, labels: List[str] = None):
+    def __init__(self, name: str, description: str, labels: List[str] = None) -> None:
         super().__init__(name, description, labels)
         self._values: Dict[str, float] = defaultdict(float)
 
@@ -125,7 +125,7 @@ class Counter(Metric):
     def type(self) -> str:
         return MetricType.COUNTER
 
-    def inc(self, labels: Dict[str, str] = None, value: float = 1.0):
+    def inc(self, labels: Dict[str, str] = None, value: float = 1.0) -> None:
         """Erhoeht den Counter"""
         labels = labels or {}
         if self.label_names:
@@ -159,7 +159,7 @@ class Gauge(Metric):
         memory.dec({}, 50)
     """
 
-    def __init__(self, name: str, description: str, labels: List[str] = None):
+    def __init__(self, name: str, description: str, labels: List[str] = None) -> None:
         super().__init__(name, description, labels)
         self._values: Dict[str, float] = {}
 
@@ -167,7 +167,7 @@ class Gauge(Metric):
     def type(self) -> str:
         return MetricType.GAUGE
 
-    def set(self, labels: Dict[str, str] = None, value: float = 0.0):
+    def set(self, labels: Dict[str, str] = None, value: float = 0.0) -> None:
         """Setzt den Gauge-Wert"""
         labels = labels or {}
         if self.label_names:
@@ -177,18 +177,18 @@ class Gauge(Metric):
             key = self._labels_key(labels)
             self._values[key] = value
 
-    def inc(self, labels: Dict[str, str] = None, value: float = 1.0):
+    def inc(self, labels: Dict[str, str] = None, value: float = 1.0) -> None:
         """Erhoeht den Gauge"""
         labels = labels or {}
         with self._lock:
             key = self._labels_key(labels)
             self._values[key] = self._values.get(key, 0.0) + value
 
-    def dec(self, labels: Dict[str, str] = None, value: float = 1.0):
+    def dec(self, labels: Dict[str, str] = None, value: float = 1.0) -> None:
         """Verringert den Gauge"""
         self.inc(labels, -value)
 
-    def set_function(self, labels: Dict[str, str], func: Callable[[], float]):
+    def set_function(self, labels: Dict[str, str], func: Callable[[], float]) -> None:
         """Setzt eine Funktion die bei collect() aufgerufen wird"""
         # Fuer dynamische Werte wie CPU-Auslastung
         pass  # Vereinfachte Implementation
@@ -219,7 +219,7 @@ class Histogram(Metric):
     DEFAULT_BUCKETS = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
 
     def __init__(self, name: str, description: str, labels: List[str] = None,
-                 buckets: tuple = None):
+                 buckets: tuple = None) -> None:
         super().__init__(name, description, labels)
         self.buckets = buckets or self.DEFAULT_BUCKETS
         self._values: Dict[str, Dict[str, float]] = defaultdict(
@@ -230,7 +230,7 @@ class Histogram(Metric):
     def type(self) -> str:
         return MetricType.HISTOGRAM
 
-    def observe(self, labels: Dict[str, str] = None, value: float = 0.0):
+    def observe(self, labels: Dict[str, str] = None, value: float = 0.0) -> None:
         """Beobachtet einen Wert"""
         labels = labels or {}
         if self.label_names:
@@ -246,7 +246,7 @@ class Histogram(Metric):
                 if value <= bucket:
                     data["buckets"][bucket] += 1
 
-    def time(self, labels: Dict[str, str] = None):
+    def time(self, labels: Dict[str, str] = None) -> '_HistogramTimer':
         """Context Manager zum Zeitmessen"""
         return _HistogramTimer(self, labels or {})
 
@@ -292,16 +292,16 @@ class Histogram(Metric):
 class _HistogramTimer:
     """Context Manager fuer Histogram.time()"""
 
-    def __init__(self, histogram: Histogram, labels: Dict[str, str]):
+    def __init__(self, histogram: Histogram, labels: Dict[str, str]) -> None:
         self.histogram = histogram
         self.labels = labels
-        self.start = None
+        self.start: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> '_HistogramTimer':
         self.start = time.time()
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args) -> None:
         duration = time.time() - self.start
         self.histogram.observe(self.labels, duration)
 
@@ -323,7 +323,7 @@ class MetricsRegistry:
         print(registry.export())
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._metrics: Dict[str, Metric] = {}
         self._lock = threading.Lock()
 
@@ -335,7 +335,7 @@ class MetricsRegistry:
             self._metrics[metric.name] = metric
         return metric
 
-    def unregister(self, name: str):
+    def unregister(self, name: str) -> None:
         """Entfernt eine Metrik"""
         with self._lock:
             if name in self._metrics:

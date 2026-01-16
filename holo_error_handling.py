@@ -145,7 +145,7 @@ class ErrorContext:
         default: Any = None,
         log_level: int = logging.DEBUG,
         reraise_critical: bool = True
-    ):
+    ) -> None:
         self.context = context
         self.default = default
         self.log_level = log_level
@@ -154,10 +154,10 @@ class ErrorContext:
         self.error: Optional[Exception] = None
         self.success = True
 
-    def __enter__(self):
+    def __enter__(self) -> 'ErrorContext':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
         if exc_type is None:
             return True
 
@@ -270,7 +270,7 @@ def log_exception(
     context: str = "",
     level: int = logging.ERROR,
     include_traceback: bool = False
-):
+) -> None:
     """
     Loggt eine Exception mit optionalem Traceback.
 
@@ -370,7 +370,7 @@ def validate_type(value: Any, expected_type: type, name: str = "value") -> Any:
     return value
 
 
-def validate_range(value: Union[int, float], min_val: float = None, max_val: float = None, name: str = "value"):
+def validate_range(value: Union[int, float], min_val: float = None, max_val: float = None, name: str = "value") -> Union[int, float]:
     """Stellt sicher dass ein Wert im erwarteten Bereich liegt."""
     if min_val is not None and value < min_val:
         raise ValueError(f"{name} muss >= {min_val} sein, ist aber {value}")
@@ -396,9 +396,9 @@ class GracefulDegradation:
         result = gd.execute()  # Probiert API, dann Cache, dann Default
     """
 
-    def __init__(self, context: str = ""):
+    def __init__(self, context: str = "") -> None:
         self.context = context
-        self.strategies: list = []
+        self.strategies: List[tuple] = []
 
     def add_strategy(self, func: Callable[[], T], name: str = "") -> 'GracefulDegradation':
         """Fügt eine Strategie hinzu."""
