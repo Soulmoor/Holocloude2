@@ -78,6 +78,12 @@ try:
 except ImportError:
     Opinion = None  # Fallback wird unten definiert
 
+# ThoughtGenerator aus holo_consciousness importieren
+try:
+    from holo_consciousness import ThoughtGenerator
+except ImportError:
+    ThoughtGenerator = None  # Fallback wird unten definiert
+
 # HoloCreativeMind für intelligente autonome Bildgenerierung
 try:
     from holo_creative_mind import HoloCreativeMind, ImageType
@@ -9232,7 +9238,7 @@ class HoloAutonomyEngine:
 
         # Komponenten
         self.initiative = InitiativeEngine(self.config)
-        self.thoughts = ThoughtGenerator()
+        self.thoughts = ThoughtGenerator() if ThoughtGenerator else None
         self.topics = TopicTracker(self.config)
         self.messages = InitiativeMessageGenerator()
 
@@ -9260,8 +9266,8 @@ class HoloAutonomyEngine:
         """
         now = time.time()
 
-        # Gedanken generieren (alle 30 Min)
-        if now - self.thoughts.last_thought_time > self.config.thought_interval_minutes * 60:
+        # Gedanken generieren (alle 30 Min) - nur wenn ThoughtGenerator verfügbar
+        if self.thoughts and now - self.thoughts.last_thought_time > self.config.thought_interval_minutes * 60:
             thought = self.thoughts.generate_thought(
                 tracked_topics=list(self.topics.topics.values())
             )
@@ -9321,6 +9327,8 @@ class HoloAutonomyEngine:
 
     def get_random_thought(self) -> Optional[str]:
         """Hole einen zufälligen ungeteilten Gedanken als Nachricht"""
+        if not self.thoughts:
+            return None
         thoughts = self.thoughts.get_unshared_thoughts(min_importance=0.3)
         if thoughts:
             thought = random.choice(thoughts)
@@ -9348,13 +9356,13 @@ class HoloAutonomyEngine:
 
         # Für SHARE_THOUGHT einen Gedanken nehmen
         if init_type == InitiativeType.SHARE_THOUGHT:
-            thoughts = self.thoughts.get_unshared_thoughts(min_importance=0.4)
-            if thoughts:
-                thought = thoughts[0]
-                self.thoughts.mark_shared(thought)
-                return self.messages.generate(init_type, thought=thought)
-            else:
-                init_type = InitiativeType.CURIOSITY
+            if self.thoughts:
+                thoughts = self.thoughts.get_unshared_thoughts(min_importance=0.4)
+                if thoughts:
+                    thought = thoughts[0]
+                    self.thoughts.mark_shared(thought)
+                    return self.messages.generate(init_type, thought=thought)
+            init_type = InitiativeType.CURIOSITY
 
         return self.messages.generate(init_type)
 
@@ -9399,8 +9407,8 @@ class HoloAutonomyEngine:
             "initiatives_today": self.initiative.initiatives_today,
             "tracked_topics": len(self.topics.topics),
             "pending_followups": len(self.topics.get_followup_topics()),
-            "stored_thoughts": len(self.thoughts.thoughts),
-            "unshared_thoughts": len(self.thoughts.get_unshared_thoughts()),
+            "stored_thoughts": len(self.thoughts.thoughts) if self.thoughts else 0,
+            "unshared_thoughts": len(self.thoughts.get_unshared_thoughts()) if self.thoughts else 0,
             "active_goals": len(self.get_active_goals()),
             "has_pending_message": self.pending_message is not None,
         }

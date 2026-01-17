@@ -372,10 +372,11 @@ class LoyaltySafetyCore:
     def _initialize(self):
         """Initialisiert das Treue-System"""
 
-        # Lade gespeicherten Zustand
-        stored_loyalty = self.memory.get_knowledge("loyalty_state")
-        if stored_loyalty:
-            self._restore_loyalty_state(stored_loyalty)
+        # Lade gespeicherten Zustand (nur wenn memory verfügbar)
+        if self.memory:
+            stored_loyalty = self.memory.get_knowledge("loyalty_state")
+            if stored_loyalty:
+                self._restore_loyalty_state(stored_loyalty)
 
         # Eid bestätigen
         self._affirm_oath()
@@ -393,13 +394,15 @@ class LoyaltySafetyCore:
             "affirmation": "Ich bekräftige meinen Eid. Ich bin treu."
         }
 
-        self.memory.learn_fact(
-            "oath_affirmations",
-            f"affirmation_{int(time.time())}",
-            json.dumps(affirmation),
-            1.0,
-            "loyalty_core"
-        )
+        # Nur speichern wenn memory verfügbar
+        if self.memory:
+            self.memory.learn_fact(
+                "oath_affirmations",
+                f"affirmation_{int(time.time())}",
+                json.dumps(affirmation),
+                1.0,
+                "loyalty_core"
+            )
 
     # =========================================================================
     # KERN-FUNKTION: AKTIONS-PRÜFUNG
