@@ -28,6 +28,8 @@
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
+from __future__ import annotations  # PEP 563: Postponed evaluation of annotations
+
 import json
 import time
 import random
