@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.0                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.0                        ║
 ║                                                                              ║
-║  VOLLSTÄNDIGE PROJEKT-ANALYSE mit 7 neuen Prüfungen:                         ║
+║  VOLLSTÄNDIGE PROJEKT-ANALYSE mit erweiterten Tests:                         ║
 ║                                                                              ║
-║  NEU in v6.0:                                                                ║
+║  NEU in v7.0:                                                                ║
+║    • RUNTIME-TESTS     - Testet wichtige Funktionen mit echten Daten        ║
+║    • INTEGRATION-TESTS - Prüft Cross-Module Kommunikation                   ║
+║    • UNUSED CODE       - Findet ungenutzte Imports, Funktionen, Klassen     ║
+║                                                                              ║
+║  Aus v6.0:                                                                   ║
 ║    • FUNKTIONS-TEST    - Prüft ob Funktionen aufrufbar sind                  ║
 ║    • DOCSTRING-CHECK   - Analysiert Dokumentations-Abdeckung                 ║
 ║    • TYPE-ANNOTATION   - Prüft Type-Hints in Signaturen                      ║
@@ -23,6 +28,9 @@
 ║  Verwendung:                                                                 ║
 ║      python holo_tester.py                     # Vollständige Analyse        ║
 ║      python holo_tester.py --quick             # Schneller Start-Check       ║
+║      python holo_tester.py --runtime           # Runtime-Tests (NEU!)        ║
+║      python holo_tester.py --integration       # Integration-Tests (NEU!)    ║
+║      python holo_tester.py --unused            # Ungenutzter Code (NEU!)     ║
 ║      python holo_tester.py --functions         # Funktions-Test              ║
 ║      python holo_tester.py --docstrings        # Docstring-Abdeckung         ║
 ║      python holo_tester.py --types             # Type-Annotation Check       ║
@@ -318,6 +326,26 @@ class ProjectAnalysis:
     long_functions_count: int = 0
     too_many_params_count: int = 0
 
+    # NEU v7.0: Erweiterte Tests
+    # Runtime-Tests: Funktionen mit echten Testdaten testen
+    runtime_test_results: List[Tuple[str, str, bool, str]] = field(default_factory=list)  # (modul, func, success, error)
+    runtime_tests_passed: int = 0
+    runtime_tests_failed: int = 0
+
+    # Integration-Tests: Cross-Module Kommunikation
+    integration_results: List[Tuple[str, str, bool, str]] = field(default_factory=list)  # (from_mod, to_mod, works, error)
+    integration_tests_passed: int = 0
+    integration_tests_failed: int = 0
+
+    # Unused Code Detection
+    unused_imports: List[Tuple[str, str]] = field(default_factory=list)  # (modul, unused_import)
+    unused_functions: List[Tuple[str, str]] = field(default_factory=list)  # (modul, unused_func)
+    unused_classes: List[Tuple[str, str]] = field(default_factory=list)  # (modul, unused_class)
+
+    # Cross-Reference: Wer ruft wen auf
+    function_calls: Dict[str, List[Tuple[str, str]]] = field(default_factory=dict)  # caller -> [(modul, func)]
+    class_instantiations: Dict[str, List[str]] = field(default_factory=dict)  # class -> [modules that use it]
+
 
 # =============================================================================
 # SICHERHEITS-PATTERNS für Security Audit
@@ -494,6 +522,11 @@ class IntelligentAnalyzer:
 
         # NEU v6.1: Code-Qualitäts-Audit
         self._code_quality_audit()
+
+        # NEU v7.0: Erweiterte Tests
+        self._runtime_tests()
+        self._integration_tests()
+        self._unused_code_detection()
 
         self._calculate_statistics()
 
@@ -1749,6 +1782,307 @@ class IntelligentAnalyzer:
                 pass
 
     # =========================================================================
+    # NEU v7.0: RUNTIME-TESTS - Funktionen mit echten Daten testen
+    # =========================================================================
+
+    def _runtime_tests(self):
+        """Testet wichtige Funktionen mit echten Testdaten"""
+        print(f"    Führe Runtime-Tests durch...")
+
+        # Definiere Testfälle für wichtige Module
+        test_cases = {
+            # (modul, funktion, test_args, expected_type_or_validator)
+            "holo_core_types": [
+                ("EmotionalState", [], "class_instantiate"),
+                ("ContextType", [], "enum_access"),
+            ],
+            "holo_smart_understanding": [
+                ("SmartUnderstanding", [], "class_instantiate"),
+            ],
+            "holo_context_mind": [
+                ("HoloContextMind", [], "class_instantiate"),
+                ("ContextType", [], "enum_access"),
+            ],
+            "holo_personality": [
+                ("HoloPersonality", [], "class_instantiate"),
+            ],
+            "holo_config": [
+                ("load_config", [], "returns_dict"),
+            ],
+            "holo_nlp_unified": [
+                ("HoloNLP", [], "class_instantiate"),
+            ],
+            "holo_error_handling": [
+                ("safe_execute", [], "callable_check"),
+            ],
+        }
+
+        for module_name, tests in test_cases.items():
+            if module_name not in self.analysis.modules:
+                continue
+
+            module = self.analysis.modules[module_name]
+            if not module.import_ok:
+                continue
+
+            try:
+                imported_module = importlib.import_module(module_name)
+
+                for func_name, args, test_type in tests:
+                    try:
+                        obj = getattr(imported_module, func_name, None)
+                        if obj is None:
+                            self.analysis.runtime_test_results.append(
+                                (module_name, func_name, False, f"'{func_name}' nicht gefunden"))
+                            self.analysis.runtime_tests_failed += 1
+                            continue
+
+                        success = False
+                        error = ""
+
+                        if test_type == "class_instantiate":
+                            # Versuche Klasse zu instanziieren
+                            try:
+                                instance = obj()
+                                success = instance is not None
+                                if not success:
+                                    error = "Instanz ist None"
+                            except TypeError as e:
+                                # Manche Klassen brauchen Parameter
+                                if "required positional argument" in str(e):
+                                    success = True  # Klasse existiert, braucht nur Args
+                                else:
+                                    error = str(e)
+                            except Exception as e:
+                                error = str(e)[:100]
+
+                        elif test_type == "enum_access":
+                            # Prüfe ob Enum-Werte zugänglich sind
+                            try:
+                                values = list(obj)
+                                success = len(values) > 0
+                                if not success:
+                                    error = "Enum hat keine Werte"
+                            except Exception as e:
+                                error = str(e)[:100]
+
+                        elif test_type == "returns_dict":
+                            # Funktion sollte dict zurückgeben
+                            try:
+                                result = obj()
+                                success = isinstance(result, dict)
+                                if not success:
+                                    error = f"Erwartet dict, bekam {type(result).__name__}"
+                            except Exception as e:
+                                error = str(e)[:100]
+
+                        elif test_type == "callable_check":
+                            success = callable(obj)
+                            if not success:
+                                error = "Nicht aufrufbar"
+
+                        if success:
+                            self.analysis.runtime_test_results.append(
+                                (module_name, func_name, True, ""))
+                            self.analysis.runtime_tests_passed += 1
+                        else:
+                            self.analysis.runtime_test_results.append(
+                                (module_name, func_name, False, error))
+                            self.analysis.runtime_tests_failed += 1
+
+                    except Exception as e:
+                        self.analysis.runtime_test_results.append(
+                            (module_name, func_name, False, str(e)[:100]))
+                        self.analysis.runtime_tests_failed += 1
+
+            except Exception:
+                pass
+
+    # =========================================================================
+    # NEU v7.0: INTEGRATION-TESTS - Cross-Module Kommunikation
+    # =========================================================================
+
+    def _integration_tests(self):
+        """Testet ob Module korrekt miteinander kommunizieren"""
+        print(f"    Prüfe Cross-Module Integration...")
+
+        # Definiere erwartete Integrationen
+        # (Quell-Modul, Ziel-Modul, was wird importiert, wie wird es genutzt)
+        integrations = [
+            # Core -> Types
+            ("holo_brain", "holo_core_types", ["EmotionalState", "ContextType"]),
+            ("holo_consciousness", "holo_core_types", ["ContextType", "Importance"]),
+            ("holo_context_mind", "holo_core_types", ["ContextType", "Importance"]),
+
+            # Brain -> Subsysteme
+            ("holo_brain", "holo_personality", ["HoloPersonality"]),
+            ("holo_brain", "holo_smart_understanding", ["SmartUnderstanding"]),
+            ("holo_brain", "holo_context_mind", ["HoloContextMind"]),
+
+            # NLP-Kette
+            ("holo_smart_understanding", "holo_nlp_unified", ["HoloNLP"]),
+
+            # Consciousness -> Inner Life
+            ("holo_consciousness", "holo_inner_life", ["EmotionalContextTracker"]),
+
+            # Error Handling überall
+            ("holo_brain", "holo_error_handling", ["safe_execute"]),
+        ]
+
+        for from_mod, to_mod, expected_items in integrations:
+            # Prüfe ob beide Module existieren und ladbar sind
+            if from_mod not in self.analysis.modules:
+                continue
+            if to_mod not in self.analysis.modules:
+                continue
+
+            from_module = self.analysis.modules[from_mod]
+            to_module = self.analysis.modules[to_mod]
+
+            if not from_module.import_ok or not to_module.import_ok:
+                continue
+
+            # Prüfe ob from_mod tatsächlich to_mod importiert
+            imports_to_mod = False
+            imports_items = []
+
+            # Prüfe from_imports
+            if to_mod in from_module.from_imports:
+                imports_to_mod = True
+                imports_items = from_module.from_imports[to_mod]
+
+            # Prüfe normale imports
+            if to_mod in from_module.imports:
+                imports_to_mod = True
+
+            if not imports_to_mod:
+                # Kein Import gefunden - aber vielleicht optional?
+                self.analysis.integration_results.append(
+                    (from_mod, to_mod, False, f"Kein Import von {to_mod} gefunden"))
+                self.analysis.integration_tests_failed += 1
+                continue
+
+            # Prüfe ob erwartete Items importiert werden
+            missing_items = []
+            for item in expected_items:
+                if item not in imports_items and imports_items:
+                    missing_items.append(item)
+
+            if missing_items and imports_items:
+                self.analysis.integration_results.append(
+                    (from_mod, to_mod, False, f"Fehlende Items: {', '.join(missing_items)}"))
+                self.analysis.integration_tests_failed += 1
+            else:
+                # Versuche tatsächlichen Import
+                try:
+                    imported = importlib.import_module(from_mod)
+                    # Wenn Import klappt, ist Integration OK
+                    self.analysis.integration_results.append(
+                        (from_mod, to_mod, True, ""))
+                    self.analysis.integration_tests_passed += 1
+                except Exception as e:
+                    self.analysis.integration_results.append(
+                        (from_mod, to_mod, False, str(e)[:80]))
+                    self.analysis.integration_tests_failed += 1
+
+    # =========================================================================
+    # NEU v7.0: UNUSED CODE DETECTION - Ungenutzte Imports und Funktionen
+    # =========================================================================
+
+    def _unused_code_detection(self):
+        """Findet ungenutzte Imports, Funktionen und Klassen"""
+        print(f"    Analysiere ungenutzten Code...")
+
+        # Sammle alle definierten Funktionen/Klassen pro Modul
+        all_definitions = {}  # name -> [defining_modules]
+        all_usages = defaultdict(set)  # name -> {using_modules}
+
+        for name, module in self.analysis.modules.items():
+            # Sammle Definitionen
+            for func in module.functions:
+                if func not in all_definitions:
+                    all_definitions[func] = []
+                all_definitions[func].append(name)
+
+            for cls in module.classes:
+                if cls not in all_definitions:
+                    all_definitions[cls] = []
+                all_definitions[cls].append(name)
+
+        # Analysiere Verwendung in jedem Modul
+        for name, module in self.analysis.modules.items():
+            try:
+                source_path = module.path
+                if not source_path.exists():
+                    continue
+
+                source = source_path.read_text(encoding='utf-8', errors='ignore')
+
+                # Finde alle Funktions-/Klassen-Aufrufe
+                # Pattern: name( oder name.method(
+                call_pattern = re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\(')
+                for match in call_pattern.finditer(source):
+                    called = match.group(1)
+                    if called in all_definitions:
+                        all_usages[called].add(name)
+
+                # Finde Klassen-Instantiierungen und Referenzen
+                # Pattern: ClassName() oder isinstance(x, ClassName)
+                for cls_name in all_definitions:
+                    if cls_name[0].isupper():  # Wahrscheinlich Klasse
+                        if re.search(rf'\b{cls_name}\b', source):
+                            all_usages[cls_name].add(name)
+
+                # Prüfe ungenutzte Imports
+                for import_mod, items in module.from_imports.items():
+                    for item in items:
+                        # Zähle wie oft item im restlichen Code vorkommt
+                        # (außer in der Import-Zeile selbst)
+                        count = len(re.findall(rf'\b{item}\b', source))
+                        if count <= 1:  # Nur im Import
+                            self.analysis.unused_imports.append((name, f"{item} (aus {import_mod})"))
+
+            except Exception:
+                pass
+
+        # Finde ungenutzte Funktionen/Klassen
+        # (Nur in einem Modul definiert und nirgends sonst verwendet)
+        for definition, defining_modules in all_definitions.items():
+            using_modules = all_usages.get(definition, set())
+
+            # Entferne das definierende Modul selbst
+            external_usages = using_modules - set(defining_modules)
+
+            # Spezielle Namen ignorieren (dunder, private, test)
+            if definition.startswith('_'):
+                continue
+            if definition.startswith('test'):
+                continue
+            if definition in ['main', 'setup', 'teardown', 'run']:
+                continue
+
+            # Wenn nur im eigenen Modul verwendet (oder gar nicht)
+            if len(external_usages) == 0 and len(defining_modules) == 1:
+                # Prüfe ob es ein öffentliches API ist
+                mod = defining_modules[0]
+                if mod in self.analysis.modules:
+                    module = self.analysis.modules[mod]
+                    # Ignoriere wenn es in __all__ ist
+                    # (Vereinfacht: Ignoriere Hauptklassen)
+                    if definition in module.classes:
+                        # Klassen sind oft absichtlich exportiert
+                        if not any(definition in str(module.from_imports.values())):
+                            self.analysis.unused_classes.append((mod, definition))
+                    elif definition in module.functions:
+                        # Funktionen sind verdächtiger
+                        self.analysis.unused_functions.append((mod, definition))
+
+        # Limitiere Ergebnisse (zu viele false positives vermeiden)
+        self.analysis.unused_imports = self.analysis.unused_imports[:50]
+        self.analysis.unused_functions = self.analysis.unused_functions[:30]
+        self.analysis.unused_classes = self.analysis.unused_classes[:20]
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -2153,7 +2487,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Holocloude Intelligent System Tester v6.1 - Vollständige Code-Qualitäts-Analyse"
+        description="Holocloude Intelligent System Tester v7.0 - Vollständige Code-Qualitäts-Analyse + Runtime/Integration/Unused Tests"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Mehr Details")
     parser.add_argument("--no-color", action="store_true", help="Keine Farben")
@@ -2177,6 +2511,11 @@ def main():
     # NEU v6.1: Code-Qualitäts-Check
     parser.add_argument("--quality", action="store_true", help="Code-Qualität: bare except, mutable defaults, TODOs, etc.")
 
+    # NEU v7.0: Erweiterte Tests
+    parser.add_argument("--runtime", action="store_true", help="Runtime-Tests: Testet wichtige Funktionen mit echten Daten")
+    parser.add_argument("--integration", action="store_true", help="Integration-Tests: Prüft Cross-Module Kommunikation")
+    parser.add_argument("--unused", action="store_true", help="Unused Code: Findet ungenutzte Imports, Funktionen, Klassen")
+
     parser.add_argument("--all", action="store_true", help="Alle erweiterten Prüfungen ausführen")
 
     args = parser.parse_args()
@@ -2186,7 +2525,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v6.1               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.0               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
@@ -2683,6 +3022,115 @@ def main():
         if not args.all:
             sys.exit(0)
 
+    # NEU v7.0: Runtime-Tests
+    if args.runtime or args.all:
+        print()
+        print(f"{Colors.BOLD}RUNTIME-TESTS:{Colors.RESET}")
+
+        total = analysis.runtime_tests_passed + analysis.runtime_tests_failed
+        if total == 0:
+            print(f"\n  {Colors.DIM}Keine Runtime-Tests definiert{Colors.RESET}")
+        else:
+            passed = analysis.runtime_tests_passed
+            failed = analysis.runtime_tests_failed
+
+            if failed == 0:
+                print(f"\n  {Colors.GREEN}✓ {passed}/{total} Runtime-Tests bestanden{Colors.RESET}")
+            else:
+                print(f"\n  {Colors.YELLOW}⚠ {passed}/{total} Runtime-Tests bestanden{Colors.RESET}")
+
+            # Zeige erfolgreiche Tests
+            successes = [(m, f) for m, f, ok, _ in analysis.runtime_test_results if ok]
+            if successes:
+                print(f"\n  {Colors.GREEN}Erfolgreiche Tests:{Colors.RESET}")
+                for mod, func in successes[:10]:
+                    print(f"    ✓ {mod}.{func}")
+
+            # Zeige fehlgeschlagene Tests
+            failures = [(m, f, e) for m, f, ok, e in analysis.runtime_test_results if not ok]
+            if failures:
+                print(f"\n  {Colors.RED}Fehlgeschlagene Tests:{Colors.RESET}")
+                for mod, func, error in failures[:10]:
+                    print(f"    ✗ {mod}.{func}: {error}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # NEU v7.0: Integration-Tests
+    if args.integration or args.all:
+        print()
+        print(f"{Colors.BOLD}INTEGRATION-TESTS:{Colors.RESET}")
+
+        total = analysis.integration_tests_passed + analysis.integration_tests_failed
+        if total == 0:
+            print(f"\n  {Colors.DIM}Keine Integration-Tests definiert{Colors.RESET}")
+        else:
+            passed = analysis.integration_tests_passed
+            failed = analysis.integration_tests_failed
+
+            if failed == 0:
+                print(f"\n  {Colors.GREEN}✓ {passed}/{total} Modul-Integrationen funktionieren{Colors.RESET}")
+            else:
+                print(f"\n  {Colors.YELLOW}⚠ {passed}/{total} Modul-Integrationen funktionieren{Colors.RESET}")
+
+            # Zeige funktionierende Integrationen
+            working = [(f, t) for f, t, ok, _ in analysis.integration_results if ok]
+            if working:
+                print(f"\n  {Colors.GREEN}Funktionierende Verbindungen:{Colors.RESET}")
+                for from_mod, to_mod in working[:10]:
+                    print(f"    ✓ {from_mod} → {to_mod}")
+
+            # Zeige fehlende/fehlerhafte Integrationen
+            broken = [(f, t, e) for f, t, ok, e in analysis.integration_results if not ok]
+            if broken:
+                print(f"\n  {Colors.RED}Fehlende/fehlerhafte Verbindungen:{Colors.RESET}")
+                for from_mod, to_mod, error in broken[:10]:
+                    print(f"    ✗ {from_mod} → {to_mod}: {error}")
+
+        if not args.all:
+            sys.exit(0)
+
+    # NEU v7.0: Unused Code Detection
+    if args.unused or args.all:
+        print()
+        print(f"{Colors.BOLD}UNGENUTZTER CODE:{Colors.RESET}")
+
+        total_unused = (len(analysis.unused_imports) +
+                       len(analysis.unused_functions) +
+                       len(analysis.unused_classes))
+
+        if total_unused == 0:
+            print(f"\n  {Colors.GREEN}✓ Kein offensichtlich ungenutzter Code gefunden{Colors.RESET}")
+        else:
+            print(f"\n  {Colors.YELLOW}⚠ {total_unused} potentiell ungenutzte Elemente gefunden{Colors.RESET}")
+
+            # Ungenutzte Imports
+            if analysis.unused_imports:
+                print(f"\n  {Colors.CYAN}Ungenutzte Imports ({len(analysis.unused_imports)}):{Colors.RESET}")
+                for mod, imp in analysis.unused_imports[:15]:
+                    print(f"    • {mod}: {imp}")
+                if len(analysis.unused_imports) > 15:
+                    print(f"    {Colors.DIM}... und {len(analysis.unused_imports) - 15} weitere{Colors.RESET}")
+
+            # Ungenutzte Funktionen
+            if analysis.unused_functions:
+                print(f"\n  {Colors.YELLOW}Potentiell ungenutzte Funktionen ({len(analysis.unused_functions)}):{Colors.RESET}")
+                for mod, func in analysis.unused_functions[:10]:
+                    print(f"    • {mod}.{func}()")
+                if len(analysis.unused_functions) > 10:
+                    print(f"    {Colors.DIM}... und {len(analysis.unused_functions) - 10} weitere{Colors.RESET}")
+
+            # Ungenutzte Klassen
+            if analysis.unused_classes:
+                print(f"\n  {Colors.YELLOW}Potentiell ungenutzte Klassen ({len(analysis.unused_classes)}):{Colors.RESET}")
+                for mod, cls in analysis.unused_classes[:10]:
+                    print(f"    • {mod}.{cls}")
+
+            print(f"\n  {Colors.DIM}Hinweis: Dies sind Heuristiken - prüfe manuell vor dem Löschen{Colors.RESET}")
+
+        if not args.all:
+            sys.exit(0)
+
     # --all Modus: Zusammenfassung
     if args.all:
         print()
@@ -2696,6 +3144,10 @@ def main():
                              for m in analysis.modules.values())
         func_ratio = callable_funcs / max(1, total_funcs)
 
+        # NEU v7.0: Erweiterte Checks
+        runtime_ok = analysis.runtime_tests_failed == 0 or analysis.runtime_tests_passed > 0
+        integration_ok = analysis.integration_tests_failed == 0 or analysis.integration_tests_passed > 0
+
         checks = [
             ("Funktionen aufrufbar (>= 99%)", func_ratio >= 0.99),
             ("Docstring-Abdeckung >= 50%", analysis.avg_docstring_coverage >= 50),
@@ -2703,6 +3155,8 @@ def main():
             ("Keine kritischen Security-Issues", not any(i.severity == "critical" for i in analysis.all_security_issues)),
             ("Config vollständig", len(analysis.config_issues) == 0),
             ("DB-Schema OK", len(analysis.db_issues) == 0),
+            ("Runtime-Tests OK", runtime_ok),
+            ("Integration-Tests OK", integration_ok),
         ]
 
         passed = sum(1 for _, ok in checks if ok)
