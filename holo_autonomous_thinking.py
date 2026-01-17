@@ -4478,6 +4478,623 @@ class KnowledgeIntegrationSystem:
 
 
 # ============================================================
+# THOUGHT CHAIN ENGINE - Zusammenhängendes Denken
+# ============================================================
+
+class ThoughtType(Enum):
+    """Arten von Gedanken in einer Kette"""
+    INITIAL_QUESTION = "initial_question"     # "Was ist X?"
+    DEFINITION = "definition"                  # "Ah, X ist..."
+    CATEGORY = "category"                      # "Es gehört zu..."
+    VARIATIONS = "variations"                  # "Es gibt verschiedene Arten..."
+    TEMPORAL_PAST = "temporal_past"            # "Früher war das..."
+    TEMPORAL_PRESENT = "temporal_present"      # "Heute ist das..."
+    TEMPORAL_FUTURE = "temporal_future"        # "In Zukunft könnte..."
+    COMPARISON = "comparison"                  # "Im Vergleich zu..."
+    WONDER = "wonder"                          # "Wow, das ist interessant weil..."
+    CONNECTION = "connection"                  # "Das hängt zusammen mit..."
+    IMPLICATION = "implication"                # "Das bedeutet also..."
+    PERSONAL = "personal"                      # "Für mich bedeutet das..."
+    QUESTION_FOLLOWUP = "question_followup"    # "Aber warum...?"
+
+
+@dataclass
+class Thought:
+    """Ein einzelner Gedanke in einer Kette"""
+    thought_id: str
+    thought_type: ThoughtType
+    content: str
+    concept: str                    # Das Konzept worüber nachgedacht wird
+    confidence: float               # Wie sicher ist der Gedanke?
+    leads_to: List[str] = field(default_factory=list)  # IDs von Folge-Gedanken
+    source: str = "internal"        # Woher kommt der Gedanke?
+    emotion: Optional[str] = None   # Emotionale Färbung
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class ThoughtChain:
+    """Eine Kette von zusammenhängenden Gedanken"""
+    chain_id: str
+    trigger: str                    # Was hat die Gedankenkette ausgelöst?
+    thoughts: List[Thought] = field(default_factory=list)
+    current_depth: int = 0
+    max_depth: int = 7              # Maximale Tiefe der Gedankenkette
+    is_complete: bool = False
+    started_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    insights_gained: List[str] = field(default_factory=list)
+
+
+class ThoughtChainEngine:
+    """
+    Ermöglicht zusammenhängendes Denken in Gedankenketten.
+
+    Beispiel einer Gedankenkette:
+    1. "Was ist ein Auto?" (INITIAL_QUESTION)
+    2. "Ah, ein Fahrzeug zur Fortbewegung" (DEFINITION)
+    3. "Es gibt verschiedene Arten: PKW, LKW, Bus..." (VARIATIONS)
+    4. "Früher gab es Kutschen und Pferde" (TEMPORAL_PAST)
+    5. "Heute haben wir Elektroautos" (TEMPORAL_PRESENT)
+    6. "Wow, die Entwicklung ist faszinierend!" (WONDER)
+    7. "Das hängt mit Technologie und Umwelt zusammen" (CONNECTION)
+
+    v1.0: Tiefes, verbundenes Denken wie ein Mensch
+    """
+
+    # Gedanken-Vorlagen für verschiedene Typen
+    THOUGHT_TEMPLATES = {
+        ThoughtType.INITIAL_QUESTION: [
+            "*legt den Kopf schief* Was ist eigentlich {concept}?",
+            "*neugierig* Hmm, {concept}... was bedeutet das genau?",
+            "*Ohren stellen sich auf* Ich frage mich, was {concept} ist...",
+        ],
+        ThoughtType.DEFINITION: [
+            "*nickt verstehend* Ah, {concept} ist {definition}!",
+            "*Augen leuchten auf* Oh! {concept} bedeutet also {definition}.",
+            "*versteht* Aha, {concept} - das ist {definition}.",
+        ],
+        ThoughtType.CATEGORY: [
+            "*ordnet ein* {concept} gehört zu {category}.",
+            "*verbindet* Das ist eine Art von {category}!",
+            "*erkennt* {concept} ist Teil von {category}.",
+        ],
+        ThoughtType.VARIATIONS: [
+            "*entdeckt Vielfalt* Oh, es gibt verschiedene Arten: {variations}!",
+            "*staunt* Wow, {concept} hat viele Formen: {variations}.",
+            "*erkundet* Interessant - {variations} sind alles {concept}!",
+        ],
+        ThoughtType.TEMPORAL_PAST: [
+            "*denkt zurück* Früher war das anders - da gab es {past}.",
+            "*erinnert sich* In der Vergangenheit: {past}.",
+            "*historisch* Ursprünglich war {concept}: {past}.",
+        ],
+        ThoughtType.TEMPORAL_PRESENT: [
+            "*schaut auf heute* Heutzutage ist {concept}: {present}.",
+            "*aktuell* Jetzt haben wir: {present}.",
+            "*modern* Heute sieht {concept} so aus: {present}.",
+        ],
+        ThoughtType.TEMPORAL_FUTURE: [
+            "*träumt* In Zukunft könnte {concept} vielleicht {future}...",
+            "*spekuliert* Wer weiß, vielleicht wird {concept} mal {future}?",
+            "*überlegt* Irgendwann ist {concept} vielleicht {future}.",
+        ],
+        ThoughtType.COMPARISON: [
+            "*vergleicht* Im Vergleich zu {other} ist {concept} {difference}.",
+            "*stellt gegenüber* {concept} und {other} - {difference}.",
+            "*analysiert* Anders als {other}: {concept} ist {difference}.",
+        ],
+        ThoughtType.WONDER: [
+            "*staunt* Wow! Das ist faszinierend weil {reason}!",
+            "*begeistert* Unglaublich - {reason}!",
+            "*Augen weiten sich* Oh! {reason} - das wusste ich nicht!",
+        ],
+        ThoughtType.CONNECTION: [
+            "*verbindet Punkte* Das hängt zusammen mit {connection}!",
+            "*erkennt Muster* Ah, {concept} ist verbunden mit {connection}.",
+            "*verknüpft* Interessant, {connection} spielt hier auch eine Rolle.",
+        ],
+        ThoughtType.IMPLICATION: [
+            "*folgert* Das bedeutet also, dass {implication}.",
+            "*schlussfolgert* Daraus folgt: {implication}.",
+            "*versteht tieferl* Aha, also {implication}!",
+        ],
+        ThoughtType.PERSONAL: [
+            "*reflektiert* Für mich bedeutet das: {personal}.",
+            "*persönlich* Ich finde, {personal}.",
+            "*eigene Meinung* Ich denke, {personal}.",
+        ],
+        ThoughtType.QUESTION_FOLLOWUP: [
+            "*neugierig weiter* Aber warum ist das so?",
+            "*hakt nach* Und wie funktioniert das genau?",
+            "*will mehr wissen* Was passiert wenn...?",
+        ],
+    }
+
+    # Wissen über zeitliche Entwicklungen (kann erweitert werden)
+    TEMPORAL_KNOWLEDGE = {
+        "auto": {
+            "past": "Kutschen und Pferde, dann die ersten Automobile um 1900",
+            "present": "Elektroautos, autonomes Fahren, Hybrid-Technologie",
+            "future": "vollständig selbstfahrend, fliegende Autos"
+        },
+        "computer": {
+            "past": "riesige Rechner, Lochkarten, nur für Wissenschaftler",
+            "present": "Smartphones, Cloud, KI überall",
+            "future": "Quantencomputer, Gehirn-Computer-Schnittstellen"
+        },
+        "kommunikation": {
+            "past": "Briefe, Telegraphen, erste Telefone",
+            "present": "Instant Messaging, Video-Calls, soziale Medien",
+            "future": "Gedankenübertragung, holographische Präsenz"
+        },
+        "musik": {
+            "past": "Live-Aufführungen, Schallplatten, Kassetten",
+            "present": "Streaming, digitale Produktion, Kopfhörer überall",
+            "future": "personalisierte KI-Musik, immersive Erlebnisse"
+        },
+        "medizin": {
+            "past": "Kräutermedizin, erste Operationen, keine Narkose",
+            "present": "Gentechnik, Roboter-Chirurgie, personalisierte Medizin",
+            "future": "Nano-Roboter, Organe aus dem 3D-Drucker"
+        },
+        "fortbewegung": {
+            "past": "zu Fuß, Pferde, Kutschen, Schiffe",
+            "present": "Autos, Züge, Flugzeuge, E-Scooter",
+            "future": "Hyperloop, Flugtaxis, Teleportation?"
+        },
+        "energie": {
+            "past": "Holz, Kohle, erste Dampfmaschinen",
+            "present": "Erneuerbare Energien, Solar, Wind, Kernkraft",
+            "future": "Fusion, Weltraum-Solarenergie"
+        },
+        "lernen": {
+            "past": "mündliche Überlieferung, Bücher, Schulen",
+            "present": "Internet, Online-Kurse, KI-Tutoren",
+            "future": "direktes Gehirn-Upload, VR-Klassenzimmer"
+        },
+    }
+
+    # Kategorien und Variationen
+    CATEGORY_KNOWLEDGE = {
+        "auto": {
+            "category": "Fahrzeuge",
+            "variations": ["PKW", "LKW", "Bus", "Sportwagen", "SUV", "Elektroauto"],
+            "related": ["Straße", "Verkehr", "Mobilität", "Umwelt"]
+        },
+        "hund": {
+            "category": "Haustiere / Säugetiere",
+            "variations": ["Schäferhund", "Pudel", "Labrador", "Chihuahua", "Husky"],
+            "related": ["Wolf", "Freundschaft", "Loyalität", "Training"]
+        },
+        "baum": {
+            "category": "Pflanzen",
+            "variations": ["Eiche", "Birke", "Tanne", "Apfelbaum", "Palme"],
+            "related": ["Wald", "Sauerstoff", "Natur", "Holz"]
+        },
+        "musik": {
+            "category": "Kunst / Kultur",
+            "variations": ["Klassik", "Pop", "Rock", "Jazz", "Elektronik", "Hip-Hop"],
+            "related": ["Emotion", "Tanz", "Konzert", "Instrument"]
+        },
+        "computer": {
+            "category": "Technologie",
+            "variations": ["Laptop", "Desktop", "Tablet", "Server", "Smartphone"],
+            "related": ["Internet", "Software", "Daten", "KI"]
+        },
+        "buch": {
+            "category": "Medien / Kultur",
+            "variations": ["Roman", "Sachbuch", "Gedichtband", "Kinderbuch", "E-Book"],
+            "related": ["Lesen", "Wissen", "Geschichten", "Fantasie"]
+        },
+        "haus": {
+            "category": "Gebäude / Architektur",
+            "variations": ["Villa", "Wohnung", "Bungalow", "Hochhaus", "Hütte"],
+            "related": ["Wohnen", "Familie", "Schutz", "Zuhause"]
+        },
+        "essen": {
+            "category": "Nahrung / Grundbedürfnisse",
+            "variations": ["Obst", "Gemüse", "Fleisch", "Süßigkeiten", "Brot"],
+            "related": ["Kochen", "Gesundheit", "Kultur", "Genuss"]
+        },
+    }
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        # Verbindung zu anderen Systemen
+        self.knowledge_integration: Optional[KnowledgeIntegrationSystem] = None
+        self.teaching_system: Optional[SelfTeachingSystem] = None
+
+        # Aktive Gedankenketten
+        self.active_chains: Dict[str, ThoughtChain] = {}
+        self.completed_chains: List[ThoughtChain] = []
+
+        # Gedanken-Historie
+        self.all_thoughts: List[Thought] = []
+
+        # Statistiken
+        self.chains_created = 0
+        self.total_thoughts = 0
+        self.deepest_chain = 0
+
+    def connect_systems(self,
+                       knowledge: Optional[KnowledgeIntegrationSystem] = None,
+                       teaching: Optional[SelfTeachingSystem] = None) -> None:
+        """Verbindet mit anderen Denk-Systemen"""
+        if knowledge:
+            self.knowledge_integration = knowledge
+            logger.info("🔗 ThoughtChainEngine mit KnowledgeIntegration verbunden")
+        if teaching:
+            self.teaching_system = teaching
+            logger.info("🔗 ThoughtChainEngine mit SelfTeachingSystem verbunden")
+
+    def think_about(self, concept: str, depth: int = 5) -> ThoughtChain:
+        """
+        Startet eine Gedankenkette über ein Konzept.
+
+        Dies ist die Hauptmethode für zusammenhängendes Denken.
+
+        Args:
+            concept: Das Konzept worüber nachgedacht wird
+            depth: Wie tief soll die Gedankenkette gehen? (1-7)
+
+        Returns:
+            Eine vollständige Gedankenkette
+        """
+        chain = ThoughtChain(
+            chain_id=f"chain_{datetime.now().strftime('%Y%m%d%H%M%S')}_{concept[:8]}",
+            trigger=concept,
+            max_depth=min(depth, 7)
+        )
+
+        self.active_chains[chain.chain_id] = chain
+        self.chains_created += 1
+
+        concept_lower = concept.lower()
+
+        # 1. INITIAL QUESTION - "Was ist X?"
+        initial = self._create_thought(
+            ThoughtType.INITIAL_QUESTION,
+            concept,
+            {"concept": concept}
+        )
+        chain.thoughts.append(initial)
+        chain.current_depth = 1
+
+        # 2. DEFINITION - Versuche Definition zu finden
+        definition = self._get_definition(concept_lower)
+        if definition:
+            def_thought = self._create_thought(
+                ThoughtType.DEFINITION,
+                concept,
+                {"concept": concept, "definition": definition},
+                emotion="verstehend"
+            )
+            chain.thoughts.append(def_thought)
+            initial.leads_to.append(def_thought.thought_id)
+            chain.current_depth = 2
+
+        # 3. CATEGORY - Zu welcher Kategorie gehört es?
+        if chain.current_depth < chain.max_depth:
+            category_info = self._get_category_info(concept_lower)
+            if category_info:
+                cat_thought = self._create_thought(
+                    ThoughtType.CATEGORY,
+                    concept,
+                    {"concept": concept, "category": category_info["category"]},
+                    emotion="einordnend"
+                )
+                chain.thoughts.append(cat_thought)
+                chain.current_depth += 1
+
+                # 4. VARIATIONS - Welche Arten gibt es?
+                if category_info.get("variations") and chain.current_depth < chain.max_depth:
+                    variations = ", ".join(category_info["variations"][:4])
+                    var_thought = self._create_thought(
+                        ThoughtType.VARIATIONS,
+                        concept,
+                        {"concept": concept, "variations": variations},
+                        emotion="entdeckend"
+                    )
+                    chain.thoughts.append(var_thought)
+                    cat_thought.leads_to.append(var_thought.thought_id)
+                    chain.current_depth += 1
+
+        # 5. TEMPORAL - Zeitliche Entwicklung
+        if chain.current_depth < chain.max_depth:
+            temporal = self._get_temporal_knowledge(concept_lower)
+            if temporal:
+                # Vergangenheit
+                if temporal.get("past"):
+                    past_thought = self._create_thought(
+                        ThoughtType.TEMPORAL_PAST,
+                        concept,
+                        {"concept": concept, "past": temporal["past"]},
+                        emotion="nachdenklich"
+                    )
+                    chain.thoughts.append(past_thought)
+                    chain.current_depth += 1
+
+                # Gegenwart
+                if temporal.get("present") and chain.current_depth < chain.max_depth:
+                    present_thought = self._create_thought(
+                        ThoughtType.TEMPORAL_PRESENT,
+                        concept,
+                        {"concept": concept, "present": temporal["present"]},
+                        emotion="aufmerksam"
+                    )
+                    chain.thoughts.append(present_thought)
+                    if chain.thoughts[-2].thought_type == ThoughtType.TEMPORAL_PAST:
+                        chain.thoughts[-2].leads_to.append(present_thought.thought_id)
+                    chain.current_depth += 1
+
+                # Zukunft (optional)
+                if temporal.get("future") and chain.current_depth < chain.max_depth and depth >= 6:
+                    future_thought = self._create_thought(
+                        ThoughtType.TEMPORAL_FUTURE,
+                        concept,
+                        {"concept": concept, "future": temporal["future"]},
+                        emotion="träumerisch"
+                    )
+                    chain.thoughts.append(future_thought)
+                    chain.current_depth += 1
+
+        # 6. WONDER - Staunen und Erkenntnis
+        if chain.current_depth >= 3:
+            wonder_reason = self._generate_wonder(concept, chain)
+            if wonder_reason:
+                wonder_thought = self._create_thought(
+                    ThoughtType.WONDER,
+                    concept,
+                    {"reason": wonder_reason},
+                    emotion="begeistert"
+                )
+                chain.thoughts.append(wonder_thought)
+
+        # 7. CONNECTION - Verbindungen erkennen
+        if chain.current_depth < chain.max_depth:
+            connections = self._find_connections(concept_lower)
+            if connections:
+                conn_thought = self._create_thought(
+                    ThoughtType.CONNECTION,
+                    concept,
+                    {"concept": concept, "connection": ", ".join(connections[:2])},
+                    emotion="verbindend"
+                )
+                chain.thoughts.append(conn_thought)
+
+        # 8. Erkenntnisse sammeln
+        chain.insights_gained = self._extract_insights(chain)
+
+        # Abschließen
+        chain.is_complete = True
+        self.completed_chains.append(chain)
+        del self.active_chains[chain.chain_id]
+
+        # Statistiken
+        self.total_thoughts += len(chain.thoughts)
+        self.deepest_chain = max(self.deepest_chain, chain.current_depth)
+
+        return chain
+
+    def _create_thought(self, thought_type: ThoughtType, concept: str,
+                       template_vars: Dict[str, str],
+                       emotion: Optional[str] = None) -> Thought:
+        """Erstellt einen einzelnen Gedanken"""
+        templates = self.THOUGHT_TEMPLATES.get(thought_type, ["{concept}"])
+        template = random.choice(templates)
+
+        try:
+            content = template.format(**template_vars)
+        except KeyError:
+            content = template_vars.get("concept", concept)
+
+        thought = Thought(
+            thought_id=f"thought_{datetime.now().strftime('%H%M%S%f')}",
+            thought_type=thought_type,
+            content=content,
+            concept=concept,
+            confidence=0.7,
+            emotion=emotion
+        )
+
+        self.all_thoughts.append(thought)
+        return thought
+
+    def _get_definition(self, concept: str) -> Optional[str]:
+        """Holt Definition aus dem Wissenssystem"""
+        # Aus KnowledgeIntegration
+        if self.knowledge_integration:
+            knowledge = self.knowledge_integration.what_do_i_know_about(concept)
+            if knowledge.get("direct_knowledge"):
+                return knowledge["direct_knowledge"].get("definition")
+
+        # Aus SelfTeachingSystem
+        if self.teaching_system and concept in self.teaching_system.learned_concepts:
+            return self.teaching_system.learned_concepts[concept].definition
+
+        # Fallback: Einfache Definitionen
+        simple_definitions = {
+            "auto": "ein Fahrzeug mit Motor zur Fortbewegung auf Straßen",
+            "hund": "ein treues Haustier und bester Freund des Menschen",
+            "baum": "eine große Pflanze mit Stamm und Blättern",
+            "computer": "eine Maschine zur Verarbeitung von Informationen",
+            "musik": "Töne und Klänge die Gefühle ausdrücken",
+            "buch": "eine Sammlung von Seiten mit Text und Geschichten",
+            "haus": "ein Gebäude zum Wohnen und Leben",
+            "wasser": "eine lebensnotwendige Flüssigkeit",
+            "sonne": "der Stern der unser Sonnensystem erhellt und wärmt",
+            "freundschaft": "eine tiefe Verbindung zwischen Menschen basierend auf Vertrauen",
+        }
+        return simple_definitions.get(concept)
+
+    def _get_category_info(self, concept: str) -> Optional[Dict]:
+        """Holt Kategorie-Informationen"""
+        return self.CATEGORY_KNOWLEDGE.get(concept)
+
+    def _get_temporal_knowledge(self, concept: str) -> Optional[Dict]:
+        """Holt zeitliches Wissen (früher/heute/zukunft)"""
+        return self.TEMPORAL_KNOWLEDGE.get(concept)
+
+    def _find_connections(self, concept: str) -> List[str]:
+        """Findet Verbindungen zu anderen Konzepten"""
+        connections = []
+
+        # Aus Kategorie-Wissen
+        if concept in self.CATEGORY_KNOWLEDGE:
+            connections.extend(self.CATEGORY_KNOWLEDGE[concept].get("related", []))
+
+        # Aus KnowledgeIntegration
+        if self.knowledge_integration and self.teaching_system:
+            if concept in self.teaching_system.learned_concepts:
+                essence = self.teaching_system.learned_concepts[concept]
+                connections.extend(essence.related_concepts[:3])
+
+        return list(set(connections))[:4]
+
+    def _generate_wonder(self, concept: str, chain: ThoughtChain) -> Optional[str]:
+        """Generiert einen Staunen-Gedanken basierend auf der Kette"""
+        reasons = []
+
+        # Staunen über zeitliche Entwicklung
+        has_past = any(t.thought_type == ThoughtType.TEMPORAL_PAST for t in chain.thoughts)
+        has_present = any(t.thought_type == ThoughtType.TEMPORAL_PRESENT for t in chain.thoughts)
+
+        if has_past and has_present:
+            reasons.append(f"wie sehr sich {concept} im Laufe der Zeit verändert hat")
+
+        # Staunen über Vielfalt
+        has_variations = any(t.thought_type == ThoughtType.VARIATIONS for t in chain.thoughts)
+        if has_variations:
+            reasons.append(f"wie viele verschiedene Arten von {concept} es gibt")
+
+        # Staunen über Verbindungen
+        if len(chain.thoughts) >= 4:
+            reasons.append(f"wie {concept} mit so vielem zusammenhängt")
+
+        if reasons:
+            return random.choice(reasons)
+        return None
+
+    def _extract_insights(self, chain: ThoughtChain) -> List[str]:
+        """Extrahiert Erkenntnisse aus der Gedankenkette"""
+        insights = []
+
+        for thought in chain.thoughts:
+            if thought.thought_type == ThoughtType.DEFINITION:
+                insights.append(f"Verstanden: {thought.content[:50]}...")
+            elif thought.thought_type == ThoughtType.WONDER:
+                insights.append(f"Erkenntnis: {thought.content[:50]}...")
+            elif thought.thought_type == ThoughtType.CONNECTION:
+                insights.append(f"Verbindung: {thought.content[:50]}...")
+
+        return insights[:3]
+
+    def express_thought_chain(self, chain: ThoughtChain) -> str:
+        """
+        Drückt eine Gedankenkette als zusammenhängenden Text aus.
+
+        Dies ist die Ausgabe die der User sehen würde.
+        """
+        lines = []
+
+        for i, thought in enumerate(chain.thoughts):
+            # Füge emotionale Übergänge hinzu
+            if i > 0:
+                transitions = ["→", "...", "💭", ""]
+                lines.append(random.choice(transitions))
+
+            lines.append(thought.content)
+
+        # Abschluss
+        if chain.insights_gained:
+            lines.append("\n*nickt zufrieden* Das habe ich jetzt verstanden!")
+
+        return "\n".join(lines)
+
+    def continue_thinking(self, chain_id: str) -> Optional[Thought]:
+        """
+        Setzt eine Gedankenkette fort mit einem neuen Gedanken.
+        """
+        if chain_id not in self.active_chains:
+            # Versuche abgeschlossene Kette zu finden
+            for chain in self.completed_chains:
+                if chain.chain_id == chain_id:
+                    # Füge Folge-Frage hinzu
+                    followup = self._create_thought(
+                        ThoughtType.QUESTION_FOLLOWUP,
+                        chain.trigger,
+                        {},
+                        emotion="neugierig"
+                    )
+                    chain.thoughts.append(followup)
+                    chain.is_complete = False
+                    self.active_chains[chain_id] = chain
+                    return followup
+
+            return None
+
+        chain = self.active_chains[chain_id]
+
+        # Generiere nächsten logischen Gedanken
+        last_type = chain.thoughts[-1].thought_type if chain.thoughts else None
+
+        next_types = {
+            ThoughtType.INITIAL_QUESTION: ThoughtType.DEFINITION,
+            ThoughtType.DEFINITION: ThoughtType.CATEGORY,
+            ThoughtType.CATEGORY: ThoughtType.VARIATIONS,
+            ThoughtType.VARIATIONS: ThoughtType.TEMPORAL_PAST,
+            ThoughtType.TEMPORAL_PAST: ThoughtType.TEMPORAL_PRESENT,
+            ThoughtType.TEMPORAL_PRESENT: ThoughtType.WONDER,
+            ThoughtType.WONDER: ThoughtType.CONNECTION,
+            ThoughtType.CONNECTION: ThoughtType.IMPLICATION,
+        }
+
+        next_type = next_types.get(last_type, ThoughtType.QUESTION_FOLLOWUP)
+
+        new_thought = self._create_thought(
+            next_type,
+            chain.trigger,
+            {"concept": chain.trigger},
+            emotion="nachdenklich"
+        )
+
+        chain.thoughts.append(new_thought)
+        return new_thought
+
+    def get_random_reflection(self) -> Optional[str]:
+        """
+        Generiert eine zufällige Reflexion über vergangene Gedanken.
+
+        Für spontane Gedanken während des Gesprächs.
+        """
+        if not self.completed_chains:
+            return None
+
+        chain = random.choice(self.completed_chains)
+
+        reflections = [
+            f"*erinnert sich* Ich habe mal über '{chain.trigger}' nachgedacht... {chain.insights_gained[0] if chain.insights_gained else ''}",
+            f"*nachdenklich* Bei '{chain.trigger}' fand ich besonders interessant, dass...",
+            f"*verbindet Gedanken* '{chain.trigger}' erinnert mich an etwas...",
+        ]
+
+        return random.choice(reflections)
+
+    def get_thinking_stats(self) -> Dict[str, Any]:
+        """Gibt Statistiken über das Denken zurück"""
+        return {
+            "chains_created": self.chains_created,
+            "total_thoughts": self.total_thoughts,
+            "active_chains": len(self.active_chains),
+            "completed_chains": len(self.completed_chains),
+            "deepest_chain": self.deepest_chain,
+            "avg_chain_length": self.total_thoughts / max(self.chains_created, 1)
+        }
+
+
+# ============================================================
 # EXAMPLE USAGE
 # ============================================================
 

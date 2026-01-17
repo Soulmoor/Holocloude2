@@ -14236,6 +14236,33 @@ class HoloPersona:
             logger.warning(f"⚠️ KnowledgeIntegration Fehler: {e}")
 
         # ================================================================
+        # 💭 THOUGHT CHAIN ENGINE - Zusammenhängendes Denken
+        # ================================================================
+        try:
+            from holo_autonomous_thinking import ThoughtChainEngine
+            self.thought_chain = ThoughtChainEngine(BrainConfig.DATA_DIR)
+            logger.info("💭 ThoughtChainEngine aktiviert (Gedankenketten & tiefes Denken)")
+
+            # Verbinde mit KnowledgeIntegration
+            if hasattr(self, 'knowledge_integration') and self.knowledge_integration:
+                self.thought_chain.connect_systems(knowledge=self.knowledge_integration)
+                logger.info("   → ThoughtChainEngine mit KnowledgeIntegration verbunden")
+
+            # Verbinde mit SelfTeachingSystem
+            if hasattr(self, 'curiosity_learner') and self.curiosity_learner:
+                if hasattr(self.curiosity_learner, 'teaching_system'):
+                    self.thought_chain.connect_systems(
+                        teaching=self.curiosity_learner.teaching_system
+                    )
+                    logger.info("   → ThoughtChainEngine mit SelfTeachingSystem verbunden")
+        except ImportError:
+            self.thought_chain = None
+            logger.debug("ThoughtChainEngine nicht verfügbar (optional)")
+        except Exception as e:
+            self.thought_chain = None
+            logger.warning(f"⚠️ ThoughtChainEngine Fehler: {e}")
+
+        # ================================================================
         # 💬 HOLO DIALOGUE ENGINE - Dialog State Machine
         # ================================================================
         try:
