@@ -14263,6 +14263,44 @@ class HoloPersona:
             logger.warning(f"⚠️ ThoughtChainEngine Fehler: {e}")
 
         # ================================================================
+        # 🧠 HOLO MIND - Zentrales Denk-System (koordiniert alles!)
+        # ================================================================
+        try:
+            from holo_autonomous_thinking import HoloMind
+            self.holo_mind = HoloMind(BrainConfig.DATA_DIR)
+            logger.info("🧠 HoloMind aktiviert (Zentrales Denk-Koordinationssystem)")
+
+            # Verbinde mit externen Systemen
+            if hasattr(self, 'inner_life') and self.inner_life:
+                if hasattr(self.inner_life, 'curiosity'):
+                    self.holo_mind.connect_external_systems(
+                        curiosity_system=self.inner_life.curiosity
+                    )
+                    logger.info("   → HoloMind mit CuriositySystem verbunden")
+
+            if hasattr(self, 'web_curiosity') and self.web_curiosity:
+                self.holo_mind.connect_external_systems(
+                    web_curiosity=self.web_curiosity
+                )
+                logger.info("   → HoloMind mit WebCuriosity verbunden")
+
+            # Teile interne Referenzen
+            if self.holo_mind.thought_chain:
+                self.thought_chain = self.holo_mind.thought_chain
+            if self.holo_mind.knowledge:
+                self.knowledge_integration = self.holo_mind.knowledge
+            if self.holo_mind.curiosity:
+                self.curiosity_learner = self.holo_mind.curiosity
+
+            logger.info("   → HoloMind Subsysteme mit Brain verbunden")
+        except ImportError:
+            self.holo_mind = None
+            logger.debug("HoloMind nicht verfügbar (optional)")
+        except Exception as e:
+            self.holo_mind = None
+            logger.warning(f"⚠️ HoloMind Fehler: {e}")
+
+        # ================================================================
         # 💬 HOLO DIALOGUE ENGINE - Dialog State Machine
         # ================================================================
         try:
@@ -19237,53 +19275,59 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             except Exception:
                 pass
 
-        # ========== CURIOSITY-DRIVEN LEARNER: Konzepte erkennen ==========
+        # ========== 🧠 HOLO MIND: Zentrales Denken ==========
+        # Das HoloMind koordiniert ALLE Denk-Prozesse zentral!
+        thinking_result = None
         curiosity_questions = []
-        if hasattr(self, 'curiosity_learner') and self.curiosity_learner:
+        knowledge_insights = []
+
+        if hasattr(self, 'holo_mind') and self.holo_mind:
+            try:
+                # Zentrale Denk-Methode - koordiniert alles!
+                thinking_result = self.holo_mind.think_for_response(user_input)
+
+                # Extrahiere Ergebnisse
+                if thinking_result:
+                    # Gedanken loggen
+                    for thought in thinking_result.get("thoughts", [])[:3]:
+                        logger.debug(f"[MIND] 💭 {thought[:60]}...")
+
+                    # Erkenntnisse
+                    knowledge_insights = thinking_result.get("insights", [])
+                    if knowledge_insights:
+                        logger.info(f"[MIND] 💡 {len(knowledge_insights)} Erkenntnisse gewonnen")
+
+                    # Angewandtes Wissen
+                    applied = thinking_result.get("relevant_knowledge", [])
+                    if applied:
+                        logger.debug(f"[MIND] 📚 Wissen angewandt: {', '.join(applied[:3])}")
+
+                    # Neugier-Fragen
+                    curiosity_questions = thinking_result.get("questions", [])
+
+                    # Emotionen
+                    emotions = thinking_result.get("emotions", [])
+                    if emotions:
+                        logger.debug(f"[MIND] 💝 Emotionen: {', '.join(emotions[:2])}")
+
+                    # Denkzeit
+                    think_time = thinking_result.get("thinking_time_ms", 0)
+                    logger.debug(f"[MIND] ⏱️ Denkzeit: {think_time:.1f}ms")
+
+            except Exception as e:
+                logger.debug(f"[MIND] think_for_response Fehler: {e}")
+
+        # Fallback auf einzelne Systeme wenn HoloMind nicht verfügbar
+        elif hasattr(self, 'curiosity_learner') and self.curiosity_learner:
             try:
                 learn_result = self.curiosity_learner.process_input(
                     text=user_input,
                     source="conversation"
                 )
-
-                # Sammle Fragen für eventuelle Nachfrage
                 if learn_result.get("questions_for_user"):
                     curiosity_questions = learn_result["questions_for_user"]
-
-                # Logge erkannte Konzepte
-                if learn_result.get("detected_concepts"):
-                    logger.debug(f"[CURIOSITY] Erkannte Konzepte: "
-                                f"{learn_result['detected_concepts'][:5]}")
-
-                # Wenn Hintergrund-Lernen gestartet wurde
-                if learn_result.get("background_learning_started"):
-                    logger.info(f"[CURIOSITY] 🎓 Hintergrund-Lernen aktiviert "
-                               f"(Queue: {learn_result.get('concepts_in_queue', 0)})")
             except Exception as e:
-                logger.debug(f"[CURIOSITY] process_input Fehler: {e}")
-
-        # ========== KNOWLEDGE INTEGRATION: Wissen anwenden ==========
-        knowledge_insights = []
-        if hasattr(self, 'knowledge_integration') and self.knowledge_integration:
-            try:
-                # Wende gelerntes Wissen auf die Situation an
-                applications = self.knowledge_integration.apply_knowledge_to_situation(user_input)
-
-                if applications:
-                    for app in applications[:2]:  # Max 2 Insights
-                        knowledge_insights.append(app.insight)
-                        logger.debug(f"[KNOWLEDGE] 💡 Angewandt: {app.source_concept} "
-                                   f"(Relevanz: {app.relevance:.0%})")
-
-                # Prüfe was Holo über das Thema weiß
-                words = user_input.split()
-                for word in words[:5]:  # Prüfe erste 5 Wörter
-                    if len(word) > 4:
-                        knowledge = self.knowledge_integration.what_do_i_know_about(word)
-                        if knowledge.get("can_answer"):
-                            logger.debug(f"[KNOWLEDGE] 📚 Wissen gefunden über: {word}")
-            except Exception as e:
-                logger.debug(f"[KNOWLEDGE] apply_knowledge Fehler: {e}")
+                logger.debug(f"[CURIOSITY] Fallback Fehler: {e}")
 
         # ========== PROACTIVE INTELLIGENCE: User hat interagiert ==========
         if hasattr(self, 'proactive_intelligence') and self.proactive_intelligence:

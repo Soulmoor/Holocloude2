@@ -5095,6 +5095,544 @@ class ThoughtChainEngine:
 
 
 # ============================================================
+# HOLO MIND - Zentrales Denk-Koordinationssystem
+# ============================================================
+
+class ThinkingContext(Enum):
+    """Kontext in dem gedacht wird"""
+    CONVERSATION = "conversation"       # Während eines Gesprächs
+    DECISION = "decision"               # Bei einer Entscheidung
+    LEARNING = "learning"               # Beim Lernen
+    EMOTION = "emotion"                 # Bei emotionaler Reaktion
+    PROACTIVE = "proactive"             # Proaktives Denken
+    REFLECTION = "reflection"           # Selbst-Reflexion
+    PROBLEM_SOLVING = "problem_solving" # Problem lösen
+    CREATIVITY = "creativity"           # Kreatives Denken
+
+
+@dataclass
+class ThinkingResult:
+    """Ergebnis eines Denk-Prozesses"""
+    result_id: str
+    context: ThinkingContext
+    input_text: str
+    thoughts: List[str]              # Die Gedanken als Text
+    insights: List[str]              # Gewonnene Erkenntnisse
+    emotions_triggered: List[str]    # Ausgelöste Emotionen
+    knowledge_applied: List[str]     # Angewandtes Wissen
+    decisions_made: List[str]        # Getroffene Entscheidungen
+    follow_up_questions: List[str]   # Offene Fragen
+    confidence: float                # Gesamt-Konfidenz
+    thinking_time_ms: float          # Wie lange wurde gedacht?
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class HoloMind:
+    """
+    Zentrales Denk-Koordinationssystem für Holo.
+
+    Verbindet ALLE Denk-Systeme und stellt eine einheitliche
+    Schnittstelle für das gesamte System bereit.
+
+    Komponenten:
+    - ThoughtChainEngine: Gedankenketten bilden
+    - KnowledgeIntegrationSystem: Wissen anwenden
+    - SelfTeachingSystem: Selbst lernen
+    - CuriosityDrivenLearner: Neugierig erkunden
+    - IntuitiveSystem: Bauchgefühl
+    - HypothesisEngine: Hypothesen bilden
+    - AnalogyEngine: Analogien finden
+    - SelfChallenger: Sich selbst hinterfragen
+
+    Das HoloMind ist das "Gehirn" das alles koordiniert.
+
+    v1.0: Zentrale Denk-Koordination für systemweite Nutzung
+    """
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        # Alle Denk-Subsysteme
+        self.thought_chain: Optional[ThoughtChainEngine] = None
+        self.knowledge: Optional[KnowledgeIntegrationSystem] = None
+        self.teaching: Optional[SelfTeachingSystem] = None
+        self.curiosity: Optional[CuriosityDrivenLearner] = None
+        self.intuition: Optional[IntuitiveSystem] = None
+        self.hypothesis: Optional[HypothesisEngine] = None
+        self.analogy: Optional[AnalogyEngine] = None
+        self.challenger: Optional[SelfChallenger] = None
+
+        # Denk-Historie
+        self.thinking_history: List[ThinkingResult] = []
+        self.current_thinking: Optional[ThinkingResult] = None
+
+        # Konfiguration
+        self.auto_think = True              # Automatisch bei Input denken
+        self.thinking_depth = 5             # Standard-Tiefe für Gedankenketten
+        self.max_thinking_time_ms = 500     # Max Denkzeit (Pi4-freundlich)
+
+        # Statistiken
+        self.total_thoughts = 0
+        self.insights_gained = 0
+        self.knowledge_applications = 0
+
+        # Initialisiere eigene Subsysteme
+        self._init_subsystems()
+
+    def _init_subsystems(self) -> None:
+        """Initialisiert die eigenen Denk-Subsysteme"""
+        try:
+            self.thought_chain = ThoughtChainEngine(self.data_dir)
+            self.knowledge = KnowledgeIntegrationSystem(self.data_dir)
+            self.teaching = SelfTeachingSystem(self.data_dir)
+            self.curiosity = CuriosityDrivenLearner(self.data_dir)
+            self.intuition = IntuitiveSystem()
+            self.hypothesis = HypothesisEngine(self.data_dir)
+            self.analogy = AnalogyEngine(self.data_dir)
+            self.challenger = SelfChallenger()
+
+            # Verbinde Systeme untereinander
+            self.thought_chain.connect_systems(
+                knowledge=self.knowledge,
+                teaching=self.teaching
+            )
+            self.knowledge.connect_systems(
+                teaching=self.teaching,
+                analogy=self.analogy,
+                hypothesis=self.hypothesis,
+                intuition=self.intuition
+            )
+            self.curiosity.connect_curiosity_system(None)  # Wird später verbunden
+
+            logger.info("🧠 HoloMind: Alle Subsysteme initialisiert")
+        except Exception as e:
+            logger.warning(f"HoloMind Subsystem-Fehler: {e}")
+
+    def connect_external_systems(self,
+                                curiosity_system=None,
+                                web_curiosity=None,
+                                emotion_system=None) -> None:
+        """Verbindet externe Systeme"""
+        if curiosity_system and self.curiosity:
+            self.curiosity.connect_curiosity_system(curiosity_system)
+            logger.info("🔗 HoloMind mit CuriositySystem verbunden")
+
+        if web_curiosity and self.curiosity:
+            self.curiosity.connect_web_curiosity(web_curiosity)
+            logger.info("🔗 HoloMind mit WebCuriosity verbunden")
+
+    # ================================================================
+    # HAUPTMETHODE: Denken über Input
+    # ================================================================
+
+    def think(self, input_text: str,
+              context: ThinkingContext = ThinkingContext.CONVERSATION,
+              depth: int = None) -> ThinkingResult:
+        """
+        Zentrale Denk-Methode die bei jedem Input aufgerufen werden kann.
+
+        Dies ist die HAUPTSCHNITTSTELLE für das gesamte System.
+
+        Args:
+            input_text: Der Input worüber nachgedacht wird
+            context: In welchem Kontext wird gedacht?
+            depth: Wie tief soll gedacht werden? (1-7)
+
+        Returns:
+            ThinkingResult mit allen Gedanken und Erkenntnissen
+        """
+        import time
+        start_time = time.time()
+
+        depth = depth or self.thinking_depth
+
+        result = ThinkingResult(
+            result_id=f"think_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            context=context,
+            input_text=input_text,
+            thoughts=[],
+            insights=[],
+            emotions_triggered=[],
+            knowledge_applied=[],
+            decisions_made=[],
+            follow_up_questions=[],
+            confidence=0.5,
+            thinking_time_ms=0
+        )
+
+        self.current_thinking = result
+
+        try:
+            # 1. INTUITION - Erstes Bauchgefühl
+            if self.intuition:
+                gut = self.intuition.get_gut_feeling(input_text)
+                if gut:
+                    result.thoughts.append(f"[Intuition] {gut.express()}")
+                    result.emotions_triggered.append(gut.feeling_type.value)
+
+            # 2. WISSEN ANWENDEN - Was weiß ich darüber?
+            if self.knowledge:
+                # Finde relevante Konzepte
+                words = input_text.split()
+                for word in words[:5]:
+                    if len(word) > 4:
+                        knowledge = self.knowledge.what_do_i_know_about(word)
+                        if knowledge.get("can_answer"):
+                            direct = knowledge.get("direct_knowledge", {})
+                            if direct:
+                                result.thoughts.append(
+                                    f"[Wissen] Ich weiß über '{word}': {direct.get('definition', '')[:80]}..."
+                                )
+                                result.knowledge_applied.append(word)
+                                self.knowledge_applications += 1
+
+                # Wende Wissen auf Situation an
+                applications = self.knowledge.apply_knowledge_to_situation(input_text)
+                for app in applications[:2]:
+                    result.insights.append(app.insight[:100])
+
+            # 3. GEDANKENKETTE - Tieferes Nachdenken
+            if self.thought_chain and depth >= 3:
+                # Finde Hauptkonzept
+                main_concept = self._extract_main_concept(input_text)
+                if main_concept:
+                    chain = self.thought_chain.think_about(main_concept, depth=depth)
+                    for thought in chain.thoughts:
+                        result.thoughts.append(f"[Kette] {thought.content}")
+                    result.insights.extend(chain.insights_gained)
+
+            # 4. HYPOTHESEN - Was könnte das bedeuten?
+            if self.hypothesis and context in [ThinkingContext.PROBLEM_SOLVING,
+                                                ThinkingContext.LEARNING]:
+                hyp = self.hypothesis.generate_hypothesis(
+                    observation=input_text,
+                    context="thinking"
+                )
+                if hyp:
+                    result.thoughts.append(f"[Hypothese] {hyp.hypothesis}")
+                    result.follow_up_questions.append(
+                        f"Wie könnte ich testen ob {hyp.hypothesis[:50]}...?"
+                    )
+
+            # 5. ANALOGIEN - Erinnert mich das an etwas?
+            if self.analogy and self.knowledge:
+                analogies = self.knowledge.find_analogies_from_knowledge(input_text)
+                for ana in analogies[:1]:
+                    result.thoughts.append(
+                        f"[Analogie] {ana.get('analogy', '')}"
+                    )
+                    if ana.get("lesson"):
+                        result.insights.append(f"Lektion: {ana['lesson']}")
+
+            # 6. SELBST-HINTERFRAGUNG - Bin ich mir sicher?
+            if self.challenger and len(result.thoughts) >= 3:
+                # Hinterfrage die eigenen Gedanken
+                if result.insights:
+                    challenge = self.challenger.challenge_belief(
+                        result.insights[0],
+                        confidence=result.confidence
+                    )
+                    if challenge.should_reconsider:
+                        result.thoughts.append(
+                            f"[Hinterfragung] Moment... {challenge.challenge}"
+                        )
+
+            # 7. NEUGIER - Was will ich noch wissen?
+            if self.curiosity:
+                learn_result = self.curiosity.process_input(input_text, source="thinking")
+                for question in learn_result.get("questions_for_user", [])[:2]:
+                    result.follow_up_questions.append(question)
+                for concept in learn_result.get("detected_concepts", [])[:3]:
+                    if concept not in result.knowledge_applied:
+                        result.follow_up_questions.append(
+                            f"Was ist eigentlich '{concept}'?"
+                        )
+
+            # Berechne Gesamt-Konfidenz
+            if result.knowledge_applied:
+                result.confidence += 0.1 * len(result.knowledge_applied)
+            if result.insights:
+                result.confidence += 0.1 * len(result.insights)
+            result.confidence = min(result.confidence, 0.95)
+
+        except Exception as e:
+            logger.warning(f"HoloMind think() Fehler: {e}")
+            result.thoughts.append(f"[Fehler] Denken unterbrochen: {str(e)[:50]}")
+
+        # Timing
+        result.thinking_time_ms = (time.time() - start_time) * 1000
+
+        # Statistiken
+        self.total_thoughts += len(result.thoughts)
+        self.insights_gained += len(result.insights)
+        self.thinking_history.append(result)
+        self.current_thinking = None
+
+        return result
+
+    def _extract_main_concept(self, text: str) -> Optional[str]:
+        """Extrahiert das Hauptkonzept aus einem Text"""
+        # Einfache Heuristik: Längstes Substantiv-artiges Wort
+        words = text.split()
+        candidates = [w for w in words if len(w) > 4 and w[0].isupper()]
+
+        if candidates:
+            return candidates[0].lower().strip(".,!?")
+
+        # Fallback: Längstes Wort
+        long_words = [w for w in words if len(w) > 5]
+        if long_words:
+            return max(long_words, key=len).lower().strip(".,!?")
+
+        return None
+
+    # ================================================================
+    # SPEZIALISIERTE DENK-METHODEN
+    # ================================================================
+
+    def think_for_response(self, user_input: str) -> Dict[str, Any]:
+        """
+        Denkt bevor eine Antwort generiert wird.
+
+        Speziell für die Konversations-Verarbeitung.
+        """
+        result = self.think(user_input, ThinkingContext.CONVERSATION, depth=4)
+
+        return {
+            "thoughts": result.thoughts,
+            "insights": result.insights,
+            "relevant_knowledge": result.knowledge_applied,
+            "emotions": result.emotions_triggered,
+            "questions": result.follow_up_questions,
+            "confidence": result.confidence,
+            "thinking_time_ms": result.thinking_time_ms
+        }
+
+    def think_for_decision(self, decision: str, options: List[str]) -> Dict[str, Any]:
+        """
+        Denkt bei einer Entscheidung.
+
+        Nutzt Wissen und Intuition um zu helfen.
+        """
+        result = self.think(decision, ThinkingContext.DECISION, depth=5)
+
+        # Zusätzlich: Konsultiere Wissen für Optionen
+        option_analysis = []
+        if self.knowledge:
+            analysis = self.knowledge.consult_knowledge_for_decision(decision, options)
+            option_analysis = analysis.get("options_analysis", [])
+            result.decisions_made.append(analysis.get("recommendation", ""))
+
+        return {
+            "thoughts": result.thoughts,
+            "option_analysis": option_analysis,
+            "recommendation": result.decisions_made[0] if result.decisions_made else None,
+            "reasoning": result.insights,
+            "confidence": result.confidence
+        }
+
+    def think_for_learning(self, concept: str) -> Dict[str, Any]:
+        """
+        Denkt beim Lernen eines neuen Konzepts.
+
+        Tieferes Nachdenken mit mehr Fragen.
+        """
+        result = self.think(concept, ThinkingContext.LEARNING, depth=6)
+
+        # Zusätzlich: Lerne das Konzept
+        if self.teaching:
+            learn_report = self.teaching.learn_concept(concept)
+            result.insights.extend([
+                f"Gelernt: {learn_report.get('essence', {}).get('definition', '')[:80]}..."
+            ])
+
+        return {
+            "thoughts": result.thoughts,
+            "what_i_learned": result.insights,
+            "still_curious_about": result.follow_up_questions,
+            "confidence": result.confidence
+        }
+
+    def think_for_emotion(self, trigger: str, current_emotion: str) -> Dict[str, Any]:
+        """
+        Denkt bei einer emotionalen Reaktion.
+
+        Verbindet Emotion mit Wissen und Erfahrung.
+        """
+        result = self.think(trigger, ThinkingContext.EMOTION, depth=3)
+
+        # Finde Analogien zu vergangenen Emotionen
+        emotional_insight = None
+        if self.analogy:
+            similar = self.analogy.find_similar_situation(trigger)
+            if similar:
+                emotional_insight = similar.get("lessons_learned", [])
+
+        return {
+            "thoughts": result.thoughts,
+            "emotional_understanding": result.insights,
+            "past_experience": emotional_insight,
+            "current_emotion": current_emotion
+        }
+
+    def think_proactively(self) -> Optional[Dict[str, Any]]:
+        """
+        Denkt proaktiv ohne externen Trigger.
+
+        Für spontane Gedanken und Reflexionen.
+        """
+        # Wähle zufälliges Thema zum Nachdenken
+        topic = None
+
+        # Aus Wissens-Reflexion
+        if self.knowledge:
+            reflection = self.knowledge.reflect_on_knowledge()
+            gaps = reflection.get("knowledge_gaps", [])
+            if gaps:
+                topic = gaps[0].get("concept")
+
+        # Aus vergangenen Gedankenketten
+        if not topic and self.thought_chain:
+            random_reflection = self.thought_chain.get_random_reflection()
+            if random_reflection:
+                return {
+                    "type": "reflection",
+                    "thought": random_reflection,
+                    "is_spontaneous": True
+                }
+
+        # Aus Neugier
+        if not topic and self.curiosity:
+            desire = self.curiosity.what_should_i_learn_next()
+            if desire:
+                return {
+                    "type": "curiosity",
+                    "thought": desire,
+                    "is_spontaneous": True
+                }
+
+        if topic:
+            result = self.think(topic, ThinkingContext.PROACTIVE, depth=4)
+            return {
+                "type": "proactive_thinking",
+                "topic": topic,
+                "thoughts": result.thoughts,
+                "insights": result.insights
+            }
+
+        return None
+
+    def reflect_on_self(self) -> Dict[str, Any]:
+        """
+        Selbst-Reflexion über das eigene Denken und Wissen.
+        """
+        result = {
+            "knowledge_status": None,
+            "thinking_stats": None,
+            "self_assessment": "",
+            "areas_to_improve": [],
+            "strengths": []
+        }
+
+        # Wissens-Reflexion
+        if self.knowledge:
+            result["knowledge_status"] = self.knowledge.reflect_on_knowledge()
+            result["self_assessment"] = result["knowledge_status"].get("self_assessment", "")
+
+            # Stärken
+            result["strengths"] = result["knowledge_status"].get("strongest_areas", [])
+
+            # Verbesserungsbereiche
+            gaps = result["knowledge_status"].get("knowledge_gaps", [])
+            result["areas_to_improve"] = [g.get("concept") for g in gaps[:5]]
+
+        # Denk-Statistiken
+        result["thinking_stats"] = {
+            "total_thoughts": self.total_thoughts,
+            "insights_gained": self.insights_gained,
+            "knowledge_applications": self.knowledge_applications,
+            "thinking_sessions": len(self.thinking_history)
+        }
+
+        return result
+
+    # ================================================================
+    # HILFSMETHODEN
+    # ================================================================
+
+    def express_current_thought(self) -> Optional[str]:
+        """
+        Drückt den aktuellen Gedanken aus.
+
+        Für spontane Äußerungen während des Denkens.
+        """
+        if self.current_thinking and self.current_thinking.thoughts:
+            return random.choice(self.current_thinking.thoughts)
+
+        # Vergangener Gedanke
+        if self.thinking_history:
+            recent = self.thinking_history[-1]
+            if recent.thoughts:
+                return f"*erinnert sich* {random.choice(recent.thoughts)}"
+
+        return None
+
+    def get_thinking_summary(self) -> str:
+        """Gibt eine Zusammenfassung des Denkens zurück"""
+        if not self.thinking_history:
+            return "*nachdenklich* Ich habe heute noch nicht viel nachgedacht..."
+
+        recent = self.thinking_history[-5:]
+        topics = [r.input_text[:30] for r in recent]
+        insights = sum(len(r.insights) for r in recent)
+
+        return (
+            f"*reflektiert* Ich habe über {len(recent)} Themen nachgedacht: "
+            f"{', '.join(topics)}... und dabei {insights} Erkenntnisse gewonnen!"
+        )
+
+    def should_think_deeper(self, input_text: str) -> bool:
+        """Entscheidet ob tieferes Nachdenken nötig ist"""
+        # Längerer Text = tieferes Denken
+        if len(input_text) > 100:
+            return True
+
+        # Fragen erfordern Nachdenken
+        if "?" in input_text or any(w in input_text.lower() for w in ["warum", "wie", "was ist"]):
+            return True
+
+        # Unbekannte Konzepte
+        if self.curiosity:
+            result = self.curiosity.process_input(input_text, source="check")
+            if result.get("detected_concepts"):
+                return True
+
+        return False
+
+    def get_mind_stats(self) -> Dict[str, Any]:
+        """Gibt Statistiken über das Denksystem zurück"""
+        return {
+            "total_thoughts": self.total_thoughts,
+            "insights_gained": self.insights_gained,
+            "knowledge_applications": self.knowledge_applications,
+            "thinking_sessions": len(self.thinking_history),
+            "subsystems_active": {
+                "thought_chain": self.thought_chain is not None,
+                "knowledge": self.knowledge is not None,
+                "teaching": self.teaching is not None,
+                "curiosity": self.curiosity is not None,
+                "intuition": self.intuition is not None,
+                "hypothesis": self.hypothesis is not None,
+                "analogy": self.analogy is not None,
+                "challenger": self.challenger is not None
+            },
+            "auto_think_enabled": self.auto_think,
+            "thinking_depth": self.thinking_depth
+        }
+
+
+# ============================================================
 # EXAMPLE USAGE
 # ============================================================
 
