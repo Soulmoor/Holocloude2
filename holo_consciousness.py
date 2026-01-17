@@ -1371,7 +1371,7 @@ class SelfReflection:
 
         # Kürzlich Gelerntes aus ContextMind
         try:
-            from holo_context_mind import ContextType
+            from holo_core_types import ContextType
             learning_store = self._context_mind.stores.get(ContextType.LEARNING)
             if learning_store:
                 recent = learning_store.get_recent(hours=24)
@@ -1458,7 +1458,7 @@ class SelfReflection:
         if "gelernt" in question_lower:
             if hasattr(self, '_context_mind') and self._context_mind:
                 try:
-                    from holo_context_mind import ContextType
+                    from holo_core_types import ContextType
                     learning = self._context_mind.stores.get(ContextType.LEARNING)
                     if learning:
                         recent = learning.get_recent(hours=168)  # Letzte Woche

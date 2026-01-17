@@ -340,28 +340,10 @@ except ImportError:
 
 
 # =============================================================================
-# CONTEXT TYPES
+# CONTEXT TYPES - Importiert aus holo_core_types (zentrale Definition)
 # =============================================================================
 
-class ContextType(Enum):
-    """Verschiedene Kontext-Typen"""
-    CHAT = "chat"               # Gesprächsverlauf
-    EMOTION = "emotion"         # Emotionen (User & Holo)
-    LEARNING = "learning"       # Gelerntes Wissen
-    WORLD = "world"             # Externe Welt (Wetter, News, Events)
-    SELF = "self"               # Über Holo selbst
-    USER = "user"               # Über den User
-    TASK = "task"               # Aufgaben/Projekte
-    THOUGHT = "thought"         # Gedankengänge
-    REFLECTION = "reflection"   # Selbstreflexionen
-
-
-class Importance(Enum):
-    """Wichtigkeit eines Context-Eintrags"""
-    LOW = 1
-    NORMAL = 2
-    HIGH = 3
-    CRITICAL = 4
+from holo_core_types import ContextType, Importance
 
 
 # =============================================================================
