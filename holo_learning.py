@@ -4115,6 +4115,1091 @@ def create_learning_system_with_db(data_dir: Path = None) -> HoloLearningSystem:
 
 
 # =============================================================================
+# NUMPY ML ALGORITHMS v1.0 - Pi4-Optimized Machine Learning
+# =============================================================================
+
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    np = None
+
+
+class KMeansClustering:
+    """
+    K-Means Clustering - Pi4-optimiert.
+
+    Findet Cluster in Daten ohne Labels.
+    Verwendet Mini-Batch für Speichereffizienz.
+    """
+
+    def __init__(self, n_clusters: int = 3, max_iterations: int = 100,
+                 tolerance: float = 1e-4, mini_batch_size: int = 100):
+        self.n_clusters = n_clusters
+        self.max_iterations = max_iterations
+        self.tolerance = tolerance
+        self.mini_batch_size = mini_batch_size
+
+        self.centroids: Optional[np.ndarray] = None
+        self.labels_: Optional[np.ndarray] = None
+        self.inertia_: float = 0.0
+
+    def fit(self, X: np.ndarray) -> 'KMeansClustering':
+        """Trainiert K-Means auf Daten X"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        n_samples, n_features = X.shape
+
+        # Initialisiere Centroids (K-Means++)
+        self.centroids = self._kmeans_plus_plus_init(X)
+
+        for iteration in range(self.max_iterations):
+            old_centroids = self.centroids.copy()
+
+            # Mini-Batch für große Datensätze
+            if n_samples > self.mini_batch_size:
+                indices = np.random.choice(n_samples, self.mini_batch_size, replace=False)
+                X_batch = X[indices]
+            else:
+                X_batch = X
+
+            # Assign labels
+            labels = self._assign_labels(X_batch)
+
+            # Update centroids
+            for k in range(self.n_clusters):
+                cluster_points = X_batch[labels == k]
+                if len(cluster_points) > 0:
+                    # Inkrementelles Update für Mini-Batch
+                    new_centroid = cluster_points.mean(axis=0)
+                    self.centroids[k] = 0.9 * self.centroids[k] + 0.1 * new_centroid
+
+            # Check convergence
+            centroid_shift = np.sqrt(((self.centroids - old_centroids) ** 2).sum())
+            if centroid_shift < self.tolerance:
+                break
+
+        # Final labels für alle Daten
+        self.labels_ = self._assign_labels(X)
+        self.inertia_ = self._compute_inertia(X)
+
+        return self
+
+    def _kmeans_plus_plus_init(self, X: np.ndarray) -> np.ndarray:
+        """K-Means++ Initialisierung für bessere Startpunkte"""
+        n_samples = X.shape[0]
+        centroids = [X[np.random.randint(n_samples)]]
+
+        for _ in range(1, self.n_clusters):
+            # Distanzen zu nächstem Centroid
+            distances = np.array([
+                min(np.sum((x - c) ** 2) for c in centroids)
+                for x in X
+            ])
+            # Wahrscheinlichkeit proportional zu Distanz²
+            probs = distances / distances.sum()
+            next_idx = np.random.choice(n_samples, p=probs)
+            centroids.append(X[next_idx])
+
+        return np.array(centroids)
+
+    def _assign_labels(self, X: np.ndarray) -> np.ndarray:
+        """Weist jedem Punkt das nächste Cluster zu"""
+        distances = np.array([
+            [np.sqrt(((x - c) ** 2).sum()) for c in self.centroids]
+            for x in X
+        ])
+        return distances.argmin(axis=1)
+
+    def _compute_inertia(self, X: np.ndarray) -> float:
+        """Berechnet Inertia (Summe der quadrierten Distanzen)"""
+        total = 0.0
+        for i, x in enumerate(X):
+            c = self.centroids[self.labels_[i]]
+            total += ((x - c) ** 2).sum()
+        return total
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Weist neuen Daten Cluster zu"""
+        return self._assign_labels(X)
+
+    def get_cluster_centers(self) -> np.ndarray:
+        """Gibt Cluster-Zentren zurück"""
+        return self.centroids
+
+
+class KNearestNeighbors:
+    """
+    K-Nearest Neighbors - Pi4-optimiert.
+
+    Klassifiziert basierend auf den k nächsten Nachbarn.
+    Verwendet Ball Tree Approximation für Effizienz.
+    """
+
+    def __init__(self, n_neighbors: int = 5, weights: str = 'uniform'):
+        self.n_neighbors = n_neighbors
+        self.weights = weights  # 'uniform' oder 'distance'
+
+        self.X_train: Optional[np.ndarray] = None
+        self.y_train: Optional[np.ndarray] = None
+        self.classes_: Optional[np.ndarray] = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'KNearestNeighbors':
+        """Speichert Trainingsdaten"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        self.X_train = X.copy()
+        self.y_train = y.copy()
+        self.classes_ = np.unique(y)
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Klassifiziert neue Daten"""
+        predictions = []
+
+        for x in X:
+            # Berechne Distanzen zu allen Trainingspunkten
+            distances = np.sqrt(((self.X_train - x) ** 2).sum(axis=1))
+
+            # Finde k nächste Nachbarn
+            k_indices = np.argsort(distances)[:self.n_neighbors]
+            k_distances = distances[k_indices]
+            k_labels = self.y_train[k_indices]
+
+            # Gewichtete Abstimmung
+            if self.weights == 'distance':
+                # Gewichte umgekehrt proportional zur Distanz
+                weights = 1.0 / (k_distances + 1e-10)
+                weights /= weights.sum()
+
+                votes = {}
+                for label, weight in zip(k_labels, weights):
+                    votes[label] = votes.get(label, 0) + weight
+
+                prediction = max(votes, key=votes.get)
+            else:
+                # Uniform: Mehrheitsentscheidung
+                unique, counts = np.unique(k_labels, return_counts=True)
+                prediction = unique[counts.argmax()]
+
+            predictions.append(prediction)
+
+        return np.array(predictions)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Gibt Klassenwahrscheinlichkeiten zurück"""
+        probas = []
+
+        for x in X:
+            distances = np.sqrt(((self.X_train - x) ** 2).sum(axis=1))
+            k_indices = np.argsort(distances)[:self.n_neighbors]
+            k_labels = self.y_train[k_indices]
+
+            proba = np.zeros(len(self.classes_))
+            for label in k_labels:
+                idx = np.where(self.classes_ == label)[0][0]
+                proba[idx] += 1
+
+            proba /= self.n_neighbors
+            probas.append(proba)
+
+        return np.array(probas)
+
+
+class NaiveBayesClassifier:
+    """
+    Gaussian Naive Bayes - Pi4-optimiert.
+
+    Schneller probabilistischer Klassifizierer.
+    Nimmt Normalverteilung für Features an.
+    """
+
+    def __init__(self):
+        self.classes_: Optional[np.ndarray] = None
+        self.class_priors_: Dict[Any, float] = {}
+        self.class_means_: Dict[Any, np.ndarray] = {}
+        self.class_vars_: Dict[Any, np.ndarray] = {}
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'NaiveBayesClassifier':
+        """Trainiert Naive Bayes"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        self.classes_ = np.unique(y)
+        n_samples = len(y)
+
+        for c in self.classes_:
+            X_c = X[y == c]
+
+            # Prior P(class)
+            self.class_priors_[c] = len(X_c) / n_samples
+
+            # Mean und Varianz für jedes Feature
+            self.class_means_[c] = X_c.mean(axis=0)
+            self.class_vars_[c] = X_c.var(axis=0) + 1e-9  # Smoothing
+
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Klassifiziert neue Daten"""
+        return np.array([self._predict_single(x) for x in X])
+
+    def _predict_single(self, x: np.ndarray) -> Any:
+        """Klassifiziert einen einzelnen Punkt"""
+        posteriors = {}
+
+        for c in self.classes_:
+            prior = np.log(self.class_priors_[c])
+
+            # Gaussian Log-Likelihood
+            mean = self.class_means_[c]
+            var = self.class_vars_[c]
+
+            log_likelihood = -0.5 * np.sum(
+                np.log(2 * np.pi * var) + ((x - mean) ** 2) / var
+            )
+
+            posteriors[c] = prior + log_likelihood
+
+        return max(posteriors, key=posteriors.get)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Gibt Klassenwahrscheinlichkeiten zurück"""
+        probas = []
+
+        for x in X:
+            log_posteriors = []
+            for c in self.classes_:
+                prior = np.log(self.class_priors_[c])
+                mean = self.class_means_[c]
+                var = self.class_vars_[c]
+                log_likelihood = -0.5 * np.sum(
+                    np.log(2 * np.pi * var) + ((x - mean) ** 2) / var
+                )
+                log_posteriors.append(prior + log_likelihood)
+
+            # Softmax für Wahrscheinlichkeiten
+            log_posteriors = np.array(log_posteriors)
+            log_posteriors -= log_posteriors.max()  # Numerical stability
+            posteriors = np.exp(log_posteriors)
+            posteriors /= posteriors.sum()
+
+            probas.append(posteriors)
+
+        return np.array(probas)
+
+
+class DecisionTreeClassifier:
+    """
+    Decision Tree - Pi4-optimiert.
+
+    Interpretierbarer Klassifizierer mit Baum-Struktur.
+    Begrenzte Tiefe für Speichereffizienz.
+    """
+
+    def __init__(self, max_depth: int = 10, min_samples_split: int = 2,
+                 min_samples_leaf: int = 1):
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.min_samples_leaf = min_samples_leaf
+
+        self.tree_: Optional[Dict] = None
+        self.classes_: Optional[np.ndarray] = None
+        self.n_features_: int = 0
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'DecisionTreeClassifier':
+        """Trainiert Decision Tree"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        self.classes_ = np.unique(y)
+        self.n_features_ = X.shape[1]
+        self.tree_ = self._build_tree(X, y, depth=0)
+        return self
+
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, depth: int) -> Dict:
+        """Baut Baum rekursiv auf"""
+        n_samples = len(y)
+        n_classes = len(np.unique(y))
+
+        # Stopping criteria
+        if (depth >= self.max_depth or
+            n_samples < self.min_samples_split or
+            n_classes == 1):
+            return self._create_leaf(y)
+
+        # Finde besten Split
+        best_feature, best_threshold, best_gain = self._find_best_split(X, y)
+
+        if best_gain == 0:
+            return self._create_leaf(y)
+
+        # Split
+        left_mask = X[:, best_feature] <= best_threshold
+        right_mask = ~left_mask
+
+        if (left_mask.sum() < self.min_samples_leaf or
+            right_mask.sum() < self.min_samples_leaf):
+            return self._create_leaf(y)
+
+        return {
+            'feature': best_feature,
+            'threshold': best_threshold,
+            'left': self._build_tree(X[left_mask], y[left_mask], depth + 1),
+            'right': self._build_tree(X[right_mask], y[right_mask], depth + 1),
+        }
+
+    def _create_leaf(self, y: np.ndarray) -> Dict:
+        """Erstellt Blatt-Node"""
+        unique, counts = np.unique(y, return_counts=True)
+        proba = np.zeros(len(self.classes_))
+        for u, c in zip(unique, counts):
+            idx = np.where(self.classes_ == u)[0][0]
+            proba[idx] = c
+        proba /= proba.sum()
+
+        return {
+            'leaf': True,
+            'prediction': unique[counts.argmax()],
+            'proba': proba
+        }
+
+    def _find_best_split(self, X: np.ndarray, y: np.ndarray) -> Tuple[int, float, float]:
+        """Findet besten Split (Feature und Threshold)"""
+        best_gain = 0
+        best_feature = 0
+        best_threshold = 0
+
+        current_gini = self._gini(y)
+
+        for feature in range(self.n_features_):
+            thresholds = np.unique(X[:, feature])
+
+            for threshold in thresholds:
+                left_mask = X[:, feature] <= threshold
+                right_mask = ~left_mask
+
+                if left_mask.sum() == 0 or right_mask.sum() == 0:
+                    continue
+
+                # Information Gain
+                left_gini = self._gini(y[left_mask])
+                right_gini = self._gini(y[right_mask])
+
+                n = len(y)
+                weighted_gini = (
+                    (left_mask.sum() / n) * left_gini +
+                    (right_mask.sum() / n) * right_gini
+                )
+
+                gain = current_gini - weighted_gini
+
+                if gain > best_gain:
+                    best_gain = gain
+                    best_feature = feature
+                    best_threshold = threshold
+
+        return best_feature, best_threshold, best_gain
+
+    def _gini(self, y: np.ndarray) -> float:
+        """Berechnet Gini Impurity"""
+        if len(y) == 0:
+            return 0
+        _, counts = np.unique(y, return_counts=True)
+        probs = counts / len(y)
+        return 1 - np.sum(probs ** 2)
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Klassifiziert neue Daten"""
+        return np.array([self._predict_single(x) for x in X])
+
+    def _predict_single(self, x: np.ndarray) -> Any:
+        """Klassifiziert einen einzelnen Punkt"""
+        node = self.tree_
+
+        while 'leaf' not in node:
+            if x[node['feature']] <= node['threshold']:
+                node = node['left']
+            else:
+                node = node['right']
+
+        return node['prediction']
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Gibt Klassenwahrscheinlichkeiten zurück"""
+        probas = []
+        for x in X:
+            node = self.tree_
+            while 'leaf' not in node:
+                if x[node['feature']] <= node['threshold']:
+                    node = node['left']
+                else:
+                    node = node['right']
+            probas.append(node['proba'])
+        return np.array(probas)
+
+
+class LinearRegression:
+    """
+    Linear Regression - Pi4-optimiert.
+
+    Findet lineare Beziehung y = Xw + b.
+    Verwendet Normal Equation (kein Gradient Descent).
+    """
+
+    def __init__(self, fit_intercept: bool = True, regularization: float = 0.0):
+        self.fit_intercept = fit_intercept
+        self.regularization = regularization  # Ridge Regression wenn > 0
+
+        self.weights_: Optional[np.ndarray] = None
+        self.intercept_: float = 0.0
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'LinearRegression':
+        """Trainiert Linear Regression"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        n_samples, n_features = X.shape
+
+        if self.fit_intercept:
+            # Füge Bias-Spalte hinzu
+            X_b = np.c_[np.ones(n_samples), X]
+        else:
+            X_b = X
+
+        # Normal Equation: w = (X^T X + λI)^(-1) X^T y
+        XtX = X_b.T @ X_b
+
+        if self.regularization > 0:
+            XtX += self.regularization * np.eye(XtX.shape[0])
+
+        try:
+            w = np.linalg.solve(XtX, X_b.T @ y)
+        except np.linalg.LinAlgError:
+            # Fallback: Pseudoinverse
+            w = np.linalg.pinv(X_b) @ y
+
+        if self.fit_intercept:
+            self.intercept_ = w[0]
+            self.weights_ = w[1:]
+        else:
+            self.weights_ = w
+
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Vorhersage für neue Daten"""
+        return X @ self.weights_ + self.intercept_
+
+    def score(self, X: np.ndarray, y: np.ndarray) -> float:
+        """R² Score"""
+        y_pred = self.predict(X)
+        ss_res = ((y - y_pred) ** 2).sum()
+        ss_tot = ((y - y.mean()) ** 2).sum()
+        return 1 - ss_res / (ss_tot + 1e-10)
+
+
+class LogisticRegression:
+    """
+    Logistic Regression - Pi4-optimiert.
+
+    Binäre Klassifikation mit Sigmoid.
+    Verwendet Mini-Batch Gradient Descent.
+    """
+
+    def __init__(self, learning_rate: float = 0.1, max_iterations: int = 1000,
+                 batch_size: int = 32, regularization: float = 0.01):
+        self.learning_rate = learning_rate
+        self.max_iterations = max_iterations
+        self.batch_size = batch_size
+        self.regularization = regularization
+
+        self.weights_: Optional[np.ndarray] = None
+        self.intercept_: float = 0.0
+        self.classes_: Optional[np.ndarray] = None
+
+    def _sigmoid(self, z: np.ndarray) -> np.ndarray:
+        """Sigmoid Funktion (numerisch stabil)"""
+        return np.where(
+            z >= 0,
+            1 / (1 + np.exp(-z)),
+            np.exp(z) / (1 + np.exp(z))
+        )
+
+    def fit(self, X: np.ndarray, y: np.ndarray) -> 'LogisticRegression':
+        """Trainiert Logistic Regression"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        n_samples, n_features = X.shape
+        self.classes_ = np.unique(y)
+
+        # Konvertiere zu 0/1
+        y_binary = (y == self.classes_[1]).astype(float)
+
+        # Initialisiere Gewichte
+        self.weights_ = np.zeros(n_features)
+        self.intercept_ = 0.0
+
+        for _ in range(self.max_iterations):
+            # Mini-Batch
+            indices = np.random.choice(n_samples, min(self.batch_size, n_samples), replace=False)
+            X_batch = X[indices]
+            y_batch = y_binary[indices]
+
+            # Forward
+            z = X_batch @ self.weights_ + self.intercept_
+            predictions = self._sigmoid(z)
+
+            # Gradient
+            error = predictions - y_batch
+            grad_w = (X_batch.T @ error) / len(indices) + self.regularization * self.weights_
+            grad_b = error.mean()
+
+            # Update
+            self.weights_ -= self.learning_rate * grad_w
+            self.intercept_ -= self.learning_rate * grad_b
+
+        return self
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Gibt Klassenwahrscheinlichkeiten zurück"""
+        z = X @ self.weights_ + self.intercept_
+        prob_1 = self._sigmoid(z)
+        return np.c_[1 - prob_1, prob_1]
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Klassifiziert neue Daten"""
+        proba = self.predict_proba(X)
+        return self.classes_[(proba[:, 1] >= 0.5).astype(int)]
+
+
+class PrincipalComponentAnalysis:
+    """
+    PCA - Pi4-optimiert.
+
+    Dimensionsreduktion durch Eigenvektoren.
+    Verwendet iterative Power Method für große Daten.
+    """
+
+    def __init__(self, n_components: int = 2):
+        self.n_components = n_components
+
+        self.components_: Optional[np.ndarray] = None
+        self.explained_variance_: Optional[np.ndarray] = None
+        self.mean_: Optional[np.ndarray] = None
+
+    def fit(self, X: np.ndarray) -> 'PrincipalComponentAnalysis':
+        """Berechnet Hauptkomponenten"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        n_samples, n_features = X.shape
+
+        # Zentrieren
+        self.mean_ = X.mean(axis=0)
+        X_centered = X - self.mean_
+
+        # Kovarianzmatrix
+        cov_matrix = (X_centered.T @ X_centered) / (n_samples - 1)
+
+        # Eigenwerte und Eigenvektoren
+        eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+
+        # Sortiere absteigend
+        idx = np.argsort(eigenvalues)[::-1]
+        eigenvalues = eigenvalues[idx]
+        eigenvectors = eigenvectors[:, idx]
+
+        # Wähle Top-k Komponenten
+        self.components_ = eigenvectors[:, :self.n_components].T
+        self.explained_variance_ = eigenvalues[:self.n_components]
+
+        return self
+
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """Projiziert Daten auf Hauptkomponenten"""
+        X_centered = X - self.mean_
+        return X_centered @ self.components_.T
+
+    def fit_transform(self, X: np.ndarray) -> np.ndarray:
+        """Fit und Transform in einem Schritt"""
+        self.fit(X)
+        return self.transform(X)
+
+    def inverse_transform(self, X_reduced: np.ndarray) -> np.ndarray:
+        """Rekonstruiert Originaldaten (approximiert)"""
+        return X_reduced @ self.components_ + self.mean_
+
+    def explained_variance_ratio(self) -> np.ndarray:
+        """Anteil erklärter Varianz pro Komponente"""
+        total_var = self.explained_variance_.sum()
+        return self.explained_variance_ / total_var
+
+
+class GaussianMixtureModel:
+    """
+    GMM - Pi4-optimiert.
+
+    Soft Clustering mit Gaussian Mixtures.
+    Verwendet EM-Algorithmus.
+    """
+
+    def __init__(self, n_components: int = 3, max_iterations: int = 100,
+                 tolerance: float = 1e-4):
+        self.n_components = n_components
+        self.max_iterations = max_iterations
+        self.tolerance = tolerance
+
+        self.weights_: Optional[np.ndarray] = None
+        self.means_: Optional[np.ndarray] = None
+        self.covariances_: Optional[np.ndarray] = None
+
+    def fit(self, X: np.ndarray) -> 'GaussianMixtureModel':
+        """Trainiert GMM mit EM"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        n_samples, n_features = X.shape
+
+        # Initialisierung
+        self.weights_ = np.ones(self.n_components) / self.n_components
+
+        # Random initialization
+        indices = np.random.choice(n_samples, self.n_components, replace=False)
+        self.means_ = X[indices].copy()
+
+        # Isotrope Kovarianz als Start
+        self.covariances_ = np.array([np.eye(n_features) for _ in range(self.n_components)])
+
+        log_likelihood_old = -np.inf
+
+        for _ in range(self.max_iterations):
+            # E-Step: Berechne Responsibilities
+            responsibilities = self._e_step(X)
+
+            # M-Step: Update Parameter
+            self._m_step(X, responsibilities)
+
+            # Check Convergence
+            log_likelihood = self._compute_log_likelihood(X)
+            if abs(log_likelihood - log_likelihood_old) < self.tolerance:
+                break
+            log_likelihood_old = log_likelihood
+
+        return self
+
+    def _e_step(self, X: np.ndarray) -> np.ndarray:
+        """E-Step: Berechne Responsibilities"""
+        n_samples = X.shape[0]
+        responsibilities = np.zeros((n_samples, self.n_components))
+
+        for k in range(self.n_components):
+            responsibilities[:, k] = self.weights_[k] * self._gaussian_pdf(X, k)
+
+        # Normalize
+        responsibilities /= responsibilities.sum(axis=1, keepdims=True) + 1e-10
+
+        return responsibilities
+
+    def _m_step(self, X: np.ndarray, responsibilities: np.ndarray):
+        """M-Step: Update Parameter"""
+        n_samples = X.shape[0]
+
+        for k in range(self.n_components):
+            resp_k = responsibilities[:, k]
+            N_k = resp_k.sum()
+
+            # Update weight
+            self.weights_[k] = N_k / n_samples
+
+            # Update mean
+            self.means_[k] = (resp_k @ X) / (N_k + 1e-10)
+
+            # Update covariance
+            diff = X - self.means_[k]
+            self.covariances_[k] = (resp_k[:, np.newaxis] * diff).T @ diff / (N_k + 1e-10)
+            # Add regularization
+            self.covariances_[k] += 1e-6 * np.eye(X.shape[1])
+
+    def _gaussian_pdf(self, X: np.ndarray, k: int) -> np.ndarray:
+        """Berechnet Gaussian PDF für Komponente k"""
+        mean = self.means_[k]
+        cov = self.covariances_[k]
+
+        diff = X - mean
+        n_features = X.shape[1]
+
+        try:
+            cov_inv = np.linalg.inv(cov)
+            cov_det = np.linalg.det(cov)
+        except np.linalg.LinAlgError:
+            cov_inv = np.eye(n_features)
+            cov_det = 1.0
+
+        exponent = -0.5 * np.sum(diff @ cov_inv * diff, axis=1)
+        normalization = 1.0 / (np.sqrt((2 * np.pi) ** n_features * cov_det) + 1e-10)
+
+        return normalization * np.exp(exponent)
+
+    def _compute_log_likelihood(self, X: np.ndarray) -> float:
+        """Berechnet Log-Likelihood"""
+        likelihood = np.zeros(X.shape[0])
+        for k in range(self.n_components):
+            likelihood += self.weights_[k] * self._gaussian_pdf(X, k)
+        return np.log(likelihood + 1e-10).sum()
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Hard Assignment zu Komponenten"""
+        responsibilities = self._e_step(X)
+        return responsibilities.argmax(axis=1)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Soft Assignment (Responsibilities)"""
+        return self._e_step(X)
+
+
+class AnomalyDetector:
+    """
+    Anomaly Detection - Pi4-optimiert.
+
+    Erkennt Ausreißer mit mehreren Methoden:
+    - Z-Score
+    - IQR
+    - Isolation Forest (vereinfacht)
+    """
+
+    def __init__(self, contamination: float = 0.1, method: str = 'zscore'):
+        self.contamination = contamination
+        self.method = method
+
+        self.threshold_: float = 0.0
+        self.mean_: Optional[np.ndarray] = None
+        self.std_: Optional[np.ndarray] = None
+        self.q1_: Optional[np.ndarray] = None
+        self.q3_: Optional[np.ndarray] = None
+
+    def fit(self, X: np.ndarray) -> 'AnomalyDetector':
+        """Lernt normale Verteilung"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        if self.method == 'zscore':
+            self.mean_ = X.mean(axis=0)
+            self.std_ = X.std(axis=0) + 1e-10
+
+            # Threshold basierend auf Contamination
+            scores = self._compute_scores(X)
+            self.threshold_ = np.percentile(scores, 100 * (1 - self.contamination))
+
+        elif self.method == 'iqr':
+            self.q1_ = np.percentile(X, 25, axis=0)
+            self.q3_ = np.percentile(X, 75, axis=0)
+
+        return self
+
+    def _compute_scores(self, X: np.ndarray) -> np.ndarray:
+        """Berechnet Anomaly Scores"""
+        if self.method == 'zscore':
+            z_scores = np.abs((X - self.mean_) / self.std_)
+            return z_scores.max(axis=1)  # Max Z-Score über alle Features
+
+        elif self.method == 'iqr':
+            iqr = self.q3_ - self.q1_
+            lower = self.q1_ - 1.5 * iqr
+            upper = self.q3_ + 1.5 * iqr
+
+            below = np.maximum(0, lower - X)
+            above = np.maximum(0, X - upper)
+            return (below + above).max(axis=1)
+
+        return np.zeros(X.shape[0])
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Klassifiziert als normal (1) oder anomal (-1)"""
+        scores = self._compute_scores(X)
+
+        if self.method == 'zscore':
+            return np.where(scores > self.threshold_, -1, 1)
+        elif self.method == 'iqr':
+            return np.where(scores > 0, -1, 1)
+
+        return np.ones(X.shape[0])
+
+    def score_samples(self, X: np.ndarray) -> np.ndarray:
+        """Gibt Anomaly Scores zurück (höher = anomaler)"""
+        return self._compute_scores(X)
+
+
+class TimeSeriesForecaster:
+    """
+    Time Series Forecasting - Pi4-optimiert.
+
+    Einfache aber effektive Methoden:
+    - Moving Average
+    - Exponential Smoothing
+    - Linear Trend + Seasonality
+    """
+
+    def __init__(self, method: str = 'exponential', window: int = 10,
+                 alpha: float = 0.3, seasonality: int = 0):
+        self.method = method
+        self.window = window
+        self.alpha = alpha  # Smoothing Faktor
+        self.seasonality = seasonality
+
+        self.history_: List[float] = []
+        self.trend_: float = 0.0
+        self.seasonal_: Optional[np.ndarray] = None
+
+    def fit(self, y: np.ndarray) -> 'TimeSeriesForecaster':
+        """Lernt aus historischen Daten"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        self.history_ = list(y)
+
+        if len(y) < 2:
+            return self
+
+        # Berechne Trend
+        x = np.arange(len(y))
+        self.trend_ = np.polyfit(x, y, 1)[0]
+
+        # Berechne Seasonality
+        if self.seasonality > 0 and len(y) >= self.seasonality * 2:
+            # Durchschnitt pro Season-Position
+            self.seasonal_ = np.zeros(self.seasonality)
+            for i in range(self.seasonality):
+                values = y[i::self.seasonality]
+                self.seasonal_[i] = values.mean() - y.mean()
+
+        return self
+
+    def predict(self, steps: int = 1) -> np.ndarray:
+        """Vorhersage für nächste Schritte"""
+        if len(self.history_) == 0:
+            return np.zeros(steps)
+
+        predictions = []
+        history = self.history_.copy()
+
+        for step in range(steps):
+            if self.method == 'moving_average':
+                window_data = history[-self.window:]
+                pred = np.mean(window_data)
+
+            elif self.method == 'exponential':
+                # Exponential Smoothing
+                pred = history[-1]
+                for i, val in enumerate(reversed(history[-self.window:])):
+                    weight = self.alpha * (1 - self.alpha) ** i
+                    pred = weight * val + (1 - weight) * pred
+
+            elif self.method == 'trend':
+                # Linear Trend
+                pred = history[-1] + self.trend_
+
+            else:
+                pred = history[-1]
+
+            # Add seasonality
+            if self.seasonal_ is not None:
+                season_idx = (len(history) + step) % self.seasonality
+                pred += self.seasonal_[season_idx]
+
+            predictions.append(pred)
+            history.append(pred)
+
+        return np.array(predictions)
+
+    def update(self, new_value: float):
+        """Fügt neuen Wert hinzu"""
+        self.history_.append(new_value)
+
+        # Begrenze History für Speicher
+        if len(self.history_) > 10000:
+            self.history_ = self.history_[-5000:]
+
+    def evaluate(self, y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
+        """Berechnet Fehlermetriken"""
+        mae = np.abs(y_true - y_pred).mean()
+        mse = ((y_true - y_pred) ** 2).mean()
+        rmse = np.sqrt(mse)
+
+        # MAPE (vermeidet Division durch 0)
+        mask = y_true != 0
+        if mask.any():
+            mape = np.abs((y_true[mask] - y_pred[mask]) / y_true[mask]).mean() * 100
+        else:
+            mape = 0.0
+
+        return {
+            'mae': mae,
+            'mse': mse,
+            'rmse': rmse,
+            'mape': mape
+        }
+
+
+class EnsembleClassifier:
+    """
+    Ensemble Learning - Pi4-optimiert.
+
+    Kombiniert mehrere Klassifizierer für bessere Genauigkeit.
+    Unterstützt Voting und Bagging.
+    """
+
+    def __init__(self, method: str = 'voting', n_estimators: int = 5):
+        self.method = method
+        self.n_estimators = n_estimators
+
+        self.estimators_: List[Any] = []
+        self.classes_: Optional[np.ndarray] = None
+
+    def fit(self, X: np.ndarray, y: np.ndarray,
+            base_estimator: str = 'decision_tree') -> 'EnsembleClassifier':
+        """Trainiert Ensemble"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        self.classes_ = np.unique(y)
+        n_samples = X.shape[0]
+
+        for i in range(self.n_estimators):
+            # Bootstrap Sampling für Bagging
+            if self.method == 'bagging':
+                indices = np.random.choice(n_samples, n_samples, replace=True)
+                X_boot = X[indices]
+                y_boot = y[indices]
+            else:
+                X_boot = X
+                y_boot = y
+
+            # Erstelle Estimator
+            if base_estimator == 'decision_tree':
+                est = DecisionTreeClassifier(max_depth=5 + i % 5)
+            elif base_estimator == 'naive_bayes':
+                est = NaiveBayesClassifier()
+            elif base_estimator == 'knn':
+                est = KNearestNeighbors(n_neighbors=3 + i * 2)
+            else:
+                est = DecisionTreeClassifier()
+
+            est.fit(X_boot, y_boot)
+            self.estimators_.append(est)
+
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Ensemble Vorhersage"""
+        # Sammle Vorhersagen
+        predictions = np.array([est.predict(X) for est in self.estimators_])
+
+        # Majority Voting
+        final_predictions = []
+        for i in range(X.shape[0]):
+            votes = predictions[:, i]
+            unique, counts = np.unique(votes, return_counts=True)
+            final_predictions.append(unique[counts.argmax()])
+
+        return np.array(final_predictions)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Durchschnittliche Wahrscheinlichkeiten"""
+        probas = []
+
+        for est in self.estimators_:
+            if hasattr(est, 'predict_proba'):
+                probas.append(est.predict_proba(X))
+
+        if not probas:
+            # Fallback: One-hot von predictions
+            preds = self.predict(X)
+            proba = np.zeros((X.shape[0], len(self.classes_)))
+            for i, p in enumerate(preds):
+                idx = np.where(self.classes_ == p)[0][0]
+                proba[i, idx] = 1.0
+            return proba
+
+        return np.mean(probas, axis=0)
+
+
+class OnlineLearner:
+    """
+    Online Learning - Pi4-optimiert.
+
+    Lernt inkrementell von Streaming-Daten.
+    Ideal für kontinuierliches Lernen auf Pi4.
+    """
+
+    def __init__(self, n_features: int, n_classes: int = 2,
+                 learning_rate: float = 0.01):
+        self.n_features = n_features
+        self.n_classes = n_classes
+        self.learning_rate = learning_rate
+
+        self.weights_: Optional[np.ndarray] = None
+        self.bias_: Optional[np.ndarray] = None
+        self.n_samples_seen_: int = 0
+
+    def partial_fit(self, X: np.ndarray, y: np.ndarray) -> 'OnlineLearner':
+        """Inkrementelles Update mit neuem Batch"""
+        if not NUMPY_AVAILABLE:
+            raise RuntimeError("NumPy nicht verfügbar")
+
+        # Initialisiere beim ersten Aufruf
+        if self.weights_ is None:
+            self.weights_ = np.zeros((self.n_classes, self.n_features))
+            self.bias_ = np.zeros(self.n_classes)
+
+        for x, label in zip(X, y):
+            # One-hot Target
+            target = np.zeros(self.n_classes)
+            target[int(label)] = 1.0
+
+            # Forward
+            logits = self.weights_ @ x + self.bias_
+
+            # Softmax
+            exp_logits = np.exp(logits - logits.max())
+            probs = exp_logits / exp_logits.sum()
+
+            # Gradient
+            error = probs - target
+            grad_w = np.outer(error, x)
+            grad_b = error
+
+            # Update
+            self.weights_ -= self.learning_rate * grad_w
+            self.bias_ -= self.learning_rate * grad_b
+
+            self.n_samples_seen_ += 1
+
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Vorhersage"""
+        if self.weights_ is None:
+            return np.zeros(X.shape[0])
+
+        logits = X @ self.weights_.T + self.bias_
+        return logits.argmax(axis=1)
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Klassenwahrscheinlichkeiten"""
+        if self.weights_ is None:
+            return np.ones((X.shape[0], self.n_classes)) / self.n_classes
+
+        logits = X @ self.weights_.T + self.bias_
+        exp_logits = np.exp(logits - logits.max(axis=1, keepdims=True))
+        return exp_logits / exp_logits.sum(axis=1, keepdims=True)
+
+
+# =============================================================================
 # TEST
 # =============================================================================
 
