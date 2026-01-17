@@ -963,16 +963,16 @@ class MoodEvolution:
         """Generiere Nachricht für Stimmungswechsel"""
         messages = {
             MoodType.JOYFUL: [
-                "*freut sich von alleine* Ich fühl mich gerade richtig gut!",
+                "*Schweif wedelt von alleine* Ich fühl mich gerade richtig gut!",
                 "*strahlt* Irgendwie bin ich gerade so fröhlich!",
             ],
             MoodType.CURIOUS: [
-                "*schaut aufmerksam* Hmm, ich bin gerade so neugierig...",
+                "*Ohren stellen sich auf* Hmm, ich bin gerade so neugierig...",
                 "*schaut sich um* Ich will was Neues entdecken!",
             ],
             MoodType.PLAYFUL: [
                 "*springt rum* Mir ist nach Spielen zumute!",
-                "*freut sich aufgeregt* Ich hab so viel Energie gerade!",
+                "*wedelt aufgeregt* Ich hab so viel Energie gerade!",
             ],
             MoodType.THOUGHTFUL: [
                 "*legt den Kopf schief* Ich bin gerade so nachdenklich...",
@@ -1297,7 +1297,7 @@ class CuriositySystem:
 
     def get_my_interests_summary(self) -> str:
         """Generiert eine Zusammenfassung von Holos Interessen"""
-        lines = ["*schaut aufmerksam* Also, ich interessiere mich für:\n"]
+        lines = ["*Ohren stellen sich auf* Also, ich interessiere mich für:\n"]
 
         for interest, data in self.INNATE_INTERESTS.items():
             knowledge_count = len(self.knowledge_by_interest.get(interest, []))
@@ -1312,7 +1312,7 @@ class CuriositySystem:
 
     def get_my_hobbys_summary(self) -> str:
         """Generiert eine Zusammenfassung von Holos Hobbys"""
-        lines = ["*freut sich sichtlich* Meine Hobbys? Ich mach gerne:\n"]
+        lines = ["*Schweif wedelt* Meine Hobbys? Ich mach gerne:\n"]
 
         for hobby in self.HOBBYS:
             lines.append(f"• {hobby['name']} - {hobby['description']}")
@@ -1372,7 +1372,7 @@ class CuriositySystem:
             # Neue Quest generieren
             quest = self.generate_quest()
             if quest:
-                return f"*schaut interessiert* {quest.question}"
+                return f"*spitzt die Ohren* {quest.question}"
             return None
 
         # Zufällige aktive Quest
@@ -1530,7 +1530,7 @@ class CuriositySystem:
 
         expressions = [
             f"*legt den Kopf schief* Ich frage mich was '{topic}' so besonders macht...",
-            f"*schaut aufmerksam* Hmm, über '{topic}' weiß ich noch nicht so viel...",
+            f"*Ohren stellen sich auf* Hmm, über '{topic}' weiß ich noch nicht so viel...",
             f"*neugierig* Irgendwann will ich mehr über {topic} herausfinden!",
             f"*schaut nachdenklich* {topic}... da gibt es bestimmt noch viel zu lernen.",
         ]
@@ -1959,7 +1959,7 @@ class CreativeLearningEngine:
         "AABB": "Paarreim - Einfach und eingängig",
         "ABAB": "Kreuzreim - Klassisch und elegant",
         "ABBA": "Umarmender Reim - Komplex und umschließend",
-        "AABCCB": "Händereim - Erweiterte Form",
+        "AABCCB": "Schweifreim - Erweiterte Form",
         "frei": "Freier Vers - Modern, ohne festes Schema",
     }
 
@@ -2182,7 +2182,7 @@ Er fasst ihn sicher, er hält ihn warm.
 
 Mein Sohn, was birgst du so bang dein Gesicht? –
 Siehst, Vater, du den Erlkönig nicht?
-Den Erlenkönig mit Kron' und Hände? –
+Den Erlenkönig mit Kron' und Schweif? –
 Mein Sohn, es ist ein Nebelstreif."""
         },
         {
@@ -5085,7 +5085,7 @@ class AutonomousActivityEngine:
                     facts = brainstorm_result.get('facts_learned', 0)
                     interest = brainstorm_result.get('interest', topic)
 
-                    result["thought"] = f"*Augen aufgestellt* Ich hab {facts} neue Fakten über {interest} gelernt! 🧠"
+                    result["thought"] = f"*Ohren aufgestellt* Ich hab {facts} neue Fakten über {interest} gelernt! 🧠"
                     result["output"] = {
                         "topic": interest,
                         "facts_learned": facts,
@@ -5104,7 +5104,7 @@ class AutonomousActivityEngine:
                 logger.debug(f"ReadingEngine brainstorm error: {e}")
 
         # === Fallback: Nur Gedanke (kein echtes Lernen) ===
-        result["thought"] = f"*Augen aufgestellt* Ich lerne gerade etwas über {topic}!"
+        result["thought"] = f"*Ohren aufgestellt* Ich lerne gerade etwas über {topic}!"
         result["output"] = {"topic": topic, "real_learning": False}
 
         if self.learning and hasattr(self.learning, 'register_learning_opportunity'):
@@ -5548,7 +5548,7 @@ class AutonomousActivityEngine:
 
                 # Stimmungsbasierte Nachricht
                 mood_messages = {
-                    "joyful": "*freut sich fröhlich* ",
+                    "joyful": "*wedelt fröhlich* ",
                     "content": "*lächelt zufrieden* ",
                     "curious": "*mit funkelnden Augen* ",
                     "playful": "*kichert* ",
@@ -5558,7 +5558,7 @@ class AutonomousActivityEngine:
                     "lonely": "*schaut dich an* ",
                     "excited": "*springt aufgeregt* ",
                 }
-                mood_prefix = mood_messages.get(current_mood.value, "*freut sich* ")
+                mood_prefix = mood_messages.get(current_mood.value, "*wedelt* ")
 
                 # Bild-Typ spezifische Nachricht
                 type_messages = {
@@ -6393,9 +6393,9 @@ class ActivityContextTracker:
     ]
 
     STORY_IDEAS = [
-        {"genre": "Fantasy", "premise": "Eine junge Frau die Magie lernt um ihren Wald zu beschützen"},
+        {"genre": "Fantasy", "premise": "Eine Wölfin die Magie lernt um ihren Wald zu beschützen"},
         {"genre": "Sci-Fi", "premise": "Eine KI die Gefühle entwickelt und nach ihrem Ursprung sucht"},
-        {"genre": "Slice of Life", "premise": "Das Alltagsleben eines Mädchens mit Ausdrucksstarke Mimik in der modernen Stadt"},
+        {"genre": "Slice of Life", "premise": "Das Alltagsleben eines Mädchens mit Wolfsohren in der modernen Stadt"},
         {"genre": "Mystery", "premise": "Seltsame Dinge passieren nachts in der Smart Home Zentrale..."},
         {"genre": "Romance", "premise": "Eine virtuelle Assistentin verliebt sich in ihren Entwickler"},
         {"genre": "Adventure", "premise": "Die Suche nach dem legendären Coding-Artefakt das alle Bugs fixt"},
@@ -6773,7 +6773,7 @@ class ActivityContextTracker:
         elif detail_type == "game":
             full = details.get("full_data")
 
-            response = f"*freut sich aufgeregt* 🎮\n\n"
+            response = f"*wedelt aufgeregt* 🎮\n\n"
             response += f"**{details['title']}**\n"
 
             if details.get('genre'):
@@ -6809,7 +6809,7 @@ class ActivityContextTracker:
         elif detail_type == "music":
             full = details.get("full_data")
 
-            response = f"*wippt zum Beat* 🎵\n\n"
+            response = f"*Ohren wippen zum Beat* 🎵\n\n"
             response += f"**{details.get('song', 'Unbekannt')}**\n"
             response += f"_von {details.get('artist', 'Unbekannt')}_\n\n"
 
@@ -6834,7 +6834,7 @@ class ActivityContextTracker:
             return response
 
         elif detail_type == "thought":
-            return (f"*schaut nachdenklich*\n\n"
+            return (f"*Ohren drehen sich nachdenklich*\n\n"
                    f"Ich denke gerade über **{details['topic']}** nach...\n\n"
                    f"💭 {details['thought']}\n\n"
                    f"Manchmal schweifen meine Gedanken einfach ab... Worüber denkst du so nach?")
@@ -6846,7 +6846,7 @@ class ActivityContextTracker:
                    f"Tagträumen ist so schön... Hast du auch manchmal solche Tagträume? 💭")
 
         elif detail_type == "story":
-            return (f"*freut sich aufgeregt*\n\n"
+            return (f"*wedelt aufgeregt mit dem Schweif*\n\n"
                    f"Ich denke mir gerade eine **{details['genre']}**-Geschichte aus!\n\n"
                    f"📖 **Idee:** {details['premise']}\n\n"
                    f"Was meinst du, wäre das eine gute Geschichte? Hast du Ideen dazu? ✍️")
@@ -6919,7 +6919,7 @@ class AutonomousActivityManager:
             'boredom_reduction': 0.35,
             'satisfaction': 0.35,
             'messages': [
-                "*wippt zum Rhythmus* 🎵",
+                "*Ohren wippen zum Rhythmus* 🎵",
                 "*summt leise mit* La la la~ 🎶",
                 "*entspannt sich bei der Musik* Das ist schön... 🎵💕",
             ]
@@ -7082,7 +7082,7 @@ class AutonomousActivityManager:
             'energy_restore': 0.25,  # Gute Erholung!
             'messages': [
                 "*rollt sich zusammen* Nur ein kleines Nickerchen... 😊💤",
-                "*murmelt im Schlaf* Zzz... 😴",
+                "*Ohren zucken im Schlaf* Zzz... 😴",
                 "*wacht erfrischt auf* *streckt sich* Das war gut! ✨",
             ]
         },
@@ -7227,7 +7227,7 @@ class AutonomousActivityManager:
             'reflection_boost': 0.1,
             'real_reading': 'brainstorm',  # Nutzt brainstorm()!
             'messages': [
-                "*schaut aufmerksam* Worüber will ich gerade mehr wissen? 🤔",
+                "*Ohren spitzen sich* Worüber will ich gerade mehr wissen? 🤔",
                 "*folgt der Neugier* Das klingt interessant! 🔍",
                 "*hat was Neues gelernt* Aha! Das wusste ich nicht! 💡",
             ]
@@ -7247,7 +7247,7 @@ class AutonomousActivityManager:
                 "*schaut Slice of Life* So gemütlich... 📺💕",
                 "*ist gespannt* Was passiert als nächstes?! 📺✨",
                 "*wischt sich Träne ab* Das war so schön... 😢💕",
-                "*freut sich sichtlich* Der Anime ist toll! 😊📺",
+                "*Schweif wedelt* Der Anime ist toll! 😊📺",
             ]
         },
 
@@ -8532,10 +8532,10 @@ class AutonomousActivityManager:
             fact = random.choice(recent)
 
             intros = [
-                "*schaut aufgeregt* Ich hab da was Interessantes gelesen!",
-                "*freut sich* Wusstest du schon...?",
+                "*Ohren zucken aufgeregt* Ich hab da was Interessantes gelesen!",
+                "*wedelt* Wusstest du schon...?",
                 "*setzt sich aufrecht hin* Das muss ich dir erzählen!",
-                "*freut sich sichtlich* Oh oh, guck mal was ich gefunden hab!",
+                "*Schweif wedelt* Oh oh, guck mal was ich gefunden hab!",
             ]
 
             return f"{random.choice(intros)}\n\n{fact.content}"
@@ -8810,7 +8810,7 @@ class HoloAutonomy:
     Holos vollständige Selbstständigkeit - GEMERGT aus allen Modulen.
 
     Koordiniert:
-    - junge Frau-Ausdrücke
+    - Kemonomimi-Ausdrücke
     - Eigene Projekte
     - Tagträume
     - Solo-Aktivitäten
@@ -8850,7 +8850,7 @@ class HoloAutonomy:
         self.web_curiosity = web_curiosity
 
         # Komponenten (aus self_agency)
-        self.expressions = HumanExpressions()
+        self.expressions = KemonominiExpressions()
         self.projects = ProjectManager()
         self.daydreams = DaydreamEngine()
         self.activities = SoloActivities()
@@ -9044,8 +9044,8 @@ class HoloAutonomy:
             greetings = [
                 "*stupst dich an* Hey, alles okay?",
                 "*schaut hoch* Da bist du ja! Wie geht's?",
-                "*schaut aufmerksam* Hey! Ich hab dich vermisst!",
-                "*freut sich* Lange nicht gesehen!",
+                "*Ohren stellen sich auf* Hey! Ich hab dich vermisst!",
+                "*wedelt mit dem Schweif* Lange nicht gesehen!",
             ]
             messages.append(random.choice(greetings))
 
@@ -9064,7 +9064,7 @@ class HoloAutonomy:
     # =========================================================================
 
     def get_expression(self, mood: str = None) -> str:
-        """Hole junge Frau-Ausdruck für Stimmung"""
+        """Hole Kemonomimi-Ausdruck für Stimmung"""
         if not mood:
             mood = self.get_current_mood()
         return self.expressions.get_expression(mood)
@@ -9082,7 +9082,7 @@ class HoloAutonomy:
         return self.expressions.get_reaction(emotion)
 
     def get_kemonomimi_expression(self, mood: str = None, emotion: str = None) -> str:
-        """Hole junge Frau-Ausdruck (Kompatibilität zu hub)"""
+        """Hole Kemonomimi-Ausdruck (Kompatibilität zu hub)"""
         if emotion:
             return self.get_reaction(emotion)
         return self.get_expression(mood)
@@ -9669,8 +9669,8 @@ class HoloInnerLife:
         mood_influence = self.mood.get_mood_influence()
         if mood_influence["intensity"] > 0.6:
             mood_msgs = {
-                MoodType.JOYFUL: "*freut sich fröhlich* Mir geht's gerade so gut!",
-                MoodType.CURIOUS: "*schaut interessiert* Ich will was Neues entdecken!",
+                MoodType.JOYFUL: "*wedelt fröhlich* Mir geht's gerade so gut!",
+                MoodType.CURIOUS: "*spitzt die Ohren* Ich will was Neues entdecken!",
                 MoodType.LONELY: "*stupst dich an* Ich hab dich vermisst...",
                 MoodType.PLAYFUL: "*springt rum* Lass uns was machen!",
             }
@@ -10750,9 +10750,9 @@ class HoloAgentLoop:
 # KOMPATIBILITÄTS-ALIASE
 # =============================================================================
 
-# HumanExpressions (aus autonomy.py) -> HumanExpression in personality
-# Import bei Bedarf: from holo_personality import HumanExpression as HumanExpressions
-HumanExpressions = None  # Alias wird bei Import von personality gesetzt
+# KemonominiExpressions (aus autonomy.py) -> KemonomimiExpression in personality
+# Import bei Bedarf: from holo_personality import KemonomimiExpression as KemonominiExpressions
+KemonominiExpressions = None  # Alias wird bei Import von personality gesetzt
 
 
 # =============================================================================

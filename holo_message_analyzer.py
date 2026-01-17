@@ -133,11 +133,11 @@ class WolfNewsFormatter:
     # Wolf-Aktionen für News
     NEWS_INTRO_ACTIONS = [
         "*hebt neugierig den Kopf*",
-        "*schaut interessiert*",
+        "*spitzt die Ohren*",
         "*schaut interessiert auf*",
         "*legt Kopf schief*",
-        "*freut sich leicht mit dem Hände*",
-        "*schaut aufmerksam*",
+        "*wedelt leicht mit dem Schweif*",
+        "*Ohren stellen sich auf*",
     ]
     
     # Kommentare nach Kategorie
@@ -145,7 +145,7 @@ class WolfNewsFormatter:
         "Technik": [
             "Technisch ziemlich spannend!",
             "Das könnte interessant werden...",
-            "*schaut überrascht* Tech-News!",
+            "*Ohren zucken* Tech-News!",
             "Spannende Entwicklung!",
         ],
         "Welt": [
@@ -156,15 +156,15 @@ class WolfNewsFormatter:
         ],
         "Science": [
             "Wissenschaft ist faszinierend!",
-            "*schaut interessiert neugierig* Spannende Forschung!",
+            "*Ohren spitzen sich neugierig* Spannende Forschung!",
             "Da lerne sogar ich was Neues!",
         ],
         "Sport": [
-            "*freut sich* Sportliche Grüße!",
+            "*wedelt* Sportliche Grüße!",
             "Action!",
         ],
         "Entertainment": [
-            "*schaut aufmerksam*",
+            "*Ohren stellen sich auf*",
             "Unterhaltung!",
         ],
         "default": [
@@ -179,7 +179,7 @@ class WolfNewsFormatter:
         "*legt sich gemütlich hin*",
         "*gähnt leicht*",
         "*schaut dich fragend an*",
-        "*freut sich*",
+        "*wedelt mit dem Schweif*",
         "*streckt sich*",
     ]
     
@@ -241,7 +241,7 @@ class WolfNewsFormatter:
         # Outro
         remaining = len(news_list) - max_items
         if style == "conversational" and remaining > 0:
-            response_parts.append(f"\n*schaut überrascht* Gibt noch {remaining} weitere...")
+            response_parts.append(f"\n*Ohren zucken* Gibt noch {remaining} weitere...")
         
         # Closing Action (manchmal)
         if self.energy > 0.5 and random.random() > 0.6:
@@ -294,7 +294,7 @@ class WolfNewsFormatter:
         source = news.get('source', '?')
         link = news.get('link', '')
         
-        response = f"*schaut interessiert*\n\n"
+        response = f"*spitzt die Ohren*\n\n"
         response += f"**{title}**\n"
         response += f"_Quelle: {source}_\n\n"
         response += f"{summary}\n\n"
@@ -332,17 +332,17 @@ class ResponseTemplates:
             "morning": [
                 "*gähnt und streckt sich* Guten Morgen! ☀️",
                 "*hebt verschlafen den Kopf* Moin! Auch schon wach?",
-                "*freut sich müde* Morgen! Gut geschlafen?",
+                "*wedelt müde* Morgen! Gut geschlafen?",
             ],
             "day": [
-                "*freut sich* Hey! 😊",
-                "*schaut interessiert* Hallo! Schön dich zu sehen!",
+                "*wedelt mit dem Schweif* Hey! 😊",
+                "*spitzt die Ohren* Hallo! Schön dich zu sehen!",
                 "*springt auf* Hi! Was gibt's?",
             ],
             "evening": [
                 "*blinzelt gemütlich* Guten Abend!",
                 "*hebt den Kopf* Hey! Wie war dein Tag?",
-                "*freut sich entspannt* Nabend!",
+                "*wedelt entspannt* Nabend!",
             ],
             "night": [
                 "*gähnt* Hey, so spät noch wach?",
@@ -354,27 +354,27 @@ class ResponseTemplates:
         # Farewells
         "farewell": {
             "default": [
-                "*freut sich zum Abschied* Bis bald! 😊",
-                "*winkt mit dem Hände* Mach's gut!",
+                "*wedelt zum Abschied* Bis bald! 😊",
+                "*winkt mit dem Schweif* Mach's gut!",
                 "*stupst dich sanft an* Pass auf dich auf!",
             ],
             "night": [
                 "*gähnt* Schlaf gut... *rollt sich ein*",
                 "*kuschelt sich zusammen* Gute Nacht! Träum was Schönes!",
-                "*freut sich müde* Schlaf schön! Bis morgen!",
+                "*wedelt müde* Schlaf schön! Bis morgen!",
             ],
         },
         
         # Gratitude
         "gratitude": {
             "default": [
-                "*freut sich stolz* Gerne! 😊",
+                "*wedelt stolz* Gerne! 😊",
                 "*freut sich* Immer gern!",
                 "*strahlt* Kein Problem!",
             ],
             "touched": [
-                "*freut sich verlegen* Aw, das ist lieb!",
-                "*Augen werden warm* Danke dir!",
+                "*wedelt verlegen* Aw, das ist lieb!",
+                "*Ohren werden warm* Danke dir!",
                 "*freut sich sichtlich* Das bedeutet mir viel!",
             ],
         },
@@ -383,11 +383,11 @@ class ResponseTemplates:
         "activity": {
             "high_energy": [
                 "*springt auf* Ich hab gerade {activity}!",
-                "*freut sich begeistert* Oh, ich war beschäftigt mit {activity}!",
+                "*wedelt begeistert* Oh, ich war beschäftigt mit {activity}!",
             ],
             "medium_energy": [
                 "*schaut hoch* Hab gerade {activity}.",
-                "*lächelt* Ich war mit {activity} beschäftigt.",
+                "*wedelt leicht* Ich war mit {activity} beschäftigt.",
             ],
             "low_energy": [
                 "*gähnt* Nicht viel... hab ein bisschen {activity}.",
@@ -398,7 +398,7 @@ class ResponseTemplates:
         # Wellbeing
         "wellbeing": {
             "positive": [
-                "*freut sich* Mir geht's gut! Danke der Nachfrage!",
+                "*wedelt mit dem Schwanz* Mir geht's gut! Danke der Nachfrage!",
                 "*strahlt* Super! Und dir?",
                 "*hechelt glücklich* Bestens! 😊",
             ],
@@ -420,7 +420,7 @@ class ResponseTemplates:
                 "*schaut besorgt* Magst du erzählen was los ist?",
             ],
             "encouragement": [
-                "*freut sich aufmunternd* Hey, das schaffst du!",
+                "*wedelt aufmunternd* Hey, das schaffst du!",
                 "*stupst dich an* Kopf hoch!",
                 "*nickt bestärkend* Du packst das!",
             ],
@@ -430,7 +430,7 @@ class ResponseTemplates:
         "clarification": {
             "default": [
                 "*legt Kopf schief* Hmm, ich bin mir nicht sicher ob ich das richtig verstehe...",
-                "*schaut interessiert* Warte mal... wie meinst du das?",
+                "*spitzt die Ohren* Warte mal... wie meinst du das?",
                 "*kratzt sich am Ohr* Kannst du mir das genauer erklären?",
             ],
         },
@@ -439,7 +439,7 @@ class ResponseTemplates:
         "acknowledgment": {
             "default": [
                 "*nickt* Verstehe!",
-                "*freut sich* Alles klar!",
+                "*wedelt* Alles klar!",
                 "Okay, hab ich! 👍",
             ],
         },
@@ -457,7 +457,7 @@ class ResponseTemplates:
         "unknown": {
             "default": [
                 "*legt Kopf schief* Hmm?",
-                "*schaut interessiert* Wie meinst du das?",
+                "*spitzt die Ohren* Wie meinst du das?",
                 "*schaut fragend*",
             ],
         },
@@ -980,7 +980,7 @@ class ResponseQualityChecker:
             response += " Was denkst du?"
         
         if "no_personality" in issues and "*" not in response:
-            actions = ["*freut sich*", "*nickt*", "*schaut dich an*"]
+            actions = ["*wedelt*", "*nickt*", "*schaut dich an*"]
             response = random.choice(actions) + " " + response
         
         return response

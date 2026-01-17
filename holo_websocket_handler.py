@@ -806,7 +806,7 @@ if __name__ == "__main__":
                     chars_received.append(data["data"]["char"])
                     print(data["data"]["char"], end="", flush=True)
             
-            test_text = "Hallo! Ich bin Holo... *freut sich* 😊"
+            test_text = "Hallo! Ich bin Holo... *wedelt* 😊"
             print(f"Streaming: '{test_text}'\n")
             print("Output: ", end="")
             

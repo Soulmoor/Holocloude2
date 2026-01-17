@@ -130,7 +130,7 @@ class HoloThoughts:
         "Ich hab so viel Energie! Was kann ich alles erkunden?",
         "Perfekt, ich kann mich richtig in etwas vertiefen!",
         "Volle Power! Lass uns was Interessantes machen!",
-        "*freut sich aufgeregt* So viel zu entdecken!",
+        "*Schweif wedelt aufgeregt* So viel zu entdecken!",
     ]
 
     MEDIUM_ENERGY = [
@@ -148,7 +148,7 @@ class HoloThoughts:
 
     CRITICAL_ENERGY = [
         "Ich brauch wirklich eine Pause jetzt...",
-        "*senkt den Blick* Ich bin erschöpft.",
+        "*Ohren hängen* Ich bin erschöpft.",
         "Okay, ich muss mich ausruhen. Aber ich komm wieder!",
     ]
 
@@ -193,7 +193,7 @@ class HoloThoughts:
     INTERESTING_TOPIC = [
         "Oh, das ist interessant! Da will ich mehr Zeit investieren.",
         "Das fasziniert mich! Auch wenn es Energie kostet.",
-        "*schaut aufmerksam* Das muss ich genauer anschauen!",
+        "*Ohren stellen sich auf* Das muss ich genauer anschauen!",
         "Dafür lohnt sich der Energie-Einsatz!",
     ]
 
@@ -218,7 +218,7 @@ class SelfRegulationThoughts:
 
     REST_THOUGHTS = [
         "Ich brauch wirklich eine Pause jetzt...",
-        "*senkt den Blick* Ich bin erschöpft.",
+        "*Ohren hängen* Ich bin erschöpft.",
         "Okay, ich muss mich ausruhen. Aber ich komm wieder!",
         "Meine Energie ist niedrig, ich ruh mich aus.",
     ]

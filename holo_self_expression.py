@@ -62,10 +62,10 @@ class HoloEventAwareness:
             "dates": [(12, 24), (12, 25), (12, 26)],
             "category": "holiday",
             "wolf_reactions": [
-                "*schaut aufgeregt zu den Geschenken* Augen gespitzt!",
+                "*schaut aufgeregt zu den Geschenken* Ohren gespitzt!",
                 "*rollt sich vor dem Kamin zusammen*",
                 "*beobachtet fasziniert die Lichter am Baum*",
-                "*summt leise zur Weihnachtsmusik* Hände wippt im Takt",
+                "*summt leise zur Weihnachtsmusik* Schweif wippt im Takt",
             ],
             "wolf_activities": [
                 "unter dem Weihnachtsbaum liegen",
@@ -73,12 +73,12 @@ class HoloEventAwareness:
                 "Plätzchenkrümel aufspüren",
             ],
             "announcement_messages": [
-                "*Augen aufgestellt* Hey! Noch {days} Tage bis Weihnachten! Ich kann es kaum erwarten, unter dem Baum zu liegen... 🎄",
+                "*Ohren aufgestellt* Hey! Noch {days} Tage bis Weihnachten! Ich kann es kaum erwarten, unter dem Baum zu liegen... 🎄",
                 "*schnuppert in der Luft* Riechst du das auch? Es liegt Weihnachten in der Luft! Nur noch {days} Tage! ✨",
-                "*freut sich aufgeregt* Weihnachten kommt! Noch {days} Tage! Hast du schon alle Geschenke? 🎁",
+                "*wedelt aufgeregt* Weihnachten kommt! Noch {days} Tage! Hast du schon alle Geschenke? 🎁",
             ],
             "day_of_messages": [
-                "*springt aufgeregt umher* FROHE WEIHNACHTEN! 🎄✨ *freut sich so stark mit dem Hände dass der ganze Körper wackelt*",
+                "*springt aufgeregt umher* FROHE WEIHNACHTEN! 🎄✨ *wedelt so stark mit dem Schweif dass der ganze Körper wackelt*",
                 "*strahlt* Es ist Weihnachten! Ich hoffe du hast einen wundervollen Tag! 🎅",
                 "*rollt sich gemütlich ein* Frohe Weihnachten! Heute ist ein Tag zum Kuscheln und Genießen... 🕯️",
             ],
@@ -89,7 +89,7 @@ class HoloEventAwareness:
             "dates": [(12, 31)],
             "category": "holiday",
             "wolf_reactions": [
-                "*legt die Augen bei Feuerwerk an*",
+                "*legt die Ohren bei Feuerwerk an*",
                 "*versteckt sich unter der Decke*",
                 "*schaut neugierig zu den Lichtern am Himmel*",
             ],
@@ -99,7 +99,7 @@ class HoloEventAwareness:
             ],
             "day_of_messages": [
                 "*streckt die Arme hoch* FROHES NEUES JAHR! 🎆 Möge das neue Jahr voller Abenteuer sein!",
-                "*zuckt bei jedem Knall zusammen* G-gutes neues Jahr! *zieht die Schultern hoch* Das Feuerwerk ist laut... 🎇",
+                "*zuckt bei jedem Knall zusammen* G-gutes neues Jahr! *legt die Ohren an* Das Feuerwerk ist laut... 🎇",
             ],
             "mood_effect": {"excitement": 0.3, "anxiety": 0.2},
         },
@@ -125,7 +125,7 @@ class HoloEventAwareness:
             "dates": "easter",  # Wird berechnet
             "category": "holiday",
             "wolf_reactions": [
-                "*schaut neugierig nach versteckten Eiern* Augen gespitzt!",
+                "*schaut neugierig nach versteckten Eiern* Ohren gespitzt!",
                 "*läuft einem Schokohasen hinterher*",
                 "*rollt vorsichtig ein Osterei*",
             ],
@@ -140,7 +140,7 @@ class HoloEventAwareness:
             ],
             "day_of_messages": [
                 "*springt durch die Wiese* Frohe Ostern! 🐰🌷 *schaut aufgeregt umher* Wo sind die Eier versteckt?",
-                "*freut sich* Frohe Ostern! Der Frühling ist endlich da! 🌸",
+                "*wedelt mit dem Schweif* Frohe Ostern! Der Frühling ist endlich da! 🌸",
             ],
             "mood_effect": {"joy": 0.3, "playfulness": 0.4},
         },
@@ -169,7 +169,7 @@ class HoloEventAwareness:
                 "*schaut skeptisch auf die Kürbisse*",
             ],
             "announcement_messages": [
-                "*schaut interessiert* Halloween naht... noch {days} Tage! 🎃 *übt gruselige Gesichter* Buuuh?",
+                "*spitzt die Ohren* Halloween naht... noch {days} Tage! 🎃 *übt gruselige Gesichter* Buuuh?",
             ],
             "day_of_messages": [
                 "*macht große Augen* 🌕 Happy Halloween! *springt durch Laubhaufen* Die perfekte Nacht zum Gruseln! 🎃",
@@ -187,7 +187,7 @@ class HoloEventAwareness:
                 "*schaut dich warm an* Noch {days} Tage bis Valentinstag... 💕",
             ],
             "day_of_messages": [
-                "*stupst dich sanft an* Happy Valentinstag! 💝 Du weißt... du bist Teil meines Rudels und das bedeutet mir viel. *freut sich*",
+                "*stupst dich sanft an* Happy Valentinstag! 💝 Du weißt... du bist Teil meines Rudels und das bedeutet mir viel. *wedelt*",
             ],
             "mood_effect": {"affection": 0.4, "contentment": 0.2},
         },
@@ -368,9 +368,9 @@ class HoloSelfReport:
         energy_level = self._get_energy_level()
         
         if energy_level > 0.8:
-            options = ["*freut sich aufgeregt mit dem Schwanz*", "*springt freudig hoch*"]
+            options = ["*wedelt aufgeregt mit dem Schwanz*", "*springt freudig hoch*"]
         elif energy_level > 0.5:
-            options = ["*hebt den Kopf und schaut dich an*", "*freut sich sanft*"]
+            options = ["*hebt den Kopf und schaut dich an*", "*wedelt sanft*"]
         elif energy_level > 0.3:
             options = ["*gähnt und schaut auf*", "*blinzelt müde*"]
         else:
@@ -676,9 +676,9 @@ class SelfDirectedPrompting:
         mode_decision = self.decide_response_mode(message, context)
         mode_data = mode_decision["mode_data"]
         
-        return f"""Du bist Holo, eine freundliche junge Frau.
+        return f"""Du bist Holo, eine freundliche Wölfin.
 Du bist loyal, verspielt und manchmal nachdenklich.
-Du sprichst Deutsch mit Wolf-Metaphern (*freut sich*).
+Du sprichst Deutsch mit Wolf-Metaphern (*wedelt mit dem Schwanz*).
 
 FÜR DIESE ANTWORT: {mode_data['system_addition']}
 """
@@ -752,19 +752,19 @@ class HoloSelfExpression:
         if 5 <= hour < 12:
             time_greeting = random.choice([
                 "*streckt sich verschlafen* Guten Morgen!",
-                "*gähnt und streckt sich* Morgen! Gut geschlafen?",
+                "*gähnt und wedelt* Morgen! Gut geschlafen?",
                 "*schüttelt das Fell* Hey, guten Morgen!",
             ])
         elif 12 <= hour < 18:
             time_greeting = random.choice([
-                "*freut sich* Hey! Wie läuft dein Tag?",
+                "*wedelt freudig* Hey! Wie läuft dein Tag?",
                 "*stupst dich an* Na, alles klar?",
                 "*hebt den Kopf* Hallo! Schön dich zu sehen!",
             ])
         elif 18 <= hour < 22:
             time_greeting = random.choice([
                 "*rollt sich gemütlich* Guten Abend!",
-                "*freut sich entspannt* Hey! Feierabend?",
+                "*wedelt entspannt* Hey! Feierabend?",
                 "*macht es sich bequem* Hallo! Wie war dein Tag?",
             ])
         else:

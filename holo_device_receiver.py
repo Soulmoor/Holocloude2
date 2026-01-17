@@ -548,9 +548,9 @@ class HoloDeviceReceiver:
         summary = self.get_summary()
         
         if summary["total_devices"] == 0:
-            return "*senkt den Blick* Ich kenne noch keine Geräte im Netzwerk..."
+            return "*Ohren hängen* Ich kenne noch keine Geräte im Netzwerk..."
         
-        lines = ["*schaut aufmerksam* Hier sind deine Geräte:\n"]
+        lines = ["*Ohren spitzen sich* Hier sind deine Geräte:\n"]
         
         for name, info in summary["devices"].items():
             emoji = info["status_emoji"]
@@ -663,7 +663,7 @@ class HoloDeviceIntegration:
             response += f"\n💿 Disk: {device.disk_percent:.0f}%"
             response += f"\n⏱️ Uptime: {device.uptime_hours:.1f}h"
         else:
-            response += f"\n\n*senkt den Blick* Zuletzt online: {device.last_seen.strftime('%d.%m. %H:%M')}"
+            response += f"\n\n*Ohren sinken* Zuletzt online: {device.last_seen.strftime('%d.%m. %H:%M')}"
         
         return {
             "type": "device_status",
@@ -689,7 +689,7 @@ class HoloDeviceIntegration:
                 by_device[device] = []
             by_device[device].append(r)
         
-        response = f"*freut sich sichtlich* Ich hab **{query}** gefunden:\n\n"
+        response = f"*Schweif wedelt* Ich hab **{query}** gefunden:\n\n"
         
         for device, items in by_device.items():
             response += f"📁 **{device}:**\n"

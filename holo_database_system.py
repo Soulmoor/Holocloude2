@@ -7603,8 +7603,8 @@ if __name__ == "__main__":
 
     # 4. Language
     print("  4️⃣ Language...")
-    db.language.learn_pattern("greeting", "*freut sich*")
-    db.language.learn_word("Augen", "noun", "Holos Ausdrucksstarke Mimik")
+    db.language.learn_pattern("greeting", "*wedelt mit dem Schwanz*")
+    db.language.learn_word("Ohren", "noun", "Holos Wolfsohren")
     print(f"     Patterns gelernt!")
 
     # === WISSEN ===

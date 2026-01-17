@@ -2663,7 +2663,7 @@ class RealLearningEngine:
         if not result["found"]:
             responses = [
                 f"*legt Kopf schief* Hmm, über '{query}' weiß ich noch nichts. Soll ich mal nachschauen?",
-                f"*schaut überrascht* '{query}'? Da muss ich passen... Soll ich recherchieren?",
+                f"*Ohren zucken* '{query}'? Da muss ich passen... Soll ich recherchieren?",
                 f"*kratzt sich am Ohr* Darüber hab ich noch nichts gelesen. Interesse?",
             ]
             return random.choice(responses)
@@ -2673,16 +2673,16 @@ class RealLearningEngine:
         # Ein Fakt
         if len(facts) == 1:
             intros = [
-                "*schaut aufmerksam* Ich hab da was gehört:",
+                "*Ohren spitzen sich* Ich hab da was gehört:",
                 "*nickt wissend* Dazu weiß ich:",
-                "*freut sich sichtlich* Oh ja, darüber hab ich gelesen:",
+                "*Schweif wedelt* Oh ja, darüber hab ich gelesen:",
             ]
             return f"{random.choice(intros)} {facts[0].content}"
 
         # Mehrere Fakten
         intros = [
-            f"*freut sich* Über {query} weiß ich einiges!",
-            f"*schaut aufmerksam* Oh, {query}! Da hab ich was!",
+            f"*wedelt* Über {query} weiß ich einiges!",
+            f"*Ohren stellen sich auf* Oh, {query}! Da hab ich was!",
             f"*setzt sich aufrecht hin* {query}? Lass mich erzählen!",
         ]
         response = f"{random.choice(intros)}\n\n"
@@ -2720,9 +2720,9 @@ class RealLearningEngine:
         }
 
         intros = [
-            "*freut sich aufgeregt* Ich hab gerade einiges gelernt!",
+            "*Schweif wedelt aufgeregt* Ich hab gerade einiges gelernt!",
             "*streckt sich* Uff, viel zu lesen heute! Hier die Highlights:",
-            "*Augen zucken begeistert* Oh oh oh, ich muss dir was erzählen!",
+            "*Ohren zucken begeistert* Oh oh oh, ich muss dir was erzählen!",
         ]
         response = f"{random.choice(intros)}\n\n"
 

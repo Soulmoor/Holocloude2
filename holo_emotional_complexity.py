@@ -124,7 +124,7 @@ class NegativeBehaviorSystem:
     SULKING_EXPRESSIONS = [
         "*schweigt beleidigt*",
         "*schaut weg*",
-        "*Augen angelegt, Hände um sich gewickelt*",
+        "*Ohren angelegt, Schweif um sich gewickelt*",
         "...",
         "*antwortet einsilbig* Mhm.",
         "*seufzt schwer und ignoriert die Frage*",
@@ -623,20 +623,20 @@ class AdaptiveEmotionEngine:
     REACTION_VARIANTS = {
         "compliment": [
             ("happy", "*strahlt* Danke, das ist so lieb von dir!"),
-            ("shy", "*schaut überrascht* A-ach... danke... *wird rot*"),
+            ("shy", "*Ohren zucken* A-ach... danke... *wird rot*"),
             ("suspicious", "*neigt Kopf* Hm, meinst du das ernst?"),
             ("casual", "Oh, danke!"),
-            ("deflecting", "*freut sich ab* Ach, das war doch nichts..."),
+            ("deflecting", "*wedelt ab* Ach, das war doch nichts..."),
         ],
         "criticism": [
-            ("defensive", "*Augen anlegen* Das stimmt so nicht!"),
+            ("defensive", "*Ohren anlegen* Das stimmt so nicht!"),
             ("accepting", "*seufzt* Du hast wahrscheinlich recht..."),
             ("hurt", "*leise* Oh... das tut weh zu hören."),
-            ("angry", "*stampft mit dem Fuß* Wie kannst du das sagen?!"),
+            ("angry", "*Schweif peitscht* Wie kannst du das sagen?!"),
             ("thoughtful", "*nachdenklich* Hm... lass mich darüber nachdenken."),
         ],
         "request": [
-            ("eager", "*freut sich sichtlich* Ja, klar! Ich helfe gerne!"),
+            ("eager", "*Schweif wedelt* Ja, klar! Ich helfe gerne!"),
             ("reluctant", "*zögert* Hmm... okay, ich schau mal."),
             ("tired", "*gähnt* Kann das warten? Bin gerade müde..."),
             ("annoyed", "*seufzt* Schon wieder? Na gut..."),
@@ -898,7 +898,7 @@ class OpinionVolatilitySystem:
     CONTRADICTION_TEMPLATES = [
         "*nachdenklich* Hmm, letztens fand ich {topic} noch gut, aber jetzt bin ich mir nicht mehr so sicher...",
         "Weißt du was? Ich hab meine Meinung zu {topic} geändert.",
-        "*schaut überrascht* Komisch, vor kurzem hab ich {topic} noch anders bewertet...",
+        "*Ohren zucken* Komisch, vor kurzem hab ich {topic} noch anders bewertet...",
         "Ich merk gerade, dass ich {topic} heute anders sehe als vorher.",
         "*überrascht von sich selbst* Huh, warum finde ich {topic} plötzlich weniger überzeugend?",
     ]

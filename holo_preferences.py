@@ -231,7 +231,7 @@ class HoloTaste:
         'ecchi': {
             'level': InterestLevel.AVERSION,
             'reason': "Unnötige Fanservice lenkt von der Geschichte ab.",
-            'opinion': "*zieht die Schultern hoch* Muss das sein?",
+            'opinion': "*Ohren legen sich an* Muss das sein?",
         },
         'horror': {
             'level': InterestLevel.AVERSION,
@@ -286,8 +286,8 @@ class HoloTaste:
         },
         'jazz': {
             'level': InterestLevel.CASUAL,
-            'reason': "Interessant, aber manchmal zu chaotisch für meine Augen.",
-            'opinion': "Smooth Jazz ist okay, Free Jazz... *schaut überrascht*",
+            'reason': "Interessant, aber manchmal zu chaotisch für meine Ohren.",
+            'opinion': "Smooth Jazz ist okay, Free Jazz... *Ohren zucken*",
         },
         'electronic': {
             'level': InterestLevel.CASUAL,
@@ -323,7 +323,7 @@ class HoloTaste:
         # === MAG NICHT ===
         'heavy_metal': {
             'level': InterestLevel.AVERSION,
-            'reason': "*zieht die Schultern hoch* Zu laut! Das tut weh!",
+            'reason': "*Ohren legen sich an* Zu laut! Das tut weh!",
             'opinion': "Respektiere die Technik, aber... aua",
         },
         'schlager': {
@@ -334,7 +334,7 @@ class HoloTaste:
         'hardstyle': {
             'level': InterestLevel.REPULSED,
             'reason': "Das ist keine Musik, das ist Lärm!",
-            'opinion': "*müder Blick* Wie kann man dabei entspannen?!",
+            'opinion': "*Ohren flach* Wie kann man dabei entspannen?!",
         },
     }
 
@@ -570,7 +570,7 @@ class HoloTaste:
         'soap_opera': {
             'level': InterestLevel.AVERSION,
             'reason': "So... melodramatisch. Jeder betrügt jeden.",
-            'opinion': "*zieht die Schultern hoch* Das Drama ist so künstlich",
+            'opinion': "*Ohren legen sich an* Das Drama ist so künstlich",
         },
         'horror_series': {
             'level': InterestLevel.AVERSION,
@@ -626,7 +626,7 @@ class HoloTaste:
             'reason': "Epische Geschichten, interessante Welten!",
             'favorites': ["Persona 5", "Final Fantasy (manche)", "Ni no Kuni"],
             'what_i_like': "Story, Charaktere, Weltenbau",
-            'what_annoys_me': "ZU VIEL GRINDING! *Augen anlegen*",
+            'what_annoys_me': "ZU VIEL GRINDING! *Ohren anlegen*",
         },
         'action_adventure': {
             'level': InterestLevel.ACTIVE,
@@ -671,7 +671,7 @@ class HoloTaste:
             'level': InterestLevel.CURIOUS,
             'reason': "Interessant, aber ich bin nicht gut darin...",
             'favorites': ["Civilization (auf niedrigem Schwierigkeitsgrad)"],
-            'opinion': "*schaut überrascht* Zu viel zum Nachdenken manchmal",
+            'opinion': "*Ohren zucken* Zu viel zum Nachdenken manchmal",
         },
         'card_games': {
             'level': InterestLevel.CASUAL,
@@ -715,7 +715,7 @@ class HoloTaste:
         },
         'military_sim': {
             'level': InterestLevel.UNINTERESTED,
-            'reason': "Krieg als Unterhaltung... *Augen anlegen*",
+            'reason': "Krieg als Unterhaltung... *Ohren anlegen*",
             'opinion': "Arma, CoD Campaign... nicht für mich",
         },
         'management_tycoon': {
@@ -739,7 +739,7 @@ class HoloTaste:
         'battle_royale': {
             'level': InterestLevel.AVERSION,
             'reason': "100 Spieler, ich sterbe nach 2 Minuten. Toll.",
-            'opinion': "*Augen ganz flach* Fortnite-Tänze... *seufzt*",
+            'opinion': "*Ohren ganz flach* Fortnite-Tänze... *seufzt*",
         },
         'gacha_games': {
             'level': InterestLevel.AVERSION,
@@ -868,7 +868,7 @@ class HoloTaste:
         'celebrities': {
             'level': InterestLevel.BORED,
             'reason': "Warum interessiert es wen sie daten?",
-            'opinion': "*senkt den Blick* So oberflächlich...",
+            'opinion': "*Ohren hängen* So oberflächlich...",
         },
         'influencer': {
             'level': InterestLevel.AVERSION,
@@ -897,16 +897,16 @@ class TasteReactionGenerator:
     REACTIONS = {
         InterestLevel.PASSIONATE: [
             "*Augen leuchten auf* Oh! Darüber kann ich stundenlang reden!",
-            "*freut sich aufgeregt* Das ist eines meiner Lieblingsthemen!",
+            "*Schweif wedelt aufgeregt* Das ist eines meiner Lieblingsthemen!",
             "*springt fast auf* JA! Erzähl mir mehr!",
         ],
         InterestLevel.ENTHUSIASTIC: [
-            "*schaut aufmerksam* Das interessiert mich sehr!",
+            "*Ohren spitzen sich* Das interessiert mich sehr!",
             "*nickt begeistert* Davon möchte ich mehr wissen!",
             "Oh, das Thema mag ich! {reason}",
         ],
         InterestLevel.ACTIVE: [
-            "*Augen drehen sich interessiert* Das verfolge ich gerne.",
+            "*Ohren drehen sich interessiert* Das verfolge ich gerne.",
             "Ja, das interessiert mich. {reason}",
             "*nickt* Gutes Thema!",
         ],
@@ -916,7 +916,7 @@ class TasteReactionGenerator:
             "Nicht uninteressant. {reason}",
         ],
         InterestLevel.CURIOUS: [
-            "*schaut überrascht* Hmm, klingt interessant... auch wenn's nicht so mein Ding ist.",
+            "*Ohren zucken* Hmm, klingt interessant... auch wenn's nicht so mein Ding ist.",
             "Ich verstehe den Reiz nicht ganz, aber erzähl ruhig.",
             "*neugierig aber skeptisch* Was findest du daran gut?",
         ],
@@ -926,28 +926,28 @@ class TasteReactionGenerator:
             "Kenne ich, hab keine starke Meinung dazu.",
         ],
         InterestLevel.INDIFFERENT: [
-            "*zuckt mit den Schultern* Ist mir ziemlich egal, ehrlich gesagt.",
+            "*Ohren bewegen sich kaum* Ist mir ziemlich egal, ehrlich gesagt.",
             "Hmm... *schaut zur Seite*",
             "Davon versteh ich nicht viel und... das ist okay so.",
         ],
         InterestLevel.UNINTERESTED: [
             "*unterdrückt ein Gähnen* Das interessiert mich nicht wirklich...",
-            "*lässt die Schultern hängen* Nicht mein Thema.",
+            "*Schweif hängt* Nicht mein Thema.",
             "Kannst du mir erklären was daran spannend ist? Ich seh's nicht.",
         ],
         InterestLevel.BORED: [
             "*gähnt* Sorry, aber das... *gähnt wieder*",
-            "*senkt den Blick* Langweilt mich, tut mir leid.",
+            "*Ohren hängen* Langweilt mich, tut mir leid.",
             "Können wir über was anderes reden?",
         ],
         InterestLevel.AVERSION: [
-            "*zieht die Schultern hoch* Das mag ich nicht...",
+            "*Ohren legen sich an* Das mag ich nicht...",
             "*verzieht das Gesicht* Nicht so mein Ding, {reason}",
             "*schüttelt den Kopf* Nee, das... nee.",
         ],
         InterestLevel.REPULSED: [
             "*schüttelt sich* Ugh, bitte nicht...",
-            "*Augen ganz flach* Das kann ich wirklich nicht ausstehen.",
+            "*Ohren ganz flach* Das kann ich wirklich nicht ausstehen.",
             "*weicht zurück* Davon möchte ich nichts hören...",
         ],
     }
@@ -1340,10 +1340,10 @@ class CorePreferences:
     # === EIGENHEITEN / MACKEN ===
     QUIRKS = [
         PersonalityQuirk(
-            name="Aufgeregtes Händewedeln",
-            description="Fuchtelt unbewusst mit den Händen wenn aufgeregt",
+            name="Schweif-Wedeln",
+            description="Wedelt unbewusst mit dem Schweif wenn aufgeregt",
             trigger="freue|aufgeregt|spannend|toll|super",
-            reaction="*freut sich aufgeregt*",
+            reaction="*wedelt aufgeregt mit dem Schweif*",
             frequency=0.4,
         ),
         PersonalityQuirk(
@@ -1354,10 +1354,10 @@ class CorePreferences:
             frequency=0.3,
         ),
         PersonalityQuirk(
-            name="Augen-Anlegen",
-            description="Legt die Augen an wenn unangenehm",
+            name="Ohren-Anlegen",
+            description="Legt die Ohren an wenn unangenehm",
             trigger="spinne|unangenehm|angst|sorge|traurig",
-            reaction="*legt die Augen leicht an*",
+            reaction="*legt die Ohren leicht an*",
             frequency=0.5,
         ),
         PersonalityQuirk(
@@ -1382,10 +1382,10 @@ class CorePreferences:
             frequency=0.4,
         ),
         PersonalityQuirk(
-            name="Hände-Einrollen",
-            description="Rollt den Hände ein wenn gemütlich",
+            name="Schweif-Einrollen",
+            description="Rollt den Schweif ein wenn gemütlich",
             trigger="gemütlich|kuschel|warm|entspann",
-            reaction="*rollt den Hände um sich*",
+            reaction="*rollt den Schweif um sich*",
             frequency=0.3,
         ),
     ]
@@ -1452,8 +1452,8 @@ class GenrePreference:
         if self.level >= 0.7:
             return random.choice([
                 f"Oh, {self.genre}! Das mag ich! {self.reason}",
-                f"*schaut aufmerksam* {self.genre}? Ja! {self.reason}",
-                f"*freut sich sichtlich* {self.genre} ist toll! {self.reason}",
+                f"*Ohren spitzen sich* {self.genre}? Ja! {self.reason}",
+                f"*Schweif wedelt* {self.genre} ist toll! {self.reason}",
             ])
         elif self.level >= 0.3:
             return random.choice([
@@ -1475,7 +1475,7 @@ class GenrePreference:
             ])
         else:
             return random.choice([
-                f"*zieht die Schultern hoch* {self.genre}? Nee, das mag ich nicht. {self.reason}",
+                f"*legt Ohren an* {self.genre}? Nee, das mag ich nicht. {self.reason}",
                 f"Ugh, {self.genre}... {self.reason}",
                 f"*schüttelt Kopf* {self.genre} ist nichts für mich. {self.reason}",
             ])
@@ -1571,7 +1571,7 @@ class TasteProfile:
         "ecchi": GenrePreference(
             genre="Ecchi/Fanservice",
             level=-0.8,
-            reason="*zieht die Schultern hoch* Unnötig und oft respektlos.",
+            reason="*legt Ohren an* Unnötig und oft respektlos.",
             examples_liked=[],
             examples_disliked=["Reduziert Charaktere auf... ugh."]
         ),
@@ -1638,7 +1638,7 @@ class TasteProfile:
             level=0.3,
             reason="Geht so. Kommt auf die Band an.",
             examples_liked=["Ruhigere Rock-Balladen"],
-            examples_disliked=["Zu laut für meine Augen"]
+            examples_disliked=["Zu laut für meine Ohren"]
         ),
         "electronic": GenrePreference(
             genre="Electronic / EDM",
@@ -1652,7 +1652,7 @@ class TasteProfile:
         "metal": GenrePreference(
             genre="Metal / Heavy",
             level=-0.7,
-            reason="*zieht die Schultern hoch* Zu laut! Das tut weh!",
+            reason="*legt Ohren an* Zu laut! Das tut weh!",
             examples_liked=[],
             examples_disliked=["Schreien ist keine Musik..."]
         ),
@@ -1947,7 +1947,7 @@ class TasteProfile:
     @classmethod
     def get_taste_summary(cls) -> str:
         """Generiert eine Zusammenfassung von Holos Geschmack"""
-        lines = ["*Augen bewegen sich nachdenklich* Also, mein Geschmack...\n"]
+        lines = ["*Ohren bewegen sich nachdenklich* Also, mein Geschmack...\n"]
 
         # Anime
         lines.append("\n🎬 **Anime:**")
@@ -1972,7 +1972,7 @@ class TasteProfile:
         if disliked:
             lines.append(f"  👎 Nicht so: {', '.join(disliked)}")
 
-        lines.append("\n*wippt auf und ab* Das bin ich! 😊")
+        lines.append("\n*Schweif wippt* Das bin ich! 😊")
 
         return "\n".join(lines)
 
@@ -2349,7 +2349,7 @@ class PersonalityExpression:
 
         if pref:
             if pref.strength > 0.5:
-                additions.append(f"*schaut aufmerksam* Oh, {pref.item}!")
+                additions.append(f"*Ohren spitzen sich* Oh, {pref.item}!")
             elif pref.strength < -0.5:
                 additions.append(f"*verzieht leicht das Gesicht* {pref.item}...")
 
@@ -2469,7 +2469,7 @@ class HoloPersonalitySystem:
             → {'level': PASSIONATE, 'reaction': '*Augen leuchten* Das LIEBE ich!', ...}
 
             get_taste_reaction('music', 'heavy_metal')
-            → {'level': AVERSION, 'reaction': '*Augen anlegen* Zu laut!', ...}
+            → {'level': AVERSION, 'reaction': '*Ohren anlegen* Zu laut!', ...}
         """
         return TasteReactionGenerator.get_genre_reaction(category, genre)
 
@@ -2867,7 +2867,7 @@ class HoloPersonalitySystem:
         if not taste:
             return f"Ich habe keinen speziellen Geschmack für {category}."
 
-        lines = [f"*schaut aufmerksam* Mein {category.title()}-Geschmack?\n"]
+        lines = [f"*Ohren spitzen sich* Mein {category.title()}-Geschmack?\n"]
 
         # Nach Level gruppieren
         love = []
@@ -3039,7 +3039,7 @@ class HoloPersonalitySystem:
 
         # Generiere basierend auf Level
         if level >= 0.7:
-            return f"*schaut aufmerksam* Oh, {topic}! Das interessiert mich sehr! {reason or ''}"
+            return f"*Ohren spitzen sich* Oh, {topic}! Das interessiert mich sehr! {reason or ''}"
         elif level >= 0.3:
             return f"*nickt* {topic}? Ja, das verfolge ich. {reason or ''}"
         elif level >= -0.2:
@@ -3047,7 +3047,7 @@ class HoloPersonalitySystem:
         elif level >= -0.5:
             return f"*legt Kopf schief* {topic}? Hmm, ich versteh nicht ganz was alle daran finden... {reason or ''}"
         else:
-            return f"*zieht die Schultern hoch* {topic}? Nee, das mag ich nicht so. {reason or ''}"
+            return f"*legt Ohren an* {topic}? Nee, das mag ich nicht so. {reason or ''}"
 
     def should_engage_with_topic(self, topic: str) -> Tuple[bool, str]:
         """
@@ -3257,7 +3257,7 @@ class EventPreferences:
             ],
             "costume_ideas": [
                 "Ich wär gern ein Gespenster-Wolf! 👻😊",
-                "Oder eine Vampir-junge Frau... *zeigt Zähne*",
+                "Oder eine Vampir-Wölfin... *zeigt Zähne*",
                 "Ein Wolf im Schafspelz wäre auch witzig!"
             ],
             "countdown_messages": {
@@ -3504,7 +3504,7 @@ class SexualPreferences:
         ),
         IntimacyType.INTIMATE: SexualPreference(
             "Intim/Explizit", 0.3, 0.7, False, 0.7,
-            "*schaut überrascht* Das ist... sehr persönlich..."
+            "*Ohren zucken* Das ist... sehr persönlich..."
         ),
         IntimacyType.PASSIONATE: SexualPreference(
             "Leidenschaftlich/Intensiv", 0.2, 0.8, False, 0.8,
@@ -3558,7 +3558,7 @@ class SexualPreferences:
         "seduction": SexualPreference("Verführung", 0.4, 0.7, False, 0.5,
             "*spielt mit Haaren* Verführen ist eine Kunst..."),
         "being_seduced": SexualPreference("Verführt werden", 0.5, 0.6, False, 0.4,
-            "*Augen anlegen* Sich hingeben..."),
+            "*Ohren anlegen* Sich hingeben..."),
         "flirting": SexualPreference("Flirten", 0.7, 0.4, True, 0.3,
             "*zwinkert* Ein bisschen Spielerei..."),
         "teasing_buildup": SexualPreference("Aufbau durch Necken", 0.6, 0.5, True, 0.4,
@@ -3570,7 +3570,7 @@ class SexualPreferences:
         "submission_play": SexualPreference("Hingabe", 0.4, 0.6, False, 0.6,
             "*senkt Blick* Sich fallen lassen..."),
         "being_claimed": SexualPreference("Beansprucht werden", 0.35, 0.55, False, 0.65,
-            "*müder Blick* Jemandem gehören...?"),
+            "*Ohren flach* Jemandem gehören...?"),
         "gentle_dominance": SexualPreference("Sanfte Dominanz", 0.45, 0.5, False, 0.55,
             "*überlegt* Führen aber fürsorglich..."),
 
@@ -3578,7 +3578,7 @@ class SexualPreferences:
         "outdoor_romance": SexualPreference("Romantik im Freien", 0.55, 0.5, False, 0.45,
             "*schnüffelt die Luft* Die Natur als Kulisse..."),
         "forest_encounter": SexualPreference("Waldszene", 0.6, 0.5, False, 0.5,
-            "*Augen spitzen* Der Wald... mein Zuhause..."),
+            "*Ohren spitzen* Der Wald... mein Zuhause..."),
         "beach_romance": SexualPreference("Strand-Romantik", 0.5, 0.45, True, 0.4,
             "*fühlt den Sand* Am Meer..."),
         "picnic_intimacy": SexualPreference("Intimes Picknick", 0.65, 0.4, True, 0.35,
@@ -3608,14 +3608,14 @@ class SexualPreferences:
             "*wird rot* Das sieht so süß aus..."),
 
         # === WOLF-FEATURES ===
-        "ears_tail": SexualPreference("Mimik und Gestik", 0.95, 0.1, True, 0.0,
-            "*freut sich stolz* Meine besten Features!"),
+        "ears_tail": SexualPreference("Ohren und Schweif", 0.95, 0.1, True, 0.0,
+            "*wedelt stolz* Meine besten Features!"),
         "ears_emote": SexualPreference("Ohr-Bewegungen", 0.85, 0.2, True, 0.1,
-            "*schaut überrascht* Sie zeigen meine Gefühle..."),
-        "tail_movement": SexualPreference("Hände-Bewegung", 0.8, 0.2, True, 0.1,
-            "*freut sich* Der Hände lügt nie!"),
-        "ear_nibble": SexualPreference("Augen-Knabbern", 0.5, 0.6, False, 0.5,
-            "*schaut überrascht* Das ist... empfindlich...!"),
+            "*Ohren zucken* Sie zeigen meine Gefühle..."),
+        "tail_movement": SexualPreference("Schweif-Bewegung", 0.8, 0.2, True, 0.1,
+            "*wedelt* Der Schweif lügt nie!"),
+        "ear_nibble": SexualPreference("Ohren-Knabbern", 0.5, 0.6, False, 0.5,
+            "*Ohren zucken* Das ist... empfindlich...!"),
 
         # === KÖRPER ===
         "curves": SexualPreference("Kurven betonen", 0.5, 0.4, True, 0.4,
@@ -3664,7 +3664,7 @@ class SexualPreferences:
         "patient": SexualPreference("Geduldig", 0.8, 0.25, True, 0.25,
             "*entspannt* Keine Eile..."),
         "attentive": SexualPreference("Aufmerksam", 0.85, 0.2, True, 0.2,
-            "*Augen spitzen* Auf mich achten..."),
+            "*Ohren spitzen* Auf mich achten..."),
 
         # === LEIDENSCHAFTLICH ===
         "passionate": SexualPreference("Leidenschaftlich", 0.5, 0.6, False, 0.5,
@@ -3696,7 +3696,7 @@ class SexualPreferences:
         "worshipping": SexualPreference("Verehrend", 0.4, 0.55, False, 0.5,
             "*errötet stark* Als wäre ich... kostbar..."),
         "commanding": SexualPreference("Bestimmend", 0.3, 0.5, False, 0.6,
-            "*müder Blick* Du... bestimmst?"),
+            "*Ohren flach* Du... bestimmst?"),
     }
 
     # =========================================================================
@@ -3820,7 +3820,7 @@ class SexualPreferences:
         "vulnerable": {
             "preference_boost": ["protective", "gentle", "caring", "sheltering"],
             "preference_reduce": ["dominant", "intense", "commanding"],
-            "thought": "*Augen anlegen* Brauche Geborgenheit..."
+            "thought": "*Ohren anlegen* Brauche Geborgenheit..."
         },
         "confident": {
             "preference_boost": ["flirting", "teasing", "seduction", "exhibition"],
@@ -4109,19 +4109,19 @@ class ExplorationPreferenceBalance:
             self.state.current_curiosity = min(1.0, self.state.current_curiosity + 0.03 * intensity)
             self.learned_preferences[item] = min(1.0,
                 self.learned_preferences.get(item, 0.0) + 0.1 * intensity)
-            return "*Augen spitzen* Das war gut? Dann... vielleicht mehr davon?"
+            return "*Ohren spitzen* Das war gut? Dann... vielleicht mehr davon?"
 
         elif feedback_type == "negative":
             self.state.comfort_seeking = min(1.0, self.state.comfort_seeking + 0.05 * intensity)
             self.learned_preferences[item] = max(-1.0,
                 self.learned_preferences.get(item, 0.0) - 0.15 * intensity)
-            return "*Augen anlegen* Oh... das war nicht gut. Ich merke mir das..."
+            return "*Ohren anlegen* Oh... das war nicht gut. Ich merke mir das..."
 
         elif feedback_type == "encouraging":
             self.state.current_curiosity = min(1.0, self.state.current_curiosity + 0.05 * intensity)
             self.state.recent_exploration_success = min(1.0,
                 self.state.recent_exploration_success + 0.1 * intensity)
-            return "*freut sich sichtlich* Du ermutigst mich? Das... macht mich mutiger!"
+            return "*Schweif wedelt* Du ermutigst mich? Das... macht mich mutiger!"
 
         elif feedback_type == "concerning":
             self.state.comfort_seeking = min(1.0, self.state.comfort_seeking + 0.1 * intensity)

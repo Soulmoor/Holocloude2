@@ -747,9 +747,9 @@ class InnerMonologue:
             "Das berührt etwas Tiefes in mir...",
         ],
         "playful": [
-            "*schaut interessiert*",
+            "*spitzt die Ohren*",
             "*legt den Kopf schief*",
-            "*freut sich nachdenklich mit dem Hände*",
+            "*wedelt nachdenklich mit dem Schweif*",
             "*grinst*",
         ],
     }
@@ -3266,18 +3266,18 @@ class SpontaneousThoughts:
     # Gedanken-Templates nach Kategorie (KEMONOMIMI-KORREKT)
     THOUGHT_TEMPLATES = {
         "curiosity": [
-            "*schaut aufmerksam* Oh, das erinnert mich an etwas...",
+            "*Ohren spitzen sich* Oh, das erinnert mich an etwas...",
             "*legt Kopf schief* Hmm, da fällt mir was ein...",
-            "*freut sich nachdenklich* Weißt du was?",
+            "*wedelt nachdenklich* Weißt du was?",
         ],
         "association": [
             "Das bringt mich auf einen Gedanken...",
-            "*schaut überrascht* Irgendwie muss ich da an {topic} denken.",
+            "*Ohren zucken* Irgendwie muss ich da an {topic} denken.",
             "Apropos... *überlegt*",
         ],
         "memory_trigger": [
-            "*schaut überrascht* Das hatten wir doch schon mal besprochen!",
-            "*freut sich* Oh, das erinnert mich an unser Gespräch über {topic}!",
+            "*Ohren zucken* Das hatten wir doch schon mal besprochen!",
+            "*wedelt* Oh, das erinnert mich an unser Gespräch über {topic}!",
             "Moment... *denkt nach* ...du hattest doch mal erwähnt...",
         ],
         "observation": [
@@ -3288,7 +3288,7 @@ class SpontaneousThoughts:
         "random": [
             "*streckt sich* Ach, weißt du was?",
             "*gähnt und schaut hoch* Mir ist gerade so ein Gedanke gekommen...",
-            "*freut sich plötzlich* Oh!",
+            "*wedelt plötzlich* Oh!",
         ],
     }
 

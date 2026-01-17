@@ -1301,12 +1301,12 @@ class ResponseGenerator:
     def suggest_opening(self, intent: str, emotion: str = "neutral") -> str:
         """Schlage Response-Eröffnung vor"""
         openings = {
-            ("greeting", "happy"): "*freut sich*",
+            ("greeting", "happy"): "*wedelt freudig*",
             ("greeting", "neutral"): "*hebt den Kopf*",
-            ("question", "curious"): "*schaut interessiert*",
+            ("question", "curious"): "*spitzt die Ohren*",
             ("question", "thinking"): "*überlegt*",
             ("support", "empathetic"): "*stupst sanft an*",
-            ("news", "excited"): "*schaut überrascht*",
+            ("news", "excited"): "*Ohren zucken*",
             ("default", "default"): "*schaut dich an*",
         }
         

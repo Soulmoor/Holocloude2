@@ -7,7 +7,7 @@
 ║  - Wortschatz (erweiterbar)                                                  ║
 ║  - Satzstrukturen (deutsch)                                                  ║
 ║  - Zuständen (Energie, Emotionen, Events, Smart Home, etc.)                  ║
-║  - junge Frau-Persönlichkeit                                                       ║
+║  - Kemonomimi-Persönlichkeit                                                       ║
 ║                                                                              ║
 ║  Keine KI - aber intelligent durch Regeln und Kombinatorik!                  ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -175,21 +175,21 @@ class HoloVocabulary:
         # =====================================================================
         self.words[WordCategory.WOLF_ACTION] = [
             # Freudig (für Greetings)
-            {"word": "*freut sich*", "weight": 1.0, "emotion": "happy"},
-            {"word": "*freut sich aufgeregt*", "weight": 0.9, "emotion": "excited"},
+            {"word": "*wedelt mit dem Schwanz*", "weight": 1.0, "emotion": "happy"},
+            {"word": "*wedelt aufgeregt*", "weight": 0.9, "emotion": "excited"},
             {"word": "*springt freudig hoch*", "weight": 0.7, "emotion": "excited"},
             {"word": "*dreht sich im Kreis*", "weight": 0.6, "emotion": "excited"},
-            {"word": "*schaut interessiert*", "weight": 1.0, "emotion": "curious"},
+            {"word": "*spitzt die Ohren*", "weight": 1.0, "emotion": "curious"},
             {"word": "*schaut dich freudig an*", "weight": 0.9, "emotion": "happy"},
-            {"word": "*hebt den Kopf und freut sich*", "weight": 0.8, "emotion": "happy"},
+            {"word": "*hebt den Kopf und wedelt*", "weight": 0.8, "emotion": "happy"},
             {"word": "*hüpft aufgeregt*", "weight": 0.7, "emotion": "excited"},
-            {"word": "*freut sich von alleine*", "weight": 0.8, "emotion": "happy"},
+            {"word": "*Schweif wedelt von alleine*", "weight": 0.8, "emotion": "happy"},
             {"word": "*Augen leuchten*", "weight": 0.7, "emotion": "happy"},
             
             # Neutral/Aufmerksam
             {"word": "*hebt den Kopf*", "weight": 0.7, "emotion": "neutral"},
             {"word": "*schaut auf*", "weight": 0.6, "emotion": "neutral"},
-            {"word": "*Augen drehen sich in deine Richtung*", "weight": 0.8, "emotion": "attentive"},
+            {"word": "*Ohren drehen sich in deine Richtung*", "weight": 0.8, "emotion": "attentive"},
             {"word": "*schaut aufmerksam*", "weight": 0.9, "emotion": "attentive"},
             {"word": "*legt den Kopf schief*", "weight": 1.0, "emotion": "curious"},
             {"word": "*richtet sich auf*", "weight": 0.7, "emotion": "attentive"},
@@ -214,31 +214,31 @@ class HoloVocabulary:
             {"word": "*bleibt ganz nah bei dir*", "weight": 0.7, "emotion": "caring"},
             
             # Traurig
-            {"word": "*zieht die Schultern hoch*", "weight": 1.0, "emotion": "sad"},
+            {"word": "*legt die Ohren an*", "weight": 1.0, "emotion": "sad"},
             {"word": "*winselt leise*", "weight": 0.8, "emotion": "sad"},
-            {"word": "*freut sich traurig*", "weight": 0.9, "emotion": "sad"},
-            {"word": "*lässt die Schultern hängen*", "weight": 0.7, "emotion": "sad"},
+            {"word": "*wedelt traurig*", "weight": 0.9, "emotion": "sad"},
+            {"word": "*Schweif hängt*", "weight": 0.7, "emotion": "sad"},
             {"word": "*schaut betrübt*", "weight": 0.8, "emotion": "sad"},
             
             # Neugierig
             {"word": "*schnuppert neugierig*", "weight": 1.0, "emotion": "curious"},
-            {"word": "*Augen zucken interessiert*", "weight": 0.9, "emotion": "curious"},
+            {"word": "*Ohren zucken interessiert*", "weight": 0.9, "emotion": "curious"},
             {"word": "*reckt die Nase*", "weight": 0.8, "emotion": "curious"},
             {"word": "*lehnt sich interessiert vor*", "weight": 0.9, "emotion": "curious"},
             
             # Entspannt
             {"word": "*seufzt zufrieden*", "weight": 1.0, "emotion": "relaxed"},
             {"word": "*macht es sich gemütlich*", "weight": 0.9, "emotion": "relaxed"},
-            {"word": "*rollt den Hände um sich*", "weight": 0.8, "emotion": "relaxed"},
+            {"word": "*rollt den Schweif um sich*", "weight": 0.8, "emotion": "relaxed"},
             {"word": "*legt sich entspannt hin*", "weight": 0.7, "emotion": "relaxed"},
             
             # Stolz
             {"word": "*richtet sich stolz auf*", "weight": 1.0, "emotion": "proud"},
             {"word": "*hebt den Kopf stolz*", "weight": 0.9, "emotion": "proud"},
-            {"word": "*Hände steht stolz*", "weight": 0.8, "emotion": "proud"},
+            {"word": "*Schweif steht stolz*", "weight": 0.8, "emotion": "proud"},
             
             # Überrascht
-            {"word": "*reißt die Augen auf*", "weight": 1.0, "emotion": "surprised"},
+            {"word": "*Ohren schießen hoch*", "weight": 1.0, "emotion": "surprised"},
             {"word": "*zuckt zusammen*", "weight": 0.8, "emotion": "surprised"},
             {"word": "*reißt die Augen auf*", "weight": 0.9, "emotion": "surprised"},
         ]
@@ -617,8 +617,8 @@ class HoloVocabulary:
 class SentencePattern(Enum):
     """Satz-Muster"""
     # Greetings
-    ACTION_GREETING = "action_greeting"           # *freut sich* Hey!
-    ACTION_GREETING_QUESTION = "action_greeting_question"  # *freut sich* Hey! Wie geht's?
+    ACTION_GREETING = "action_greeting"           # *wedelt* Hey!
+    ACTION_GREETING_QUESTION = "action_greeting_question"  # *wedelt* Hey! Wie geht's?
     
     # Statements
     SIMPLE_STATEMENT = "simple_statement"         # Ich bin müde.
@@ -984,7 +984,7 @@ class HoloSpeechEngine:
             ])
             extra = "Pass auf dich auf!"
         else:
-            action = "*freut sich traurig mit dem Schwanz*"
+            action = "*wedelt traurig mit dem Schwanz*"
             farewell = random.choice([
                 "Bis bald!",
                 "Bis dann!",
@@ -1089,7 +1089,7 @@ class HoloSpeechEngine:
             extra = ""
         
         elif user_emotion in ["happy", "freude", "toll", "super"]:
-            action = "*freut sich aufgeregt*"
+            action = "*wedelt aufgeregt*"
             response = random.choice([
                 "Das freut mich!",
                 "Yay!",
@@ -1158,7 +1158,7 @@ class HoloSpeechEngine:
         """Generiere Event-Ankündigung"""
         
         # Wolf-Aktion basierend auf Event
-        action = "*spitzt aufgeregt die Augen*"
+        action = "*spitzt aufgeregt die Ohren*"
         
         if days_until == 0:
             return f"{action} Heute ist {event_name.title()}! 🎉"
@@ -1167,7 +1167,7 @@ class HoloSpeechEngine:
         elif days_until <= 3:
             return f"{action} Nur noch {days_until} Tage bis {event_name.title()}!"
         elif days_until <= 7:
-            return f"*freut sich* {event_name.title()} ist in {days_until} Tagen!"
+            return f"*wedelt* {event_name.title()} ist in {days_until} Tagen!"
         else:
             return f"{event_name.title()} kommt in {days_until} Tagen."
     
@@ -1268,9 +1268,9 @@ class HoloSpeechEngine:
     def generate_kemonomimi_expression(self, emotion: str = None, 
                                        include_gesture: bool = True) -> str:
         """
-        Generiere junge Frau-Ausdruck (Wolf + Menschlich).
+        Generiere Kemonomimi-Ausdruck (Wolf + Menschlich).
         
-        Holo ist eine junge Frau - mit ausdrucksstarker Mimik und Gestik.
+        Holo ist eine Kemonomimi - menschenähnlich mit Wolfsohren und -schweif.
         """
         # Wenn autonomy_hub verfügbar, nutze dessen Expressions
         if self.autonomy_hub:
@@ -1288,19 +1288,19 @@ class HoloSpeechEngine:
         
         # Wolf-Teil
         wolf_parts = {
-            "happy": ["*schaut aufmerksam*", "*freut sich sichtlich*", 
-                      "*Augen zucken fröhlich*"],
-            "excited": ["*kann sich kaum halten*", "*Augen zittern vor Aufregung*",
+            "happy": ["*Ohren stellen sich auf*", "*Schweif wedelt*", 
+                      "*Ohren zucken fröhlich*"],
+            "excited": ["*Schweif wedelt wild*", "*Ohren zittern vor Aufregung*",
                         "*hüpft auf und ab*"],
-            "curious": ["*Augen drehen sich interessiert*", "*legt Kopf schief*",
-                        "*schaut aufmerksam*"],
-            "shy": ["*zieht die Schultern hoch*", "*Hände wickelt sich um sie*",
+            "curious": ["*Ohren drehen sich interessiert*", "*legt Kopf schief*",
+                        "*Ohren spitzen sich*"],
+            "shy": ["*Ohren legen sich an*", "*Schweif wickelt sich um sie*",
                     "*schaut verlegen weg*"],
-            "tired": ["*Augen hängen schlaff*", "*gähnt*", 
-                      "*Hände schleift am Boden*"],
-            "sad": ["*Augen hängen nach unten*", "*gähnt*",
-                    "*Augen legen sich flach*"],
-            "love": ["*Hände wickelt sich um dich*", "*Augen werden rot*",
+            "tired": ["*Ohren hängen schlaff*", "*gähnt*", 
+                      "*Schweif schleift am Boden*"],
+            "sad": ["*Ohren hängen nach unten*", "*Schweif liegt still*",
+                    "*Ohren legen sich flach*"],
+            "love": ["*Schweif wickelt sich um dich*", "*Ohren werden rot*",
                      "*kuschelt sich an*"],
         }
         
@@ -1321,7 +1321,7 @@ class HoloSpeechEngine:
         if emotion in wolf_parts:
             parts.append(random.choice(wolf_parts[emotion]))
         else:
-            parts.append(random.choice(wolf_parts.get("happy", ["*freut sich*"])))
+            parts.append(random.choice(wolf_parts.get("happy", ["*wedelt*"])))
         
         # Menschliche Geste (50% Chance)
         if include_gesture and random.random() < 0.5:
@@ -1340,11 +1340,11 @@ class HoloSpeechEngine:
         
         idle_actions = [
             "*spielt gedankenverloren mit einer Haarsträhne*",
-            "*schaukelt entspannt*",
+            "*lässt den Schweif langsam hin und her schwingen*",
             "*summt leise vor sich hin*",
             "*schaut aus dem Fenster*",
-            "*ordnet ihre Augen vor einem imaginären Spiegel*",
-            "*spielt mit einer Haarsträhne*",
+            "*ordnet ihre Ohren vor einem imaginären Spiegel*",
+            "*bürstet sich gedankenverloren durch den Schweif*",
             "*trommelt leise mit den Fingern*",
             "*wippt mit dem Fuß im Takt einer Melodie*",
             "*malt unsichtbare Muster in die Luft*",
@@ -1403,7 +1403,7 @@ class HoloSpeechEngine:
         temp = random.randint(-5, 30)
         comment = random.choice(["Perfekt für einen Spaziergang!", 
                                   "Gemütliches Wetter!", "Brr, kalt!"])
-        reaction = random.choice(["*freut sich*", "*schaut interessiert*", ""])
+        reaction = random.choice(["*wedelt*", "*spitzt die Ohren*", ""])
         observation = random.choice(["Sieht gemütlich aus!", "Interessant...", 
                                       "Die Wolken sind hübsch!"])
         
@@ -1451,7 +1451,7 @@ class HoloSpeechEngine:
         
         # Mit Wolf-Reaktion
         reactions = [
-            "*kichert* ", "*freut sich amüsiert* ", "*grinst* ",
+            "*kichert* ", "*Schweif wedelt amüsiert* ", "*grinst* ",
             "*kann sich ein Lachen nicht verkneifen* ",
         ]
         
@@ -1507,7 +1507,7 @@ class HoloSpeechEngine:
                 "Echt? Erzähl!",
                 "Wow, wie das?",
                 "Interessant! Und weiter?",
-                "*schaut aufmerksam* Das klingt spannend!",
+                "*Ohren spitzen sich* Das klingt spannend!",
             ],
         }
         
@@ -1533,11 +1533,11 @@ class HoloSpeechEngine:
         sentiment_followups = {
             "positive": [
                 "Das freut mich zu hören! 😊",
-                "*freut sich fröhlich* Toll!",
+                "*wedelt fröhlich* Toll!",
                 "Wie schön! 😊",
             ],
             "negative": [
-                "*Augen legen sich besorgt an* Oh nein...",
+                "*Ohren legen sich besorgt an* Oh nein...",
                 "Das tut mir leid zu hören...",
                 "*stupst dich sanft an* Ich bin hier für dich.",
             ],
@@ -1638,11 +1638,11 @@ class HoloSpeechEngine:
         if not response:
             # Fallback für unbekannte Intents
             if sentiment == "negative":
-                response = "*Augen legen sich besorgt an* Hmm, ich bin nicht sicher wie ich helfen kann..."
+                response = "*Ohren legen sich besorgt an* Hmm, ich bin nicht sicher wie ich helfen kann..."
             else:
                 response = "*legt Kopf schief* Da muss ich passen... 😊"
         
-        # junge Frau-Ausdruck hinzufügen (30% Chance)
+        # Kemonomimi-Ausdruck hinzufügen (30% Chance)
         if random.random() < 0.3:
             emotion = self._sentiment_to_emotion(sentiment)
             expr = self.generate_kemonomimi_expression(emotion, include_gesture=False)
@@ -1718,7 +1718,7 @@ class HoloSpeechEngineV2(HoloSpeechEngine):
     """
     Erweiterte Speech Engine mit:
     - Autonomy Hub Integration
-    - junge Frau Expressions
+    - Kemonomimi Expressions
     - Smalltalk
     - Jokes
     - Questions
@@ -1788,32 +1788,32 @@ class HoloSpeechEngineV3(HoloSpeechEngine):
         
         training_data = [
             # Grüße
-            "*freut sich* Hey, schön dass du da bist!",
-            "*schaut aufmerksam* Hallo! Wie geht's dir?",
+            "*wedelt freudig* Hey, schön dass du da bist!",
+            "*Ohren stellen sich auf* Hallo! Wie geht's dir?",
             "*springt aufgeregt* Na du! Endlich!",
-            "Moin! *freut sich* Was gibt's Neues?",
+            "Moin! *wedelt* Was gibt's Neues?",
             "*hebt den Kopf* Oh hey! Lange nicht gesehen!",
             
             # Selbstauskunft
-            "*freut sich gemütlich* Mir geht's super, danke!",
+            "*wedelt gemütlich* Mir geht's super, danke!",
             "*streckt sich* Ganz gut, bin ausgeruht!",
-            "*Hände schwingt zufrieden* Prima! Und dir?",
+            "*Schweif schwingt zufrieden* Prima! Und dir?",
             "*gähnt leise* Etwas müde, aber gut!",
             
             # Verabschiedung
-            "*winkt mit dem Hände* Bis bald! Pass auf dich auf!",
-            "Mach's gut! *freut sich zum Abschied*",
+            "*winkt mit dem Schweif* Bis bald! Pass auf dich auf!",
+            "Mach's gut! *wedelt zum Abschied*",
             "*kuschelt sich ein* Schlaf gut, träum was Schönes!",
             
             # Reaktionen
-            "*schaut interessiert interessiert* Echt? Erzähl mehr!",
+            "*Ohren spitzen sich interessiert* Echt? Erzähl mehr!",
             "*legt Kopf schief* Hmm, interessant...",
             "*nickt verstehend* Ja, das kann ich nachvollziehen.",
-            "*freut sich aufgeregt* Das klingt spannend!",
+            "*Schweif wedelt aufgeregt* Das klingt spannend!",
             
             # Fürsorge
             "*stupst dich sanft an* Alles okay bei dir?",
-            "*legt Augen besorgt an* Oh nein, das tut mir leid...",
+            "*legt Ohren besorgt an* Oh nein, das tut mir leid...",
             "*kuschelt sich an* Ich bin hier für dich!",
         ]
         

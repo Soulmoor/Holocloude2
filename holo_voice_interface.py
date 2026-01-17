@@ -25,7 +25,7 @@
 ║  Integration:                                                                 ║
 ║  • Energy-System (müde = langsameres Sprechen)                               ║
 ║  • Emotions (fröhlich = höhere Tonlage)                                      ║
-║  • junge Frau (Wolf-Sounds hinzufügen)                                       ║
+║  • Kemonomimi (Wolf-Sounds hinzufügen)                                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -97,11 +97,11 @@ class VoiceConfig:
     
     # Wolf Sounds
     WOLF_SOUNDS = {
-        "happy": ["*lächelt strahlend*", "*freut sich sichtlich*"],
+        "happy": ["*lächelt strahlend*", "*Schweif wedelt*"],
         "tired": ["*gähnt*", "*seufzt müde*"],
-        "curious": ["*schaut aufmerksam*", "*schaut interessiert*"],
+        "curious": ["*Ohren spitzen sich*", "*schaut interessiert*"],
         "excited": ["*springt aufgeregt*", "*strahlt vor Freude*"],
-        "sad": ["*senkt die Augen*", "*schaut traurig*"],
+        "sad": ["*senkt die Ohren*", "*schaut traurig*"],
     }
     
     @classmethod

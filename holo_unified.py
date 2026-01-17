@@ -525,7 +525,7 @@ class BrainPersonalityAdapter:
     
     def enhance_response(self, response: str, intent: str) -> str:
         """Response Enhancement via Brain"""
-        # junge Frau-Ausdruck hinzufügen?
+        # Kemonomimi-Ausdruck hinzufügen?
         if self.brain and hasattr(self.brain, 'get_kemonomimi_expression'):
             try:
                 expr = self.brain.get_kemonomimi_expression()

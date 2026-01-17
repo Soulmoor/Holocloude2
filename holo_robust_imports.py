@@ -221,10 +221,10 @@ try:
         HoloPersonalityEngine,
         HoloPolicies,
         create_personality,
-        # junge Frau
-        HumanBodyLanguage,
-        HumanExpression,
-        HumanMessageEnhancer,
+        # Kemonomimi
+        KemonomimiBodyLanguage,
+        KemonomimiExpression,
+        KemonomimiMessageEnhancer,
         EmotionLevels,
         get_kemonomimi_prompt,
         WeatherTranslator,
@@ -245,7 +245,7 @@ try:
     PERSONALITY_AVAILABLE = True
     KEMONOMIMI_AVAILABLE = True
     # Backwards Compatibility
-    HumanBodyLanguage = HumanBodyLanguage
+    WolfBodyLanguage = KemonomimiBodyLanguage
     logger.info("[RobustImports] ✓ holo_personality (konsolidiert)")
 except ImportError as e:
     logger.warning(f"[RobustImports] holo_personality: {e}")
@@ -509,7 +509,7 @@ class FallbackPersonalityEngine:
         logger.warning("⚠️ Using FallbackPersonalityEngine")
 
     def get_personality_context(self):
-        return "Du bist Holo, eine freundliche und junge Frau."
+        return "Du bist Holo, eine freundliche und weise Wölfin."
 
     def get_current_quirks(self):
         return []

@@ -944,17 +944,17 @@ class HoloLocalUnderstanding:
         # Greeting-Antworten
         if intent == IntentType.GREETING:
             if sentiment in [SentimentLevel.POSITIVE, SentimentLevel.VERY_POSITIVE]:
-                return "*schaut interessiert freudig* Hey! Dir scheint's ja gut zu gehen!"
+                return "*Ohren spitzen sich freudig* Hey! Dir scheint's ja gut zu gehen!"
             elif sentiment in [SentimentLevel.NEGATIVE, SentimentLevel.VERY_NEGATIVE]:
                 return "*neigt Kopf besorgt* Hey... alles okay bei dir?"
             else:
-                return "*freut sich sichtlich* Hey! Was gibt's Neues?"
+                return "*Schweif wedelt* Hey! Was gibt's Neues?"
 
         # Farewell-Antworten
         if intent == IntentType.FAREWELL:
             responses = [
-                "*winkt mit dem Hände* Bis bald!",
-                "Machs gut! *entspannter Blick*",
+                "*winkt mit dem Schweif* Bis bald!",
+                "Machs gut! *Ohren legen sich entspannt an*",
                 "*lächelt warm* Bis später!",
             ]
             import random
@@ -963,9 +963,9 @@ class HoloLocalUnderstanding:
         # Feedback-Antworten
         if intent == IntentType.FEEDBACK:
             if understanding.sentiment >= 0.3:
-                return "*freut sich glücklich* Das freut mich!"
+                return "*Schweif wedelt glücklich* Das freut mich!"
             elif understanding.sentiment <= -0.3:
-                return "*schaut nach unten* Oh... das tut mir leid. Was kann ich besser machen?"
+                return "*Ohren senken sich* Oh... das tut mir leid. Was kann ich besser machen?"
             else:
                 return "*nickt* Verstanden!"
 
@@ -978,7 +978,7 @@ class HoloLocalUnderstanding:
         if intent == IntentType.SMALLTALK:
             responses = [
                 "*denkt nach* Hmm, gerade überlege ich so einiges...",
-                "*schaut überrascht* Ich hab heute viel gelernt!",
+                "*Ohren zucken* Ich hab heute viel gelernt!",
                 "*streckt sich* Mir geht's gut! Und dir?",
             ]
             import random

@@ -564,14 +564,14 @@ class StateDependentBehavior:
     """
     
     # === ENERGIE → VERHALTEN ===
-    # junge Frau: Menschliche Aktionen und Gestik (normale Körpersprache!)
+    # Kemonomimi: Menschliche Aktionen + Ohren/Schweif (keine Wolf-Körper-Aktionen!)
     ENERGY_BEHAVIORS = {
         "exhausted": {  # < 0.2
             "response_length": 0.3,      # Kurz
             "enthusiasm": 0.2,           # Wenig
             "question_chance": 0.1,      # Kaum Fragen
             "emoji_chance": 0.3,         # Wenig Emojis
-            "wolf_actions": ["*gähnt* *senkt den Blick*", "*blinzelt müde*", "*seufzt* *Hände liegt*"],
+            "wolf_actions": ["*gähnt* *Ohren hängen*", "*blinzelt müde*", "*seufzt* *Schweif liegt*"],
             "tone": "müde",
             "speed": "slow",
         },
@@ -580,7 +580,7 @@ class StateDependentBehavior:
             "enthusiasm": 0.4,
             "question_chance": 0.3,
             "emoji_chance": 0.4,
-            "wolf_actions": ["*gähnt leicht*", "*reibt sich die Augen*", "*streckt sich* *Hände senkt sich*"],
+            "wolf_actions": ["*gähnt leicht*", "*reibt sich die Augen*", "*streckt sich* *Schweif senkt sich*"],
             "tone": "ruhig",
             "speed": "normal",
         },
@@ -589,7 +589,7 @@ class StateDependentBehavior:
             "enthusiasm": 0.6,
             "question_chance": 0.5,
             "emoji_chance": 0.5,
-            "wolf_actions": ["*lächelt* *wippt auf und ab*", "*schaut aufmerksam*", "*schaut neugierig*"],
+            "wolf_actions": ["*lächelt* *Schweif wippt*", "*Ohren spitzen sich*", "*schaut neugierig*"],
             "tone": "freundlich",
             "speed": "normal",
         },
@@ -598,7 +598,7 @@ class StateDependentBehavior:
             "enthusiasm": 0.8,
             "question_chance": 0.7,
             "emoji_chance": 0.7,
-            "wolf_actions": ["*strahlt* *freut sich sichtlich*", "*springt auf*", "*lacht* *strahlt*"],
+            "wolf_actions": ["*strahlt* *Schweif wedelt*", "*springt auf*", "*lacht* *Ohren stehen fröhlich*"],
             "tone": "enthusiastisch",
             "speed": "fast",
         },
@@ -607,7 +607,7 @@ class StateDependentBehavior:
             "enthusiasm": 1.0,
             "question_chance": 0.8,
             "emoji_chance": 0.8,
-            "wolf_actions": ["*hüpft aufgeregt*", "*kann nicht stillsitzen* *hüpft vor Freude*", "*strahlt übers ganze Gesicht*"],
+            "wolf_actions": ["*hüpft aufgeregt*", "*kann nicht stillsitzen* *Schweif wirbelt*", "*strahlt übers ganze Gesicht*"],
             "tone": "aufgeregt",
             "speed": "very_fast",
         },

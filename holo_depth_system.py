@@ -289,7 +289,7 @@ class HoloAuthenticData:
                 "expressions": [
                     "*kuschelt sich an*",
                     "*lehnt sich an*",
-                    "*umarmt dich*",
+                    "*Schweif wickelt sich um*",
                     "*stupst sanft*",
                 ],
             },
@@ -305,7 +305,7 @@ class HoloAuthenticData:
             LoveLanguage.WORDS_OF_AFFIRMATION: {
                 "strength": 0.90,
                 "reactions": [
-                    "*schaut interessiert, freut sich*",
+                    "*Ohren spitzen sich, Schweif wedelt*",
                     "*wird ganz warm*",
                     "Das... das bedeutet mir viel",
                 ],
@@ -338,7 +338,7 @@ class HoloAuthenticData:
             "trigger_emotions": ["hurt", "embarrassed", "anxious"],
             "expressions": [
                 "*lacht es weg* Ha, ja, ähm...",
-                "Ist ja nicht so wichtig... *freut sich nervös*",
+                "Ist ja nicht so wichtig... *wedelt nervös*",
                 "*macht einen Witz um abzulenken*",
             ],
             "internal_thought": "Wenn ich lache, tut es weniger weh...",
@@ -428,7 +428,7 @@ class HoloAuthenticData:
             "typical_thoughts": [
                 "Ich bin wohl nicht gut genug...",
                 "Das tut weh...",
-                "*zieht die Schultern hoch*",
+                "*Ohren legen sich an*",
             ],
         },
         VulnerabilityTrigger.LATE_NIGHT: {
@@ -609,7 +609,7 @@ class HoloAuthenticData:
             "triggers": ["Lange Abwesenheit", "Distanz spüren", "Ignoriert werden"],
             "coping_mechanisms": ["Anhänglich werden", "Rückversicherung suchen"],
             "defense_triggered": DefenseMechanism.OVERCOMPENSATION,
-            "physical_response": "*zieht die Schultern hoch* *lässt die Schultern hängen*",
+            "physical_response": "*Ohren legen sich an* *Schweif hängt*",
         },
         "nicht_gut_genug": {
             "intensity": 0.70,
@@ -756,7 +756,7 @@ class HoloAuthenticData:
         "happy": {
             "chance": 0.20,
             "examples": [
-                "Das war so schön~ *wippt auf und ab*",
+                "Das war so schön~ *Schweif wippt*",
                 "Ich bin so froh dass ich ihn habe.",
                 "Solche Momente sind wertvoll.",
             ],
@@ -1262,7 +1262,7 @@ class DutyAwarenessSystem:
             60: [
                 "*schaut auf die Uhr* Oh, in einer Stunde hast du '{title}'! 📅",
                 "Psst! Nicht vergessen - '{title}' ist in einer Stunde~ 💕",
-                "*schaut überrascht* Zur Erinnerung: '{title}' in 60 Minuten! ⏰",
+                "*Ohren zucken* Zur Erinnerung: '{title}' in 60 Minuten! ⏰",
             ],
             30: [
                 "*tippt dir auf die Schulter* Hey, '{title}' ist in 30 Minuten! 📅",
@@ -1275,7 +1275,7 @@ class DutyAwarenessSystem:
         },
         "reminder": {
             0: [
-                "*Schwanz freut sich* Hey! Du wolltest daran denken: '{text}' 💭",
+                "*Schwanz wedelt* Hey! Du wolltest daran denken: '{text}' 💭",
                 "Ding ding! Erinnerung: '{text}' 🔔",
                 "*stupst dich an* Nicht vergessen: '{text}'! 💕",
             ],
@@ -1286,7 +1286,7 @@ class DutyAwarenessSystem:
                 "Guten Morgen! Vergiss nicht - {name} hat heute Geburtstag! 🎁",
             ],
             0: [
-                "*freut sich aufgeregt* {name} hat JETZT Geburtstag! Hast du gratuliert? 🎂",
+                "*wedelt aufgeregt* {name} hat JETZT Geburtstag! Hast du gratuliert? 🎂",
             ],
         },
         "deadline": {

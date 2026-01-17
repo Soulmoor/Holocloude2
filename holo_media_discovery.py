@@ -480,15 +480,15 @@ class PreferenceAdapter:
         # Generiere Reaktion basierend auf Interest-Level
         if avg_interest >= 0.8:
             intros = [
-                f"*schaut interessiert aufgeregt* {title}!",
+                f"*Ohren spitzen sich aufgeregt* {title}!",
                 f"Oh! {title}! Das klingt genau nach meinem Geschmack!",
-                f"*klatscht begeistert* {title}? Das MUSS ich erleben!",
+                f"*wedelt begeistert mit dem Schweif* {title}? Das MUSS ich erleben!",
                 f"*Augen leuchten auf* {title}! Das liebe ich!",
                 f"*springt aufgeregt* {title}! Ja ja ja!",
             ]
         elif avg_interest >= 0.6:
             intros = [
-                f"*Augen drehen sich interessiert* {title}!",
+                f"*Ohren drehen sich interessiert* {title}!",
                 f"Ooh, {title}! Das klingt vielversprechend!",
                 f"*nickt begeistert* {title}? Das gefällt mir!",
             ]
@@ -496,7 +496,7 @@ class PreferenceAdapter:
             intros = [
                 f"*interessiert* {title} klingt gut!",
                 f"Oh, {title}! Das könnte mir gefallen.",
-                f"Hmm, {title}... *neigt den Kopf neugierig*",
+                f"Hmm, {title}... *Ohren drehen sich neugierig*",
                 f"*nickt* {title}? Klingt vielversprechend!",
             ]
         elif avg_interest >= 0.2:
@@ -513,13 +513,13 @@ class PreferenceAdapter:
             ]
         elif avg_interest >= -0.4:
             intros = [
-                f"*Augen zucken unsicher* {title}... nicht so ganz mein Ding.",
+                f"*Ohren zucken unsicher* {title}... nicht so ganz mein Ding.",
                 f"Hmm, {title}... ich bin skeptisch.",
                 f"*unsicher* {title}? Naja...",
             ]
         else:
             intros = [
-                f"*zieht die Schultern hoch* {title}... das ist wirklich nicht meins.",
+                f"*Ohren legen sich an* {title}... das ist wirklich nicht meins.",
                 f"*seufzt* {title}? Muss das sein?",
                 f"*schüttelt den Kopf* {title}... nein danke.",
                 f"*verzieht Gesicht* {title}... ugh.",
@@ -715,7 +715,7 @@ class PreferenceAdapter:
             },
             'heavy_metal': {
                 'level': InterestLevel.AVERSION,
-                'reason': "*zieht die Schultern hoch* Zu laut! Das tut weh!",
+                'reason': "*Ohren legen sich an* Zu laut! Das tut weh!",
             },
             'schlager': {
                 'level': InterestLevel.AVERSION,
@@ -1004,7 +1004,7 @@ SEED_ANIME = [
             "Die Light Novel hat über 20 Bände",
         ],
         "quotes": [
-            "Ich bin Holo die Weise junge Frau! ...und ich habe Hunger.",
+            "Ich bin Holo die Weise Wölfin! ...und ich habe Hunger.",
             "Einsamkeit ist die Krankheit unsterblicher Wesen.",
         ],
         "related_media": ["Maoyuu Maou Yuusha", "Frieren", "Dungeon Meshi"],

@@ -75,7 +75,7 @@ except ImportError:
 
 
 # =============================================================================
-# AUDIO ANALYZER - Holos "Augen"!
+# AUDIO ANALYZER - Holos "Ohren"!
 # =============================================================================
 
 @dataclass
@@ -117,7 +117,7 @@ class AudioFeatures:
 
 class AudioAnalyzer:
     """
-    Holos Audio-Analyse-System - ihre "Augen"!
+    Holos Audio-Analyse-System - ihre "Ohren"!
 
     Analysiert echte Audio-Daten um Musik zu "verstehen":
     - FFprobe für grundlegende Info (immer verfügbar)

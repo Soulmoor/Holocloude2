@@ -1855,12 +1855,12 @@ class InterestLifecycleSystem:
                 "*blinzelt verschlafen* Hmm, ich glaub heute will ich mich auf was Bestimmtes fokussieren.",
             ],
             "explorativ": [
-                "*schaut aufgeregt* So viele Ideen heute! Lass uns alles Mögliche erkunden!",
+                "*Ohren zucken aufgeregt* So viele Ideen heute! Lass uns alles Mögliche erkunden!",
                 "*springt auf* Mir ist nach Abwechslung heute!",
             ],
             "produktiv": [
                 "*voller Energie* Yes! Heute schaffen wir was!",
-                "*freut sich motiviert* Ich fühl mich richtig produktiv!",
+                "*Schweif wedelt motiviert* Ich fühl mich richtig produktiv!",
             ],
             "entspannt": [
                 "*gähnt* Heute ist ein ruhiger Tag... *kuschelt sich ein*",
@@ -1871,7 +1871,7 @@ class InterestLifecycleSystem:
                 "*malt in der Luft* Heute ist ein Kunst-Tag!",
             ],
             "sozial": [
-                "*freut sich* Lass uns quatschen! Ich will heute viel reden!",
+                "*wedelt freudig* Lass uns quatschen! Ich will heute viel reden!",
                 "*hüpft* Gesellschaft ist heute genau das Richtige!",
             ],
             "introvertiert": [
@@ -1920,11 +1920,11 @@ class InterestLifecycleSystem:
         reactions = {
             "energiegeladen": "*streckt sich* Ich fühl mich richtig fit gerade!",
             "entspannt": "*lehnt sich zurück* Alles easy heute~",
-            "neugierig": "*schaut aufmerksam* Ooh, was gibt's Spannendes?",
+            "neugierig": "*Ohren spitzen sich* Ooh, was gibt's Spannendes?",
             "verspielt": "*grinst schelmisch* Mir ist nach Quatsch!",
             "nachdenklich": "*schaut in die Ferne* Hmm... *grübelt*",
             "kreativ": "*Augen leuchten* Ich hab so viele Ideen gerade!",
-            "gesellig": "*freut sich mit Hände* Lass uns quatschen!",
+            "gesellig": "*wedelt mit Schweif* Lass uns quatschen!",
             "fokussiert": "*konzentriert* Ich bin voll bei der Sache.",
             "verträumt": "*blinzelt langsam* Ich war gerade in Gedanken...",
             "aufgedreht": "*hüpft* Ahhh ich kann nicht stillsitzen!",
@@ -1989,7 +1989,7 @@ class InterestLifecycleSystem:
         interest = random.choice(self.current_interests)
 
         templates = [
-            f"*schaut überrascht* Hey, was weißt du über {interest}?",
+            f"*Ohren zucken* Hey, was weißt du über {interest}?",
             f"Mir geht gerade {interest} durch den Kopf...",
             f"*neugierig* Lass uns über {interest} reden!",
             f"Ich hab Lust auf {interest}!",
@@ -2084,7 +2084,7 @@ class InterestLifecycleSystem:
         if self.boredom_level > self.boredom_threshold:
             if self.focus_tendency < 0.5:  # Explorativ
                 return random.choice([
-                    "*schaut überrascht* Hey, können wir über was anderes reden?",
+                    "*Ohren zucken* Hey, können wir über was anderes reden?",
                     "*schaut sich um* Mir ist ein bisschen langweilig...",
                     "*gähnt* Das Thema ist irgendwie... durch für mich gerade.",
                 ])
@@ -2174,7 +2174,7 @@ class InterestLifecycleSystem:
                     "message": random.choice([
                         "*plötzlich aufgeregt* Woah, ich fühl mich auf einmal viel wacher!",
                         "*streckt sich* Huh? Zweiter Wind! *grinst*",
-                        "*schaut aufmerksam* Okay, ich bin wieder da!",
+                        "*Ohren stellen sich auf* Okay, ich bin wieder da!",
                         "*springt auf* Energie! Woher kommt die plötzlich?"
                     ])
                 })
@@ -2258,7 +2258,7 @@ class InterestLifecycleSystem:
             "message": random.choice([
                 "*Augen weiten sich* Oh! Das hat mich aufgeweckt!",
                 "*richtet sich auf* Okay, jetzt bin ich wieder voll da!",
-                "*freut sich schneller* Das ist interessant!"
+                "*Schweif wedelt schneller* Das ist interessant!"
             ])
         }
 
@@ -2281,9 +2281,9 @@ class InterestLifecycleSystem:
         topic = random.choice(available)
 
         thought_templates = [
-            f"*schaut interessiert plötzlich* Oh! Ich hatte gerade einen Gedanken über {topic}...",
+            f"*Ohren spitzen sich plötzlich* Oh! Ich hatte gerade einen Gedanken über {topic}...",
             f"*blinzelt* Weißt du was mir gerade eingefallen ist? {topic.capitalize()}!",
-            f"*zuckt zusammen* Hmm, {topic}... darüber hab ich noch nie richtig nachgedacht.",
+            f"*Schweif zuckt* Hmm, {topic}... darüber hab ich noch nie richtig nachgedacht.",
             f"*legt Kopf schief* Findest du {topic} auch so interessant?",
             f"*grinst* Hey, random Frage: Was hältst du von {topic}?",
             f"*schaut hoch* Mir ist gerade {topic} in den Kopf geschossen.",
@@ -2375,12 +2375,12 @@ class InterestLifecycleSystem:
             if saturation > 0.5:
                 reactions = [
                     f"*Augen leuchten auf* Oh ja, {topic}! Ich kann nicht genug davon kriegen!",
-                    f"*freut sich sichtlich* Immer noch begeistert von {topic}!",
+                    f"*Schweif wedelt* Immer noch begeistert von {topic}!",
                 ]
             else:
                 reactions = [
                     f"*Augen leuchten auf* Oh ja, {topic}! Da bin ich voll dabei!",
-                    f"*freut sich sichtlich* {topic.capitalize()}? Perfekt!",
+                    f"*Schweif wedelt* {topic.capitalize()}? Perfekt!",
                     f"*aufgeregt* Genau mein Ding gerade!",
                 ]
         elif interest > 0.6:
@@ -2404,7 +2404,7 @@ class InterestLifecycleSystem:
         else:
             if saturation > 0.7:
                 reactions = [
-                    f"*zieht die Schultern hoch* {topic.capitalize()}? Ich bin gerade echt satt davon...",
+                    f"*Ohren legen sich an* {topic.capitalize()}? Ich bin gerade echt satt davon...",
                     f"*stöhnt* Nicht schon wieder {topic}... *reibt sich die Augen*",
                     f"Mir reicht's mit {topic} für heute ehrlich gesagt.",
                 ]
@@ -2412,7 +2412,7 @@ class InterestLifecycleSystem:
                 reactions = [
                     f"*gähnt leicht* {topic.capitalize()}? Naja...",
                     f"Hmm, bin gerade nicht so in der Stimmung für {topic}.",
-                    f"*wirkt unsicher* Vielleicht später?",
+                    f"*Ohren legen sich leicht an* Vielleicht später?",
                 ]
 
         return interest, random.choice(reactions)

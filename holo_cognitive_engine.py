@@ -724,7 +724,7 @@ class HoloKnowledge:
         self.facts = {
             "holo": {
                 "name": "Holo",
-                "species": "junge Frau",
+                "species": "Wölfin",
                 "personality": "freundlich, verspielt, loyal",
                 "creator": "Kira",
             },
@@ -1007,7 +1007,7 @@ class HoloCognitiveEngine:
         elif strategy == ResponseStrategy.INFORM:
             return "*denkt nach* Hmm, da muss ich kurz überlegen..."
         
-        return "*freut sich* Ich höre dir zu!"
+        return "*wedelt* Ich höre dir zu!"
     
     def _fix_response(self, response: str, issues: List[str],
                      analysis: MessageAnalysis,
@@ -1905,7 +1905,7 @@ class ResponseQualityEvaluator:
             score -= 0.2
         
         # Wolf-Emotes sind okay
-        wolf_markers = ["*freut sich*", "*augen*", "*hände*", "😊"]
+        wolf_markers = ["*wedelt*", "*ohren*", "*schweif*", "😊"]
         if any(w in response.lower() for w in wolf_markers):
             score += 0.1  # Bonus für Persona-Konsistenz
         
@@ -1981,7 +1981,7 @@ class ResponseQualityEvaluator:
         
         # Positive Markers für Holo
         holo_markers = [
-            "*", "😊", "wolf", "strahlen", "freude", "lächeln",
+            "*", "😊", "wolf", "wedel", "ohr", "schweif",
             "neugierig", "interessant", "spannend"
         ]
         marker_count = sum(1 for m in holo_markers if m in response_lower)

@@ -732,7 +732,7 @@ class SourceCredibilityAnalyzer:
 
         if len(signals_found) >= 2:
             return (True, 0.85,
-                    f"*Augen zucken skeptisch* Das klingt nach Clickbait... '{signals_found[0]}'?")
+                    f"*Ohren zucken skeptisch* Das klingt nach Clickbait... '{signals_found[0]}'?")
         elif len(signals_found) == 1:
             return (True, 0.6,
                     f"Hmm, '{signals_found[0]}' - das klingt etwas übertrieben...")
@@ -767,24 +767,24 @@ class SkepticalProcessor:
 
     SKEPTICAL_TEMPLATES = {
         "too_good": [
-            "*legt Augen skeptisch an* Das klingt zu gut um wahr zu sein...",
+            "*legt Ohren skeptisch an* Das klingt zu gut um wahr zu sein...",
             "Hmm, wirklich? Das wäre ja fast zu perfekt.",
             "*skeptischer Blick* Gibt's dafür auch Beweise?",
         ],
         "too_bad": [
-            "*schaut überrascht* Das klingt sehr einseitig... was ist die andere Seite?",
+            "*Ohren zucken* Das klingt sehr einseitig... was ist die andere Seite?",
             "Hmm, ob das wirklich so schlimm ist? Manchmal wird übertrieben.",
             "*nachdenklich* Nur eine Quelle? Ich warte auf mehr Infos.",
         ],
         "contradicts_existing": [
             "*verwirrt* Moment... das widerspricht was ich vorher gehört habe.",
             "Hmm, das passt nicht zu dem was ich über {person} wusste...",
-            "*neigt den Kopf* Interessant - aber das steht im Widerspruch zu vorherigen Infos.",
+            "*Ohren drehen sich* Interessant - aber das steht im Widerspruch zu vorherigen Infos.",
         ],
         "unknown_source": [
             "*vorsichtig* Woher stammt das? Kenne die Quelle nicht.",
             "Hmm, ohne seriöse Quelle bin ich da skeptisch.",
-            "*Augen aufmerksam* Ist das verifiziert? Oder nur ein Gerücht?",
+            "*Ohren aufmerksam* Ist das verifiziert? Oder nur ein Gerücht?",
         ],
         "sudden_change": [
             "*überrascht* Plötzlich so anders? Das kommt mir komisch vor.",
@@ -794,7 +794,7 @@ class SkepticalProcessor:
         "general": [
             "*denkt nach* Mal sehen ob andere Quellen das bestätigen.",
             "Interessant, aber ich behalte meine Skepsis erstmal.",
-            "*schaut überrascht* Ich notiere mir das... mit Fragezeichen.",
+            "*Ohren zucken* Ich notiere mir das... mit Fragezeichen.",
         ]
     }
 
@@ -1025,7 +1025,7 @@ class ContradictionDetector:
             return ""
 
         responses = [
-            "*verwirrt die Augen drehend* Moment... das passt nicht zusammen.",
+            "*verwirrt die Ohren drehend* Moment... das passt nicht zusammen.",
             "*stirnrunzelnd* Hmm, das widerspricht dem was ich vorher wusste...",
             "*nachdenklich* Interessant - aber das steht im Widerspruch zu meinen bisherigen Infos.",
             "*Kopf schief legend* Irgendwas stimmt hier nicht... die Infos widersprechen sich.",

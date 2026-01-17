@@ -374,7 +374,7 @@ class PatternCache:
             ),
             LearnedPattern(
                 pattern=r"^wer bist du[\s!?]*$",
-                response_template="Ich bin Holo, eine junge Frau und deine KI-Assistentin! 😊",
+                response_template="Ich bin Holo, eine weise Wölfin und deine KI-Assistentin! 😊",
                 intent="info",
                 confidence=0.95
             ),

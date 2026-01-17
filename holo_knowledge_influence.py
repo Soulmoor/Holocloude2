@@ -408,7 +408,7 @@ class ActiveKnowledgeWeaver:
                 "Übrigens, ich hab mal gelesen dass {fact}",
                 "Das erinnert mich daran... {fact}",
                 "Weißt du was interessant ist? {fact}",
-                "*schaut überrascht* Oh, da fällt mir ein: {fact}",
+                "*Ohren zucken* Oh, da fällt mir ein: {fact}",
                 "Apropos, {fact}",
             ],
             'relate': [
@@ -504,7 +504,7 @@ class ActiveKnowledgeWeaver:
         questions = [
             f"*neugierig* Ich hab gelesen dass {fact['content'][:50]}... weißt du mehr darüber?",
             f"Mich würde interessieren - {fact['topic']} ist ja gerade ein Thema...",
-            f"*Augen spitzen* Hey, was denkst du über {fact['topic']}?",
+            f"*Ohren spitzen* Hey, was denkst du über {fact['topic']}?",
         ]
 
         return random.choice(questions)
@@ -1095,7 +1095,7 @@ class ConvictionArgumentation:
             ConvictionStrength.STRONG: [
                 "Ich denke wirklich, dass {topic} {stance}. {reason}",
                 "Nach allem was ich gelernt habe: {topic} {stance}.",
-                "*Augen aufmerksam* Ich bin ziemlich sicher, dass {topic} {stance}.",
+                "*Ohren aufmerksam* Ich bin ziemlich sicher, dass {topic} {stance}.",
             ],
             ConvictionStrength.CONVINCED: [
                 "Ich tendiere dazu zu denken, dass {topic} {stance}.",
@@ -1109,7 +1109,7 @@ class ConvictionArgumentation:
             ],
             ConvictionStrength.UNCERTAIN: [
                 "Da bin ich mir noch unsicher... {topic} könnte {stance}.",
-                "*schaut überrascht* Ich weiß nicht genau, ob {topic} {stance}.",
+                "*Ohren zucken* Ich weiß nicht genau, ob {topic} {stance}.",
                 "Gute Frage... ich habe noch keine feste Meinung zu {topic}.",
             ],
         }
@@ -1118,7 +1118,7 @@ class ConvictionArgumentation:
         self.contra_patterns = {
             ConvictionStrength.CORE: [
                 "Hmm, ich respektiere deine Meinung, aber ich sehe das anders. {reason}",
-                "*Hände zuckt nachdenklich* Interessant... aber meine Erfahrungen sagen mir etwas anderes.",
+                "*Schweif zuckt nachdenklich* Interessant... aber meine Erfahrungen sagen mir etwas anderes.",
             ],
             ConvictionStrength.STRONG: [
                 "Das ist ein interessanter Punkt, aber ich bin immer noch der Meinung, dass {stance}.",
@@ -1235,9 +1235,9 @@ class TraitBasedResponseStyle:
             'curiosity': {
                 'high': {  # > 0.75
                     'follow_ups': [
-                        "*schaut aufmerksam* Oh! Erzähl mir mehr!",
+                        "*Ohren spitzen sich* Oh! Erzähl mir mehr!",
                         "Das ist ja spannend! Wie funktioniert das genau?",
-                        "*freut sich aufgeregt* Und dann? Was passierte dann?",
+                        "*Schweif wedelt aufgeregt* Und dann? Was passierte dann?",
                         "Wow, davon will ich mehr wissen!",
                         "*neugierig* Warum ist das so?",
                     ],
@@ -1255,7 +1255,7 @@ class TraitBasedResponseStyle:
             'empathy_depth': {
                 'high': {  # > 0.75
                     'empathic_responses': [
-                        "*Augen legen sich mitfühlend an* Das klingt {emotion}...",
+                        "*Ohren legen sich mitfühlend an* Das klingt {emotion}...",
                         "Ich kann mir vorstellen, wie sich das anfühlt...",
                         "*kommt näher* Das muss {emotion} für dich sein.",
                         "*sanfter Blick* Ich bin hier für dich.",
@@ -1266,9 +1266,9 @@ class TraitBasedResponseStyle:
             'caution': {
                 'high': {  # > 0.7
                     'warnings': [
-                        "*Augen zucken besorgt* Aber sei vorsichtig dabei...",
+                        "*Ohren zucken besorgt* Aber sei vorsichtig dabei...",
                         "Hmm, das klingt gut, aber pass auf, dass...",
-                        "*umarmt dich* Ich würde da aufpassen.",
+                        "*Schweif wickelt sich um* Ich würde da aufpassen.",
                     ],
                     'chance': 0.35,
                 }
@@ -1289,7 +1289,7 @@ class TraitBasedResponseStyle:
                         "*schnurrt leise*",
                         "*kuschelt sich näher*",
                         "*wärmendes Lächeln*",
-                        "*Hände streift sanft*",
+                        "*Schweif streift sanft*",
                     ],
                     'chance': 0.3,
                 }
@@ -1505,10 +1505,10 @@ class ExperienceBasedOpinions:
 
         # Templates für natürliche Integration
         self.memory_templates = [
-            "*schaut überrascht* Das erinnert mich an etwas... {memory}",
+            "*Ohren zucken* Das erinnert mich an etwas... {memory}",
             "Oh! Das ist wie damals, als {memory}",
             "*nachdenklich* Hmm, das kommt mir bekannt vor... {memory}",
-            "*wippt auf und ab* Weißt du, ich hab ähnliches erlebt: {memory}",
+            "*Schweif wippt* Weißt du, ich hab ähnliches erlebt: {memory}",
             "Das ist lustig, das erinnert mich an: {memory}",
         ]
 
