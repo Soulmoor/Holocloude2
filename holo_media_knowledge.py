@@ -771,8 +771,8 @@ class MediaKnowledgeBase:
         """
         if context == "watching":
             intros = [
-                f"*Ohren spitzen sich* Ich schaue gerade **{anime.title}**!",
-                f"*wedelt* Kennst du **{anime.title}**? Ich bin gerade mittendrin!",
+                f"*schaut aufmerksam* Ich schaue gerade **{anime.title}**!",
+                f"*freut sich* Kennst du **{anime.title}**? Ich bin gerade mittendrin!",
                 f"*schaut vom Bildschirm auf* Oh! Ich schaue **{anime.title}**!",
             ]
 
@@ -811,7 +811,7 @@ class MediaKnowledgeBase:
         if context == "playing":
             intros = [
                 f"*drückt Controller-Buttons* Ich spiele gerade **{game.title}**!",
-                f"*wedelt aufgeregt* Ich bin gerade in **{game.title}** vertieft!",
+                f"*freut sich aufgeregt* Ich bin gerade in **{game.title}** vertieft!",
                 f"*schaut kurz auf* Oh! Ich zocke **{game.title}**!",
             ]
 
@@ -864,7 +864,7 @@ class MediaKnowledgeBase:
                     return f"Die Hauptcharaktere in **{anime.title}**:\n\n{chars}"
 
                 elif any(w in q for w in ["gut", "empfehl", "warum", "schau"]):
-                    return f"*Ohren spitzen sich* {anime.why_i_love_it}\n\n💡 {random.choice(anime.fun_facts) if anime.fun_facts else ''}"
+                    return f"*schaut aufmerksam* {anime.why_i_love_it}\n\n💡 {random.choice(anime.fun_facts) if anime.fun_facts else ''}"
 
                 elif any(w in q for w in ["fakt", "fact", "trivia", "wusstest"]):
                     if anime.fun_facts:
@@ -884,7 +884,7 @@ class MediaKnowledgeBase:
                         return f"Tipps für **{game.title}**:\n\n" + "\n".join([f"• {t}" for t in game.tips])
 
                 elif any(w in q for w in ["gut", "empfehl", "warum", "spiel"]):
-                    return f"*wedelt* {game.why_i_love_it}"
+                    return f"*freut sich* {game.why_i_love_it}"
 
                 return self.generate_game_talk(game, "discussing")
 

@@ -603,12 +603,12 @@ class HoloWebSocket {
         this.ws = new WebSocket(this.url);
         
         this.ws.onopen = () => {
-            console.log('🐺 Holo WebSocket verbunden');
+            console.log('😊 Holo WebSocket verbunden');
             if (this.options.onConnect) this.options.onConnect();
         };
         
         this.ws.onclose = () => {
-            console.log('🐺 Holo WebSocket getrennt');
+            console.log('😊 Holo WebSocket getrennt');
             if (this.options.onDisconnect) this.options.onDisconnect();
             
             if (this.options.reconnect) {
@@ -617,7 +617,7 @@ class HoloWebSocket {
         };
         
         this.ws.onerror = (error) => {
-            console.error('🐺 WebSocket Fehler:', error);
+            console.error('😊 WebSocket Fehler:', error);
         };
         
         this.ws.onmessage = (event) => {
@@ -755,7 +755,7 @@ async def run_test_server(host: str = "localhost", port: int = 8765):
         finally:
             handler.unregister_client(client_id)
     
-    print(f"🐺 Holo WebSocket Test-Server auf ws://{host}:{port}")
+    print(f"😊 Holo WebSocket Test-Server auf ws://{host}:{port}")
     print(f"   Sende: {{\"type\": \"user_message\", \"data\": {{\"text\": \"Hallo\"}}}}")
     
     async with websockets.serve(handle_client, host, port):
@@ -775,7 +775,7 @@ if __name__ == "__main__":
     )
     
     print("=" * 60)
-    print("🐺 HOLO WEBSOCKET HANDLER")
+    print("😊 HOLO WEBSOCKET HANDLER")
     print("=" * 60)
     
     if "--server" in sys.argv:
@@ -806,7 +806,7 @@ if __name__ == "__main__":
                     chars_received.append(data["data"]["char"])
                     print(data["data"]["char"], end="", flush=True)
             
-            test_text = "Hallo! Ich bin Holo... *wedelt* 🐺"
+            test_text = "Hallo! Ich bin Holo... *freut sich* 😊"
             print(f"Streaming: '{test_text}'\n")
             print("Output: ", end="")
             

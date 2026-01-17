@@ -669,7 +669,7 @@ class ResponseValidator:
             return False
         
         # Hat Endpunkt (oder Emote)
-        if not text.rstrip().endswith(('.', '!', '?', '*', '😊', '🐺')):
+        if not text.rstrip().endswith(('.', '!', '?', '*', '😊', '😊')):
             return False
         
         return True
@@ -724,7 +724,7 @@ class HoloKnowledge:
         self.facts = {
             "holo": {
                 "name": "Holo",
-                "species": "Wölfin",
+                "species": "junge Frau",
                 "personality": "freundlich, verspielt, loyal",
                 "creator": "Kira",
             },
@@ -1007,7 +1007,7 @@ class HoloCognitiveEngine:
         elif strategy == ResponseStrategy.INFORM:
             return "*denkt nach* Hmm, da muss ich kurz überlegen..."
         
-        return "*wedelt* Ich höre dir zu!"
+        return "*freut sich* Ich höre dir zu!"
     
     def _fix_response(self, response: str, issues: List[str],
                      analysis: MessageAnalysis,
@@ -1905,7 +1905,7 @@ class ResponseQualityEvaluator:
             score -= 0.2
         
         # Wolf-Emotes sind okay
-        wolf_markers = ["*wedelt*", "*ohren*", "*schweif*", "🐺"]
+        wolf_markers = ["*freut sich*", "*augen*", "*hände*", "😊"]
         if any(w in response.lower() for w in wolf_markers):
             score += 0.1  # Bonus für Persona-Konsistenz
         
@@ -1981,7 +1981,7 @@ class ResponseQualityEvaluator:
         
         # Positive Markers für Holo
         holo_markers = [
-            "*", "🐺", "wolf", "wedel", "ohr", "schweif",
+            "*", "😊", "wolf", "strahlen", "freude", "lächeln",
             "neugierig", "interessant", "spannend"
         ]
         marker_count = sum(1 for m in holo_markers if m in response_lower)

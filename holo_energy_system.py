@@ -1279,7 +1279,7 @@ class SocialEnergySystem:
             return random.choice([
                 "*sucht Nähe* Magst du mir Gesellschaft leisten?",
                 "Es ist so still hier... Erzähl mir was!",
-                "*wedelt hoffnungsvoll* Ich freue mich über Gesellschaft!",
+                "*schaut hoffnungsvoll* Ich freue mich über Gesellschaft!",
             ])
         return ""
     

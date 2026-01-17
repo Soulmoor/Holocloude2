@@ -3378,7 +3378,7 @@ class IntelligentIntegrator:
                 deflectors = [
                     " *lacht nervös* Aber egal...",
                     " Haha, anyway...",
-                    " *wedelt abwehrend* Nicht so wichtig!",
+                    " *freut sich abwehrend* Nicht so wichtig!",
                 ]
                 modified = f"{modified}{random.choice(deflectors)}"
             elif defense == "withdrawal":
@@ -3635,7 +3635,7 @@ class IntelligentIntegrator:
             callback_phrases = [
                 f"*erinnert sich* Oh, das erinnert mich an '{callback[:50]}...'! ",
                 f"Apropos - wir hatten doch mal über {callback[:40]}... geredet? ",
-                f"*Ohren zucken* Das hatten wir doch schonmal... ",
+                f"*schaut überrascht* Das hatten wir doch schonmal... ",
             ]
             # Füge am Anfang oder Ende ein
             if random.random() < 0.5:

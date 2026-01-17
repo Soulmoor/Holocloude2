@@ -511,7 +511,7 @@ class HoloDeviceAgent:
 def setup_wizard():
     """Interaktiver Setup-Assistent"""
     print("\n" + "="*50)
-    print("🐺 HOLO DEVICE AGENT - Setup Wizard")
+    print("😊 HOLO DEVICE AGENT - Setup Wizard")
     print("="*50 + "\n")
     
     print("Beantworte ein paar Fragen um den Agent zu konfigurieren:\n")

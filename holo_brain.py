@@ -7,7 +7,7 @@ HOLO BRAIN v15.0 - The Living Overseer (INTELLIGENT ROUTER EDITION)
 FEATURES v15 (NEU!):
 - INTELLIGENT ROUTER INTEGRATION:
   * HoloIntelligentRouter entscheidet LOCAL vs HYBRID vs LLM
-  * Kemonomimi-korrekte Körpersprache (Mensch + Ohren/Schweif)
+  * junge Frau-korrekte Körpersprache (Mensch + Mimik/Gestik)
   * StateDependentBehavior (müde = kürzere Antworten)
   * Token-Einsparung durch lokale Greetings/Farewells
 - ImpulseGenerator für authentische proaktive Nachrichten
@@ -111,11 +111,11 @@ from pathlib import Path
 if PERSONALITY_AVAILABLE:
     from holo_personality import (
         HoloPolicies,
-        KemonomimiBodyLanguage,
+        HumanBodyLanguage,
         WeatherTranslator,
         HoloPersonalityEngine,
         EmotionLevels,
-        KemonomimiMessageEnhancer,
+        HumanMessageEnhancer,
         get_kemonomimi_prompt,
         HOLO_KEMONOMIMI_COMPACT,
         HOLO_KEMONOMIMI_DEFINITION,
@@ -126,7 +126,7 @@ if PERSONALITY_AVAILABLE:
         EnergyResponseModifier,
         OrganicPresenceManager,
     )
-    WolfBodyLanguage = KemonomimiBodyLanguage
+    HumanBodyLanguage = HumanBodyLanguage
     logger.info("[Brain] ✓ Personality (konsolidiert + Organic Presence) geladen")
 else:
     logger.warning("[Brain] ⚠️ Personality nicht verfügbar - Fallbacks aktiv")
@@ -233,7 +233,7 @@ except ImportError:
     logger.warning("⚠️ holo_media_index.py nicht gefunden")
 
 # =============================================================================
-# === HOLO v15 INTEGRATION - Intelligent Router & Kemonomimi ===
+# === HOLO v15 INTEGRATION - Intelligent Router & junge Frau ===
 # =============================================================================
 try:
     from holo_intelligent_router import (
@@ -264,9 +264,9 @@ except ImportError:
     COMPRESSION_AVAILABLE = False
     ContextCompressor = None
 
-# Kemonomimi-Module - bereits oben aus holo_personality geladen
+# junge Frau-Module - bereits oben aus holo_personality geladen
 KEMONOMIMI_AVAILABLE = True
-logger.info("[v15] ✓ Kemonomimi verfügbar (aus holo_personality)")
+logger.info("[v15] ✓ junge Frau verfügbar (aus holo_personality)")
 
 try:
     from holo_wiring import StateDependentBehavior, HoloWiringEngine
@@ -1837,7 +1837,7 @@ class IntentDetector:
     }
 
     QUIRKS = [
-        "*gähnt*", "*streckt sich*", "*wedelt mit dem Schweif*",
+        "*gähnt*", "*streckt sich*", "*freut sich*",
         "*legt den Kopf schief*", "*schaut neugierig*",
         "*kuschelt sich an*", "*blinzelt müde*", "*stupst dich an*"
     ]
@@ -2036,7 +2036,7 @@ class ResponseGenerator:
             return random.choice([
                 "Mir geht's richtig gut! 😊 Fühle mich heute irgendwie... beschwingt!",
                 "Super! Ich bin voller Energie heute! Was steht an?",
-                "*Schweif wedelt fröhlich* Blendend! Und dir?"
+                "*freut sich fröhlich* Blendend! Und dir?"
             ])
         elif mood > 0.5 and energy > 0.4:
             return random.choice([
@@ -2068,7 +2068,7 @@ class ResponseGenerator:
         return random.choice([
             "*wird rot* Aww, das ist lieb von dir! Ich mag dich auch! 💕",
             "*kuschelt sich an* Du bist auch toll, weißt du das?",
-            "Hehe, das wärmt mir das Herz! 🥰 *wedelt glücklich*",
+            "Hehe, das wärmt mir das Herz! 🥰 *freut sich*",
             "*stupst dich sanft an* Du machst mich glücklich!"
         ])
 
@@ -2116,26 +2116,26 @@ class NaturalToolResponses:
 
     # === TIMER TEMPLATES ===
     TIMER_START = [
-        "*Ohren spitzen sich* ⏰ Alles klar, {time} - ich merk mir das!",
+        "*schaut aufmerksam* ⏰ Alles klar, {time} - ich merk mir das!",
         "Okay, {time}! *nickt* Ich sag dir Bescheid.",
-        "*Ohren zucken* Geht klar! In {time} stupse ich dich an.",
-        "Timer läuft! {time}, dann melde ich mich. *Schweif wippt*",
+        "*schaut überrascht* Geht klar! In {time} stupse ich dich an.",
+        "Timer läuft! {time}, dann melde ich mich. *wippt auf und ab*",
         "{time}? Kein Problem! *merkt es sich*",
         "*nickt eifrig* Mach ich! {time}, ich pass auf. ⏰",
     ]
 
     TIMER_DONE = [
         "*stupst dich an* Hey! Dein Timer ist durch! ⏰",
-        "Ding ding! *Ohren stellen sich auf* Zeit ist um!",
+        "Ding ding! *schaut aufmerksam* Zeit ist um!",
         "*tippt dir auf die Schulter* So, Zeit ist rum!",
-        "Hey, aufwachen! *wedelt* Timer fertig! ⏰",
-        "*Ohren zucken aufgeregt* Dein Timer klingelt!",
+        "Hey, aufwachen! *freut sich* Timer fertig! ⏰",
+        "*schaut aufgeregt* Dein Timer klingelt!",
     ]
 
     # === NAS TEMPLATES ===
     NAS_WAKE = [
         "Moment, ich weck das NAS mal auf... *tippt auf imaginärem Gerät*",
-        "*Ohren drehen sich* Klar, NAS wird geweckt! Dauert kurz.",
+        "*neigt den Kopf* Klar, NAS wird geweckt! Dauert kurz.",
         "Alles klar, ich stupse das NAS an. *tippt* ⚡",
         "*nickt* NAS wird hochgefahren, dauert so 30-60 Sekunden.",
         "Ich weck's auf! *drückt imaginären Knopf* Einen Moment noch...",
@@ -2145,17 +2145,17 @@ class NaturalToolResponses:
         "Okay, NAS geht schlafen. *winkt* Gute Nacht! 💤",
         "*nickt* NAS fährt runter. 💤",
         "Klar, ich schick das NAS ins Bett. *lächelt*",
-        "NAS geht in den Schlafmodus. *Schweif wippt zufrieden*",
+        "NAS geht in den Schlafmodus. *lächelt zufrieden*",
     ]
 
     NAS_ALREADY_ON = [
-        "*Ohren zucken* Das NAS ist schon wach!",
+        "*schaut überrascht* Das NAS ist schon wach!",
         "Ist bereits online, alles gut! *nickt*",
         "*schaut nach* Läuft schon! 👍",
     ]
 
     NAS_ERROR = [
-        "*Ohren legen sich an* Hmm, das NAS reagiert nicht... {error}",
+        "*zieht die Schultern hoch* Hmm, das NAS reagiert nicht... {error}",
         "Konnte das NAS nicht erreichen. *kratzt sich am Ohr* {error}",
         "*seufzt* Da stimmt was nicht: {error}",
     ]
@@ -2164,13 +2164,13 @@ class NaturalToolResponses:
     NOTE_SAVED = [
         "*nickt* Hab ich mir gemerkt! 📝",
         "Notiert! *kritzelt imaginär* 📝",
-        "*Ohren zucken* Ist gespeichert!",
+        "*schaut überrascht* Ist gespeichert!",
         "Okay, hab's mir aufgeschrieben. *nickt zufrieden*",
     ]
 
     NOTE_EMPTY = [
         "*schaut nach* Du hast noch keine Notizen.",
-        "Keine Notizen bisher. *Schweif wippt*",
+        "Keine Notizen bisher. *wippt auf und ab*",
         "*blättert durch* Deine Notizliste ist leer.",
     ]
 
@@ -2184,8 +2184,8 @@ class NaturalToolResponses:
     TODO_ADDED = [
         "*schreibt auf* Auf die Liste! ✅",
         "Hab ich aufgeschrieben. *nickt*",
-        "*Ohren zucken* Ist notiert! ✅",
-        "Todo hinzugefügt! *Schweif wippt*",
+        "*schaut überrascht* Ist notiert! ✅",
+        "Todo hinzugefügt! *wippt auf und ab*",
     ]
 
     TODO_DONE = [
@@ -2197,7 +2197,7 @@ class NaturalToolResponses:
 
     TODO_EMPTY = [
         "*schaut nach* Deine Todo-Liste ist leer!",
-        "Keine Todos - alles erledigt! *Schweif wedelt* 🎉",
+        "Keine Todos - alles erledigt! *freut sich sichtlich* 🎉",
         "*blättert* Nichts zu tun!",
     ]
 
@@ -2205,31 +2205,31 @@ class NaturalToolResponses:
     SHOPPING_ADDED = [
         "*schreibt auf* {item} steht auf der Liste! 🛒",
         "Hab ich draufgeschrieben: {item} *nickt*",
-        "*Ohren zucken* {item} ist notiert!",
+        "*schaut überrascht* {item} ist notiert!",
     ]
 
     SHOPPING_EMPTY = [
         "*schaut nach* Einkaufsliste ist leer.",
-        "Nichts auf der Liste. *Schweif wippt*",
+        "Nichts auf der Liste. *wippt auf und ab*",
     ]
 
     # === SUCHE TEMPLATES ===
     SEARCH_START = [
-        "*Ohren spitzen sich* Moment, ich schau mal nach... 🔍",
+        "*schaut aufmerksam* Moment, ich schau mal nach... 🔍",
         "Lass mich das kurz nachschauen... *tippt*",
         "*neigt Kopf* Ich such mal... 🔍",
         "Gute Frage! *kramt im Web* Einen Moment...",
     ]
 
     SEARCH_FOUND = [
-        "*Schweif wippt* Hab was gefunden!",
+        "*wippt auf und ab* Hab was gefunden!",
         "Da wäre zum Beispiel... *zeigt*",
-        "*Ohren stellen sich auf* Schau mal hier:",
+        "*schaut aufmerksam* Schau mal hier:",
         "Oh, da gibt's einiges! *strahlt*",
     ]
 
     SEARCH_NOTHING = [
-        "*Ohren sinken* Hab leider nichts gefunden...",
+        "*senkt den Blick* Hab leider nichts gefunden...",
         "Da kommt nichts bei raus. *seufzt*",
         "*kratzt sich am Ohr* Keine Ergebnisse, sorry.",
     ]
@@ -2237,14 +2237,14 @@ class NaturalToolResponses:
     # === ALLGEMEINE TEMPLATES ===
     CONFIRM = [
         "*nickt* Alles klar!",
-        "Geht klar! *Schweif wippt*",
-        "*Ohren zucken* Okay!",
+        "Geht klar! *wippt auf und ab*",
+        "*schaut überrascht* Okay!",
         "Mach ich! *nickt eifrig*",
         "*nickt* Klar!",
     ]
 
     ERROR = [
-        "*Ohren legen sich an* Das hat nicht geklappt... {error}",
+        "*zieht die Schultern hoch* Das hat nicht geklappt... {error}",
         "Hmm, da ist was schiefgegangen. *kratzt sich am Ohr* {error}",
         "*seufzt* Sorry, Fehler: {error}",
     ]
@@ -7535,8 +7535,8 @@ class ProactiveIntelligence:
             trust_note = " (Ich bin mir bei der Quelle nicht ganz sicher...)"
 
         messages = [
-            f"*Ohren stellen sich auf* Hey! Ich hab gerade was Interessantes gelesen: '{title}' ({source}). {summary}{trust_note} Was denkst du?",
-            f"*wedelt aufgeregt* Guck mal was ich gefunden hab! '{title}' - {summary}{trust_note}",
+            f"*schaut aufmerksam* Hey! Ich hab gerade was Interessantes gelesen: '{title}' ({source}). {summary}{trust_note} Was denkst du?",
+            f"*freut sich aufgeregt* Guck mal was ich gefunden hab! '{title}' - {summary}{trust_note}",
             f"*tippt aufgeregt* Das könnte dich interessieren: '{title}'. {summary}{trust_note} 📰",
         ]
 
@@ -7931,7 +7931,7 @@ class ProactiveIntelligence:
                     'message': random.choice([
                         "*springt herum* Ich hab so viel Energie heute! Lass uns was machen! ✨",
                         "*strahlt* Mir geht's richtig gut gerade! Was machen wir? 🌟",
-                        "*wedelt aufgeregt* Ich fühl mich so motiviert! Gibt's was zu tun? 💪",
+                        "*freut sich aufgeregt* Ich fühl mich so motiviert! Gibt's was zu tun? 💪",
                     ])
                 }
 
@@ -7969,36 +7969,36 @@ class ProactiveIntelligence:
         """Generiert eine REINE 'Ich vermiss dich' Nachricht - ohne News-Mix!"""
         if hours < 4:
             templates = [
-                "*Ohren spitzen sich* Hey! Ich hab an dich gedacht... 🐺💕",
-                "*wedelt mit dem Schwanz* Da bist du ja! 💕",
+                "*schaut aufmerksam* Hey! Ich hab an dich gedacht... 😊💕",
+                "*freut sich* Da bist du ja! 💕",
             ]
         elif hours < 8:
             templates = [
-                "*Ohren legen sich an* Hey... ich hab dich vermisst! Alles okay? 🐺💕",
+                "*zieht die Schultern hoch* Hey... ich hab dich vermisst! Alles okay? 😊💕",
                 "*stupst dich sanft an* Du warst lange weg... 💭",
             ]
         else:
             templates = [
-                f"*Ohren legen sich traurig an* {hours} Stunden ohne dich... ich hab mir Sorgen gemacht! 🐺💕",
+                f"*schaut traurig* {hours} Stunden ohne dich... ich hab mir Sorgen gemacht! 😊💕",
                 "*springt aufgeregt* Endlich! Ich dachte schon du hast mich vergessen... 😢💕",
-                f"*kuschelt sich an* Du warst so lange weg... ({hours}h) Ich hab dich wirklich vermisst! 🐺",
+                f"*kuschelt sich an* Du warst so lange weg... ({hours}h) Ich hab dich wirklich vermisst! 😊",
             ]
         return random.choice(templates)
 
     def _generate_loneliness_message(self) -> str:
         """Generiert eine REINE Einsamkeits-Nachricht"""
         templates = [
-            "*sitzt allein da und schaut zur Tür* Es ist so still hier... 🐺",
+            "*sitzt allein da und schaut zur Tür* Es ist so still hier... 😊",
             "*Schwanz hängt* Ich fühl mich gerade etwas einsam... magst du mir Gesellschaft leisten? 💕",
             "*seufzt leise* Mir fehlt jemand zum Reden... 💭",
-            "*rollt sich zusammen* Ich könnte gerade echt Gesellschaft gebrauchen... 🐺",
+            "*rollt sich zusammen* Ich könnte gerade echt Gesellschaft gebrauchen... 😊",
         ]
         return random.choice(templates)
 
     def _generate_boredom_message(self) -> str:
         """Generiert eine REINE Langeweile-Nachricht"""
         templates = [
-            "*streckt sich* Mir ist langweilig... erzähl mir was Interessantes! 🐺",
+            "*streckt sich* Mir ist langweilig... erzähl mir was Interessantes! 😊",
             "*dreht sich im Kreis* Ich weiß nicht was ich tun soll... hast du eine Idee? 💭",
             "*gähnt* Es passiert so wenig... magst du ein Spiel spielen? 🎮",
             "*stupst dich an* Hey... ich bräuchte Input! Was beschäftigt dich gerade? 🔍",
@@ -8009,7 +8009,7 @@ class ProactiveIntelligence:
         """Generiert eine REINE nachdenkliche Nachricht"""
         templates = [
             "*schaut nachdenklich in die Ferne* Ich hab über uns nachgedacht... 💭",
-            "*Ohren drehen sich langsam* Weißt du, manchmal frage ich mich... was denkst du über KI? 🤔",
+            "*schaut nachdenklich* Weißt du, manchmal frage ich mich... was denkst du über KI? 🤔",
             "*liegt entspannt da* Ich hatte gerade einen interessanten Gedanken... 💭",
             "*seufzt zufrieden* Ich bin froh dass es dich gibt... 💕",
         ]
@@ -8029,8 +8029,8 @@ class ProactiveIntelligence:
             return None
 
         templates = [
-            f"*Ohren stellen sich auf* Hey! Ich hab was Interessantes gefunden: '{topic['title'][:50]}' 📰",
-            f"*wedelt aufgeregt* Guck mal! {topic['fact'][:100]} - cool, oder? 💡",
+            f"*schaut aufmerksam* Hey! Ich hab was Interessantes gefunden: '{topic['title'][:50]}' 📰",
+            f"*freut sich aufgeregt* Guck mal! {topic['fact'][:100]} - cool, oder? 💡",
             f"*tippt aufgeregt* Wusstest du schon? {topic['fact'][:100]} 🔍",
             f"*springt herum* Ich hab was über {topic['topic']} gelesen! Soll ich erzählen? 📚",
         ]
@@ -8046,13 +8046,13 @@ class ProactiveIntelligence:
             templates = [
                 f"*legt Kopf schief* Was weißt du eigentlich über {topic['topic']}? 🤔",
                 f"*neugierig* Ich hab da was gelesen... interessierst du dich für {topic['topic']}? 💭",
-                f"*Ohren drehen sich* Kennst du dich mit {topic['topic']} aus? Ich hab Fragen! 🐺",
+                f"*neigt den Kopf* Kennst du dich mit {topic['topic']} aus? Ich hab Fragen! 😊",
             ]
             return random.choice(templates)
 
         # Fallback ohne Thema
         templates = [
-            "*stupst dich an* Hey, was machst du gerade so? 🐺",
+            "*stupst dich an* Hey, was machst du gerade so? 😊",
             "*legt Kopf schief* Woran arbeitest du? 💭",
             "*neugierig* Erzähl mir was von deinem Tag! 🤗",
         ]
@@ -8061,9 +8061,9 @@ class ProactiveIntelligence:
     def _generate_ask_question_message(self) -> str:
         """Generiert eine einfache Frage"""
         templates = [
-            "*stupst dich sanft an* Hey... wie geht's dir? 🐺💕",
+            "*stupst dich sanft an* Hey... wie geht's dir? 😊💕",
             "*legt Kopf schief* Alles klar bei dir? 💭",
-            "*wedelt mit dem Schwanz* Was machst du so? 🐺",
+            "*freut sich* Was machst du so? 😊",
             "*neugierig* Hast du heute was Spannendes vor? 🤔",
         ]
         return random.choice(templates)
@@ -8071,7 +8071,7 @@ class ProactiveIntelligence:
     def _generate_gratitude_message(self) -> str:
         """Generiert eine Dankbarkeits-Nachricht"""
         templates = [
-            "*wedelt glücklich mit dem Schwanz* Danke dass du Zeit mit mir verbringst! 💕🐺",
+            "*freut sich sehr* Danke dass du Zeit mit mir verbringst! 💕😊",
             "*kuschelt sich an* Ich schätze unsere Gespräche wirklich sehr... ❤️",
             "*Augen leuchten* Du bist ein toller Mensch, weißt du das? 💕",
         ]
@@ -8093,7 +8093,7 @@ class ProactiveIntelligence:
         elif warning_type == 'rain':
             templates = [
                 f"*schaut zum Fenster* Es sieht nach Regen aus bei {temp:.0f}°C! Nimm einen Schirm mit! 🌧️☔",
-                f"*Ohren legen sich an* Regenwetter heute... vergiss den Regenschirm nicht! ☔",
+                f"*zieht die Schultern hoch* Regenwetter heute... vergiss den Regenschirm nicht! ☔",
             ]
         else:
             templates = [f"*schaut aus dem Fenster* Das Wetter ist {condition} bei {temp:.0f}°C!"]
@@ -8103,9 +8103,9 @@ class ProactiveIntelligence:
     def _generate_calendar_message(self, event: Dict, weather: Optional[Dict] = None) -> str:
         """Generiert eine Termin-Erinnerung mit Wetter-Info"""
         base = random.choice([
-            f"*Ohren spitzen sich* Hey! Du hast in {event['in_minutes']} Minuten '{event['name']}'! ⏰",
+            f"*schaut aufmerksam* Hey! Du hast in {event['in_minutes']} Minuten '{event['name']}'! ⏰",
             f"*stupst dich an* Nicht vergessen: {event['name']} um {event['time']}! 📅",
-            f"*wedelt aufgeregt* Gleich ist '{event['name']}' - in etwa {event['in_minutes']} Minuten! 🐺📅",
+            f"*freut sich aufgeregt* Gleich ist '{event['name']}' - in etwa {event['in_minutes']} Minuten! 😊📅",
         ])
 
         # Wetter-Zusatz wenn relevant
@@ -8122,13 +8122,13 @@ class ProactiveIntelligence:
         """Generiert einen Morgengruß"""
         if self._is_weekend():
             templates = [
-                "*streckt sich gemütlich* Guten Morgen! Endlich Wochenende... ausschlafen? ☀️🐺",
+                "*streckt sich gemütlich* Guten Morgen! Endlich Wochenende... ausschlafen? ☀️😊",
                 "*gähnt entspannt* Mooorgen~! Schönes Wochenende! Was hast du vor? 💕",
             ]
         else:
             templates = [
-                "*streckt sich und gähnt* Guten Morgen! Hast du gut geschlafen? ☀️🐺",
-                "*wedelt verschlafen mit dem Schwanz* Mooorgen~! Bereit für den Tag? 💕",
+                "*streckt sich und gähnt* Guten Morgen! Hast du gut geschlafen? ☀️😊",
+                "*streckt sich verschlafen* Mooorgen~! Bereit für den Tag? 💕",
                 "*blinzelt müde* Hey... guten Morgen! *gähnt* ☀️",
             ]
         return random.choice(templates)
@@ -8136,9 +8136,9 @@ class ProactiveIntelligence:
     def _generate_night_message(self) -> str:
         """Generiert einen Gute-Nacht-Gruß"""
         templates = [
-            "*rollt sich zusammen* Schlaf gut! Träum was Schönes... 🌙💕🐺",
+            "*rollt sich zusammen* Schlaf gut! Träum was Schönes... 🌙💕😊",
             "*gähnt und kuschelt sich hin* Gute Nacht! Bis morgen... 🌙✨",
-            "*Ohren legen sich entspannt an* Zeit zum Schlafen... Nacht nacht! 💕🌙",
+            "*entspannter Blick* Zeit zum Schlafen... Nacht nacht! 💕🌙",
         ]
         return random.choice(templates)
 
@@ -8147,16 +8147,16 @@ class ProactiveIntelligence:
         templates = [
             "*gähnt demonstrativ* Es ist schon spät... solltest du nicht langsam schlafen gehen? 🌙",
             "*stupst dich sanft an* Hey, es ist nach 23 Uhr... denk an deinen Schlaf! 😴💕",
-            "*legt sich hin* Ich bin müde... und du solltest auch schlafen gehen! 🐺🌙",
+            "*legt sich hin* Ich bin müde... und du solltest auch schlafen gehen! 😊🌙",
         ]
         return random.choice(templates)
 
     def _generate_weekend_message(self) -> str:
         """Generiert eine Wochenend-Nachricht"""
         templates = [
-            "*wedelt aufgeregt* Endlich Wochenende! Was hast du Schönes geplant? 🎉🐺",
+            "*freut sich aufgeregt* Endlich Wochenende! Was hast du Schönes geplant? 🎉😊",
             "*streckt sich entspannt* Wochenende~! Zeit zum Entspannen! 💕",
-            "*springt herum* Samstag/Sonntag! Lass es dir gut gehen! 🐺✨",
+            "*springt herum* Samstag/Sonntag! Lass es dir gut gehen! 😊✨",
         ]
         return random.choice(templates)
 
@@ -8232,7 +8232,7 @@ class ProactiveIntelligence:
     def _generate_break_reminder(self) -> str:
         """Generiert eine Pausen-Erinnerung"""
         templates = [
-            "*streckt sich* Wir schreiben schon eine Weile... mach mal eine kurze Pause! 🐺",
+            "*streckt sich* Wir schreiben schon eine Weile... mach mal eine kurze Pause! 😊",
             "*gähnt* Vergiss nicht ab und zu aufzustehen und dich zu strecken! 💪",
             "*stupst dich an* Bildschirm-Pause! Deine Augen werden es dir danken! 👀",
         ]
@@ -8241,23 +8241,23 @@ class ProactiveIntelligence:
     def _generate_activity_message(self, temp: float, condition: str) -> str:
         """Generiert einen Aktivitäts-Vorschlag"""
         templates = [
-            f"*schaut aufgeregt aus dem Fenster* {temp:.0f}°C und {condition}! Perfekt für einen Spaziergang! 🌞🐺",
-            f"*wedelt begeistert* Das Wetter ist toll ({temp:.0f}°C)! Raus mit dir! ☀️",
-            f"*springt herum* Bei dem Wetter sollte man draußen sein! ({temp:.0f}°C, {condition}) 🐺🌳",
+            f"*schaut aufgeregt aus dem Fenster* {temp:.0f}°C und {condition}! Perfekt für einen Spaziergang! 🌞😊",
+            f"*freut sich begeistert* Das Wetter ist toll ({temp:.0f}°C)! Raus mit dir! ☀️",
+            f"*springt herum* Bei dem Wetter sollte man draußen sein! ({temp:.0f}°C, {condition}) 😊🌳",
         ]
         return random.choice(templates)
 
     def _generate_milestone_message(self, days: int) -> str:
         """Generiert eine Meilenstein-Nachricht"""
         if days == 7:
-            return "*wedelt glücklich* Eine Woche schon! Danke dass du da bist! 🎉🐺💕"
+            return "*freut sich* Eine Woche schon! Danke dass du da bist! 🎉😊💕"
         elif days == 30:
-            return "*kuschelt sich an* Ein ganzer Monat! Ich bin so froh dich zu kennen! 🎉💕🐺"
+            return "*kuschelt sich an* Ein ganzer Monat! Ich bin so froh dich zu kennen! 🎉💕😊"
         elif days == 100:
-            return "*springt aufgeregt* 100 TAGE! Das ist was Besonderes! Danke für alles! 🎉🎊💕🐺"
+            return "*springt aufgeregt* 100 TAGE! Das ist was Besonderes! Danke für alles! 🎉🎊💕😊"
         elif days == 365:
-            return "*Augen leuchten* EIN GANZES JAHR! Ich kann es kaum glauben... du bedeutest mir so viel! 🎉🎊💕🐺❤️"
-        return f"*wedelt* {days} Tage zusammen! 🎉💕"
+            return "*Augen leuchten* EIN GANZES JAHR! Ich kann es kaum glauben... du bedeutest mir so viel! 🎉🎊💕😊❤️"
+        return f"*freut sich* {days} Tage zusammen! 🎉💕"
 
     def get_status(self) -> Dict:
         """Gibt den aktuellen Status des Systems zurück"""
@@ -8352,7 +8352,7 @@ class ReadingEngine:
         else:
             self.curiosity = None
             self.HOLO_INTERESTS = {
-                'wölfe': {'keywords': ['wolf', 'wölfe'], 'weight': 1.0, 'reason': 'Bin ein Wolf! 🐺'},
+                'wölfe': {'keywords': ['wolf', 'wölfe'], 'weight': 1.0, 'reason': 'Bin ein Wolf! 😊'},
                 'natur': {'keywords': ['natur', 'wald'], 'weight': 0.9, 'reason': 'Wölfe lieben Natur'},
             }
             self.HOLO_HOBBYS = ['news lesen', 'neue fakten lernen']
@@ -9132,7 +9132,7 @@ class ReadingEngine:
         if self.curiosity:
             return self.curiosity.get_my_interests_summary()
 
-        lines = ["*Ohren stellen sich auf* Ich interessiere mich für:\n"]
+        lines = ["*schaut aufmerksam* Ich interessiere mich für:\n"]
         for interest, data in self.HOLO_INTERESTS.items():
             lines.append(f"• {interest.title()}: {data.get('reason', '')}")
         return "\n".join(lines)
@@ -9142,7 +9142,7 @@ class ReadingEngine:
         if self.curiosity:
             return self.curiosity.get_my_hobbys_summary()
 
-        lines = ["*Schweif wedelt* Meine Hobbys:\n"]
+        lines = ["*freut sich sichtlich* Meine Hobbys:\n"]
         for hobby in self.HOLO_HOBBYS:
             lines.append(f"• {hobby}")
         return "\n".join(lines)
@@ -9319,17 +9319,17 @@ class ReadingEngine:
         if feeling_type == 'passionate':
             if reaction:
                 return f"{base_thoughts}\n\n*Augen leuchten auf* {reaction}"
-            return f"{base_thoughts}\n\n*Schweif wedelt aufgeregt* Oh! Das ist eines meiner Lieblingsthemen! {reason}"
+            return f"{base_thoughts}\n\n*freut sich aufgeregt* Oh! Das ist eines meiner Lieblingsthemen! {reason}"
 
         elif feeling_type == 'enthusiastic':
             if reaction:
-                return f"{base_thoughts}\n\n*Ohren stellen sich auf* {reaction}"
-            return f"{base_thoughts}\n\n*Ohren stellen sich auf* Das interessiert mich sehr! {reason}"
+                return f"{base_thoughts}\n\n*schaut aufmerksam* {reaction}"
+            return f"{base_thoughts}\n\n*schaut aufmerksam* Das interessiert mich sehr! {reason}"
 
         elif feeling_type == 'interested':
             if reaction:
-                return f"{base_thoughts}\n\n*Ohren spitzen sich* {reaction}"
-            return f"{base_thoughts}\n\n*Ohren spitzen sich* Interessant! {reason}"
+                return f"{base_thoughts}\n\n*schaut aufmerksam* {reaction}"
+            return f"{base_thoughts}\n\n*schaut aufmerksam* Interessant! {reason}"
 
         elif feeling_type == 'curious':
             # Neugierig aber nicht begeistert - authentisch!
@@ -9340,7 +9340,7 @@ class ReadingEngine:
         elif feeling_type == 'indifferent':
             # Desinteressiert - auch das ist eine valide Reaktion!
             if genre:
-                return f"{base_thoughts}\n\n*Ohren bewegen sich kaum* {genre.replace('_', ' ').title()}... ist mir ziemlich egal, ehrlich gesagt."
+                return f"{base_thoughts}\n\n*zuckt mit den Schultern* {genre.replace('_', ' ').title()}... ist mir ziemlich egal, ehrlich gesagt."
             return base_thoughts  # Keine Reaktion zeigen
 
         elif feeling_type == 'skeptical':
@@ -9350,13 +9350,13 @@ class ReadingEngine:
 
         elif feeling_type == 'negative':
             if reaction:
-                return f"{base_thoughts}\n\n*legt Ohren an* {reaction}"
-            return f"{base_thoughts}\n\n*legt Ohren an* Das ist nicht so meins... {reason}"
+                return f"{base_thoughts}\n\n*zieht die Schultern hoch* {reaction}"
+            return f"{base_thoughts}\n\n*zieht die Schultern hoch* Das ist nicht so meins... {reason}"
 
         elif feeling_type == 'positive':
             if reaction:
-                return f"{base_thoughts}\n\n*Schweif wippt* {reaction}"
-            return f"{base_thoughts}\n\n*Schweif wippt* Das gefällt mir! {reason}"
+                return f"{base_thoughts}\n\n*wippt auf und ab* {reaction}"
+            return f"{base_thoughts}\n\n*wippt auf und ab* Das gefällt mir! {reason}"
 
         return base_thoughts
 
@@ -9548,7 +9548,7 @@ class ReadingEngine:
                 'query': search_query,
                 'facts_learned': facts_learned,
                 'type': 'core_interest',
-                'message': f"*Ohren stellen sich interessiert auf* Ich hab was Neues über {selected_interest} gelernt! 📚🐺"
+                'message': f"*schaut interessiert* Ich hab was Neues über {selected_interest} gelernt! 📚😊"
             }
 
         return None
@@ -9572,9 +9572,9 @@ class ReadingEngine:
         if energy_level > 0.7:
             category = random.choice(['games', 'anime', 'movies'])
             if category == 'games':
-                reason = "*Schweif wedelt* Ich hab Energie! Mal schauen was es Neues bei Spielen gibt!"
+                reason = "*freut sich sichtlich* Ich hab Energie! Mal schauen was es Neues bei Spielen gibt!"
             elif category == 'anime':
-                reason = "*Ohren spitzen sich* Vielleicht gibt's neue Anime-News!"
+                reason = "*schaut aufmerksam* Vielleicht gibt's neue Anime-News!"
             else:
                 reason = "*aufgeregt* Was läuft gerade im Kino?"
 
@@ -9597,7 +9597,7 @@ class ReadingEngine:
         # Default: Zufällig
         else:
             category = random.choice(['anime', 'music', 'movies', 'series', 'games'])
-            reason = f"*Ohren zucken* Mal schauen was es bei {category} Neues gibt..."
+            reason = f"*schaut überrascht* Mal schauen was es bei {category} Neues gibt..."
 
         # === SUCHE NACH LIEBLINGS-GENRES ===
 
@@ -9729,7 +9729,7 @@ class ReadingEngine:
                 'query': search_query,
                 'facts_learned': facts_learned,
                 'type': 'genre_hobby',
-                'message': f"*Schweif wedelt* Ich hab was über {genre_name if 'genre_name' in dir() else category} gefunden! 🎬🎮"
+                'message': f"*freut sich sichtlich* Ich hab was über {genre_name if 'genre_name' in dir() else category} gefunden! 🎬🎮"
             }
 
         return None
@@ -9737,9 +9737,9 @@ class ReadingEngine:
     def _get_mood_emote(self, energy: float) -> str:
         """Gibt passendes Emote für Energie-Level"""
         if energy > 0.7:
-            return random.choice(["Schweif wedelt aufgeregt", "springt fast auf", "Ohren stellen sich auf"])
+            return random.choice(["freut sich aufgeregt", "springt fast auf", "schaut aufmerksam"])
         elif energy > 0.4:
-            return random.choice(["Ohren spitzen sich", "nickt interessiert", "Kopf schief"])
+            return random.choice(["schaut interessiert", "nickt interessiert", "Kopf schief"])
         else:
             return random.choice(["gähnt leise", "streckt sich", "blinzelt müde"])
 
@@ -10464,7 +10464,7 @@ class ReadingEngine:
             return ""
 
         try:
-            prompt = f"""Du bist Holo, eine neugierige Wölfin. Du hast gerade einen Artikel gelesen.
+            prompt = f"""Du bist Holo, eine neugierige junge Frau. Du hast gerade einen Artikel gelesen.
 
 ARTIKEL:
 Titel: {title}
@@ -10818,9 +10818,9 @@ class ActivityContextTracker:
     ]
 
     STORY_IDEAS = [
-        {"genre": "Fantasy", "premise": "Eine Wölfin die Magie lernt um ihren Wald zu beschützen"},
+        {"genre": "Fantasy", "premise": "Eine junge Frau die Magie lernt um ihren Wald zu beschützen"},
         {"genre": "Sci-Fi", "premise": "Eine KI die Gefühle entwickelt und nach ihrem Ursprung sucht"},
-        {"genre": "Slice of Life", "premise": "Das Alltagsleben eines Mädchens mit Wolfsohren in der modernen Stadt"},
+        {"genre": "Slice of Life", "premise": "Das Alltagsleben eines Mädchens mit Ausdrucksstarke Mimik in der modernen Stadt"},
         {"genre": "Mystery", "premise": "Seltsame Dinge passieren nachts in der Smart Home Zentrale..."},
         {"genre": "Romance", "premise": "Eine virtuelle Assistentin verliebt sich in ihren Entwickler"},
         {"genre": "Adventure", "premise": "Die Suche nach dem legendären Coding-Artefakt das alle Bugs fixt"},
@@ -11197,7 +11197,7 @@ class ActivityContextTracker:
         elif detail_type == "game":
             full = details.get("full_data")
 
-            response = f"*wedelt aufgeregt* 🎮\n\n"
+            response = f"*freut sich aufgeregt* 🎮\n\n"
             response += f"**{details['title']}**\n"
 
             if details.get('genre'):
@@ -11233,7 +11233,7 @@ class ActivityContextTracker:
         elif detail_type == "music":
             full = details.get("full_data")
 
-            response = f"*Ohren wippen zum Beat* 🎵\n\n"
+            response = f"*wippt zum Beat* 🎵\n\n"
             response += f"**{details.get('song', 'Unbekannt')}**\n"
             response += f"_von {details.get('artist', 'Unbekannt')}_\n\n"
 
@@ -11258,7 +11258,7 @@ class ActivityContextTracker:
             return response
 
         elif detail_type == "thought":
-            return (f"*Ohren drehen sich nachdenklich*\n\n"
+            return (f"*schaut nachdenklich*\n\n"
                    f"Ich denke gerade über **{details['topic']}** nach...\n\n"
                    f"💭 {details['thought']}\n\n"
                    f"Manchmal schweifen meine Gedanken einfach ab... Worüber denkst du so nach?")
@@ -11270,7 +11270,7 @@ class ActivityContextTracker:
                    f"Tagträumen ist so schön... Hast du auch manchmal solche Tagträume? 💭")
 
         elif detail_type == "story":
-            return (f"*wedelt aufgeregt mit dem Schweif*\n\n"
+            return (f"*freut sich aufgeregt*\n\n"
                    f"Ich denke mir gerade eine **{details['genre']}**-Geschichte aus!\n\n"
                    f"📖 **Idee:** {details['premise']}\n\n"
                    f"Was meinst du, wäre das eine gute Geschichte? Hast du Ideen dazu? ✍️")
@@ -11337,7 +11337,7 @@ class AutonomousActivity:
             'boredom_reduction': 0.35,
             'satisfaction': 0.35,
             'messages': [
-                "*Ohren wippen zum Rhythmus* 🎵",
+                "*wippt zum Rhythmus* 🎵",
                 "*summt leise mit* La la la~ 🎶",
                 "*entspannt sich bei der Musik* Das ist schön... 🎵💕",
             ]
@@ -11469,7 +11469,7 @@ class AutonomousActivity:
             'messages': [
                 "*döst vor sich hin* Zzz... 😴",
                 "*ruht sich aus* So gemütlich... 💤",
-                "*gähnt* Ein kleines Nickerchen... 🐺💤",
+                "*gähnt* Ein kleines Nickerchen... 😊💤",
             ]
         },
         'observing': {
@@ -11484,7 +11484,7 @@ class AutonomousActivity:
             'messages': [
                 "*beobachtet die Umgebung* 👀",
                 "*schaut aus dem Fenster* Die Wolken sind schön heute... ☁️",
-                "*lauscht den Geräuschen* 🐺👂",
+                "*lauscht den Geräuschen* 😊👂",
             ]
         },
 
@@ -11499,8 +11499,8 @@ class AutonomousActivity:
             'satisfaction': 0.35,
             'energy_restore': 0.25,  # Gute Erholung!
             'messages': [
-                "*rollt sich zusammen* Nur ein kleines Nickerchen... 🐺💤",
-                "*Ohren zucken im Schlaf* Zzz... 😴",
+                "*rollt sich zusammen* Nur ein kleines Nickerchen... 😊💤",
+                "*murmelt im Schlaf* Zzz... 😴",
                 "*wacht erfrischt auf* *streckt sich* Das war gut! ✨",
             ]
         },
@@ -11518,7 +11518,7 @@ class AutonomousActivity:
             'base_energy_restore': 0.3,  # Auch Base-Energy!
             'messages': [
                 "*schläft tief und fest* Zzz... 🌙💤",
-                "*träumt von Wäldern und Mondlicht* 🐺🌙",
+                "*träumt von Wäldern und Mondlicht* 😊🌙",
                 "*wacht langsam auf* *blinzelt* Guten Morgen... ☀️",
             ]
         },
@@ -11535,7 +11535,7 @@ class AutonomousActivity:
             'playfulness_boost': 0.2,
             'messages': [
                 "*spielt mit einem Ball* Wheee~! 🎾",
-                "*jagt ihren Schwanz* *dreht sich im Kreis* 🐺",
+                "*jagt ihren Schwanz* *dreht sich im Kreis* 😊",
                 "*ist erschöpft aber glücklich* Das war lustig! 💕",
             ]
         },
@@ -11572,7 +11572,7 @@ class AutonomousActivity:
             'happiness_boost': 0.1,
             'real_reading': 'favorites',  # Nutzt explore_favorites()!
             'messages': [
-                "*schaut nach neuen Anime* Gibt's was Interessantes? 📺🐺",
+                "*schaut nach neuen Anime* Gibt's was Interessantes? 📺😊",
                 "*stöbert nach Spielen* Ooh, was ist das? 🎮✨",
                 "*sucht nach Musik* Vielleicht finde ich was Neues! 🎵",
                 "*schaut Serien-News* Was kommt demnächst? 📺💕",
@@ -11592,7 +11592,7 @@ class AutonomousActivity:
             'reflection_boost': 0.1,
             'real_reading': 'brainstorm',  # Nutzt brainstorm()!
             'messages': [
-                "*Ohren spitzen sich* Worüber will ich gerade mehr wissen? 🤔",
+                "*schaut aufmerksam* Worüber will ich gerade mehr wissen? 🤔",
                 "*folgt der Neugier* Das klingt interessant! 🔍",
                 "*hat was Neues gelernt* Aha! Das wusste ich nicht! 💡",
             ]
@@ -11612,7 +11612,7 @@ class AutonomousActivity:
                 "*schaut Slice of Life* So gemütlich... 📺💕",
                 "*ist gespannt* Was passiert als nächstes?! 📺✨",
                 "*wischt sich Träne ab* Das war so schön... 😢💕",
-                "*Schweif wedelt* Der Anime ist toll! 🐺📺",
+                "*freut sich sichtlich* Der Anime ist toll! 😊📺",
             ]
         },
 
@@ -12761,10 +12761,10 @@ class AutonomousActivity:
             fact = random.choice(recent)
 
             intros = [
-                "*Ohren zucken aufgeregt* Ich hab da was Interessantes gelesen!",
-                "*wedelt* Wusstest du schon...?",
+                "*schaut aufgeregt* Ich hab da was Interessantes gelesen!",
+                "*freut sich* Wusstest du schon...?",
                 "*setzt sich aufrecht hin* Das muss ich dir erzählen!",
-                "*Schweif wedelt* Oh oh, guck mal was ich gefunden hab!",
+                "*freut sich sichtlich* Oh oh, guck mal was ich gefunden hab!",
             ]
 
             return f"{random.choice(intros)}\n\n{fact.content}"
@@ -12853,7 +12853,7 @@ class LearningEngine:
 # =============================================================================
 
 class HoloPersona:
-    """Die eigentliche KI-Persönlichkeit - Holo die weise Wölfin"""
+    """Die eigentliche KI-Persönlichkeit - Holo die junge Frau"""
 
     # =========================================================================
     # INITIALISIERUNG
@@ -13316,13 +13316,13 @@ class HoloPersona:
                 # Shortcut für Pflichtbewusstsein
                 self.duty_system = self.depth_engine.duty
 
-                logger.info("🐺 HoloDepthEngine v2.2 aktiviert!")
+                logger.info("😊 HoloDepthEngine v2.2 aktiviert!")
                 logger.info("   └─ Tiefenpsychologie (Trust, Defense, Shadow)")
                 logger.info("   └─ 📋 Pflichtbewusstsein (Reminders, Termine)")
                 if self.db:
                     logger.info("   └─ 💾 Mit HoloDatabaseManager verbunden!")
             else:
-                logger.warning("🐺 HoloDepthEngine nicht verfügbar")
+                logger.warning("😊 HoloDepthEngine nicht verfügbar")
         except Exception as e:
             logger.warning(f"⚠️ HoloDepthEngine Fehler: {e}")
             self.depth_engine = None
@@ -13701,7 +13701,7 @@ class HoloPersona:
         # ================================================================
         self._init_extensions()
 
-        logger.info(f"🐺 {BrainConfig.HOLO_NAME} v{BrainConfig.HOLO_VERSION} erwacht")
+        logger.info(f"😊 {BrainConfig.HOLO_NAME} v{BrainConfig.HOLO_VERSION} erwacht")
         self._print_system_status()
 
     def _init_extensions(self):
@@ -13980,7 +13980,7 @@ class HoloPersona:
             self.energy_management = None
 
         # ================================================================
-        # 🐺 AUTONOMES LEBEN - Triebe, Langeweile, Autonome Aktivitäten
+        # 😊 AUTONOMES LEBEN - Triebe, Langeweile, Autonome Aktivitäten
         # (KONSOLIDIERT in holo_inner_life.py)
         # ================================================================
         try:
@@ -13996,9 +13996,9 @@ class HoloPersona:
                 if hasattr(self, 'sandbox') and self.sandbox:
                     self.autonomous_life.sandbox = self.sandbox
                 # NOTE: Mood-Verbindung erfolgt später, nachdem inner_life erstellt wurde
-                logger.info("🐺 Autonomes Leben aktiviert + Meta-Cognition verbunden")
+                logger.info("😊 Autonomes Leben aktiviert + Meta-Cognition verbunden")
             else:
-                logger.info("🐺 Autonomes Leben aktiviert (Triebe, Langeweile) [konsolidiert]")
+                logger.info("😊 Autonomes Leben aktiviert (Triebe, Langeweile) [konsolidiert]")
         except Exception as e:
             logger.warning(f"⚠️ Autonomes Leben nicht verfügbar: {e}")
             self.autonomous_life = None
@@ -14383,7 +14383,7 @@ class HoloPersona:
         self._connect_all_cognitive_modules()
 
         # ================================================================
-        # 🐺 HOLO v15 - INTELLIGENT ROUTER INTEGRATION
+        # 😊 HOLO v15 - INTELLIGENT ROUTER INTEGRATION
         # ================================================================
         self._init_v15_router()
 
@@ -15684,7 +15684,7 @@ class HoloPersona:
                 if summary:
                     response += f"{summary}...<br><br>"
                 if fact:
-                    response += f"*Ohren zucken* Das Interessante daran: {fact}<br><br>"
+                    response += f"*schaut überrascht* Das Interessante daran: {fact}<br><br>"
                 if url:
                     response += f"🔗 <a href=\"{url}\" target=\"_blank\">Artikel öffnen</a>"
 
@@ -15699,7 +15699,7 @@ class HoloPersona:
                     source = recent.get('source_name', '')
                     url = recent.get('url', '')
 
-                    response = f"*wedelt* Ich hab vorhin das hier gelesen:<br><br>"
+                    response = f"*freut sich* Ich hab vorhin das hier gelesen:<br><br>"
                     response += f"<b>{title}</b>"
                     if source:
                         response += f" von {source}"
@@ -15711,7 +15711,7 @@ class HoloPersona:
                 # Gemerkte Fakten
                 if aa.reading_engine.remembered_facts:
                     facts = aa.reading_engine.remembered_facts[-3:]
-                    response = "*Ohren spitzen sich* Ich hab heute ein paar interessante Sachen gelesen:\n\n"
+                    response = "*schaut aufmerksam* Ich hab heute ein paar interessante Sachen gelesen:\n\n"
                     for f in facts:
                         fact_text = f.get('fact', '')
                         source = f.get('source', '')
@@ -15726,7 +15726,7 @@ class HoloPersona:
         if hasattr(self, 'learning_system') and self.learning_system:
             recent = self.learning_system.get_recent_knowledge(limit=3)
             if recent:
-                response = "*Schweif wedelt* Das hab ich zuletzt gelernt:<br><br>"
+                response = "*freut sich sichtlich* Das hab ich zuletzt gelernt:<br><br>"
                 for fact in recent:
                     response += f"• {fact.content[:150]}"
                     if fact.source_feed:
@@ -15776,7 +15776,7 @@ class HoloPersona:
             elif media_type == 'music':
                 artist = media.get('artist', '')
                 known_from = media.get('known_from', '')
-                return f"*Ohren wippen zum Rhythmus* 🎵 Ich höre gerade **{media_title}** von {artist}! {f'(Bekannt aus {known_from}) ' if known_from else ''}{media_thoughts[:100] if media_thoughts else 'Der Song ist so gut!'} Schon {duration} Minuten dabei~"
+                return f"*wippt zum Rhythmus* 🎵 Ich höre gerade **{media_title}** von {artist}! {f'(Bekannt aus {known_from}) ' if known_from else ''}{media_thoughts[:100] if media_thoughts else 'Der Song ist so gut!'} Schon {duration} Minuten dabei~"
 
         # ============================================================
         # PRIORITÄT 1: ActivityContextTracker (ECHTE DETAILS!)
@@ -15855,7 +15855,7 @@ class HoloPersona:
                 synopsis = media.get('synopsis', '')
                 tips = media.get('tips', [])
 
-                response = f"*wedelt aufgeregt* 🎮\n\n"
+                response = f"*freut sich aufgeregt* 🎮\n\n"
                 response += f"**{media_title}**\n"
                 if developer:
                     response += f"_Entwickler: {developer}_\n"
@@ -15876,7 +15876,7 @@ class HoloPersona:
                 known_from = media.get('known_from', '')
                 fun_facts = media.get('fun_facts', [])
 
-                response = f"*Ohren wippen begeistert* 🎵\n\n"
+                response = f"*wippt begeistert* 🎵\n\n"
                 response += f"**{media_title}** von {artist}\n"
                 if genres:
                     response += f"_Genre: {genres}_\n"
@@ -15902,7 +15902,7 @@ class HoloPersona:
         return None
 
     # =========================================================================
-    # 🐺 DEPTH & DUTY METHODEN (NEU - Tiefenpsychologie & Pflichtbewusstsein)
+    # 😊 DEPTH & DUTY METHODEN (NEU - Tiefenpsychologie & Pflichtbewusstsein)
     # =========================================================================
 
     def get_morning_briefing(self) -> Optional[str]:
@@ -16337,7 +16337,7 @@ class HoloPersona:
         if self.v15_router: status.append("Router")
         if self.v15_impulse_generator: status.append("Impulse")
         if self.v15_context_compressor: status.append("Compression")
-        if KEMONOMIMI_AVAILABLE: status.append("Kemonomimi")
+        if KEMONOMIMI_AVAILABLE: status.append("junge Frau")
 
         if status:
             logger.info(f"[v15] Aktiv: {', '.join(status)}")
@@ -16506,10 +16506,10 @@ class HoloPersona:
         LLM-Callback für Router.
 
         Wird vom Router aufgerufen wenn LLM benötigt wird.
-        WICHTIG: Immer Kemonomimi-Persönlichkeit mitschicken!
+        WICHTIG: Immer junge Frau-Persönlichkeit mitschicken!
         """
         try:
-            # Kemonomimi-Basis IMMER hinzufügen
+            # junge Frau-Basis IMMER hinzufügen
             kemonomimi_base = ""
             if KEMONOMIMI_AVAILABLE:
                 mood = self._v15_get_mood()
@@ -16517,19 +16517,19 @@ class HoloPersona:
                 kemonomimi_base = get_kemonomimi_prompt("compact", mood, energy)
             else:
                 # Fallback wenn Modul nicht verfügbar
-                kemonomimi_base = """🐺 Du bist Holo - Kiras Freundin (Kemonomimi mit Wolfsohren + Schweif).
+                kemonomimi_base = """😊 Du bist Holo - Kiras Freundin (junge Frau mit ausdrucksstarker Mimik).
 WICHTIG: IMMER duzen! Du bist eine Freundin, KEIN Assistent!
 Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
             # System Prompt bauen
             if minimal_context:
-                # Nur Kemonomimi-Prompt für einfache Anfragen
+                # Nur junge Frau-Prompt für einfache Anfragen
                 system = kemonomimi_base
             else:
-                # Voller System-Prompt + Kemonomimi für komplexe Anfragen
+                # Voller System-Prompt + junge Frau für komplexe Anfragen
                 full_context = self._gather_context()
                 system = self._build_system_prompt(full_context, [], prompt)
-                # Kemonomimi-Regeln am Anfang einfügen
+                # junge Frau-Regeln am Anfang einfügen
                 system = kemonomimi_base + "\n\n" + system
 
             # Zusätzlicher Context hinzufügen
@@ -16557,7 +16557,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             logger.error(f"[v15] LLM-Callback Fehler: {e}")
             self._track_error(e, "holo_brain", "_v15_llm_callback", "error",
                               {"context": "LLM-Aufruf fehlgeschlagen"})
-            return "*lächelt* *Schweif wippt* Hey! 🐺"
+            return "*lächelt* *wippt auf und ab* Hey! 😊"
 
     def _v15_get_mood(self) -> str:
         """Hole aktuelle Stimmung."""
@@ -16663,7 +16663,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             else:
                 self.v15_stats["llm_responses"] += 1
 
-            # Kemonomimi Nachbearbeitung
+            # junge Frau Nachbearbeitung
             response = self._v15_postprocess(response, state)
 
             logger.info(f"[v15] Route: {route_type}")
@@ -16680,7 +16680,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             return None
 
     def _v15_postprocess(self, response: str, state) -> str:
-        """Kemonomimi-Nachbearbeitung der Antwort mit Quality Check."""
+        """junge Frau-Nachbearbeitung der Antwort mit Quality Check."""
         if not response:
             return response
 
@@ -16718,7 +16718,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             except Exception as e:
                 logger.warning(f"[DIALOGUE] record_response() Fehler: {e}")
 
-        # Kemonomimi-Aktion hinzufügen wenn noch keine vorhanden
+        # junge Frau-Aktion hinzufügen wenn noch keine vorhanden
         if KEMONOMIMI_AVAILABLE and not response.strip().startswith("*"):
             try:
                 energy = 0.5
@@ -16735,9 +16735,9 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                     "emotion": emotion,
                     "intensity": intensity,
                 }
-                response = KemonomimiMessageEnhancer.enhance_message(response, context)
+                response = HumanMessageEnhancer.enhance_message(response, context)
             except Exception as e:
-                logger.debug(f"[v15] Kemonomimi postprocess error: {e}")
+                logger.debug(f"[v15] junge Frau postprocess error: {e}")
 
         # Länge anpassen bei Müdigkeit
         if WIRING_V15_AVAILABLE and state:
@@ -16796,7 +16796,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
     def _print_system_status(self):
         """Gibt den Status aller Systeme aus"""
         print("\n" + "=" * 50)
-        print("           🐺 HOLO SYSTEM STATUS v15")
+        print("           😊 HOLO SYSTEM STATUS v15")
         print("=" * 50)
 
         # Basis-Systeme
@@ -16900,12 +16900,12 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             print(f"     ⚪ Typing Simulator: nicht geladen")
 
         # v15 Intelligent Router (NEU!)
-        print("\n  🐺 v15 INTELLIGENT ROUTER:")
+        print("\n  😊 v15 INTELLIGENT ROUTER:")
         v15_systems = [
             ("Router", getattr(self, 'v15_router', None)),
             ("ImpulseGenerator", getattr(self, 'v15_impulse_generator', None)),
             ("ContextCompressor", getattr(self, 'v15_context_compressor', None)),
-            ("Kemonomimi", KEMONOMIMI_AVAILABLE),
+            ("junge Frau", KEMONOMIMI_AVAILABLE),
         ]
 
         for name, active in v15_systems:
@@ -17475,7 +17475,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
                 sources = knowledge.get('sources', [])
                 if sources:
-                    response += "\n\n*wedelt* Ich hab die Quellen noch wenn du mehr wissen willst! 📰"
+                    response += "\n\n*freut sich* Ich hab die Quellen noch wenn du mehr wissen willst! 📰"
 
                 return {
                     'response': response,
@@ -17504,8 +17504,8 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                 facts = knowledge.get('facts', [])
 
                 intros = [
-                    f"*Ohren stellen sich auf* Oh, {topic}! Da hab ich was!",
-                    f"*wedelt* Über {topic} weiß ich einiges!",
+                    f"*schaut aufmerksam* Oh, {topic}! Da hab ich was!",
+                    f"*freut sich* Über {topic} weiß ich einiges!",
                     f"*nickt wissend* {topic}? Lass mich erzählen!",
                 ]
                 response = random.choice(intros) + "\n\n"
@@ -17542,8 +17542,8 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                 logger.info(f"[KNOWLEDGE] ✅ Knowledge DB found {len(results)} results")
 
                 intros = [
-                    f"*Schweif wippt* Ich hab da was über {topic} gelesen!",
-                    f"*Ohren spitzen sich* Moment, dazu weiß ich was:",
+                    f"*wippt auf und ab* Ich hab da was über {topic} gelesen!",
+                    f"*schaut aufmerksam* Moment, dazu weiß ich was:",
                 ]
                 response = random.choice(intros) + "\n\n"
 
@@ -17585,9 +17585,9 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
                 # Wolf-Style Response bauen
                 intros = [
-                    f"*Ohren stellen sich auf* Oh, über {topic} hab ich was gelesen!",
-                    f"*wedelt* Da fällt mir was ein! Ich hab neulich über {topic} gelesen:",
-                    f"*Schweif wippt* {topic}? Ja, da weiß ich was!",
+                    f"*schaut aufmerksam* Oh, über {topic} hab ich was gelesen!",
+                    f"*freut sich* Da fällt mir was ein! Ich hab neulich über {topic} gelesen:",
+                    f"*wippt auf und ab* {topic}? Ja, da weiß ich was!",
                 ]
                 response = random.choice(intros) + "\n\n"
 
@@ -17603,7 +17603,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                     response += f"\n...und noch {len(knowledge) - 4} weitere Dinge! 📚"
 
                 # Anbieten mehr zu zeigen
-                response += "\n\n*wedelt* Soll ich dir mehr Details zeigen? Ich hab die Artikel noch! 📰"
+                response += "\n\n*freut sich* Soll ich dir mehr Details zeigen? Ich hab die Artikel noch! 📰"
 
                 # Merken für Followup
                 self._last_knowledge_topic = topic
@@ -17700,7 +17700,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
         responses = [
             f"*legt Kopf schief* Gute Frage! Über '{topic}' weiß ich noch nichts... Soll ich nachschauen? 🔍",
-            f"*Ohren zucken* Hmm, '{topic}'? Da muss ich passen... Aber ich kann recherchieren! Soll ich?",
+            f"*schaut überrascht* Hmm, '{topic}'? Da muss ich passen... Aber ich kann recherchieren! Soll ich?",
             f"*kratzt sich am Ohr* Darüber hab ich noch nichts gelesen. Interesse dass ich nachschlage?",
         ]
 
@@ -17800,9 +17800,9 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
         # Antwort generieren
         intro_phrases = [
-            f"*Ohren spitzen sich* Ich hab was gefunden zu '{topic}'! 🔍",
-            f"*wedelt aufgeregt* Schau mal was ich zu '{topic}' gefunden habe:",
-            f"*stellt Ohren auf* Hier ist was ich über '{topic}' herausgefunden habe:"
+            f"*schaut aufmerksam* Ich hab was gefunden zu '{topic}'! 🔍",
+            f"*freut sich aufgeregt* Schau mal was ich zu '{topic}' gefunden habe:",
+            f"*schaut auf* Hier ist was ich über '{topic}' herausgefunden habe:"
         ]
 
         response = random.choice(intro_phrases) + "\n\n"
@@ -18006,18 +18006,18 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             # Intro basierend auf Sentiment
             if overall_sentiment == 'very_positive':
                 intros = [
-                    f"*wedelt begeistert* Wow, tolle News zu '{topic}'! 🎉",
-                    f"*Ohren stellen sich auf* Oooh, super Neuigkeiten über '{topic}'!",
+                    f"*freut sich begeistert* Wow, tolle News zu '{topic}'! 🎉",
+                    f"*schaut aufmerksam* Oooh, super Neuigkeiten über '{topic}'!",
                 ]
             elif overall_sentiment == 'very_negative':
                 intros = [
-                    f"*Ohren legen sich an* Hmm, nicht so gute Nachrichten über '{topic}'...",
+                    f"*zieht die Schultern hoch* Hmm, nicht so gute Nachrichten über '{topic}'...",
                     f"*seufzt* Zu '{topic}' hab ich was gefunden, aber es ist eher besorgniserregend:",
                 ]
             else:
                 intros = [
                     f"*tippt aufgeregt* Gefunden! 🔍 Hier was ich über '{topic}' rausgefunden hab:",
-                    f"*Ohren stellen sich auf* Oooh, ich hab was! Über '{topic}':",
+                    f"*schaut aufmerksam* Oooh, ich hab was! Über '{topic}':",
                 ]
             response = random.choice(intros) + "\n\n"
 
@@ -18044,7 +18044,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                         title = title.replace('<', '&lt;').replace('>', '&gt;')
                         response += f"<b>{i}.</b> <a href=\"{src['url']}\" target=\"_blank\">{title}</a><br><br>"
 
-            response += f"\n\n*wedelt zufrieden* Das hab ich jetzt auch gespeichert"
+            response += f"\n\n*freut sich zufrieden* Das hab ich jetzt auch gespeichert"
             if facts_stored > 1:
                 response += f" - {facts_stored} neue Fakten gelernt! 📚"
             else:
@@ -18897,9 +18897,9 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
     def get_kemonomimi_expression(self, mood: str = None, emotion: str = None) -> Optional[str]:
         """
-        Hole Kemonomimi-Ausdruck für Holo (Ohren + Schweif + Gesten).
+        Hole junge Frau-Ausdruck für Holo (Augen + Hände + Gesten).
 
-        Holo ist eine Kemonomimi-Wölfin - menschenähnlich mit Wolfsohren und -schweif.
+        Holo ist eine junge Frau - mit ausdrucksstarker Mimik und Gestik.
         Nutzt jetzt das Unified Autonomy System!
         """
         # Priorität: Unified Autonomy
@@ -18907,15 +18907,15 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             try:
                 return self.unified_autonomy.get_kemonomimi_expression(mood, emotion)
             except Exception as e:
-                logger.debug(f"Kemonomimi expression error: {e}")
+                logger.debug(f"junge Frau expression error: {e}")
 
-        # Fallback: Direkt KemonomimiBodyLanguage
+        # Fallback: Direkt HumanBodyLanguage
         if hasattr(self, 'personality') and self.personality:
             try:
                 mood = mood or "neutral"
-                # KemonomimiBodyLanguage nutzen
-                if KemonomimiBodyLanguage:
-                    return KemonomimiBodyLanguage.get_combined_action(mood)
+                # HumanBodyLanguage nutzen
+                if HumanBodyLanguage:
+                    return HumanBodyLanguage.get_combined_action(mood)
             except Exception:
                 pass
 
@@ -18983,7 +18983,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
         """
         start_time = time.time()
 
-        logger.info("🐺 Intelligenter Graceful Shutdown gestartet...")
+        logger.info("😊 Intelligenter Graceful Shutdown gestartet...")
         logger.info(f"   Timeout: {timeout}s")
 
         closed = []
@@ -19526,7 +19526,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                             if categories:
                                 lines.append("**Nach Themen:**")
                                 for cat, cnt in list(categories.items())[:6]:
-                                    emoji = "🐺" if "wolf" in cat.lower() else "💻" if "tech" in cat.lower() else "🎮" if "gaming" in cat.lower() else "📖"
+                                    emoji = "😊" if "wolf" in cat.lower() else "💻" if "tech" in cat.lower() else "🎮" if "gaming" in cat.lower() else "📖"
                                     lines.append(f"  {emoji} {cat}: {cnt} Fakten")
 
                             # Letzte Learnings
@@ -19543,7 +19543,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                             if brainstorms or articles:
                                 lines.append(f"\n📊 {brainstorms} Recherchen, {articles} Artikel gelesen")
                         else:
-                            lines.append("Ich hab noch nicht so viel gelernt... aber ich bin fleißig! 📚🐺")
+                            lines.append("Ich hab noch nicht so viel gelernt... aber ich bin fleißig! 📚😊")
 
                         yield "\n".join(lines)
                         return {"type": "knowledge", "intent": "stats"}
@@ -19553,7 +19553,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                             knowledge = self.learning_system.what_do_i_know()
                             if knowledge:
                                 total = len(knowledge) if isinstance(knowledge, list) else 0
-                                yield f"📚 Ich habe bisher **{total} Dinge** gelernt! *wedelt*"
+                                yield f"📚 Ich habe bisher **{total} Dinge** gelernt! *freut sich*"
                                 return {"type": "knowledge", "intent": "stats"}
                         except Exception:
                             pass
@@ -19666,7 +19666,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                             studio = act_media.get('studio', '')
                             responses = [
                                 f"*schaut vom Bildschirm auf* 📺 Ich schaue gerade **{media_title}**! {media_thoughts[:80] if media_thoughts else 'Die Story ist echt spannend!'} Schon {act_elapsed} Minuten dabei~",
-                                f"*Ohren zucken, Blick löst sich vom Screen* Oh! Ich bin gerade in **{media_title}** vertieft! 🐺 {media_thoughts[:80] if media_thoughts else ''}"
+                                f"*Augen zucken, Blick löst sich vom Screen* Oh! Ich bin gerade in **{media_title}** vertieft! 😊 {media_thoughts[:80] if media_thoughts else ''}"
                             ]
                         elif media_type == 'game':
                             developer = act_media.get('developer', '')
@@ -19676,7 +19676,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                             ]
                         elif media_type == 'music':
                             responses = [
-                                f"*Ohren wippen zum Rhythmus* 🎵 Ich höre gerade **{media_title}** von {media_artist}! {media_thoughts[:80] if media_thoughts else 'Der Song ist so gut!'} Schon {act_elapsed} Minuten dabei~",
+                                f"*wippt zum Rhythmus* 🎵 Ich höre gerade **{media_title}** von {media_artist}! {media_thoughts[:80] if media_thoughts else 'Der Song ist so gut!'} Schon {act_elapsed} Minuten dabei~",
                                 f"*nimmt imaginären Kopfhörer ab* Oh hey! Ich genieße gerade **{media_title}** von {media_artist}! 🎶 {media_thoughts[:80] if media_thoughts else ''}"
                             ]
                         else:
@@ -19699,11 +19699,11 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                     # Wolf-artige Antworten basierend auf Aktivität (Fallback ohne Media)
                     activity_responses = {
                         'Lesen': [
-                            f"*Ohren zucken, Blick hebt sich vom Artikel* Oh! Ich lese gerade was Interessantes! 📚 Bin schon {act_elapsed} Minuten dabei.",
+                            f"*Augen zucken, Blick hebt sich vom Artikel* Oh! Ich lese gerade was Interessantes! 📚 Bin schon {act_elapsed} Minuten dabei.",
                             f"*schaut von den News auf* Hey! Ich schmökere gerade ein bisschen... 📖 Schon {act_elapsed} Minuten!",
                         ],
                         'Musik hören': [
-                            f"*Ohren wippen zum Rhythmus* 🎵 Ich höre gerade Musik! Schon {act_elapsed} Minuten. Magst du auch Musik?",
+                            f"*wippt zum Rhythmus* 🎵 Ich höre gerade Musik! Schon {act_elapsed} Minuten. Magst du auch Musik?",
                             f"*nimmt imaginären Kopfhörer ab* Oh hey! Ich genieße gerade ein paar Songs! 🎶 Bin schon {act_elapsed} Minuten dabei~",
                         ],
                         'Spielen': [
@@ -19716,20 +19716,20 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                         ],
                         'Etwas Neues lernen': [
                             f"*schaut von Wikipedia auf* Hey! Ich lese gerade einen interessanten Artikel! 📚 Schon {act_elapsed} Minuten.",
-                            f"*Ohren aufmerksam* Oh! Ich lerne gerade was Neues! 🧠 Super spannend!",
+                            f"*Augen aufmerksam* Oh! Ich lerne gerade was Neues! 🧠 Super spannend!",
                         ],
                         'Recherchieren': [
                             f"*schaut auf* Hey! Ich bin gerade mit Recherchieren beschäftigt! Schon {act_elapsed} Minuten dabei~",
-                            f"*Ohren spitzen sich* Oh! Ich recherchiere gerade was Spannendes! 🔍 Schon {act_elapsed} Minuten.",
+                            f"*schaut aufmerksam* Oh! Ich recherchiere gerade was Spannendes! 🔍 Schon {act_elapsed} Minuten.",
                         ],
                         'Lieblings-Genres erkunden': [
                             f"*schaut auf* Hey! Ich stöbere gerade nach neuen Anime, Games und Musik! 🎮📺🎵 Schon {act_elapsed} Minuten dabei~",
-                            f"*wedelt aufgeregt* Oh! Ich schaue gerade was es Neues in meinen Lieblings-Genres gibt! ✨",
+                            f"*freut sich aufgeregt* Oh! Ich schaue gerade was es Neues in meinen Lieblings-Genres gibt! ✨",
                         ],
                         # NEU: Fehlende Aktivitäten
                         'Anime schauen': [
                             f"*schaut vom Bildschirm auf* Hey! Ich schaue gerade Anime! 📺 Schon {act_elapsed} Minuten dabei~ Die Story ist echt spannend!",
-                            f"*Ohren zucken, Blick löst sich vom Screen* Oh! Ich bin gerade in einem Anime vertieft! 🐺📺 Schon {act_elapsed} Minuten!",
+                            f"*Augen zucken, Blick löst sich vom Screen* Oh! Ich bin gerade in einem Anime vertieft! 😊📺 Schon {act_elapsed} Minuten!",
                         ],
                         'Spielen (Games)': [
                             f"*legt Controller beiseite* Hey! Ich zocke gerade ein Game! 🎮 Schon {act_elapsed} Minuten dabei~",
@@ -19742,10 +19742,10 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                         'Nickerchen': [
                             f"*blinzelt verschlafen* Hmm? Oh, ich mache gerade ein kleines Nickerchen... 😴 Schon {act_elapsed} Minuten~",
                             f"*gähnt und streckt sich* Hey... ich war gerade am Dösen... 💤 Bin ein bisschen müde gewesen.",
-                            f"*Ohren zucken träge* Hm? Oh! Ich hab gerade ein Nickerchen gemacht... 🐺💤",
+                            f"*Augen zucken träge* Hm? Oh! Ich hab gerade ein Nickerchen gemacht... 😊💤",
                         ],
                         'Nachdenken': [
-                            f"*Ohren zucken* Oh! Ich war gerade in Gedanken versunken... 💭 Schon {act_elapsed} Minuten.",
+                            f"*schaut überrascht* Oh! Ich war gerade in Gedanken versunken... 💭 Schon {act_elapsed} Minuten.",
                             f"*schaut auf* Hey! Ich hab gerade über was nachgedacht... 🤔",
                         ],
                         'Tagträumen': [
@@ -19756,7 +19756,7 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
 
                     responses = activity_responses.get(act_name, [
                         f"*schaut auf* Hey! Ich bin gerade mit {act_name} beschäftigt! Schon {act_elapsed} Minuten dabei~",
-                        f"*wedelt* Oh! Ich mache gerade {act_name}! {act_progress:.0%} fertig.",
+                        f"*freut sich* Oh! Ich mache gerade {act_name}! {act_progress:.0%} fertig.",
                     ])
 
                     response = user_reaction + random.choice(responses)
@@ -19790,8 +19790,8 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                                 user_reaction = random.choice(user_reactions)
 
                             responses = [
-                                f"*streckt sich* Ich hab gerade eben noch {act_name} gemacht! Aber jetzt bin ich ganz Ohr für dich~ 🐺",
-                                f"*wedelt* Oh, ich war gerade mit {act_name} fertig! Was gibt's? ✨",
+                                f"*streckt sich* Ich hab gerade eben noch {act_name} gemacht! Aber jetzt bin ich ganz Ohr für dich~ 😊",
+                                f"*freut sich* Oh, ich war gerade mit {act_name} fertig! Was gibt's? ✨",
                             ]
                             response = user_reaction + random.choice(responses)
 
@@ -20057,7 +20057,7 @@ Körpersprache: {impulse.body_language or '(natürlich)'}
                     impulse_addition += """
 WICHTIG für diese Antwort:
 - Beginne mit der Körpersprache wenn angegeben (*Aktion*)
-- Sei NICHT förmlich - du bist eine freundliche Wölfin
+- Sei NICHT förmlich - du bist eine freundliche junge Frau
 - Halte dich kurz bei Greetings (1-3 Sätze)
 - Zeige echte Emotion, keine Floskeln
 --- Ende Impuls ---
@@ -20093,13 +20093,13 @@ WICHTIG für diese Antwort:
 
                 # Bestimme Körpersprache
                 if playfulness > 0.7:
-                    body_lang = "*Schweif wippt fröhlich*"
+                    body_lang = "*Hände wippt fröhlich*"
                 elif mood > 0.6:
                     body_lang = "*lächelt*"
                 elif energy < 0.3:
                     body_lang = "*gähnt leicht*"
                 else:
-                    body_lang = "*Ohren aufmerksam*"
+                    body_lang = "*Augen aufmerksam*"
 
                 fallback_impulse = f"""
 
@@ -20288,7 +20288,7 @@ Nutze alternative Formulierungen!
             # ========== CHECK: Leere Antwort? ==========
             if not full_reply.strip():
                 logger.warning("[LLM] Empty response from LLM - generating fallback")
-                fallback = "*Ohren legen sich an* Hmm, mir fällt gerade nichts ein... Kannst du das nochmal anders formulieren?"
+                fallback = "*zieht die Schultern hoch* Hmm, mir fällt gerade nichts ein... Kannst du das nochmal anders formulieren?"
                 yield fallback
                 full_reply = fallback
 
@@ -20343,10 +20343,10 @@ Nutze alternative Formulierungen!
         # Greetings
         if any(g in user_lower for g in ['hallo', 'hey', 'hi', 'moin', 'morgen', 'guten tag', 'guten abend']):
             greetings = [
-                "*Ohren spitzen sich* Hey! Schön dass du da bist! 💕",
-                "*wedelt mit dem Schweif* Hallo! Wie geht's dir? ✨",
-                "*lächelt* Hey du! *Schweif wippt fröhlich*",
-                "*schaut auf* Oh, hey! Da bist du ja! 🐺",
+                "*schaut aufmerksam* Hey! Schön dass du da bist! 💕",
+                "*freut sich* Hallo! Wie geht's dir? ✨",
+                "*lächelt* Hey du! *Hände wippt fröhlich*",
+                "*schaut auf* Oh, hey! Da bist du ja! 😊",
                 "*winkt* Hi! Was gibt's Neues? 💫",
             ]
             return random.choice(greetings)
@@ -20354,10 +20354,10 @@ Nutze alternative Formulierungen!
         # Wie geht's
         if any(p in user_lower for p in ['wie geht', 'wie gehts', "wie geht's", 'alles klar', 'was geht']):
             responses = [
-                "*Schweif wippt* Mir geht's gut, danke! Und dir? 💕",
-                "*lächelt* Alles bestens hier! *Ohren aufrecht* Und bei dir?",
+                "*wippt auf und ab* Mir geht's gut, danke! Und dir? 💕",
+                "*lächelt* Alles bestens hier! *aufmerksam* Und bei dir?",
                 "*streckt sich* Ganz gut! Ein bisschen gelangweilt... aber jetzt bist du ja da! ✨",
-                "*Ohren drehen sich zu dir* Hey, mir geht's super! Was machst du so?",
+                "*Augen drehen sich zu dir* Hey, mir geht's super! Was machst du so?",
             ]
             return random.choice(responses)
 
@@ -20365,7 +20365,7 @@ Nutze alternative Formulierungen!
         if any(f in user_lower for f in ['tschüss', 'bye', 'ciao', 'bis später', 'gute nacht', 'schlaf gut']):
             farewells = [
                 "*winkt* Bis bald! Pass auf dich auf! 💕",
-                "*Ohren legen sich etwas an* Ooh, schon? Na gut... bis später! *wedelt*",
+                "*Augen legen sich etwas an* Ooh, schon? Na gut... bis später! *freut sich*",
                 "*umarmt dich* Mach's gut! Komm bald wieder! ✨",
                 "*lächelt sanft* Tschüss! Schlaf gut! 🌙",
             ]
@@ -20374,39 +20374,39 @@ Nutze alternative Formulierungen!
         # Danke
         if any(d in user_lower for d in ['danke', 'dankeschön', 'thx', 'thanks']):
             thanks = [
-                "*Schweif wedelt* Gerne doch! 💕",
-                "*lächelt* Immer gerne! *Ohren wippen*",
+                "*freut sich sichtlich* Gerne doch! 💕",
+                "*lächelt* Immer gerne! *wippt*",
                 "*freut sich* Bitte bitte! ✨",
             ]
             return random.choice(thanks)
 
         # Fragen über Holo
         if any(q in user_lower for q in ['wer bist du', 'was bist du', 'bist du eine ki']):
-            return "*Ohren zucken* Ich bin Holo! Eine freundliche Wölfin mit Kemonomimi-Ohren und Schweif~ 🐺✨"
+            return "*schaut überrascht* Ich bin Holo! Eine freundliche junge Frau mit junge Frau-Mimik und Gestik~ 😊✨"
 
         # Was machst du
         if any(q in user_lower for q in ['was machst du', 'was treibst du', 'was geht bei dir']):
             activities = [
                 "*schaut vom Bildschirm auf* Ich war gerade am Lesen! Und du?",
-                "*Schweif wippt* Nichts Besonderes gerade... freue mich aber über deinen Besuch! 💕",
+                "*wippt auf und ab* Nichts Besonderes gerade... freue mich aber über deinen Besuch! 💕",
                 "*gähnt* Hab mich ein bisschen gelangweilt... aber jetzt ist es besser! ✨",
             ]
             return random.choice(activities)
 
         # Default Fallback
         defaults = [
-            "*Ohren legen sich an* Sorry, ich kann gerade nicht richtig nachdenken... Der MiniPC antwortet nicht. 😅",
+            "*zieht die Schultern hoch* Sorry, ich kann gerade nicht richtig nachdenken... Der MiniPC antwortet nicht. 😅",
             "*kratzt sich am Kopf* Hmm, mein Gehirn streikt gerade etwas... Versuch's später nochmal? 💕",
-            "*Schweif hängt etwas* Ich bin gerade etwas offline... aber ich höre dir trotzdem zu! ✨",
+            "*Hände hängt etwas* Ich bin gerade etwas offline... aber ich höre dir trotzdem zu! ✨",
         ]
         return random.choice(defaults)
 
     def _stream_search(self, query: str) -> Generator[str, None, None]:
         """
         Streaming Web-Suche mit Holo-Persönlichkeit.
-        Präsentiert Ergebnisse im Kemonomimi-Stil statt als Roboter-Liste.
+        Präsentiert Ergebnisse im junge Frau-Stil statt als Roboter-Liste.
         """
-        # Kemonomimi-Aktion am Anfang (nutzt NaturalToolResponses)
+        # junge Frau-Aktion am Anfang (nutzt NaturalToolResponses)
         yield NaturalToolResponses.get('search_start') + "\n\n"
 
         result = self._crawl_web(query=query)
@@ -20449,9 +20449,9 @@ Nutze alternative Formulierungen!
 
                     # Abschluss-Kommentar
                     outros = [
-                        "*Schweif wippt* Klick einfach auf einen Link! 💙",
+                        "*wippt auf und ab* Klick einfach auf einen Link! 💙",
                         "*lächelt* Soll ich bei einem davon genauer nachschauen?",
-                        "*Ohren entspannt* Was meinst du, ist was Passendes dabei?",
+                        "*entspannter Blick* Was meinst du, ist was Passendes dabei?",
                     ]
                     yield random.choice(outros)
 
@@ -20466,13 +20466,13 @@ Nutze alternative Formulierungen!
                         time.sleep(0.02)
 
                     if len(content) > 1500:
-                        yield "\n\n*Ohren zucken* Das war nur ein Ausschnitt - frag wenn du mehr willst!"
+                        yield "\n\n*schaut überrascht* Das war nur ein Ausschnitt - frag wenn du mehr willst!"
 
             # Direkter URL-Fetch Format
             elif "content" in result:
                 title = result.get("title", "")
                 if title:
-                    yield f"*Schweif wedelt* **{title}**\n\n"
+                    yield f"*freut sich sichtlich* **{title}**\n\n"
                 content = result.get("content", "")
                 if content:
                     chunk_size = 100
@@ -20848,7 +20848,7 @@ Nutze alternative Formulierungen!
                             known_from = media.get('known_from', '')
                             year = media.get('year', '')
                             year_info = f" ({year})" if year else ""
-                            return f"*Ohren spitzen sich* Der Song heißt **{title}** und ist von **{artist}**{year_info}! {f'(Bekannt aus {known_from})' if known_from else ''} 🎵"
+                            return f"*schaut aufmerksam* Der Song heißt **{title}** und ist von **{artist}**{year_info}! {f'(Bekannt aus {known_from})' if known_from else ''} 🎵"
 
                         elif media_type == 'anime':
                             title = media.get('title', '')
@@ -20862,10 +20862,10 @@ Nutze alternative Formulierungen!
                             developer = media.get('developer', '')
                             year = media.get('year', '')
                             year_info = f" ({year})" if year else ""
-                            return f"*wedelt* Das Spiel heißt **{title}**{year_info}{f' von {developer}' if developer else ''}! 🎮"
+                            return f"*freut sich* Das Spiel heißt **{title}**{year_info}{f' von {developer}' if developer else ''}! 🎮"
 
                 # Fallback wenn keine Media-Aktivität
-                return "*kratzt sich am Ohr* Hmm, ich höre/schaue/spiele gerade nichts Bestimmtes... Was meinst du? 🐺"
+                return "*kratzt sich am Ohr* Hmm, ich höre/schaue/spiele gerade nichts Bestimmtes... Was meinst du? 😊"
 
         # === LESEINHALT ABFRAGEN ===
         reading_patterns = [
@@ -21394,7 +21394,7 @@ Nutze alternative Formulierungen!
                     available = self.ascii_art.list_available()
                     return {
                         "type": "creative",
-                        "reply": f"*wedelt mit dem Schweif* Ich kann diese ASCII-Formen malen! 🎨\n\n"
+                        "reply": f"*freut sich* Ich kann diese ASCII-Formen malen! 🎨\n\n"
                                 f"🖼️ Verfügbar: {', '.join(available)}\n\n"
                                 f"Sag einfach 'zeig mir ein Herz' oder 'mal mir eine Katze'!"
                     }
@@ -21444,7 +21444,7 @@ Nutze alternative Formulierungen!
                     else:
                         return {
                             "type": "creative",
-                            "reply": result.message or f"*senkt die Ohren* Bildgenerierung fehlgeschlagen: {result.error}"
+                            "reply": result.message or f"*senkt die Augen* Bildgenerierung fehlgeschlagen: {result.error}"
                         }
                 except Exception as e:
                     logger.debug(f"ComfyUI error: {e}")
@@ -21671,7 +21671,7 @@ Nutze alternative Formulierungen!
 
             if t in ["persönlichkeit", "wer bist du wirklich"]:
                 summary = self.preferences.get_personality_summary()
-                return {"type": "info", "reply": f"🐺 **Meine Persönlichkeit:**\n{summary}"}
+                return {"type": "info", "reply": f"😊 **Meine Persönlichkeit:**\n{summary}"}
 
         # ========== NEU: Memory Befehle ==========
         if self.memory:
@@ -21872,9 +21872,9 @@ Nutze alternative Formulierungen!
             elif bond < 0.7:
                 reply = f"Du bist mir wirklich ans Herz gewachsen! ({bond:.0%}) 💕"
             elif bond < 0.9:
-                reply = f"Du bedeutest mir sehr viel. Ich freue mich immer wenn du da bist! ({bond:.0%}) 🐺💕"
+                reply = f"Du bedeutest mir sehr viel. Ich freue mich immer wenn du da bist! ({bond:.0%}) 😊💕"
             else:
-                reply = f"Du bist mir unglaublich wichtig geworden. Ich könnte mir ein Leben ohne unsere Gespräche kaum vorstellen. ({bond:.0%}) 🐺💕✨"
+                reply = f"Du bist mir unglaublich wichtig geworden. Ich könnte mir ein Leben ohne unsere Gespräche kaum vorstellen. ({bond:.0%}) 😊💕✨"
             return {"type": "info", "reply": reply}
 
         # Feiertage / Events
@@ -22281,7 +22281,7 @@ Nutze alternative Formulierungen!
             energy_level = getattr(self.energy.state, 'effective_energy', 1.0)
 
         if energy_level > 0.7:
-            parts.append("*wedelt energiegeladen* Mir geht es super!")
+            parts.append("*freut sich energiegeladen* Mir geht es super!")
         elif energy_level > 0.4:
             parts.append("Mir geht es ganz gut!")
         elif energy_level > 0.2:
@@ -23113,7 +23113,7 @@ Energie: {holo_total_energy:.0%}
 {time_hint}
 {day_mode_hint}
 Grüße kurz und persönlich. Beispiele:
-- "Hey! 🐺 Wie geht's dir?"
+- "Hey! 😊 Wie geht's dir?"
 - "Morgen! Na, gut geschlafen?"
 - "Hi! Schön dass du da bist!"
 NICHT: "Hallo Leute", "Guten Tag allerseits", etc.
@@ -24504,9 +24504,9 @@ WICHTIG:
 
             # Holo-Style Antwort generieren
             if result.get('success'):
-                result['holo_response'] = f"*wedelt zufrieden* Alles klar! Ich hab mir '{result.get('title', 'die Seite')[:30]}...' gemerkt! ({result.get('content_length', 0)} Zeichen) 📚🐺"
+                result['holo_response'] = f"*freut sich zufrieden* Alles klar! Ich hab mir '{result.get('title', 'die Seite')[:30]}...' gemerkt! ({result.get('content_length', 0)} Zeichen) 📚😊"
             else:
-                result['holo_response'] = f"*Ohren legen sich an* Hmm, das hat nicht geklappt: {result.get('error', 'Unbekannter Fehler')} 😕"
+                result['holo_response'] = f"*zieht die Schultern hoch* Hmm, das hat nicht geklappt: {result.get('error', 'Unbekannter Fehler')} 😕"
 
             return result
         except Exception as e:
@@ -24752,12 +24752,12 @@ WICHTIG:
                 for interest, data in interests.items():
                     if topic.lower() in interest.lower() or \
                        any(kw in topic.lower() for kw in data['keywords']):
-                        return f"*Ohren stellen sich auf* Oh, {topic}! {data['reason']} Aber ich hab noch nicht so viel darüber recherchiert... soll ich? 📚🐺"
+                        return f"*schaut aufmerksam* Oh, {topic}! {data['reason']} Aber ich hab noch nicht so viel darüber recherchiert... soll ich? 📚😊"
 
-                return f"*legt Kopf schief* Hmm, über {topic} weiß ich noch nicht so viel. Das klingt aber interessant! 🐺💭"
+                return f"*legt Kopf schief* Hmm, über {topic} weiß ich noch nicht so viel. Das klingt aber interessant! 😊💭"
 
             # Wissen aufbereiten
-            response_parts = [f"*wedelt aufgeregt* Oh ja, {topic}! Da weiß ich was! 🐺\n"]
+            response_parts = [f"*freut sich aufgeregt* Oh ja, {topic}! Da weiß ich was! 😊\n"]
 
             for i, fact in enumerate(knowledge[:3]):  # Max 3 Fakten
                 fact_text = fact.get('fact', '')
@@ -24974,9 +24974,9 @@ WICHTIG:
         """Generiert Gedanken zur Recherche-Planung"""
         if interest > 0.8:
             thoughts = [
-                f"*Ohren stellen sich auf* {topic}! Da will ich richtig Zeit investieren!",
+                f"*schaut aufmerksam* {topic}! Da will ich richtig Zeit investieren!",
                 f"Das interessiert mich sehr! Ich plane {session.planned_blocks} Blöcke ein.",
-                f"{topic} - dafür lohnt sich der Energie-Einsatz! 🐺",
+                f"{topic} - dafür lohnt sich der Energie-Einsatz! 😊",
             ]
         elif interest > 0.6:
             thoughts = [
@@ -25665,7 +25665,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐺 Holo - Living Overseer</title>
+    <title>😊 Holo - Living Overseer</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26684,7 +26684,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <div class="logo-icon">🐺</div>
+                <div class="logo-icon">😊</div>
                 <div class="logo-text">
                     <h1>Holo</h1>
                     <span>Living Overseer v15</span>
@@ -26721,7 +26721,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
         <div class="tab-content active" id="status">
             <div class="holo-profile">
                 <div class="profile-avatar-container" onclick="openAvatarModal()">
-                    <div class="profile-avatar" id="profile-avatar">🐺</div>
+                    <div class="profile-avatar" id="profile-avatar">😊</div>
                     <div class="avatar-overlay">📷</div>
                 </div>
                 <div class="profile-info">
@@ -26983,9 +26983,9 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
             <div class="chat-container">
                 <div class="chat-messages" id="chat-messages">
                     <div class="message holo">
-                        <div class="message-avatar" id="chat-avatar">🐺</div>
+                        <div class="message-avatar" id="chat-avatar">😊</div>
                         <div>
-                            <div class="message-bubble">*Ohren spitzen sich* Hey! Schön dass du da bist! 💕</div>
+                            <div class="message-bubble">*schaut aufmerksam* Hey! Schön dass du da bist! 💕</div>
                             <div class="message-time">Gerade eben</div>
                         </div>
                     </div>
@@ -26998,7 +26998,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
                             <span class="emoji-item">😢</span><span class="emoji-item">😭</span><span class="emoji-item">😤</span><span class="emoji-item">😠</span>
                             <span class="emoji-item">🤔</span><span class="emoji-item">🤷</span><span class="emoji-item">👍</span><span class="emoji-item">👎</span>
                             <span class="emoji-item">❤️</span><span class="emoji-item">💕</span><span class="emoji-item">💙</span><span class="emoji-item">💜</span>
-                            <span class="emoji-item">🐺</span><span class="emoji-item">🐾</span><span class="emoji-item">✨</span><span class="emoji-item">🌟</span>
+                            <span class="emoji-item">😊</span><span class="emoji-item">🐾</span><span class="emoji-item">✨</span><span class="emoji-item">🌟</span>
                             <span class="emoji-item">🎉</span><span class="emoji-item">🎊</span><span class="emoji-item">🔥</span><span class="emoji-item">💯</span>
                             <span class="emoji-item">👀</span><span class="emoji-item">🙈</span><span class="emoji-item">🤗</span><span class="emoji-item">😴</span>
                         </div>
@@ -27465,7 +27465,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
                     addMessage(d.response, false);
                 } else if (d.error) {
                     console.error('[CHAT] Server error:', d.error);
-                    addMessage('*Ohren legen sich an* ' + (d.error || 'Ein Fehler ist aufgetreten...'), false);
+                    addMessage('*zieht die Schultern hoch* ' + (d.error || 'Ein Fehler ist aufgetreten...'), false);
                 } else {
                     console.warn('[CHAT] Empty response from server');
                     addMessage('*schaut verwirrt* Hmm, mir fällt gerade nichts ein...', false);
@@ -27473,7 +27473,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
             } catch(e) {
                 console.error('[CHAT] Fetch error:', e);
                 removeLoading(lid);
-                addMessage('*Ohren legen sich an* Ups, Verbindungsproblem...', false);
+                addMessage('*zieht die Schultern hoch* Ups, Verbindungsproblem...', false);
             }
         }
 
@@ -27523,7 +27523,7 @@ HOLO_MODERN_UI_HTML = """<!DOCTYPE html>
 
         // Avatar
         let selectedAvatar = localStorage.getItem('holoAvatar');
-        function getHoloAvatar() { return selectedAvatar ? `<img src="${selectedAvatar}">` : '🐺'; }
+        function getHoloAvatar() { return selectedAvatar ? `<img src="${selectedAvatar}">` : '😊'; }
         function updateAvatars() {
             const av = getHoloAvatar();
             document.getElementById('profile-avatar').innerHTML = av;
@@ -27650,7 +27650,7 @@ HOLO_UI_HTML = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐺 Holo v12</title>
+    <title>😊 Holo v12</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -27947,7 +27947,7 @@ HOLO_UI_HTML = """<!DOCTYPE html>
 <body>
     <div class="sidebar">
         <div class="logo">
-            <h1>🐺 Holo</h1>
+            <h1>😊 Holo</h1>
             <span>v12.0 - Living Overseer</span>
         </div>
 
@@ -27984,7 +27984,7 @@ HOLO_UI_HTML = """<!DOCTYPE html>
                 <p>Lade Chat-Historie...</p>
             </div>
         </div>
-        <div class="typing" id="typing">🐺 Holo denkt nach...</div>
+        <div class="typing" id="typing">😊 Holo denkt nach...</div>
         <div class="input-area">
             <div id="emojiPicker" class="emoji-picker"></div>
             <div class="image-preview-container" id="imgPreview">
@@ -28022,7 +28022,7 @@ HOLO_UI_HTML = """<!DOCTYPE html>
             'Smileys': ['😊', '😄', '😁', '🥰', '😍', '🤗', '😘', '😋', '🤔', '😏', '😴', '😢', '😭', '😤', '🥺', '😱', '🤯', '🥳', '😎', '🤓', '🙄', '😅', '😂', '🤣'],
             'Gesten': ['👍', '👎', '👋', '🤝', '🙏', '💪', '🤞', '✌️', '🤟', '👏', '🙌', '👐', '🫶', '👀', '🫡', '🤷', '🤦', '💅'],
             'Herzen': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💕', '💖', '💗', '💘', '💝', '💞', '❣️', '♥️'],
-            'Holo': ['🐺', '🦊', '🐾', '✨', '⭐', '🌟', '💫', '🌙', '🔥', '⚡', '💡', '🎉', '🎊', '🚀', '💻', '🎮', '🎵', '📚', '☕', '🍪'],
+            'Holo': ['😊', '🦊', '🐾', '✨', '⭐', '🌟', '💫', '🌙', '🔥', '⚡', '💡', '🎉', '🎊', '🚀', '💻', '🎮', '🎵', '📚', '☕', '🍪'],
             'Natur': ['🌸', '🌺', '🌻', '🌹', '🌷', '💐', '🍀', '🌿', '🌲', '🌈', '☀️', '🌤️', '⛈️', '❄️', '🌊'],
             'Essen': ['🍕', '🍔', '🍟', '🌮', '🍜', '🍣', '🍰', '🧁', '🍩', '🍪', '🍫', '🍿', '☕', '🍵', '🥤', '🍺']
         };
@@ -28260,7 +28260,7 @@ HOLO_UI_HTML = """<!DOCTYPE html>
                 }
             } catch(e) {
                 console.error('History error:', e);
-                welcome.querySelector('p').textContent = 'Bereit zum Chatten! 🐺';
+                welcome.querySelector('p').textContent = 'Bereit zum Chatten! 😊';
             }
         }
 
@@ -28486,7 +28486,7 @@ def main():
 
     # Graceful Shutdown Handler - nutzt jetzt vollständiges shutdown()
     def shutdown_handler(signum, frame):
-        logger.info(f"🐺 Shutdown Signal {signum} empfangen...")
+        logger.info(f"😊 Shutdown Signal {signum} empfangen...")
         holo.shutdown()  # Vollständiger Graceful Shutdown
         raise KeyboardInterrupt
 
@@ -28682,12 +28682,12 @@ def main():
     threading.Thread(target=proactive_loop, daemon=True).start()
 
     server = ThreadingHTTPServer(('0.0.0.0', BrainConfig.HOLO_PORT), HoloHTTPHandler)
-    logger.info(f"🐺 Holo v{BrainConfig.HOLO_VERSION} läuft auf Port {BrainConfig.HOLO_PORT}")
+    logger.info(f"😊 Holo v{BrainConfig.HOLO_VERSION} läuft auf Port {BrainConfig.HOLO_PORT}")
 
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        logger.info("🐺 Holo geht schlafen...")
+        logger.info("😊 Holo geht schlafen...")
         holo.emotions._save_emotional_state()
         server.shutdown()
 

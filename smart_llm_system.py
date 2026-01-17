@@ -368,13 +368,13 @@ class PatternCache:
             # =================================================================
             LearnedPattern(
                 pattern=r"^(hilfe|help|was kannst du)[\s!?]*$",
-                response_template="🐺 Ich kann:\n• NAS steuern (status, starten, stoppen)\n• System überwachen (CPU, RAM, Temp)\n• Wetter abfragen\n• Smart Home steuern\n• Mit dir plaudern!\n\nFrag einfach!",
+                response_template="😊 Ich kann:\n• NAS steuern (status, starten, stoppen)\n• System überwachen (CPU, RAM, Temp)\n• Wetter abfragen\n• Smart Home steuern\n• Mit dir plaudern!\n\nFrag einfach!",
                 intent="help",
                 confidence=0.95
             ),
             LearnedPattern(
                 pattern=r"^wer bist du[\s!?]*$",
-                response_template="Ich bin Holo, eine weise Wölfin und deine KI-Assistentin! 🐺",
+                response_template="Ich bin Holo, eine junge Frau und deine KI-Assistentin! 😊",
                 intent="info",
                 confidence=0.95
             ),
@@ -819,7 +819,7 @@ class UnifiedLLM:
         if decision.route == RouteType.OFFLINE:
             self.stats["offline_fallbacks"] += 1
             return {
-                "response": "Ich bin gerade offline und kann nicht antworten. 🐺💤",
+                "response": "Ich bin gerade offline und kann nicht antworten. 😊💤",
                 "source": "offline_fallback",
                 "latency_ms": 0,
                 "route": "offline",
@@ -950,7 +950,7 @@ class UnifiedLLM:
                 return
 
         if decision.route == RouteType.OFFLINE:
-            yield "Ich bin gerade offline... 🐺💤"
+            yield "Ich bin gerade offline... 😊💤"
             return
 
         # Stream von LLM
@@ -1071,7 +1071,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     print("=" * 70)
-    print("🐺 UnifiedLLM v15 - NEUES 3-Stufen-System")
+    print("😊 UnifiedLLM v15 - NEUES 3-Stufen-System")
     print("=" * 70)
     print("""
     PATTERN (0ms)  → NUR Daten: Status, Wetter, Zeit, Sensoren
@@ -1128,7 +1128,7 @@ if __name__ == "__main__":
             print(f"   Template: {pattern.response_template[:60]}...")
 
     print("\n" + "=" * 70)
-    print("🐺 FAZIT:")
+    print("😊 FAZIT:")
     print("=" * 70)
     print("""
     ✅ 'hallo', 'wie gehts', 'danke' → LOCAL LLM (dynamisch!)

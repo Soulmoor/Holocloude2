@@ -221,10 +221,10 @@ try:
         HoloPersonalityEngine,
         HoloPolicies,
         create_personality,
-        # Kemonomimi
-        KemonomimiBodyLanguage,
-        KemonomimiExpression,
-        KemonomimiMessageEnhancer,
+        # junge Frau
+        HumanBodyLanguage,
+        HumanExpression,
+        HumanMessageEnhancer,
         EmotionLevels,
         get_kemonomimi_prompt,
         WeatherTranslator,
@@ -245,7 +245,7 @@ try:
     PERSONALITY_AVAILABLE = True
     KEMONOMIMI_AVAILABLE = True
     # Backwards Compatibility
-    WolfBodyLanguage = KemonomimiBodyLanguage
+    HumanBodyLanguage = HumanBodyLanguage
     logger.info("[RobustImports] ✓ holo_personality (konsolidiert)")
 except ImportError as e:
     logger.warning(f"[RobustImports] holo_personality: {e}")
@@ -509,16 +509,16 @@ class FallbackPersonalityEngine:
         logger.warning("⚠️ Using FallbackPersonalityEngine")
 
     def get_personality_context(self):
-        return "Du bist Holo, eine freundliche und weise Wölfin."
+        return "Du bist Holo, eine freundliche und junge Frau."
 
     def get_current_quirks(self):
         return []
 
     def get_greeting(self):
-        return "Hallo! 🐺"
+        return "Hallo! 😊"
 
     def get_farewell(self):
-        return "Bis bald! 👋🐺"
+        return "Bis bald! 👋😊"
 
     def update(self, context=None):
         pass
@@ -754,35 +754,35 @@ class FallbackResponseGenerator:
     def generate_greeting_response(self):
         hour = datetime.now().hour
         if 5 <= hour < 12:
-            return random.choice(["Guten Morgen! 🌅", "Morgen! ☀️", "Hey, früher Vogel! 🐺"])
+            return random.choice(["Guten Morgen! 🌅", "Morgen! ☀️", "Hey, früher Vogel! 😊"])
         elif 12 <= hour < 18:
-            return random.choice(["Hey! 👋", "Hallo! 🐺", "Na du! 😊"])
+            return random.choice(["Hey! 👋", "Hallo! 😊", "Na du! 😊"])
         elif 18 <= hour < 22:
-            return random.choice(["Guten Abend! 🌙", "Hey! 🐺", "Nabend! ✨"])
+            return random.choice(["Guten Abend! 🌙", "Hey! 😊", "Nabend! ✨"])
         else:
-            return random.choice(["Hey Nachteule! 🦉", "Oh, noch wach? 🌙", "Na du! 🐺"])
+            return random.choice(["Hey Nachteule! 🦉", "Oh, noch wach? 🌙", "Na du! 😊"])
 
     def generate_farewell_response(self):
         hour = datetime.now().hour
         if 22 <= hour or hour < 5:
-            return random.choice(["Gute Nacht! Schlaf gut! 🌙", "Träum was Schönes! 💤🐺"])
+            return random.choice(["Gute Nacht! Schlaf gut! 🌙", "Träum was Schönes! 💤😊"])
         else:
-            return random.choice(["Bis bald! 👋🐺", "Mach's gut! 😊", "Ciao! 🐺"])
+            return random.choice(["Bis bald! 👋😊", "Mach's gut! 😊", "Ciao! 😊"])
 
     def generate_gratitude_response(self):
         return random.choice([
-            "Gerne! 😊🐺",
+            "Gerne! 😊😊",
             "Kein Ding!",
-            "Immer doch! 🐺",
+            "Immer doch! 😊",
             "Freut mich wenn ich helfen konnte!"
         ])
 
     def generate_feelings_response(self):
         moods = ["gut", "ganz okay", "super", "ein bisschen müde aber okay"]
         return random.choice([
-            f"Mir geht's {random.choice(moods)}! Und dir? 🐺",
+            f"Mir geht's {random.choice(moods)}! Und dir? 😊",
             f"Ach, {random.choice(moods)}. Was macht du so?",
-            "Prima soweit! Danke der Nachfrage! 😊🐺"
+            "Prima soweit! Danke der Nachfrage! 😊😊"
         ])
 
 

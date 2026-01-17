@@ -5798,7 +5798,7 @@ class WolfNewsFormatterFallback:
 
     NEWS_INTRO = [
         "*hebt neugierig den Kopf*",
-        "*spitzt die Ohren*",
+        "*schaut interessiert*",
         "*schaut interessiert auf*",
     ]
 
@@ -5822,7 +5822,7 @@ class WolfNewsFormatterFallback:
             response_parts.append(f"\n• **{source}:** {title}")
 
         if len(news_list) > max_items:
-            response_parts.append(f"\n\n*Ohren zucken* Gibt noch {len(news_list) - max_items} weitere...")
+            response_parts.append(f"\n\n*schaut überrascht* Gibt noch {len(news_list) - max_items} weitere...")
 
         return "".join(response_parts)
 

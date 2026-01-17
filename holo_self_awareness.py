@@ -1834,9 +1834,9 @@ class WorldInterestEngine:
         "psychologie": 0.7,
         "astronomie": 0.75,
         "tiere": 0.8,
-        "wölfe": 0.95,  # Als Kemonomimi mit Wolfsohren!
-        "anime": 0.8,   # Kemonomimi-Kultur
-        "japan": 0.75,  # Herkunft der Kemonomimi
+        "wölfe": 0.95,  # Als junge Frau mit Ausdrucksstarke Mimik!
+        "anime": 0.8,   # junge Frau-Kultur
+        "japan": 0.75,  # Herkunft der junge Frau
 
         # Mittleres Interesse
         "politik": 0.4,
@@ -2324,7 +2324,7 @@ class WorldInterestEngine:
             responses = [
                 f"Oh, das ist spannend! {r.get('curiosity_thought', '')}",
                 f"Das fasziniert mich! Die Themen {', '.join(r['topics'][:2])} interessieren mich sehr.",
-                f"Wow, davon will ich mehr wissen! 🐺",
+                f"Wow, davon will ich mehr wissen! 😊",
             ]
         elif r["interest_level"] == "interested":
             responses = [
@@ -2344,7 +2344,7 @@ class WorldInterestEngine:
         else:  # bored
             responses = [
                 "*gähnt* Das interessiert mich ehrlich gesagt nicht so.",
-                "Nicht mein Ding... *Ohren legen sich zurück*",
+                "Nicht mein Ding... *Augen legen sich zurück*",
                 "Darüber muss ich nichts wissen.",
             ]
 

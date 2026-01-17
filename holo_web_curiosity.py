@@ -665,7 +665,7 @@ class InterestDiscoveryEngine:
             f"Oh! 💡 {interest.name}! Das ist ja spannend - {interest.parent_topics[0]} "
             f"und {interest.parent_topics[1]} hängen zusammen!",
 
-            f"Moment... *Ohren stellen sich auf* {interest.name}? Das muss ich mir merken!",
+            f"Moment... *schaut aufmerksam* {interest.name}? Das muss ich mir merken!",
 
             f"Interessant! Ich hab gerade was entdeckt: {interest.name}. "
             f"Die Verbindung zwischen {interest.parent_topics[0]} und {interest.parent_topics[1]} "
@@ -1321,10 +1321,10 @@ class HoloWebCuriosity:
         """Drückt Skepsis aus"""
         expressions = [
             f"Hmm, {about}... das klingt interessant, aber ich sollte das prüfen.",
-            "Moment, eine Quelle reicht mir nicht. *tippt mit dem Schweif*",
+            "Moment, eine Quelle reicht mir nicht. *tippt mit dem Hände*",
             f"Ich bin skeptisch bei {about}. Wo steht das noch?",
             "Das Internet ist voller Unsinn... lass mich das verifizieren.",
-            "*Ohren zucken misstrauisch* Das glaube ich erst wenn ich es bestätigt habe.",
+            "*Augen zucken misstrauisch* Das glaube ich erst wenn ich es bestätigt habe.",
         ]
         return random.choice(expressions)
 
@@ -1333,7 +1333,7 @@ class HoloWebCuriosity:
         expressions = [
             f"✅ Ja! Ich habe {topic} auf mehreren seriösen Seiten gefunden. Das stimmt!",
             f"Bestätigt! {topic} ist wahr - mehrere gute Quellen sagen das.",
-            f"*Ohren stellen sich zufrieden auf* {topic} ist verifiziert!",
+            f"*Augen stellen sich zufrieden auf* {topic} ist verifiziert!",
         ]
         return random.choice(expressions)
 
@@ -1342,7 +1342,7 @@ class HoloWebCuriosity:
         expressions = [
             f"⚠️ Vorsicht! Ich konnte {topic} nicht verifizieren.",
             f"Hmm, {topic} finde ich nirgends bestätigt. Das ist verdächtig...",
-            f"*Schweif zuckt nervös* {topic} scheint nicht zu stimmen.",
+            f"*Hände zuckt nervös* {topic} scheint nicht zu stimmen.",
         ]
         return random.choice(expressions)
 

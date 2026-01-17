@@ -25,7 +25,7 @@
 ║  Integration:                                                                 ║
 ║  • Energy-System (müde = langsameres Sprechen)                               ║
 ║  • Emotions (fröhlich = höhere Tonlage)                                      ║
-║  • Kemonomimi (Wolf-Sounds hinzufügen)                                       ║
+║  • junge Frau (Wolf-Sounds hinzufügen)                                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -97,11 +97,11 @@ class VoiceConfig:
     
     # Wolf Sounds
     WOLF_SOUNDS = {
-        "happy": ["*lächelt strahlend*", "*Schweif wedelt*"],
+        "happy": ["*lächelt strahlend*", "*freut sich sichtlich*"],
         "tired": ["*gähnt*", "*seufzt müde*"],
-        "curious": ["*Ohren spitzen sich*", "*schaut interessiert*"],
+        "curious": ["*schaut aufmerksam*", "*schaut interessiert*"],
         "excited": ["*springt aufgeregt*", "*strahlt vor Freude*"],
-        "sad": ["*senkt die Ohren*", "*schaut traurig*"],
+        "sad": ["*senkt die Augen*", "*schaut traurig*"],
     }
     
     @classmethod
@@ -1517,7 +1517,7 @@ if __name__ == "__main__":
         print("  ❌ Nicht erreichbar")
     
     # Voice Interface erstellen
-    print("\n🐺 Erstelle Voice Interface...")
+    print("\n😊 Erstelle Voice Interface...")
     voice = create_voice_interface(
         use_remote=use_remote,
         remote_host=args.host,

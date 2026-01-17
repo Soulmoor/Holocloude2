@@ -727,8 +727,8 @@ class TopicTracker:
                  "deadline", "aufgabe", "büro", "karriere"],
         "hobbies": ["spiel", "musik", "film", "buch", "sport", "kochen",
                     "reisen", "hobby", "kreativ", "gaming", "anime"],
-        "holo": ["holo", "wolf", "traum", "energie", "stimmung", "wedeln",
-                 "ohren", "schweif"],
+        "holo": ["holo", "freundin", "traum", "energie", "stimmung", "freude",
+                 "mimik", "gestik"],
         "home": ["licht", "lampe", "temperatur", "heizung", "wohnzimmer",
                  "küche", "schlafzimmer", "smart", "home"],
         "meta": ["verstehen", "erklär", "hilfe", "kannst", "funktion", "wie"],
@@ -2374,7 +2374,7 @@ if __name__ == "__main__":
     # Chat simulieren
     print("\n📍 Chat simulieren...")
     mind.add_chat("user", "Hi Holo!", topics=["greeting"])
-    mind.add_chat("assistant", "*wedelt* Hey! Wie geht's?")
+    mind.add_chat("assistant", "*freut sich* Hey! Wie geht's?")
     mind.add_chat("user", "Mir geht es heute nicht so gut, ich bin etwas traurig",
                   topics=["emotion"])
     mind.add_emotion("user", "sad", 0.6, "unbekannt")

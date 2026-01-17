@@ -2161,7 +2161,7 @@ class SimpleWordEmbeddings:
             "devices": ["licht", "lampe", "nas", "server", "computer", "handy"],
             "rooms": ["küche", "wohnzimmer", "schlafzimmer", "bad", "büro"],
             "actions": ["machen", "tun", "gehen", "kommen", "sagen"],
-            "holo": ["wolf", "wedeln", "ohren", "schweif", "pfote"],
+            "holo": ["freude", "lächeln", "strahlen", "winken"],
         }
 
     def train(self, texts: List[str]):
@@ -2670,7 +2670,7 @@ class CoherenceScorer:
     def __init__(self):
         self.good_patterns = [
             r"^\*[^*]+\*",
-            r"🐺",
+            r"😊",
             r"\?$",
             r"!$",
         ]
@@ -2683,7 +2683,7 @@ class CoherenceScorer:
         ]
 
         self.persona_words = {
-            "positiv": ["🐺", "*", "wedelt", "ohren", "schweif"],
+            "positiv": ["😊", "*", "freut sich", "mimik", "gestik"],
             "freundlich": ["gerne", "freut", "schön", "toll"],
         }
 
@@ -2946,7 +2946,7 @@ class TemplateTextGenerator:
         """Stimmungs-Modifikatoren"""
         return {
             "energetic": {
-                "prefix": ["*springt auf*", "*wedelt begeistert*"],
+                "prefix": ["*springt auf*", "*freut sich begeistert*"],
                 "suffix": ["!", "!!"],
                 "intensifiers": ["total", "mega", "richtig"],
             },
@@ -3097,7 +3097,7 @@ class HoloNLP:
             "Wie geht es dir heute",
             "Mir geht es gut danke der Nachfrage",
             "Schalte das Licht im Wohnzimmer an",
-            "Der Wolf wedelt mit dem Schweif",
+            "Der Wolf freut sich mit dem Hände",
         ]
         self.embeddings.train(training_data)
 

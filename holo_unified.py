@@ -217,9 +217,9 @@ class PersonalityEngine:
         if self.state.energy < 40:
             greeting += random.choice([" *gähn*", "... bin etwas müde", ""])
         elif self.state.energy > 80:
-            greeting += random.choice(["! 🐺", "! ✨", "!"])
+            greeting += random.choice(["! 😊", "! ✨", "!"])
         else:
-            greeting += random.choice(["!", " 🐺", ""])
+            greeting += random.choice(["!", " 😊", ""])
         
         # User-Name wenn bekannt
         if self.user_name:
@@ -234,15 +234,15 @@ class PersonalityEngine:
         if 22 <= hour or hour < 5:
             farewells = [
                 "Gute Nacht! Schlaf gut! 🌙",
-                "Träum was Schönes! 🐺💤",
+                "Träum was Schönes! 😊💤",
                 "Bis morgen! Ruh dich aus!",
             ]
         else:
             farewells = [
-                "Bis bald! 👋🐺",
+                "Bis bald! 👋😊",
                 "Mach's gut!",
                 "Bis später! Pass auf dich auf!",
-                "Ciao! 🐺",
+                "Ciao! 😊",
             ]
         
         return random.choice(farewells)
@@ -255,9 +255,9 @@ class PersonalityEngine:
         energy = self.state.get_energy_text()
         
         responses = [
-            f"Mir geht's {mood}! {energy.capitalize()}. Und dir? 🐺",
+            f"Mir geht's {mood}! {energy.capitalize()}. Und dir? 😊",
             f"Ach, {mood}. Bin gerade {energy}. Was macht du so?",
-            f"{mood.capitalize()}! Danke der Nachfrage. 🐺 Und selbst?",
+            f"{mood.capitalize()}! Danke der Nachfrage. 😊 Und selbst?",
         ]
         
         response = random.choice(responses)
@@ -271,16 +271,16 @@ class PersonalityEngine:
     def get_gratitude_response(self) -> str:
         """Antwortet auf 'danke'"""
         responses = [
-            "Gerne! 😊🐺",
+            "Gerne! 😊😊",
             "Kein Ding!",
-            "Immer doch! 🐺",
+            "Immer doch! 😊",
             "Freut mich wenn ich helfen konnte!",
             "Bitte! 😊",
         ]
         
         if self.state.mood > 80:
             responses.extend([
-                "Total gerne! Das macht mir Spaß! 🐺✨",
+                "Total gerne! Das macht mir Spaß! 😊✨",
                 "Immer wieder gern!",
             ])
         
@@ -292,9 +292,9 @@ class PersonalityEngine:
         self.state.update_from_interaction(intent)
         
         # Emoji basierend auf Stimmung
-        if self.state.mood > 70 and "🐺" not in response:
+        if self.state.mood > 70 and "😊" not in response:
             if random.random() > 0.5:
-                response += " 🐺"
+                response += " 😊"
         
         return response
     
@@ -471,11 +471,11 @@ class BrainPersonalityAdapter:
         # Fallback
         hour = datetime.now().hour
         if 5 <= hour < 12:
-            return "Guten Morgen! 🐺"
+            return "Guten Morgen! 😊"
         elif 12 <= hour < 18:
-            return "Hey! 🐺"
+            return "Hey! 😊"
         else:
-            return "Guten Abend! 🐺"
+            return "Guten Abend! 😊"
     
     def get_farewell_style(self) -> str:
         """Abschied von echtem Personality-System"""
@@ -484,7 +484,7 @@ class BrainPersonalityAdapter:
                 return self.brain.personality.get_farewell()
             except Exception:
                 pass
-        return "Bis bald! 🐺"
+        return "Bis bald! 😊"
     
     def get_emotion_response(self) -> str:
         """Emotions-Antwort vom echten Energy-System"""
@@ -499,10 +499,10 @@ class BrainPersonalityAdapter:
                     energy_text = "ganz okay"
                 else:
                     energy_text = "etwas müde"
-                return f"Mir geht's {mood}! Bin {energy_text}. Und dir? 🐺"
+                return f"Mir geht's {mood}! Bin {energy_text}. Und dir? 😊"
             except Exception:
                 pass
-        return "Mir geht's gut! Und dir? 🐺"
+        return "Mir geht's gut! Und dir? 😊"
     
     def update_from_interaction(self, intent: str, positive: bool = True):
         """Update via Brain's Systeme"""
@@ -525,7 +525,7 @@ class BrainPersonalityAdapter:
     
     def enhance_response(self, response: str, intent: str) -> str:
         """Response Enhancement via Brain"""
-        # Kemonomimi-Ausdruck hinzufügen?
+        # junge Frau-Ausdruck hinzufügen?
         if self.brain and hasattr(self.brain, 'get_kemonomimi_expression'):
             try:
                 expr = self.brain.get_kemonomimi_expression()
@@ -579,7 +579,7 @@ class HoloUnified:
             brain: Optional HoloBrain Referenz - wenn vorhanden,
                    werden dessen Module genutzt statt eigener.
         """
-        logger.info("🐺 Initialisiere Holo Unified v16...")
+        logger.info("😊 Initialisiere Holo Unified v16...")
         
         self.brain = brain
         
@@ -631,7 +631,7 @@ class HoloUnified:
         }
         
         mode = "integrated" if brain else "standalone"
-        logger.info(f"🐺 Holo Unified v16 bereit! (Mode: {mode})")
+        logger.info(f"😊 Holo Unified v16 bereit! (Mode: {mode})")
     
     def process(self, text: str) -> Dict:
         """
@@ -742,9 +742,9 @@ class HoloUnified:
         # 3d. FALLBACK
         if not response:
             if route == "offline":
-                response = "Ich bin gerade offline und kann nicht antworten. 🐺💤"
+                response = "Ich bin gerade offline und kann nicht antworten. 😊💤"
             else:
-                response = "Hmm, da bin ich gerade überfragt... Frag mich gerne anders! 🐺"
+                response = "Hmm, da bin ich gerade überfragt... Frag mich gerne anders! 😊"
             route = "fallback"
         
         # === 4. PERSÖNLICHKEIT HINZUFÜGEN ===
@@ -802,7 +802,7 @@ class HoloUnified:
 def interactive_chat():
     """Interaktiver Chat-Modus"""
     print("=" * 60)
-    print("🐺 HOLO UNIFIED v16 - Interaktiver Chat")
+    print("😊 HOLO UNIFIED v16 - Interaktiver Chat")
     print("=" * 60)
     print("Befehle: /quit, /stats, /name <name>")
     print("-" * 60)
@@ -818,7 +818,7 @@ def interactive_chat():
             
             # Befehle
             if user_input.lower() == "/quit":
-                print("\n🐺 Tschüss! Bis bald!")
+                print("\n😊 Tschüss! Bis bald!")
                 break
             elif user_input.lower() == "/stats":
                 stats = holo.get_stats()
@@ -834,14 +834,14 @@ def interactive_chat():
             # Normale Nachricht
             result = holo.process(user_input)
             
-            print(f"\n🐺 Holo: {result['response']}")
+            print(f"\n😊 Holo: {result['response']}")
             print(f"   [{result['route']}|{result['intent']}|{result['latency_ms']}ms]")
             
             if result['typo_corrections']:
                 print(f"   🔧 Korrigiert: {result['typo_corrections']}")
                 
         except KeyboardInterrupt:
-            print("\n\n🐺 Tschüss!")
+            print("\n\n😊 Tschüss!")
             break
         except Exception as e:
             print(f"\n❌ Fehler: {e}")
@@ -854,7 +854,7 @@ def interactive_chat():
 def run_tests():
     """Führt Tests durch"""
     print("=" * 70)
-    print("🐺 HOLO UNIFIED v16 - TEST SUITE")
+    print("😊 HOLO UNIFIED v16 - TEST SUITE")
     print("=" * 70)
     
     holo = HoloUnified()

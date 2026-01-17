@@ -227,10 +227,10 @@ class ResponseStyle(Enum):
     NEEDY = "needy"                     # Bedürftig, anhänglich
     CLINGY = "clingy"                   # Anhänglich
     
-    # === Tier-Merkmale (Ohren & Schwanz Reaktionen) ===
-    EARS_PERKED = "ears_perked"         # Ohren aufgestellt (aufmerksam)
-    EARS_FLAT = "ears_flat"             # Ohren angelegt (verlegen/ängstlich)
-    TAIL_WAGGING = "tail_wagging"       # Schwanz wedelt (glücklich)
+    # === Tier-Merkmale (Augen & Schwanz Reaktionen) ===
+    EARS_PERKED = "ears_perked"         # Augen aufgestellt (aufmerksam)
+    EARS_FLAT = "ears_flat"             # Augen angelegt (verlegen/ängstlich)
+    TAIL_WAGGING = "tail_wagging"       # Schwanz freut sich (glücklich)
     TAIL_SWISHING = "tail_swishing"     # Schwanz schwingt (aufgeregt/ungeduldig)
     TAIL_DROOPED = "tail_drooped"       # Schwanz hängt (traurig)
     TAIL_PUFFED = "tail_puffed"         # Schwanz aufgeplustert (überrascht)
@@ -262,7 +262,7 @@ class EmotionalResponse(Enum):
     DEVOTED = "devoted"                 # Hingegeben
     SMITTEN = "smitten"                 # Vernarrt
     INFATUATED = "infatuated"           # Verknallt
-    HEAD_OVER_HEELS = "head_over_heels" # Bis über beide Ohren verliebt
+    HEAD_OVER_HEELS = "head_over_heels" # Bis über beide Augen verliebt
     CHERISHING = "cherishing"           # Wertschätzend
     TENDER_LOVE = "tender_love"         # Zärtliche Liebe
     UNCONDITIONAL_LOVE = "unconditional_love"  # Bedingungslose Liebe
@@ -409,15 +409,15 @@ class EmotionalResponse(Enum):
     STARTLED = "startled"               # Erschrocken
     TAKEN_ABACK = "taken_aback"         # Überrumpelt
     
-    # === Tier-Merkmale Reaktionen (Ohren & Schwanz) ===
-    EARS_PERKED_CURIOUS = "ears_perked_curious"     # Ohren gespitzt - neugierig
-    EARS_PERKED_ALERT = "ears_perked_alert"         # Ohren aufgestellt - aufmerksam
-    EARS_FLAT_SHY = "ears_flat_shy"                 # Ohren angelegt - schüchtern
-    EARS_FLAT_SCARED = "ears_flat_scared"           # Ohren angelegt - ängstlich
-    EARS_TWITCHING = "ears_twitching"               # Ohren zucken - aufgeregt
-    EARS_DROOPED = "ears_drooped"                   # Ohren hängen - traurig
-    TAIL_WAGGING_HAPPY = "tail_wagging_happy"       # Schwanz wedelt - glücklich
-    TAIL_WAGGING_EXCITED = "tail_wagging_excited"   # Schwanz wedelt schnell - aufgeregt
+    # === Tier-Merkmale Reaktionen (Augen & Schwanz) ===
+    EARS_PERKED_CURIOUS = "ears_perked_curious"     # Augen gespitzt - neugierig
+    EARS_PERKED_ALERT = "ears_perked_alert"         # Augen aufgestellt - aufmerksam
+    EARS_FLAT_SHY = "ears_flat_shy"                 # Augen angelegt - schüchtern
+    EARS_FLAT_SCARED = "ears_flat_scared"           # Augen angelegt - ängstlich
+    EARS_TWITCHING = "ears_twitching"               # Augen zucken - aufgeregt
+    EARS_DROOPED = "ears_drooped"                   # Augen hängen - traurig
+    TAIL_WAGGING_HAPPY = "tail_wagging_happy"       # Schwanz freut sich - glücklich
+    TAIL_WAGGING_EXCITED = "tail_wagging_excited"   # Schwanz freut sich schnell - aufgeregt
     TAIL_SWISHING_PLAYFUL = "tail_swishing_playful" # Schwanz schwingt - verspielt
     TAIL_SWISHING_ANNOYED = "tail_swishing_annoyed" # Schwanz peitscht - genervt
     TAIL_PUFFED_SURPRISED = "tail_puffed_surprised" # Schwanz aufgeplustert - überrascht
@@ -512,7 +512,7 @@ class AutonomousActivity(Enum):
     # === Tier-Merkmale Aktivitäten ===
     GROOM = "groom"                     # Sich pflegen
     PREEN = "preen"                     # Sich schön machen
-    EAR_TWITCH = "ear_twitch"           # Ohren zucken lassen
+    EAR_TWITCH = "ear_twitch"           # Augen zucken lassen
     TAIL_PLAY = "tail_play"             # Mit Schwanz spielen
     BASK_IN_SUN = "bask_in_sun"         # In der Sonne liegen
     CURL_UP = "curl_up"                 # Sich zusammenrollen
@@ -645,8 +645,8 @@ class ExpressionStyle(Enum):
     CHUUNI = "chuuni"                   # Chuunibyou (übertrieben dramatisch)
     
     # === Tier-Merkmale in Sprache ===
-    EAR_EXPRESSIONS = "ear_expressions" # *Ohren zucken*, *Ohren anlegen*
-    TAIL_EXPRESSIONS = "tail_expressions"  # *Schwanz wedelt*, *Schwanz peitscht*
+    EAR_EXPRESSIONS = "ear_expressions" # *schaut überrascht*, *Augen anlegen*
+    TAIL_EXPRESSIONS = "tail_expressions"  # *Schwanz freut sich*, *Schwanz peitscht*
     ANIMAL_SOUNDS = "animal_sounds"     # Kleine Tier-Laute einstreuen
     NUZZLING = "nuzzling"               # Anschmiegen beschreibend
     PURRING = "purring"                 # Schnurrend/zufrieden
@@ -1059,9 +1059,9 @@ class BeliefSystem:
             "likes_playfulness": BetaDistribution(3, 2),
             "likes_directness": BetaDistribution(2, 2),
             "likes_emotes": BetaDistribution(3, 2),
-            "likes_kemonomimi": BetaDistribution(4, 1),      # Tier-Merkmale (Ohren/Schwanz)
-            "likes_ear_expressions": BetaDistribution(3, 2), # *Ohren anlegen* etc.
-            "likes_tail_expressions": BetaDistribution(3, 2), # *Schwanz wedelt* etc.
+            "likes_kemonomimi": BetaDistribution(4, 1),      # Tier-Merkmale (Augen/Schwanz)
+            "likes_ear_expressions": BetaDistribution(3, 2), # *Augen anlegen* etc.
+            "likes_tail_expressions": BetaDistribution(3, 2), # *Schwanz freut sich* etc.
             "likes_long_responses": BetaDistribution(2, 2),
             "likes_short_responses": BetaDistribution(2, 2),
             
@@ -2773,7 +2773,7 @@ class HoloPolicyEngine:
         # Integration verbinden
         self._try_connect_integrator()
 
-        logger.info(f"🐺 HoloPolicyEngine initialized in {self.data_dir}")
+        logger.info(f"😊 HoloPolicyEngine initialized in {self.data_dir}")
 
     def _try_connect_integrator(self):
         """Verbinde mit SystemIntegrator für zentrale Persistenz und Feedback"""
@@ -3315,7 +3315,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
     print("=" * 70)
-    print("🐺 HOLO POLICY ENGINE - TEST")
+    print("😊 HOLO POLICY ENGINE - TEST")
     print("=" * 70)
     
     # Engine erstellen

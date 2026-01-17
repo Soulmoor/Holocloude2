@@ -1129,7 +1129,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     print("=" * 70)
-    print("🐺 HOLO NLP UNIFIED v1.0 - TEST")
+    print("😊 HOLO NLP UNIFIED v1.0 - TEST")
     print("=" * 70)
 
     nlp = HoloNLP()

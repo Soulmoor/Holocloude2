@@ -426,14 +426,14 @@ class HoloMediaIndex:
             if manual:
                 return {
                     "type": "media_location",
-                    "reply": f"*Ohren spitzen sich* {manual['description']} ist auf **{manual['device']}** unter `{manual['path']}`"
+                    "reply": f"*schaut aufmerksam* {manual['description']} ist auf **{manual['device']}** unter `{manual['path']}`"
                 }
             
             return {
                 "type": "media_not_found",
                 "reply": f"*kratzt sich am Ohr* Hmm, '{query}' hab ich leider nicht in meinem Index... " +
                          "Vielleicht ist es unter einem anderen Namen gespeichert? " +
-                         "Oder sag mir wo es ist, dann merk ich mir das! 🐺"
+                         "Oder sag mir wo es ist, dann merk ich mir das! 😊"
             }
         
         # Beste Treffer
@@ -442,7 +442,7 @@ class HoloMediaIndex:
         # Antwort bauen
         device_name = "NAS" if best["device"] == "nas" else best["device"].upper()
         
-        response = f"*Schweif wedelt* Gefunden! **{best['name']}** ist auf dem **{device_name}**\n\n"
+        response = f"*freut sich sichtlich* Gefunden! **{best['name']}** ist auf dem **{device_name}**\n\n"
         response += f"📁 Pfad: `{best['path']}`\n"
         
         if best.get("file_count"):
@@ -453,7 +453,7 @@ class HoloMediaIndex:
         
         # NAS Status prüfen
         if best["device"] == "nas" and not self.nas_online:
-            response += "\n⚠️ *Ohren legen sich an* Das NAS ist gerade **offline**. Soll ich es aufwecken?"
+            response += "\n⚠️ *zieht die Schultern hoch* Das NAS ist gerade **offline**. Soll ich es aufwecken?"
         
         # Weitere Treffer?
         if len(results) > 1:
@@ -470,7 +470,7 @@ class HoloMediaIndex:
         """Gibt Übersicht über NAS-Inhalt"""
         stats = self.get_stats()
         
-        response = "*Ohren stellen sich auf* Hier ist was auf dem NAS ist:\n\n"
+        response = "*schaut aufmerksam* Hier ist was auf dem NAS ist:\n\n"
         
         for media_type, info in stats.get("by_type", {}).items():
             emoji = {
@@ -533,12 +533,12 @@ class HoloMediaIndex:
         if self.nas_online:
             return {
                 "type": "nas_status",
-                "reply": "*Schweif wedelt* Ja, das NAS ist online und läuft! 🟢"
+                "reply": "*freut sich sichtlich* Ja, das NAS ist online und läuft! 🟢"
             }
         else:
             return {
                 "type": "nas_status",
-                "reply": "*Ohren sinken leicht* Nein, das NAS ist gerade offline. 🔴\nSoll ich es aufwecken?",
+                "reply": "*Augen sinken leicht* Nein, das NAS ist gerade offline. 🔴\nSoll ich es aufwecken?",
                 "nas_online": False
             }
     
@@ -607,11 +607,11 @@ class HoloMediaIndex:
         if not results:
             return {
                 "type": "device_content",
-                "reply": f"*Ohren legen sich an* Ich hab noch nichts für den **{display_name}** gespeichert...\n\n" +
+                "reply": f"*zieht die Schultern hoch* Ich hab noch nichts für den **{display_name}** gespeichert...\n\n" +
                          f"Sag mir was drauf ist! Z.B.: \"Meine Fotos sind auf dem {display_name}\""
             }
         
-        response = f"*Schweif wedelt* Hier ist was ich über den **{display_name}** weiß:\n\n"
+        response = f"*freut sich sichtlich* Hier ist was ich über den **{display_name}** weiß:\n\n"
         
         for r in results[:10]:
             emoji = {"anime": "🎌", "filme": "🎬", "serien": "📺", "musik": "🎵", 
@@ -647,7 +647,7 @@ class HoloMediaIndex:
         if not rows:
             return {
                 "type": "all_locations",
-                "reply": "*Ohren hängen* Ich hab mir noch nichts gemerkt...\n\n" +
+                "reply": "*senkt den Blick* Ich hab mir noch nichts gemerkt...\n\n" +
                          "Sag mir wo deine Sachen sind! Z.B.:\n" +
                          "• \"Meine Fotos sind auf dem NAS\"\n" +
                          "• \"Die Steuererklärung ist auf dem Laptop\"\n" +
@@ -694,7 +694,7 @@ class HoloMediaIndex:
     
     def _get_known_devices(self) -> Dict:
         """Zeigt alle bekannten Geräte"""
-        response = "*Ohren stellen sich auf* Diese Geräte kenne ich:\n\n"
+        response = "*schaut aufmerksam* Diese Geräte kenne ich:\n\n"
         
         devices_info = [
             ("💾", "NAS", "Netzwerkspeicher für Filme, Anime, etc."),

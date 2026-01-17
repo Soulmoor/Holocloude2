@@ -126,7 +126,7 @@ class GutFeeling:
         expressions = {
             GutFeelingType.POSITIVE: f"*{intensity_prefix}gutes Gefühl* {self.vague_reason}",
             GutFeelingType.NEGATIVE: f"*{intensity_prefix}ungutes Gefühl* {self.vague_reason}",
-            GutFeelingType.SUSPICIOUS: f"*Ohren zucken* Hmm... {self.vague_reason}",
+            GutFeelingType.SUSPICIOUS: f"*schaut überrascht* Hmm... {self.vague_reason}",
             GutFeelingType.EXCITED: f"*aufgeregt* Oh! {self.vague_reason}",
             GutFeelingType.UNEASY: f"*unruhig* {self.vague_reason}",
             GutFeelingType.CURIOUS: f"*neugierig* {self.vague_reason}",
@@ -5410,7 +5410,7 @@ class ConceptEssenceExtractor:
             "definition": "Domestiziertes Säugetier, Unterart des Wolfs",
             "necessary": ["säugetier", "canis_familiaris", "domestiziert"],
             "sufficient": ["domestizierter_wolf"],
-            "typical": ["vier_beine", "fell", "bellt", "wedelt_mit_schwanz"],
+            "typical": ["vier_beine", "fell", "bellt", "freut sich_mit_schwanz"],
             "distinguishing": ["domestiziert_im_gegensatz_zu_wolf"],
         },
         "stuhl": {
@@ -6330,7 +6330,7 @@ class CuriosityDrivenLearner:
             AutonomousLearningMode.AGGRESSIVE: "Ich will ALLES wissen!"
         }
 
-        return f"*Ohren stellen sich auf* {mode_descriptions[mode]}"
+        return f"*schaut aufmerksam* {mode_descriptions[mode]}"
 
     def process_input(self, text: str, source: str = "conversation") -> Dict[str, Any]:
         """
@@ -6453,7 +6453,7 @@ class CuriosityDrivenLearner:
         """Generiert eine neugierige Frage für den Benutzer"""
         templates = [
             f"*legt den Kopf schief* Was ist eigentlich '{concept}'?",
-            f"*Ohren stellen sich auf* '{concept}'... was bedeutet das?",
+            f"*schaut aufmerksam* '{concept}'... was bedeutet das?",
             f"*neugierig* Ich kenne '{concept}' nicht - kannst du mir das erklären?",
             f"*tippt mit der Pfote* Hmm, was genau ist '{concept}'?",
         ]
@@ -6642,7 +6642,7 @@ class CuriosityDrivenLearner:
         # Aus Interessen
         if self.curiosity_system:
             random_interest = random.choice(list(self.curiosity_system.INNATE_INTERESTS.keys()))
-            return f"*Schweif wedelt* Ich würde gerne mehr über {random_interest} erfahren!"
+            return f"*freut sich sichtlich* Ich würde gerne mehr über {random_interest} erfahren!"
 
         return "*zufrieden* Im Moment habe ich keine offenen Fragen!"
 
@@ -6671,7 +6671,7 @@ class CuriosityDrivenLearner:
         })
 
         result["correction_acknowledged"] = True
-        result["response"] = f"*senkt beschämt die Ohren* Oh, ich hatte '{concept}' falsch verstanden! " \
+        result["response"] = f"*senkt beschämt die Augen* Oh, ich hatte '{concept}' falsch verstanden! " \
                             f"Jetzt weiß ich es besser: {correct_understanding[:100]}..."
 
         return result
@@ -6734,7 +6734,7 @@ class CuriosityDrivenLearner:
         if self.learning_queue:
             concept = self.learning_queue[0].concept
             expressions = [
-                f"*Ohren stellen sich auf* Ich frage mich was '{concept}' bedeutet...",
+                f"*schaut aufmerksam* Ich frage mich was '{concept}' bedeutet...",
                 f"*neugierig* Irgendwann will ich verstehen was '{concept}' ist!",
                 f"*schaut nachdenklich* '{concept}'... da muss ich noch mehr drüber lernen.",
             ]
@@ -7791,7 +7791,7 @@ class ThoughtChainEngine:
         ThoughtType.INITIAL_QUESTION: [
             "*legt den Kopf schief* Was ist eigentlich {concept}?",
             "*neugierig* Hmm, {concept}... was bedeutet das genau?",
-            "*Ohren stellen sich auf* Ich frage mich, was {concept} ist...",
+            "*schaut aufmerksam* Ich frage mich, was {concept} ist...",
         ],
         ThoughtType.DEFINITION: [
             "*nickt verstehend* Ah, {concept} ist {definition}!",

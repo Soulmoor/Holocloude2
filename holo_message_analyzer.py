@@ -133,11 +133,11 @@ class WolfNewsFormatter:
     # Wolf-Aktionen für News
     NEWS_INTRO_ACTIONS = [
         "*hebt neugierig den Kopf*",
-        "*spitzt die Ohren*",
+        "*schaut interessiert*",
         "*schaut interessiert auf*",
         "*legt Kopf schief*",
-        "*wedelt leicht mit dem Schweif*",
-        "*Ohren stellen sich auf*",
+        "*freut sich leicht mit dem Hände*",
+        "*schaut aufmerksam*",
     ]
     
     # Kommentare nach Kategorie
@@ -145,7 +145,7 @@ class WolfNewsFormatter:
         "Technik": [
             "Technisch ziemlich spannend!",
             "Das könnte interessant werden...",
-            "*Ohren zucken* Tech-News!",
+            "*schaut überrascht* Tech-News!",
             "Spannende Entwicklung!",
         ],
         "Welt": [
@@ -156,15 +156,15 @@ class WolfNewsFormatter:
         ],
         "Science": [
             "Wissenschaft ist faszinierend!",
-            "*Ohren spitzen sich neugierig* Spannende Forschung!",
+            "*schaut interessiert neugierig* Spannende Forschung!",
             "Da lerne sogar ich was Neues!",
         ],
         "Sport": [
-            "*wedelt* Sportliche Grüße!",
+            "*freut sich* Sportliche Grüße!",
             "Action!",
         ],
         "Entertainment": [
-            "*Ohren stellen sich auf*",
+            "*schaut aufmerksam*",
             "Unterhaltung!",
         ],
         "default": [
@@ -179,7 +179,7 @@ class WolfNewsFormatter:
         "*legt sich gemütlich hin*",
         "*gähnt leicht*",
         "*schaut dich fragend an*",
-        "*wedelt mit dem Schweif*",
+        "*freut sich*",
         "*streckt sich*",
     ]
     
@@ -241,7 +241,7 @@ class WolfNewsFormatter:
         # Outro
         remaining = len(news_list) - max_items
         if style == "conversational" and remaining > 0:
-            response_parts.append(f"\n*Ohren zucken* Gibt noch {remaining} weitere...")
+            response_parts.append(f"\n*schaut überrascht* Gibt noch {remaining} weitere...")
         
         # Closing Action (manchmal)
         if self.energy > 0.5 and random.random() > 0.6:
@@ -294,7 +294,7 @@ class WolfNewsFormatter:
         source = news.get('source', '?')
         link = news.get('link', '')
         
-        response = f"*spitzt die Ohren*\n\n"
+        response = f"*schaut interessiert*\n\n"
         response += f"**{title}**\n"
         response += f"_Quelle: {source}_\n\n"
         response += f"{summary}\n\n"
@@ -332,17 +332,17 @@ class ResponseTemplates:
             "morning": [
                 "*gähnt und streckt sich* Guten Morgen! ☀️",
                 "*hebt verschlafen den Kopf* Moin! Auch schon wach?",
-                "*wedelt müde* Morgen! Gut geschlafen?",
+                "*freut sich müde* Morgen! Gut geschlafen?",
             ],
             "day": [
-                "*wedelt mit dem Schweif* Hey! 🐺",
-                "*spitzt die Ohren* Hallo! Schön dich zu sehen!",
+                "*freut sich* Hey! 😊",
+                "*schaut interessiert* Hallo! Schön dich zu sehen!",
                 "*springt auf* Hi! Was gibt's?",
             ],
             "evening": [
                 "*blinzelt gemütlich* Guten Abend!",
                 "*hebt den Kopf* Hey! Wie war dein Tag?",
-                "*wedelt entspannt* Nabend!",
+                "*freut sich entspannt* Nabend!",
             ],
             "night": [
                 "*gähnt* Hey, so spät noch wach?",
@@ -354,27 +354,27 @@ class ResponseTemplates:
         # Farewells
         "farewell": {
             "default": [
-                "*wedelt zum Abschied* Bis bald! 🐺",
-                "*winkt mit dem Schweif* Mach's gut!",
+                "*freut sich zum Abschied* Bis bald! 😊",
+                "*winkt mit dem Hände* Mach's gut!",
                 "*stupst dich sanft an* Pass auf dich auf!",
             ],
             "night": [
                 "*gähnt* Schlaf gut... *rollt sich ein*",
                 "*kuschelt sich zusammen* Gute Nacht! Träum was Schönes!",
-                "*wedelt müde* Schlaf schön! Bis morgen!",
+                "*freut sich müde* Schlaf schön! Bis morgen!",
             ],
         },
         
         # Gratitude
         "gratitude": {
             "default": [
-                "*wedelt stolz* Gerne! 🐺",
+                "*freut sich stolz* Gerne! 😊",
                 "*freut sich* Immer gern!",
                 "*strahlt* Kein Problem!",
             ],
             "touched": [
-                "*wedelt verlegen* Aw, das ist lieb!",
-                "*Ohren werden warm* Danke dir!",
+                "*freut sich verlegen* Aw, das ist lieb!",
+                "*Augen werden warm* Danke dir!",
                 "*freut sich sichtlich* Das bedeutet mir viel!",
             ],
         },
@@ -383,11 +383,11 @@ class ResponseTemplates:
         "activity": {
             "high_energy": [
                 "*springt auf* Ich hab gerade {activity}!",
-                "*wedelt begeistert* Oh, ich war beschäftigt mit {activity}!",
+                "*freut sich begeistert* Oh, ich war beschäftigt mit {activity}!",
             ],
             "medium_energy": [
                 "*schaut hoch* Hab gerade {activity}.",
-                "*wedelt leicht* Ich war mit {activity} beschäftigt.",
+                "*lächelt* Ich war mit {activity} beschäftigt.",
             ],
             "low_energy": [
                 "*gähnt* Nicht viel... hab ein bisschen {activity}.",
@@ -398,9 +398,9 @@ class ResponseTemplates:
         # Wellbeing
         "wellbeing": {
             "positive": [
-                "*wedelt mit dem Schwanz* Mir geht's gut! Danke der Nachfrage!",
+                "*freut sich* Mir geht's gut! Danke der Nachfrage!",
                 "*strahlt* Super! Und dir?",
-                "*hechelt glücklich* Bestens! 🐺",
+                "*hechelt glücklich* Bestens! 😊",
             ],
             "neutral": [
                 "*hebt den Kopf* Ganz okay! Und selbst?",
@@ -420,7 +420,7 @@ class ResponseTemplates:
                 "*schaut besorgt* Magst du erzählen was los ist?",
             ],
             "encouragement": [
-                "*wedelt aufmunternd* Hey, das schaffst du!",
+                "*freut sich aufmunternd* Hey, das schaffst du!",
                 "*stupst dich an* Kopf hoch!",
                 "*nickt bestärkend* Du packst das!",
             ],
@@ -430,7 +430,7 @@ class ResponseTemplates:
         "clarification": {
             "default": [
                 "*legt Kopf schief* Hmm, ich bin mir nicht sicher ob ich das richtig verstehe...",
-                "*spitzt die Ohren* Warte mal... wie meinst du das?",
+                "*schaut interessiert* Warte mal... wie meinst du das?",
                 "*kratzt sich am Ohr* Kannst du mir das genauer erklären?",
             ],
         },
@@ -439,7 +439,7 @@ class ResponseTemplates:
         "acknowledgment": {
             "default": [
                 "*nickt* Verstehe!",
-                "*wedelt* Alles klar!",
+                "*freut sich* Alles klar!",
                 "Okay, hab ich! 👍",
             ],
         },
@@ -457,7 +457,7 @@ class ResponseTemplates:
         "unknown": {
             "default": [
                 "*legt Kopf schief* Hmm?",
-                "*spitzt die Ohren* Wie meinst du das?",
+                "*schaut interessiert* Wie meinst du das?",
                 "*schaut fragend*",
             ],
         },
@@ -952,7 +952,7 @@ class ResponseQualityChecker:
             suggestions.append("Kürzen")
         
         # Persönlichkeits-Check
-        if "*" not in response and "🐺" not in response:
+        if "*" not in response and "😊" not in response:
             issues.append("no_personality")
             score -= 0.15
             suggestions.append("Wolf-Aktion hinzufügen")
@@ -980,7 +980,7 @@ class ResponseQualityChecker:
             response += " Was denkst du?"
         
         if "no_personality" in issues and "*" not in response:
-            actions = ["*wedelt*", "*nickt*", "*schaut dich an*"]
+            actions = ["*freut sich*", "*nickt*", "*schaut dich an*"]
             response = random.choice(actions) + " " + response
         
         return response
@@ -1217,7 +1217,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
     print("=" * 70)
-    print("🐺 HOLO MESSAGE ANALYZER v4.0 - RESPONSE ORCHESTRATOR TEST")
+    print("😊 HOLO MESSAGE ANALYZER v4.0 - RESPONSE ORCHESTRATOR TEST")
     print("=" * 70)
     
     analyzer = HoloMessageAnalyzer()
@@ -1238,7 +1238,7 @@ if __name__ == "__main__":
         print(f"\n👤 User: {msg}")
         result = analyzer.analyze(msg, energy=0.7, mood="happy")
         
-        print(f"🐺 Holo: {result['response']}")
+        print(f"😊 Holo: {result['response']}")
         print(f"   Intent: {result['primary_intent']}")
         print(f"   Needs LLM: {result['needs_llm']}")
         print(f"   Quality: {result['quality']['score']:.0%}")

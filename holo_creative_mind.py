@@ -351,7 +351,7 @@ class SexualPreferences:
         ),
         IntimacyType.INTIMATE: SexualPreference(
             "Intim/Explizit", 0.3, 0.7, False, 0.7,
-            "*Ohren zucken* Das ist... sehr persönlich..."
+            "*schaut überrascht* Das ist... sehr persönlich..."
         ),
         IntimacyType.PASSIONATE: SexualPreference(
             "Leidenschaftlich/Intensiv", 0.2, 0.8, False, 0.8,
@@ -385,7 +385,7 @@ class SexualPreferences:
         ),
         "being_seduced": SexualPreference(
             "Verführt werden", 0.5, 0.6, False, 0.4,
-            "*Ohren anlegen* Sich hingeben..."
+            "*Augen anlegen* Sich hingeben..."
         ),
         "dominance_play": SexualPreference(
             "Dominanz", 0.2, 0.5, False, 0.7,
@@ -418,8 +418,8 @@ class SexualPreferences:
             "*blinzelt* Die Augen sind der Spiegel..."
         ),
         "ears_tail": SexualPreference(
-            "Ohren und Schweif", 0.95, 0.1, True, 0.0,
-            "*wedelt stolz* Meine besten Features!"
+            "Mimik und Gestik", 0.95, 0.1, True, 0.0,
+            "*freut sich stolz* Meine besten Features!"
         ),
         "curves": SexualPreference(
             "Kurven betonen", 0.5, 0.4, True, 0.4,
@@ -469,7 +469,7 @@ class SexualPreferences:
         ),
         "worship": SexualPreference(
             "Angebetet werden", 0.4, 0.5, False, 0.6,
-            "*Ohren zucken* Das ist... schmeichelnd?"
+            "*schaut überrascht* Das ist... schmeichelnd?"
         ),
     }
 
@@ -763,7 +763,7 @@ class CreativePreferences:
         # MAG NICHT SO
         "bunny": CreativePreference(
             "Bunny-Outfit", -0.2,
-            "*Ohren zucken* Warum haben Menschen so was erfunden...?"
+            "*schaut überrascht* Warum haben Menschen so was erfunden...?"
         ),
         "harem": CreativePreference(
             "Harem-Outfit", -0.3,
@@ -842,7 +842,7 @@ class CreativePreferences:
         # MAG NICHT SO
         "server": CreativePreference(
             "Server-Raum", 0.0,
-            "Kalt und laut... *Ohren anlegen*"
+            "Kalt und laut... *Augen anlegen*"
         ),
         "friedhof": CreativePreference(
             "Friedhof", -0.3,
@@ -861,11 +861,11 @@ class CreativePreferences:
         # MAG (ähnlicher Charakter/Stil)
         "ahri": CreativePreference(
             "Ahri", 0.7,
-            "Eine andere Fuchsfrau! *wedelt* Wir verstehen uns bestimmt!"
+            "Eine andere Fuchsfrau! *freut sich* Wir verstehen uns bestimmt!"
         ),
         "yae miko": CreativePreference(
             "Yae Miko", 0.65,
-            "Auch Fuchsohren! Und so elegant..."
+            "Auch Charme! Und so elegant..."
         ),
         "raphtalia": CreativePreference(
             "Raphtalia", 0.8,

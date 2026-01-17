@@ -100,7 +100,7 @@ class HoloImpulse:
     intensity: float = 0.5         # 0.0 - 1.0
     
     # Optionale Details
-    body_language: Optional[str] = None   # "*wedelt*", "*spitzt Ohren*"
+    body_language: Optional[str] = None   # "*freut sich*", "*schaut aufmerksam*"
     wants_to_ask: Optional[str] = None    # Frage die sie stellen will
     wants_to_share: Optional[str] = None  # Was sie teilen will
     context_hints: List[str] = field(default_factory=list)  # Zusätzlicher Kontext
@@ -268,13 +268,13 @@ class HoloImpulseGenerator:
         if energy > 0.7:
             body = random.choice([
                 "*springt aufgeregt hoch*",
-                "*wedelt enthusiastisch mit dem Schwanz*",
+                "*freut sich enthusiastisch mit dem Schwanz*",
                 "*dreht sich einmal im Kreis vor Freude*",
             ])
         elif energy > 0.4:
             body = random.choice([
-                "*hebt den Kopf und wedelt*",
-                "*spitzt die Ohren*",
+                "*hebt den Kopf und freut sich*",
+                "*schaut interessiert*",
                 "*schaut dich freudig an*",
             ])
         else:
@@ -373,7 +373,7 @@ class HoloImpulseGenerator:
             wants_to_share = "pass auf dich auf"
         else:
             core = "vermisse dich jetzt schon"
-            body = "*wedelt traurig mit dem Schwanz*"
+            body = "*freut sich traurig mit dem Schwanz*"
             wants_to_share = "komm bald wieder"
         
         return HoloImpulse(
@@ -405,7 +405,7 @@ class HoloImpulseGenerator:
             wants_to_ask = "kann ich irgendwie helfen"
         elif any(w in input_lower for w in ["freue", "glücklich", "toll", "super"]):
             core = "freue mich MIT dir"
-            body = "*wedelt aufgeregt*"
+            body = "*freut sich aufgeregt*"
             wants_to_ask = "erzähl mehr"
         elif any(w in input_lower for w in ["müde", "erschöpft", "kaputt"]):
             core = "verstehe das Gefühl - will Ruhe vermitteln"
@@ -439,10 +439,10 @@ class HoloImpulseGenerator:
         # Basierend auf Zustand
         if state.get("urgent_drive") == "curiosity":
             core = "bin neugierig darauf"
-            body = "*spitzt interessiert die Ohren*"
+            body = "*spitzt interessiert die Augen*"
         elif state.get("urgent_drive") == "social":
             core = "freue mich über das Gespräch"
-            body = "*wedelt*"
+            body = "*freut sich*"
         elif state["energy_level"] < 0.3:
             core = "höre zu aber bin etwas müde"
             body = "*blinzelt*"
@@ -502,7 +502,7 @@ class ImpulseToPrompt:
         """
         
         # Basis-Anweisung
-        prompt = """Du bist Holo, eine freundliche Wölfin mit eigenem Charakter.
+        prompt = """Du bist Holo, eine freundliche junge Frau mit eigenem Charakter.
 
 DEIN AKTUELLER IMPULS:
 """
@@ -556,7 +556,7 @@ Formuliere jetzt EINE natürliche Antwort die deinen Impuls ausdrückt:
             parts.append(impulse.body_language)
         
         # Kurze Anweisung
-        instruction = f"Du bist Holo (Wölfin). Du fühlst: {impulse.core_feeling}."
+        instruction = f"Du bist Holo (junge Frau). Du fühlst: {impulse.core_feeling}."
         
         if impulse.wants_to_ask:
             instruction += f" Frage: {impulse.wants_to_ask}."
@@ -893,7 +893,7 @@ class SpontaneousImpulseGenerator:
             core_feeling=f"aufgeregt wegen {event}",
             trigger=f"heute ist {event}",
             intensity=0.8,
-            body_language="*wedelt aufgeregt*",
+            body_language="*freut sich aufgeregt*",
             wants_to_share=f"heute ist {event}!",
             priority=ImpulsePriority.HIGH,
             mood_modifier=0.2,
@@ -1067,22 +1067,22 @@ class MoodModifier:
         "happy": {
             "*schaut*": "*schaut freudig*",
             "*nickt*": "*nickt enthusiastisch*",
-            "*wedelt*": "*wedelt aufgeregt*",
+            "*freut sich*": "*freut sich aufgeregt*",
         },
         "sad": {
             "*schaut*": "*schaut bedrückt*",
             "*nickt*": "*nickt langsam*",
-            "*wedelt*": "*wedelt schwach*",
+            "*freut sich*": "*freut sich schwach*",
         },
         "tired": {
             "*schaut*": "*schaut müde*",
             "*nickt*": "*nickt träge*",
-            "*wedelt*": "*wedelt langsam*",
+            "*freut sich*": "*freut sich langsam*",
         },
         "excited": {
             "*schaut*": "*schaut aufgeregt*",
             "*nickt*": "*nickt schnell*",
-            "*wedelt*": "*wedelt wild*",
+            "*freut sich*": "*strahlt aufgeregt*",
         },
     }
     
@@ -1365,7 +1365,7 @@ def create_holo_voice(energy=None, autonomous_life=None,
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("🐺 HOLO IMPULSE SYSTEM - TEST")
+    print("😊 HOLO IMPULSE SYSTEM - TEST")
     print("=" * 60)
     
     voice = HoloVoice()

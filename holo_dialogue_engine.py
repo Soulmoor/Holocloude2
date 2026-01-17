@@ -617,7 +617,7 @@ class UserProfileManager:
         )
         
         # Emoji-Nutzung
-        if any(c in message for c in "😀🙂🐺❤️👍🎉"):
+        if any(c in message for c in "😀🙂😊❤️👍🎉"):
             profile.uses_emojis = True
         
         # Kommunikationsstil erkennen
@@ -1301,12 +1301,12 @@ class ResponseGenerator:
     def suggest_opening(self, intent: str, emotion: str = "neutral") -> str:
         """Schlage Response-Eröffnung vor"""
         openings = {
-            ("greeting", "happy"): "*wedelt freudig*",
+            ("greeting", "happy"): "*freut sich*",
             ("greeting", "neutral"): "*hebt den Kopf*",
-            ("question", "curious"): "*spitzt die Ohren*",
+            ("question", "curious"): "*schaut interessiert*",
             ("question", "thinking"): "*überlegt*",
             ("support", "empathetic"): "*stupst sanft an*",
-            ("news", "excited"): "*Ohren zucken*",
+            ("news", "excited"): "*schaut überrascht*",
             ("default", "default"): "*schaut dich an*",
         }
         
@@ -2239,7 +2239,7 @@ if __name__ == "__main__":
         print(f"   💭 Next Step: {context['next_step']}")
         print(f"   📈 Engagement: {context['engagement_level']}")
         print(f"   🎭 Framework: tone={framework['tone']}, length={framework['length']}")
-        print(f"   🐺 Opening: {framework['suggested_opening']}")
+        print(f"   😊 Opening: {framework['suggested_opening']}")
     
     # Summary
     print("\n\n📊 KONVERSATIONS-ZUSAMMENFASSUNG:")

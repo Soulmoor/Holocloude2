@@ -7315,7 +7315,7 @@ class HoloDatabaseManager:
         self.data_dir = data_dir or DatabaseConfig.DATA_DIR
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"🐺 HoloDatabaseManager startet in: {self.data_dir}")
+        logger.info(f"😊 HoloDatabaseManager startet in: {self.data_dir}")
 
         # === KERN (Persönlichkeit & Gedächtnis) ===
         self.memory = MemoryDatabase(
@@ -7603,8 +7603,8 @@ if __name__ == "__main__":
 
     # 4. Language
     print("  4️⃣ Language...")
-    db.language.learn_pattern("greeting", "*wedelt mit dem Schwanz*")
-    db.language.learn_word("Ohren", "noun", "Holos Wolfsohren")
+    db.language.learn_pattern("greeting", "*freut sich*")
+    db.language.learn_word("Augen", "noun", "Holos Ausdrucksstarke Mimik")
     print(f"     Patterns gelernt!")
 
     # === WISSEN ===
@@ -7635,7 +7635,7 @@ if __name__ == "__main__":
     print("  8️⃣ Conversations...")
     conv_id = db.conversations.start_conversation()
     db.conversations.store_message("user", "Hallo!", conv_id)
-    db.conversations.store_message("assistant", "Hey! 🐺", conv_id)
+    db.conversations.store_message("assistant", "Hey! 😊", conv_id)
     print(f"     Conversation: {conv_id}")
 
     # 9. Activity
