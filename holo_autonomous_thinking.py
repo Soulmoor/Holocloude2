@@ -2136,6 +2136,1048 @@ def get_autonomous_thinking() -> AutonomousThinkingSystem:
 
 
 # ============================================================
+# ADVANCED ABSTRACTION & SELF-LEARNING SYSTEM v2.0
+# ============================================================
+
+class AbstractionType(Enum):
+    """Arten von Abstraktionen"""
+    CATEGORICAL = "categorical"      # Was ist es? (Auto ist ein Fahrzeug)
+    STRUCTURAL = "structural"        # Woraus besteht es? (Auto hat Räder, Motor)
+    FUNCTIONAL = "functional"        # Was macht es? (Auto transportiert)
+    RELATIONAL = "relational"        # Wie verhält es sich zu anderem?
+    ESSENTIAL = "essential"          # Was macht es zu dem was es ist?
+    ANALOGICAL = "analogical"        # Wem ist es ähnlich?
+
+
+@dataclass
+class ConceptEssence:
+    """Die Essenz eines Konzepts - was es zu dem macht was es ist"""
+    concept_name: str
+    definition: str                           # Kurzdefinition
+    necessary_properties: List[str]           # Was MUSS es haben?
+    sufficient_properties: List[str]          # Was REICHT damit es das ist?
+    typical_properties: List[str]             # Was hat es MEISTENS?
+    distinguishing_features: List[str]        # Was unterscheidet es von ähnlichem?
+    parent_categories: List[str]              # Übergeordnete Kategorien
+    child_concepts: List[str]                 # Untergeordnete Konzepte
+    related_concepts: List[str]               # Verwandte Konzepte
+    examples: List[str]                       # Konkrete Beispiele
+    counterexamples: List[str]                # Was ist es NICHT?
+    abstraction_level: int                    # 1=sehr konkret, 10=sehr abstrakt
+    confidence: float                         # Wie sicher?
+    sources: List[str]                        # Woher das Wissen?
+    verified: bool = False                    # Durch Skeptik verifiziert?
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class SelfQuestion:
+    """Eine Frage die sich das System selbst stellt"""
+    question_id: str
+    question: str
+    question_type: str  # "what_is", "what_makes", "how_does", "why", "how_related"
+    target_concept: str
+    priority: float  # 0-1, wie wichtig ist diese Frage?
+    context: str
+    answered: bool = False
+    answer: Optional[str] = None
+    confidence: float = 0.0
+    sources_used: List[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class VerificationResult:
+    """Ergebnis einer skeptischen Überprüfung"""
+    claim: str
+    is_verified: bool
+    confidence: float
+    supporting_evidence: List[str]
+    contradicting_evidence: List[str]
+    reasoning: str
+    sources_checked: int
+    recommendation: str  # "accept", "reject", "uncertain", "needs_more_research"
+
+
+class DeepAbstractionEngine:
+    """
+    Tiefes Abstraktions-System.
+
+    Geht über einfache Kategorisierung hinaus:
+    - Strukturelle Abstraktion (gemeinsame Strukturen erkennen)
+    - Relationale Abstraktion (Beziehungsmuster abstrahieren)
+    - Meta-Abstraktion (über Abstraktionen abstrahieren)
+    """
+
+    def __init__(self):
+        # Abstraktions-Hierarchie
+        self.concept_hierarchy: Dict[str, ConceptEssence] = {}
+
+        # Strukturelle Muster
+        self.structural_patterns: Dict[str, List[str]] = {
+            "container": ["enthält", "beinhaltet", "fasst", "hat innen"],
+            "vehicle": ["bewegt", "transportiert", "fährt", "fliegt"],
+            "tool": ["wird benutzt für", "hilft bei", "ermöglicht"],
+            "living": ["lebt", "wächst", "stirbt", "atmet", "isst"],
+            "shape": ["form", "geometrie", "ecken", "seiten", "rund"],
+            "process": ["schritt", "ablauf", "phase", "entwicklung"],
+        }
+
+        # Abstraktions-Levels
+        self.abstraction_levels = {
+            1: "Einzelnes Objekt (dieses Auto)",
+            2: "Spezifische Art (Tesla Model 3)",
+            3: "Allgemeine Art (Elektroauto)",
+            4: "Kategorie (Auto)",
+            5: "Oberkategorie (Fahrzeug)",
+            6: "Abstrakte Kategorie (Fortbewegungsmittel)",
+            7: "Funktionale Abstraktion (Transportmittel)",
+            8: "Strukturelle Abstraktion (bewegliches System)",
+            9: "Meta-Konzept (Werkzeug zur Ortsveränderung)",
+            10: "Philosophische Abstraktion (Erweiterung menschlicher Fähigkeiten)"
+        }
+
+    def abstract_concept(self, concept: str, target_level: int) -> Dict[str, Any]:
+        """
+        Abstrahiert ein Konzept auf ein höheres Level.
+
+        z.B. "roter Apfel" (Level 1) → "Apfel" (3) → "Frucht" (5) → "Nahrung" (7)
+        """
+        current_level = self._estimate_abstraction_level(concept)
+
+        abstractions = []
+        current = concept
+
+        while current_level < target_level:
+            # Finde nächsthöhere Abstraktion
+            higher = self._find_higher_abstraction(current, current_level)
+            if not higher:
+                break
+
+            abstractions.append({
+                "from": current,
+                "to": higher,
+                "from_level": current_level,
+                "to_level": current_level + 1,
+                "abstraction_type": self._classify_abstraction(current, higher)
+            })
+
+            current = higher
+            current_level += 1
+
+        return {
+            "original": concept,
+            "final_abstraction": current,
+            "original_level": self._estimate_abstraction_level(concept),
+            "final_level": current_level,
+            "abstraction_chain": abstractions,
+            "description": self.abstraction_levels.get(current_level, "Unbekanntes Level")
+        }
+
+    def _estimate_abstraction_level(self, concept: str) -> int:
+        """Schätzt das Abstraktionslevel eines Konzepts"""
+        concept_lower = concept.lower()
+
+        # Sehr konkret (Artikel, Adjektive)
+        if any(word in concept_lower for word in ["dieser", "diese", "mein", "dein"]):
+            return 1
+
+        # Spezifische Marke/Art
+        if concept[0].isupper() and len(concept.split()) > 1:
+            return 2
+
+        # Abstrakte Wörter
+        abstract_markers = ["heit", "keit", "ung", "ismus", "ität", "konzept", "prinzip"]
+        if any(marker in concept_lower for marker in abstract_markers):
+            return 8
+
+        # Philosophische Konzepte
+        philosophical = ["sein", "existenz", "wesen", "realität", "wahrheit"]
+        if concept_lower in philosophical:
+            return 10
+
+        # Default: mittleres Level
+        return 4
+
+    def _find_higher_abstraction(self, concept: str, current_level: int) -> Optional[str]:
+        """Findet die nächsthöhere Abstraktion"""
+        # Vordefinierte Abstraktionsketten
+        chains = {
+            "auto": "fahrzeug",
+            "fahrzeug": "fortbewegungsmittel",
+            "fortbewegungsmittel": "werkzeug",
+            "hund": "haustier",
+            "haustier": "tier",
+            "tier": "lebewesen",
+            "lebewesen": "organismus",
+            "apfel": "frucht",
+            "frucht": "nahrung",
+            "nahrung": "ressource",
+            "kreis": "form",
+            "form": "geometrie",
+            "geometrie": "mathematik",
+            "mathematik": "wissenschaft",
+            "stuhl": "möbel",
+            "möbel": "gegenstand",
+            "gegenstand": "ding",
+            "ding": "entität",
+        }
+
+        concept_lower = concept.lower()
+        return chains.get(concept_lower)
+
+    def _classify_abstraction(self, lower: str, higher: str) -> str:
+        """Klassifiziert die Art der Abstraktion"""
+        # Kategorische Abstraktion (is-a)
+        if higher in ["fahrzeug", "tier", "pflanze", "möbel", "werkzeug"]:
+            return "categorical"
+
+        # Funktionale Abstraktion
+        if higher in ["fortbewegungsmittel", "nahrung", "ressource"]:
+            return "functional"
+
+        # Strukturelle Abstraktion
+        if higher in ["organismus", "system", "struktur"]:
+            return "structural"
+
+        return "general"
+
+    def find_structural_similarity(self, concept_a: str, concept_b: str) -> Dict[str, Any]:
+        """
+        Findet strukturelle Ähnlichkeiten zwischen zwei Konzepten.
+
+        z.B. "Atom" und "Sonnensystem" → beide haben Zentrum + umlaufende Teile
+        """
+        # Extrahiere strukturelle Features
+        features_a = self._extract_structural_features(concept_a)
+        features_b = self._extract_structural_features(concept_b)
+
+        # Finde Überschneidungen
+        common = set(features_a) & set(features_b)
+        unique_a = set(features_a) - set(features_b)
+        unique_b = set(features_b) - set(features_a)
+
+        similarity = len(common) / max(len(features_a), len(features_b), 1)
+
+        return {
+            "concept_a": concept_a,
+            "concept_b": concept_b,
+            "common_structure": list(common),
+            "unique_to_a": list(unique_a),
+            "unique_to_b": list(unique_b),
+            "structural_similarity": similarity,
+            "analogy_potential": similarity > 0.3,
+            "analogy_description": self._describe_analogy(concept_a, concept_b, common) if common else None
+        }
+
+    def _extract_structural_features(self, concept: str) -> List[str]:
+        """Extrahiert strukturelle Features eines Konzepts"""
+        # Vordefinierte strukturelle Features
+        features_db = {
+            "auto": ["hat_räder", "hat_motor", "transportiert", "bewegt_sich", "hat_innenraum"],
+            "atom": ["hat_zentrum", "hat_umlaufende_teile", "ist_einheit", "hat_energie"],
+            "sonnensystem": ["hat_zentrum", "hat_umlaufende_teile", "ist_einheit", "hat_gravitation"],
+            "zelle": ["hat_membran", "hat_zentrum", "ist_einheit", "lebt"],
+            "kreis": ["ist_rund", "hat_zentrum", "ist_geschlossen", "ist_symmetrisch"],
+            "baum": ["hat_wurzeln", "hat_stamm", "hat_äste", "wächst", "lebt"],
+            "organisation": ["hat_hierarchie", "hat_mitglieder", "hat_struktur", "hat_ziel"],
+            "computer": ["verarbeitet_daten", "hat_speicher", "hat_prozessor", "ist_werkzeug"],
+        }
+
+        concept_lower = concept.lower()
+        return features_db.get(concept_lower, ["ist_objekt", "existiert"])
+
+    def _describe_analogy(self, a: str, b: str, common: set) -> str:
+        """Beschreibt eine strukturelle Analogie"""
+        common_list = list(common)
+        if len(common_list) >= 2:
+            return f"'{a}' und '{b}' sind strukturell ähnlich: beide {', '.join(common_list[:2])}"
+        elif len(common_list) == 1:
+            return f"'{a}' und '{b}' teilen die Eigenschaft: {common_list[0]}"
+        return None
+
+
+class SelfQuestioningEngine:
+    """
+    System das sich selbst Fragen stellt um zu lernen.
+
+    "Was ist ein Kreis?"
+    "Was macht ein Auto zu einem Auto?"
+    "Wie unterscheidet sich X von Y?"
+    """
+
+    # Frage-Templates für verschiedene Aspekte
+    QUESTION_TEMPLATES = {
+        "what_is": [
+            "Was ist ein/eine {concept}?",
+            "Wie würde ich {concept} definieren?",
+            "Was bedeutet '{concept}' eigentlich?"
+        ],
+        "what_makes": [
+            "Was macht ein/eine {concept} zu einem/einer {concept}?",
+            "Welche Eigenschaften MUSS ein/eine {concept} haben?",
+            "Was ist das Wesentliche an {concept}?"
+        ],
+        "components": [
+            "Woraus besteht ein/eine {concept}?",
+            "Welche Teile hat ein/eine {concept}?",
+            "Was sind die Komponenten von {concept}?"
+        ],
+        "function": [
+            "Wofür ist ein/eine {concept} da?",
+            "Was macht ein/eine {concept}?",
+            "Welchen Zweck erfüllt {concept}?"
+        ],
+        "category": [
+            "Zu welcher Kategorie gehört {concept}?",
+            "Was ist die Oberkategorie von {concept}?",
+            "Ist {concept} eine Art von was?"
+        ],
+        "difference": [
+            "Was unterscheidet {concept} von {related}?",
+            "Wie ist {concept} anders als {related}?",
+            "Warum ist {concept} nicht einfach {related}?"
+        ],
+        "examples": [
+            "Was sind Beispiele für {concept}?",
+            "Welche Arten von {concept} gibt es?",
+            "Kannst du mir {concept} an einem Beispiel zeigen?"
+        ],
+        "counterexamples": [
+            "Was ist KEIN {concept}?",
+            "Was wird oft mit {concept} verwechselt?",
+            "Was sieht aus wie {concept}, ist aber keins?"
+        ],
+        "origin": [
+            "Woher kommt das Konzept {concept}?",
+            "Wie ist {concept} entstanden?",
+            "Was ist die Geschichte von {concept}?"
+        ],
+        "relations": [
+            "Wie hängt {concept} mit {related} zusammen?",
+            "Welche Beziehung hat {concept} zu anderen Dingen?",
+            "In welchem Kontext taucht {concept} auf?"
+        ]
+    }
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.questions: Dict[str, SelfQuestion] = {}
+        self.question_queue: List[str] = []  # Fragen die noch beantwortet werden müssen
+        self.curiosity_topics: List[str] = []  # Themen die interessieren
+
+    def generate_questions_about(self, concept: str, depth: str = "basic") -> List[SelfQuestion]:
+        """
+        Generiert Fragen über ein Konzept.
+
+        depth: "basic", "intermediate", "deep"
+        """
+        questions = []
+
+        # Basis-Fragen (immer)
+        basic_types = ["what_is", "what_makes", "components", "function"]
+
+        # Erweiterte Fragen
+        intermediate_types = ["category", "examples", "counterexamples"]
+
+        # Tiefe Fragen
+        deep_types = ["difference", "origin", "relations"]
+
+        if depth == "basic":
+            question_types = basic_types
+        elif depth == "intermediate":
+            question_types = basic_types + intermediate_types
+        else:  # deep
+            question_types = basic_types + intermediate_types + deep_types
+
+        for q_type in question_types:
+            templates = self.QUESTION_TEMPLATES.get(q_type, [])
+            if not templates:
+                continue
+
+            template = random.choice(templates)
+
+            # Für Vergleichsfragen brauchen wir ein verwandtes Konzept
+            if "{related}" in template:
+                related = self._find_related_concept(concept)
+                if related:
+                    question_text = template.format(concept=concept, related=related)
+                else:
+                    continue
+            else:
+                question_text = template.format(concept=concept)
+
+            question = SelfQuestion(
+                question_id=f"q_{concept}_{q_type}_{len(self.questions)}",
+                question=question_text,
+                question_type=q_type,
+                target_concept=concept,
+                priority=self._calculate_priority(q_type),
+                context=f"Selbstlernen über '{concept}'"
+            )
+
+            questions.append(question)
+            self.questions[question.question_id] = question
+
+        return questions
+
+    def _find_related_concept(self, concept: str) -> Optional[str]:
+        """Findet ein verwandtes Konzept für Vergleichsfragen"""
+        related_db = {
+            "kreis": "oval",
+            "auto": "motorrad",
+            "hund": "katze",
+            "apfel": "birne",
+            "stuhl": "hocker",
+            "see": "meer",
+            "berg": "hügel",
+        }
+        return related_db.get(concept.lower())
+
+    def _calculate_priority(self, question_type: str) -> float:
+        """Berechnet Priorität einer Frage"""
+        priorities = {
+            "what_is": 1.0,
+            "what_makes": 0.95,
+            "components": 0.8,
+            "function": 0.85,
+            "category": 0.7,
+            "examples": 0.6,
+            "counterexamples": 0.75,
+            "difference": 0.65,
+            "origin": 0.4,
+            "relations": 0.5
+        }
+        return priorities.get(question_type, 0.5)
+
+    def get_next_question(self) -> Optional[SelfQuestion]:
+        """Holt die nächste unbeantwortete Frage mit höchster Priorität"""
+        unanswered = [q for q in self.questions.values() if not q.answered]
+        if not unanswered:
+            return None
+        return max(unanswered, key=lambda q: q.priority)
+
+    def mark_answered(self, question_id: str, answer: str, confidence: float,
+                      sources: List[str] = None):
+        """Markiert eine Frage als beantwortet"""
+        if question_id in self.questions:
+            q = self.questions[question_id]
+            q.answered = True
+            q.answer = answer
+            q.confidence = confidence
+            q.sources_used = sources or []
+
+
+class SkepticalVerifier:
+    """
+    Skeptisches Verifikationssystem.
+
+    Prüft Informationen kritisch bevor sie akzeptiert werden:
+    - Sucht nach Widersprüchen
+    - Prüft Quellen
+    - Sucht Gegenbeweise
+    - Bewertet Plausibilität
+    """
+
+    # Rote Flaggen für unzuverlässige Informationen
+    RED_FLAGS = [
+        "immer", "nie", "alle", "jeder", "niemand",  # Absolute Aussagen
+        "offensichtlich", "natürlich", "selbstverständlich",  # Schein-Evidenz
+        "man sagt", "es heißt", "angeblich",  # Vage Quellen
+        "geheim", "verschwiegen", "sie wollen nicht",  # Verschwörungs-Marker
+        "garantiert", "100%", "definitiv",  # Übertriebene Sicherheit
+    ]
+
+    # Qualitätsmarker für gute Informationen
+    QUALITY_MARKERS = [
+        "studie", "forschung", "wissenschaft",  # Akademisch
+        "laut", "gemäß", "nach angaben von",  # Quellenangabe
+        "ungefähr", "etwa", "ca.", "in der regel",  # Angemessene Unsicherheit
+        "beispielsweise", "zum beispiel", "unter anderem",  # Konkrete Beispiele
+    ]
+
+    def __init__(self):
+        self.verified_facts: Dict[str, VerificationResult] = {}
+        self.rejection_log: List[Dict] = []
+
+    def verify(self, claim: str, sources: List[str] = None,
+               context: Dict = None) -> VerificationResult:
+        """
+        Verifiziert eine Behauptung skeptisch.
+
+        Prüft:
+        1. Innere Konsistenz (widerspricht sich die Aussage selbst?)
+        2. Plausibilität (ist es überhaupt möglich?)
+        3. Quellenqualität (woher stammt die Info?)
+        4. Bekannte Fakten (widerspricht es Bekanntem?)
+        """
+        supporting = []
+        contradicting = []
+        reasoning_steps = []
+
+        # 1. Prüfe auf rote Flaggen
+        red_flag_count = self._count_red_flags(claim)
+        if red_flag_count > 0:
+            reasoning_steps.append(f"⚠️ {red_flag_count} Warnsignal(e) gefunden")
+            contradicting.append(f"{red_flag_count} absolute/vage Aussagen")
+
+        # 2. Prüfe auf Qualitätsmarker
+        quality_count = self._count_quality_markers(claim)
+        if quality_count > 0:
+            reasoning_steps.append(f"✓ {quality_count} Qualitätsmarker gefunden")
+            supporting.append(f"{quality_count} wissenschaftliche/konkrete Angaben")
+
+        # 3. Prüfe logische Konsistenz
+        consistency = self._check_consistency(claim)
+        if consistency["has_contradiction"]:
+            reasoning_steps.append(f"❌ Widerspruch: {consistency['contradiction']}")
+            contradicting.append(consistency['contradiction'])
+        else:
+            reasoning_steps.append("✓ Keine offensichtlichen Widersprüche")
+
+        # 4. Prüfe Plausibilität
+        plausibility = self._check_plausibility(claim)
+        if plausibility < 0.5:
+            reasoning_steps.append(f"⚠️ Geringe Plausibilität: {plausibility:.1%}")
+            contradicting.append("Unplausible Behauptung")
+        else:
+            supporting.append(f"Plausibilität: {plausibility:.1%}")
+
+        # 5. Berechne Gesamtbewertung
+        base_confidence = 0.5
+        confidence = base_confidence
+        confidence -= red_flag_count * 0.1
+        confidence += quality_count * 0.1
+        confidence += plausibility * 0.2
+        confidence = max(0.0, min(1.0, confidence))
+
+        # 6. Empfehlung
+        if confidence > 0.7:
+            recommendation = "accept"
+            is_verified = True
+        elif confidence > 0.4:
+            recommendation = "uncertain"
+            is_verified = False
+        else:
+            recommendation = "reject"
+            is_verified = False
+            self.rejection_log.append({
+                "claim": claim,
+                "reason": "; ".join(contradicting),
+                "confidence": confidence
+            })
+
+        result = VerificationResult(
+            claim=claim,
+            is_verified=is_verified,
+            confidence=confidence,
+            supporting_evidence=supporting,
+            contradicting_evidence=contradicting,
+            reasoning="; ".join(reasoning_steps),
+            sources_checked=len(sources) if sources else 0,
+            recommendation=recommendation
+        )
+
+        self.verified_facts[claim[:50]] = result
+        return result
+
+    def _count_red_flags(self, text: str) -> int:
+        """Zählt rote Flaggen im Text"""
+        text_lower = text.lower()
+        return sum(1 for flag in self.RED_FLAGS if flag in text_lower)
+
+    def _count_quality_markers(self, text: str) -> int:
+        """Zählt Qualitätsmarker im Text"""
+        text_lower = text.lower()
+        return sum(1 for marker in self.QUALITY_MARKERS if marker in text_lower)
+
+    def _check_consistency(self, claim: str) -> Dict:
+        """Prüft auf innere Widersprüche"""
+        # Einfache Widerspruchserkennung
+        contradictions = [
+            ("immer", "manchmal"),
+            ("alle", "manche"),
+            ("nie", "gelegentlich"),
+            ("unmöglich", "möglich"),
+        ]
+
+        text_lower = claim.lower()
+        for word_a, word_b in contradictions:
+            if word_a in text_lower and word_b in text_lower:
+                return {
+                    "has_contradiction": True,
+                    "contradiction": f"'{word_a}' widerspricht '{word_b}'"
+                }
+
+        return {"has_contradiction": False, "contradiction": None}
+
+    def _check_plausibility(self, claim: str) -> float:
+        """Bewertet die Plausibilität einer Aussage"""
+        # Basis-Plausibilität
+        plausibility = 0.6
+
+        # Unrealistische Zahlen
+        numbers = re.findall(r'\d+(?:\.\d+)?', claim)
+        for num_str in numbers:
+            num = float(num_str)
+            if num > 1000000000000:  # Trillion+
+                plausibility -= 0.2
+            elif num > 1000000000:  # Milliarde+
+                plausibility -= 0.1
+
+        # Superlative sind oft übertrieben
+        superlatives = ["beste", "schlechteste", "größte", "kleinste", "erste", "einzige"]
+        if any(s in claim.lower() for s in superlatives):
+            plausibility -= 0.1
+
+        return max(0.0, min(1.0, plausibility))
+
+
+class ConceptEssenceExtractor:
+    """
+    Extrahiert die Essenz eines Konzepts.
+
+    Beantwortet: "Was macht ein X zu einem X?"
+
+    z.B. "Was macht einen Kreis zu einem Kreis?"
+    → "Alle Punkte haben den gleichen Abstand zum Mittelpunkt"
+    """
+
+    # Bekannte Konzept-Essenzen
+    KNOWN_ESSENCES = {
+        "kreis": {
+            "definition": "Geometrische Form bei der alle Punkte gleichen Abstand zum Mittelpunkt haben",
+            "necessary": ["mittelpunkt", "konstanter_radius", "geschlossene_linie"],
+            "sufficient": ["alle_punkte_gleicher_abstand_zum_zentrum"],
+            "typical": ["rund", "symmetrisch", "hat_durchmesser"],
+            "distinguishing": ["kein_anfang_kein_ende", "keine_ecken"],
+        },
+        "auto": {
+            "definition": "Motorisiertes Straßenfahrzeug zur Personenbeförderung",
+            "necessary": ["motor", "räder", "steuerung", "für_straße"],
+            "sufficient": ["selbstangetriebenes_straßenfahrzeug"],
+            "typical": ["vier_räder", "sitze", "karosserie", "fenster"],
+            "distinguishing": ["nicht_schienengebunden", "nicht_für_wasser"],
+        },
+        "hund": {
+            "definition": "Domestiziertes Säugetier, Unterart des Wolfs",
+            "necessary": ["säugetier", "canis_familiaris", "domestiziert"],
+            "sufficient": ["domestizierter_wolf"],
+            "typical": ["vier_beine", "fell", "bellt", "wedelt_mit_schwanz"],
+            "distinguishing": ["domestiziert_im_gegensatz_zu_wolf"],
+        },
+        "stuhl": {
+            "definition": "Möbelstück zum Sitzen für eine Person mit Rückenlehne",
+            "necessary": ["sitzfläche", "für_eine_person", "zum_sitzen"],
+            "sufficient": ["einzelsitz_mit_lehne"],
+            "typical": ["vier_beine", "rückenlehne", "stabil"],
+            "distinguishing": ["hat_lehne_anders_als_hocker", "für_einen_anders_als_bank"],
+        },
+        "dreieck": {
+            "definition": "Polygon mit genau drei Ecken und drei Seiten",
+            "necessary": ["drei_ecken", "drei_seiten", "geschlossen"],
+            "sufficient": ["polygon_mit_drei_ecken"],
+            "typical": ["drei_winkel", "winkelsumme_180_grad"],
+            "distinguishing": ["weniger_ecken_als_viereck"],
+        },
+        "baum": {
+            "definition": "Mehrjährige Pflanze mit verholztem Stamm",
+            "necessary": ["pflanze", "verholzter_stamm", "mehrjährig"],
+            "sufficient": ["holzpflanze_mit_stamm"],
+            "typical": ["blätter_oder_nadeln", "wurzeln", "krone", "hoch"],
+            "distinguishing": ["hat_stamm_anders_als_strauch"],
+        },
+    }
+
+    def __init__(self):
+        self.extracted_essences: Dict[str, ConceptEssence] = {}
+        self.abstraction_engine = DeepAbstractionEngine()
+
+    def extract_essence(self, concept: str) -> ConceptEssence:
+        """Extrahiert oder konstruiert die Essenz eines Konzepts"""
+        concept_lower = concept.lower()
+
+        # Prüfe ob bereits bekannt
+        if concept_lower in self.KNOWN_ESSENCES:
+            known = self.KNOWN_ESSENCES[concept_lower]
+            essence = ConceptEssence(
+                concept_name=concept,
+                definition=known["definition"],
+                necessary_properties=known["necessary"],
+                sufficient_properties=known["sufficient"],
+                typical_properties=known["typical"],
+                distinguishing_features=known["distinguishing"],
+                parent_categories=self._find_parent_categories(concept),
+                child_concepts=self._find_child_concepts(concept),
+                related_concepts=self._find_related_concepts(concept),
+                examples=self._find_examples(concept),
+                counterexamples=self._find_counterexamples(concept),
+                abstraction_level=self.abstraction_engine._estimate_abstraction_level(concept),
+                confidence=0.9,
+                sources=["internal_knowledge_base"],
+                verified=True
+            )
+        else:
+            # Konstruiere Essenz aus Heuristiken
+            essence = self._construct_essence(concept)
+
+        self.extracted_essences[concept_lower] = essence
+        return essence
+
+    def _construct_essence(self, concept: str) -> ConceptEssence:
+        """Konstruiert eine Essenz für unbekannte Konzepte"""
+        # Versuche aus der Abstraktions-Hierarchie zu lernen
+        abstraction = self.abstraction_engine.abstract_concept(concept, 6)
+
+        parent = abstraction.get("final_abstraction", "entität")
+
+        return ConceptEssence(
+            concept_name=concept,
+            definition=f"Eine Art von {parent}",
+            necessary_properties=["existiert", f"ist_{parent}"],
+            sufficient_properties=[f"typisches_{concept.lower()}"],
+            typical_properties=["hat_eigenschaften"],
+            distinguishing_features=[f"spezifisch_für_{concept.lower()}"],
+            parent_categories=[parent] if parent != concept else [],
+            child_concepts=[],
+            related_concepts=[],
+            examples=[],
+            counterexamples=[],
+            abstraction_level=abstraction.get("final_level", 4),
+            confidence=0.3,  # Niedrige Konfidenz für konstruierte Essenzen
+            sources=["heuristic_construction"],
+            verified=False
+        )
+
+    def _find_parent_categories(self, concept: str) -> List[str]:
+        """Findet übergeordnete Kategorien"""
+        parents = {
+            "kreis": ["form", "geometrie"],
+            "auto": ["fahrzeug", "fortbewegungsmittel"],
+            "hund": ["haustier", "säugetier", "tier"],
+            "stuhl": ["möbel", "sitzgelegenheit"],
+            "dreieck": ["polygon", "form"],
+            "baum": ["pflanze", "holzgewächs"],
+        }
+        return parents.get(concept.lower(), [])
+
+    def _find_child_concepts(self, concept: str) -> List[str]:
+        """Findet untergeordnete Konzepte"""
+        children = {
+            "form": ["kreis", "dreieck", "quadrat"],
+            "fahrzeug": ["auto", "motorrad", "fahrrad"],
+            "tier": ["hund", "katze", "vogel"],
+            "möbel": ["stuhl", "tisch", "schrank"],
+        }
+        return children.get(concept.lower(), [])
+
+    def _find_related_concepts(self, concept: str) -> List[str]:
+        """Findet verwandte Konzepte"""
+        related = {
+            "kreis": ["kugel", "radius", "durchmesser", "pi"],
+            "auto": ["straße", "benzin", "fahren", "verkehr"],
+            "hund": ["leine", "bellen", "fell", "treue"],
+            "stuhl": ["tisch", "sitzen", "holz", "lehne"],
+        }
+        return related.get(concept.lower(), [])
+
+    def _find_examples(self, concept: str) -> List[str]:
+        """Findet konkrete Beispiele"""
+        examples = {
+            "kreis": ["Uhr", "Rad", "Münze", "Sonne"],
+            "auto": ["VW Golf", "Tesla Model 3", "BMW 3er"],
+            "hund": ["Labrador", "Schäferhund", "Pudel"],
+            "stuhl": ["Bürostuhl", "Küchenstuhl", "Schaukelstuhl"],
+        }
+        return examples.get(concept.lower(), [])
+
+    def _find_counterexamples(self, concept: str) -> List[str]:
+        """Findet Gegenbeispiele (was es NICHT ist)"""
+        counter = {
+            "kreis": ["Oval (nicht perfekt rund)", "Spirale (nicht geschlossen)"],
+            "auto": ["Motorrad (nur 2 Räder)", "Zug (schienengebunden)"],
+            "hund": ["Wolf (nicht domestiziert)", "Fuchs (andere Spezies)"],
+            "stuhl": ["Hocker (keine Lehne)", "Bank (für mehrere Personen)"],
+        }
+        return counter.get(concept.lower(), [])
+
+
+class SelfTeachingSystem:
+    """
+    Koordiniert das gesamte Selbstlern-System.
+
+    Workflow:
+    1. Stellt sich Fragen über Konzepte
+    2. Recherchiert Antworten
+    3. Verifiziert skeptisch
+    4. Extrahiert Essenz
+    5. Speichert verifiziertes Wissen
+    6. Generiert Folgefragen
+    """
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        # Subsysteme
+        self.questioning = SelfQuestioningEngine(data_dir)
+        self.verifier = SkepticalVerifier()
+        self.essence_extractor = ConceptEssenceExtractor()
+        self.abstraction = DeepAbstractionEngine()
+
+        # Gelerntes Wissen
+        self.learned_concepts: Dict[str, ConceptEssence] = {}
+        self.learning_log: List[Dict] = []
+
+        # Lern-Warteschlange
+        self.concepts_to_learn: List[str] = []
+        self.current_learning_session: Optional[str] = None
+
+    def learn_concept(self, concept: str, depth: str = "deep") -> Dict[str, Any]:
+        """
+        Lernt ein Konzept durch Selbstbefragung und Verifikation.
+
+        Args:
+            concept: Das zu lernende Konzept
+            depth: "basic", "intermediate", "deep"
+
+        Returns:
+            Lernbericht mit allem was gelernt wurde
+        """
+        self.current_learning_session = concept
+        learning_report = {
+            "concept": concept,
+            "started_at": datetime.now().isoformat(),
+            "questions_asked": [],
+            "answers_found": [],
+            "verifications": [],
+            "essence": None,
+            "related_concepts_discovered": [],
+            "follow_up_questions": [],
+            "overall_confidence": 0.0,
+        }
+
+        # 1. Generiere Fragen
+        questions = self.questioning.generate_questions_about(concept, depth)
+        learning_report["questions_asked"] = [q.question for q in questions]
+
+        logger.info(f"🤔 Lerne über '{concept}': {len(questions)} Fragen generiert")
+
+        # 2. Beantworte Fragen und verifiziere
+        total_confidence = 0.0
+        for question in questions:
+            # Versuche Antwort zu finden
+            answer = self._research_answer(question)
+
+            if answer:
+                # Verifiziere skeptisch
+                verification = self.verifier.verify(answer)
+
+                learning_report["answers_found"].append({
+                    "question": question.question,
+                    "answer": answer,
+                    "verified": verification.is_verified,
+                    "confidence": verification.confidence
+                })
+
+                learning_report["verifications"].append({
+                    "claim": answer[:50] + "...",
+                    "result": verification.recommendation
+                })
+
+                # Markiere als beantwortet
+                self.questioning.mark_answered(
+                    question.question_id,
+                    answer,
+                    verification.confidence,
+                    verification.supporting_evidence
+                )
+
+                total_confidence += verification.confidence
+
+        # 3. Extrahiere Essenz
+        essence = self.essence_extractor.extract_essence(concept)
+        learning_report["essence"] = {
+            "definition": essence.definition,
+            "necessary_properties": essence.necessary_properties,
+            "distinguishing_features": essence.distinguishing_features,
+            "abstraction_level": essence.abstraction_level
+        }
+
+        # 4. Entdecke verwandte Konzepte
+        related = essence.related_concepts + essence.parent_categories
+        for rel in related:
+            if rel not in self.learned_concepts and rel not in self.concepts_to_learn:
+                self.concepts_to_learn.append(rel)
+                learning_report["related_concepts_discovered"].append(rel)
+
+        # 5. Generiere Folgefragen
+        if essence.confidence < 0.7:
+            follow_ups = [
+                f"Was genau bedeutet '{prop}'?" for prop in essence.necessary_properties[:2]
+            ]
+            learning_report["follow_up_questions"] = follow_ups
+
+        # 6. Speichere gelerntes Konzept
+        if len(questions) > 0:
+            learning_report["overall_confidence"] = total_confidence / len(questions)
+
+        if learning_report["overall_confidence"] > 0.4:
+            self.learned_concepts[concept.lower()] = essence
+            logger.info(f"✅ '{concept}' gelernt mit Konfidenz {learning_report['overall_confidence']:.1%}")
+        else:
+            logger.warning(f"⚠️ '{concept}' nicht sicher genug gelernt")
+
+        # Log
+        self.learning_log.append({
+            "concept": concept,
+            "success": learning_report["overall_confidence"] > 0.4,
+            "confidence": learning_report["overall_confidence"],
+            "timestamp": datetime.now().isoformat()
+        })
+
+        self.current_learning_session = None
+        return learning_report
+
+    def _research_answer(self, question: SelfQuestion) -> Optional[str]:
+        """
+        Recherchiert eine Antwort auf eine Frage.
+
+        In der aktuellen Version: Nutzt internes Wissen.
+        Könnte erweitert werden für: Web-Recherche, Datenbank-Abfragen, etc.
+        """
+        q_type = question.question_type
+        concept = question.target_concept.lower()
+
+        # Versuche aus Essenz-Datenbank
+        if concept in self.essence_extractor.KNOWN_ESSENCES:
+            known = self.essence_extractor.KNOWN_ESSENCES[concept]
+
+            if q_type == "what_is":
+                return known["definition"]
+            elif q_type == "what_makes":
+                return f"Wesentlich für {concept}: {', '.join(known['necessary'])}"
+            elif q_type == "components":
+                return f"Besteht aus: {', '.join(known['typical'])}"
+            elif q_type == "function":
+                # Generiere aus Definition
+                return f"Funktion von {concept}: {known['definition']}"
+
+        # Fallback: Generische Antwort
+        return None
+
+    def learn_concept_chain(self, start_concept: str, max_depth: int = 3) -> List[Dict]:
+        """
+        Lernt ein Konzept und alle verwandten Konzepte.
+
+        Beginnt bei start_concept und folgt Beziehungen.
+        """
+        learned = []
+        to_learn = [start_concept]
+        depth = 0
+
+        while to_learn and depth < max_depth:
+            concept = to_learn.pop(0)
+
+            if concept.lower() in self.learned_concepts:
+                continue
+
+            report = self.learn_concept(concept)
+            learned.append(report)
+
+            # Füge neue Konzepte hinzu
+            for related in report.get("related_concepts_discovered", []):
+                if related not in to_learn and related.lower() not in self.learned_concepts:
+                    to_learn.append(related)
+
+            depth += 1
+
+        return learned
+
+    def ask_and_verify(self, claim: str) -> Dict[str, Any]:
+        """
+        Prüft eine externe Behauptung skeptisch.
+
+        Stellt sich Fragen um die Behauptung zu prüfen.
+        """
+        result = {
+            "claim": claim,
+            "questions_generated": [],
+            "verification": None,
+            "recommendation": "",
+        }
+
+        # Generiere skeptische Fragen
+        skeptical_questions = [
+            f"Woher stammt diese Information?",
+            f"Gibt es Belege dafür?",
+            f"Was spricht dagegen?",
+            f"Ist das plausibel?"
+        ]
+        result["questions_generated"] = skeptical_questions
+
+        # Verifiziere
+        verification = self.verifier.verify(claim)
+        result["verification"] = {
+            "is_verified": verification.is_verified,
+            "confidence": verification.confidence,
+            "reasoning": verification.reasoning,
+            "recommendation": verification.recommendation
+        }
+
+        # Empfehlung
+        if verification.recommendation == "accept":
+            result["recommendation"] = "Diese Information scheint vertrauenswürdig."
+        elif verification.recommendation == "uncertain":
+            result["recommendation"] = "Diese Information sollte mit Vorsicht behandelt werden."
+        else:
+            result["recommendation"] = "Diese Information ist zweifelhaft und sollte hinterfragt werden."
+
+        return result
+
+    def get_learning_stats(self) -> Dict[str, Any]:
+        """Gibt Lernstatistiken zurück"""
+        return {
+            "concepts_learned": len(self.learned_concepts),
+            "concepts_in_queue": len(self.concepts_to_learn),
+            "questions_asked": len(self.questioning.questions),
+            "questions_answered": sum(1 for q in self.questioning.questions.values() if q.answered),
+            "verifications_performed": len(self.verifier.verified_facts),
+            "rejections": len(self.verifier.rejection_log),
+            "average_confidence": sum(
+                c.confidence for c in self.learned_concepts.values()
+            ) / max(len(self.learned_concepts), 1),
+            "recent_learning": self.learning_log[-5:] if self.learning_log else []
+        }
+
+    def express_understanding(self, concept: str) -> str:
+        """Drückt das Verständnis eines Konzepts aus"""
+        concept_lower = concept.lower()
+
+        if concept_lower not in self.learned_concepts:
+            return f"Hmm, über '{concept}' weiß ich noch nicht genug. Soll ich es lernen?"
+
+        essence = self.learned_concepts[concept_lower]
+
+        response = f"*nachdenklich* Also, '{concept}'...\n\n"
+        response += f"**Definition:** {essence.definition}\n\n"
+        response += f"**Was es ausmacht:** {', '.join(essence.necessary_properties)}\n\n"
+
+        if essence.distinguishing_features:
+            response += f"**Besonders:** {', '.join(essence.distinguishing_features)}\n\n"
+
+        if essence.examples:
+            response += f"**Beispiele:** {', '.join(essence.examples[:3])}\n\n"
+
+        if essence.counterexamples:
+            response += f"**Was es NICHT ist:** {essence.counterexamples[0]}\n"
+
+        response += f"\n*Konfidenz: {essence.confidence:.0%}*"
+
+        return response
+
+
+# ============================================================
 # EXAMPLE USAGE
 # ============================================================
 
