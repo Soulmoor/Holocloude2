@@ -1970,6 +1970,740 @@ class MetaLearner:
 
 
 # =============================================================================
+# ADVANCED ML v2.0 - Pi4-optimized Machine Learning
+# =============================================================================
+
+class PrioritizedExperienceReplay:
+    """
+    Prioritized Experience Replay (PER) für wichtigere Erfahrungen.
+
+    Erfahrungen mit höherem TD-Error werden häufiger gesampelt.
+    Pi4-optimiert: Verwendet SumTree-Approximation ohne numpy.
+    """
+
+    def __init__(self, max_size: int = 10000, alpha: float = 0.6, beta: float = 0.4):
+        self.max_size = max_size
+        self.alpha = alpha  # Priority exponent (0 = uniform, 1 = full priority)
+        self.beta = beta    # Importance sampling correction
+        self.beta_increment = 0.001
+
+        self.buffer: List[Experience] = []
+        self.priorities: List[float] = []
+        self.max_priority = 1.0
+        self.lock = threading.RLock()
+
+    def add(self, experience: Experience, td_error: float = None):
+        """Fügt Erfahrung mit Priorität hinzu"""
+        with self.lock:
+            priority = (abs(td_error) + 0.01) ** self.alpha if td_error else self.max_priority
+
+            if len(self.buffer) >= self.max_size:
+                # Ersetze niedrigste Priorität
+                min_idx = self.priorities.index(min(self.priorities))
+                self.buffer[min_idx] = experience
+                self.priorities[min_idx] = priority
+            else:
+                self.buffer.append(experience)
+                self.priorities.append(priority)
+
+            self.max_priority = max(self.max_priority, priority)
+
+    def sample(self, batch_size: int) -> Tuple[List[Experience], List[int], List[float]]:
+        """Sampelt nach Priorität mit Importance Sampling Weights"""
+        with self.lock:
+            if len(self.buffer) < batch_size:
+                indices = list(range(len(self.buffer)))
+                weights = [1.0] * len(self.buffer)
+                return list(self.buffer), indices, weights
+
+            # Berechne Sampling-Wahrscheinlichkeiten
+            total_priority = sum(self.priorities)
+            probs = [p / total_priority for p in self.priorities]
+
+            # Gewichtetes Sampling
+            indices = []
+            for _ in range(batch_size):
+                r = random.random()
+                cumsum = 0
+                for i, p in enumerate(probs):
+                    cumsum += p
+                    if r <= cumsum:
+                        indices.append(i)
+                        break
+
+            # Importance Sampling Weights
+            n = len(self.buffer)
+            weights = []
+            for idx in indices:
+                prob = probs[idx]
+                weight = (n * prob) ** (-self.beta)
+                weights.append(weight)
+
+            # Normalize weights
+            max_weight = max(weights)
+            weights = [w / max_weight for w in weights]
+
+            # Update beta
+            self.beta = min(1.0, self.beta + self.beta_increment)
+
+            experiences = [self.buffer[i] for i in indices]
+            return experiences, indices, weights
+
+    def update_priorities(self, indices: List[int], td_errors: List[float]):
+        """Aktualisiert Prioritäten nach Lernen"""
+        with self.lock:
+            for idx, td_error in zip(indices, td_errors):
+                if 0 <= idx < len(self.priorities):
+                    priority = (abs(td_error) + 0.01) ** self.alpha
+                    self.priorities[idx] = priority
+                    self.max_priority = max(self.max_priority, priority)
+
+    def __len__(self) -> int:
+        return len(self.buffer)
+
+
+class DoubleQLearning:
+    """
+    Double Q-Learning zur Reduktion von Overestimation Bias.
+
+    Verwendet zwei Q-Tables: Eine für Aktionsauswahl, eine für Bewertung.
+    Pi4-optimiert: Lightweight ohne Neural Networks.
+    """
+
+    def __init__(self, actions: List[str], learning_rate: float = 0.1,
+                 discount: float = 0.95, epsilon: float = 0.1):
+        self.actions = actions
+        self.lr = learning_rate
+        self.gamma = discount
+        self.epsilon = epsilon
+
+        # Zwei Q-Tables
+        self.q1: Dict[str, Dict[str, float]] = defaultdict(lambda: {a: 0.0 for a in actions})
+        self.q2: Dict[str, Dict[str, float]] = defaultdict(lambda: {a: 0.0 for a in actions})
+
+        self.update_count = 0
+        self.lock = threading.RLock()
+
+    def select_action(self, state: str, explore: bool = True) -> str:
+        """Epsilon-Greedy mit kombinierten Q-Werten"""
+        with self.lock:
+            if explore and random.random() < self.epsilon:
+                return random.choice(self.actions)
+
+            # Kombiniere beide Q-Tables für Aktion
+            combined_q = {}
+            for a in self.actions:
+                combined_q[a] = (self.q1[state][a] + self.q2[state][a]) / 2
+
+            return max(combined_q, key=combined_q.get)
+
+    def update(self, state: str, action: str, reward: float,
+               next_state: str, done: bool = False) -> float:
+        """
+        Double Q-Learning Update.
+
+        Zufällig Q1 oder Q2 updaten, die andere für Target verwenden.
+        Returns TD-Error für PER.
+        """
+        with self.lock:
+            self.update_count += 1
+
+            if random.random() < 0.5:
+                # Update Q1, use Q2 for target
+                current_q = self.q1[state][action]
+                if done:
+                    target = reward
+                else:
+                    # Beste Aktion nach Q1
+                    best_action = max(self.q1[next_state], key=self.q1[next_state].get)
+                    # Wert nach Q2
+                    target = reward + self.gamma * self.q2[next_state][best_action]
+
+                td_error = target - current_q
+                self.q1[state][action] += self.lr * td_error
+            else:
+                # Update Q2, use Q1 for target
+                current_q = self.q2[state][action]
+                if done:
+                    target = reward
+                else:
+                    best_action = max(self.q2[next_state], key=self.q2[next_state].get)
+                    target = reward + self.gamma * self.q1[next_state][best_action]
+
+                td_error = target - current_q
+                self.q2[state][action] += self.lr * td_error
+
+            return td_error
+
+    def get_q_value(self, state: str, action: str) -> float:
+        """Kombinierter Q-Wert"""
+        with self.lock:
+            return (self.q1[state][action] + self.q2[state][action]) / 2
+
+    def decay_epsilon(self, min_epsilon: float = 0.01, decay: float = 0.995):
+        """Reduziert Exploration"""
+        self.epsilon = max(min_epsilon, self.epsilon * decay)
+
+    def get_stats(self) -> Dict:
+        return {
+            "states_q1": len(self.q1),
+            "states_q2": len(self.q2),
+            "updates": self.update_count,
+            "epsilon": self.epsilon,
+        }
+
+
+class EligibilityTraces:
+    """
+    Eligibility Traces für schnellere Credit Assignment.
+
+    TD(λ) - Kombiniert TD(0) und Monte Carlo.
+    Pi4-optimiert: Sparse traces, automatic cleanup.
+    """
+
+    def __init__(self, actions: List[str], lambda_: float = 0.9,
+                 learning_rate: float = 0.1, discount: float = 0.95):
+        self.actions = actions
+        self.lambda_ = lambda_  # Trace decay
+        self.lr = learning_rate
+        self.gamma = discount
+
+        self.q_table: Dict[str, Dict[str, float]] = defaultdict(lambda: {a: 0.0 for a in actions})
+        self.traces: Dict[str, Dict[str, float]] = defaultdict(lambda: {a: 0.0 for a in actions})
+
+        self.min_trace = 0.01  # Threshold für Cleanup
+        self.lock = threading.RLock()
+
+    def select_action(self, state: str, epsilon: float = 0.1) -> str:
+        """Epsilon-Greedy Aktionswahl"""
+        with self.lock:
+            if random.random() < epsilon:
+                return random.choice(self.actions)
+            return max(self.q_table[state], key=self.q_table[state].get)
+
+    def update(self, state: str, action: str, reward: float,
+               next_state: str, next_action: str = None, done: bool = False):
+        """
+        SARSA(λ) Update mit Eligibility Traces.
+
+        Propagiert Reward zurück durch alle besuchten State-Action Paare.
+        """
+        with self.lock:
+            # TD-Error berechnen
+            current_q = self.q_table[state][action]
+
+            if done:
+                td_error = reward - current_q
+            else:
+                if next_action:
+                    # SARSA
+                    next_q = self.q_table[next_state][next_action]
+                else:
+                    # Q-Learning variant
+                    next_q = max(self.q_table[next_state].values())
+                td_error = reward + self.gamma * next_q - current_q
+
+            # Erhöhe Trace für aktuelles State-Action
+            self.traces[state][action] = 1.0  # Replacing traces
+
+            # Update alle State-Actions proportional zu ihren Traces
+            states_to_clean = []
+            for s in list(self.traces.keys()):
+                for a in self.actions:
+                    trace = self.traces[s][a]
+                    if trace > self.min_trace:
+                        # Q-Update proportional zu Trace
+                        self.q_table[s][a] += self.lr * td_error * trace
+                        # Decay trace
+                        self.traces[s][a] *= self.gamma * self.lambda_
+                    else:
+                        self.traces[s][a] = 0
+
+                # Markiere für Cleanup wenn alle Traces 0
+                if all(self.traces[s][a] < self.min_trace for a in self.actions):
+                    states_to_clean.append(s)
+
+            # Cleanup
+            for s in states_to_clean:
+                del self.traces[s]
+
+    def reset_traces(self):
+        """Setzt alle Traces zurück (bei Episode-Ende)"""
+        with self.lock:
+            self.traces.clear()
+
+    def get_stats(self) -> Dict:
+        return {
+            "states": len(self.q_table),
+            "active_traces": len(self.traces),
+            "lambda": self.lambda_,
+        }
+
+
+class UCBBandit:
+    """
+    Upper Confidence Bound (UCB) Multi-Armed Bandit.
+
+    Balanciert Exploration/Exploitation mathematisch optimal.
+    Pi4-optimiert: O(1) pro Aktion, kein numpy.
+    """
+
+    def __init__(self, actions: List[str], c: float = 2.0):
+        self.actions = actions
+        self.c = c  # Exploration parameter
+
+        self.counts: Dict[str, int] = {a: 0 for a in actions}
+        self.values: Dict[str, float] = {a: 0.0 for a in actions}
+        self.total_count = 0
+
+        self.lock = threading.RLock()
+
+    def select_action(self) -> str:
+        """Wählt Aktion nach UCB1 Formel"""
+        with self.lock:
+            self.total_count += 1
+
+            # Erst alle Aktionen einmal probieren
+            for a in self.actions:
+                if self.counts[a] == 0:
+                    return a
+
+            # UCB1: value + c * sqrt(ln(total) / count)
+            import math
+            ucb_values = {}
+            for a in self.actions:
+                exploration = self.c * math.sqrt(math.log(self.total_count) / self.counts[a])
+                ucb_values[a] = self.values[a] + exploration
+
+            return max(ucb_values, key=ucb_values.get)
+
+    def update(self, action: str, reward: float):
+        """Inkrementelles Update des Durchschnitts"""
+        with self.lock:
+            self.counts[action] += 1
+            n = self.counts[action]
+            # Inkrementeller Durchschnitt: new_avg = old_avg + (reward - old_avg) / n
+            self.values[action] += (reward - self.values[action]) / n
+
+    def get_best_action(self) -> str:
+        """Gibt Aktion mit höchstem geschätztem Wert zurück"""
+        with self.lock:
+            return max(self.values, key=self.values.get)
+
+    def get_stats(self) -> Dict:
+        return {
+            "actions": {a: {"count": self.counts[a], "value": self.values[a]}
+                       for a in self.actions},
+            "best_action": self.get_best_action(),
+            "total_pulls": self.total_count,
+        }
+
+
+class ThompsonSamplingBandit:
+    """
+    Thompson Sampling für Multi-Armed Bandit.
+
+    Bayesian Approach: Sampelt aus Posterior-Verteilungen.
+    Pi4-optimiert: Beta-Distribution ohne scipy.
+    """
+
+    def __init__(self, actions: List[str]):
+        self.actions = actions
+
+        # Beta(α, β) Parameter für jede Aktion
+        # α = Erfolge + 1, β = Misserfolge + 1
+        self.alpha: Dict[str, float] = {a: 1.0 for a in actions}
+        self.beta_param: Dict[str, float] = {a: 1.0 for a in actions}
+
+        self.lock = threading.RLock()
+
+    def _sample_beta(self, alpha: float, beta: float) -> float:
+        """
+        Sampelt aus Beta-Verteilung ohne scipy.
+        Verwendet Gamma-Sampling Trick.
+        """
+        # Approximation für Pi4: Verwende einfache Methode
+        # Für große α, β konvergiert Beta zu Normal
+        if alpha > 10 and beta > 10:
+            mean = alpha / (alpha + beta)
+            var = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1))
+            return max(0, min(1, random.gauss(mean, var ** 0.5)))
+
+        # Für kleine Werte: einfache Approximation
+        samples = [random.random() ** (1 / alpha) for _ in range(int(alpha + beta))]
+        return sum(s for s in samples[:int(alpha)]) / len(samples) if samples else 0.5
+
+    def select_action(self) -> str:
+        """Sampelt aus jeder Posterior und wählt Maximum"""
+        with self.lock:
+            samples = {}
+            for a in self.actions:
+                samples[a] = self._sample_beta(self.alpha[a], self.beta_param[a])
+            return max(samples, key=samples.get)
+
+    def update(self, action: str, reward: float):
+        """
+        Update Posterior basierend auf Reward.
+
+        reward sollte zwischen 0 und 1 sein (oder binär).
+        """
+        with self.lock:
+            if reward > 0.5:  # Erfolg
+                self.alpha[action] += reward
+            else:  # Misserfolg
+                self.beta_param[action] += (1 - reward)
+
+    def get_expected_values(self) -> Dict[str, float]:
+        """Gibt erwartete Werte (Mean der Posterior) zurück"""
+        with self.lock:
+            return {a: self.alpha[a] / (self.alpha[a] + self.beta_param[a])
+                   for a in self.actions}
+
+    def get_uncertainty(self) -> Dict[str, float]:
+        """Gibt Unsicherheit (Varianz) pro Aktion zurück"""
+        with self.lock:
+            uncertainties = {}
+            for a in self.actions:
+                alpha, beta = self.alpha[a], self.beta_param[a]
+                var = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1))
+                uncertainties[a] = var
+            return uncertainties
+
+    def get_stats(self) -> Dict:
+        return {
+            "expected_values": self.get_expected_values(),
+            "uncertainty": self.get_uncertainty(),
+            "total_observations": sum(self.alpha[a] + self.beta_param[a] - 2 for a in self.actions),
+        }
+
+
+class ContextualBandit:
+    """
+    Contextual Bandit für kontext-abhängige Entscheidungen.
+
+    Lernt verschiedene Policies für verschiedene Kontexte.
+    Pi4-optimiert: Einfaches Feature Hashing.
+    """
+
+    def __init__(self, actions: List[str], n_contexts: int = 100):
+        self.actions = actions
+        self.n_contexts = n_contexts
+
+        # Ein UCB-Bandit pro Kontext-Bucket
+        self.bandits: Dict[int, UCBBandit] = {}
+
+        self.lock = threading.RLock()
+
+    def _hash_context(self, context: Dict[str, float]) -> int:
+        """Hasht Kontext zu Bucket-Index"""
+        # Einfaches Feature Hashing
+        hash_val = 0
+        for key, value in sorted(context.items()):
+            # Diskretisiere kontinuierliche Werte
+            discrete_val = int(value * 10)
+            hash_val = (hash_val * 31 + hash(key) + discrete_val) % self.n_contexts
+        return hash_val
+
+    def _get_bandit(self, context_hash: int) -> UCBBandit:
+        """Holt oder erstellt Bandit für Kontext"""
+        if context_hash not in self.bandits:
+            self.bandits[context_hash] = UCBBandit(self.actions)
+        return self.bandits[context_hash]
+
+    def select_action(self, context: Dict[str, float]) -> str:
+        """Wählt Aktion basierend auf Kontext"""
+        with self.lock:
+            context_hash = self._hash_context(context)
+            bandit = self._get_bandit(context_hash)
+            return bandit.select_action()
+
+    def update(self, context: Dict[str, float], action: str, reward: float):
+        """Update für kontext-spezifischen Bandit"""
+        with self.lock:
+            context_hash = self._hash_context(context)
+            bandit = self._get_bandit(context_hash)
+            bandit.update(action, reward)
+
+    def get_stats(self) -> Dict:
+        return {
+            "active_contexts": len(self.bandits),
+            "total_observations": sum(b.total_count for b in self.bandits.values()),
+        }
+
+
+# =============================================================================
+# PI4 ML INFERENCE - Lightweight Deep Learning für Raspberry Pi
+# =============================================================================
+
+class Pi4MLInference:
+    """
+    Leichtgewichtige ML-Inferenz für Raspberry Pi 4.
+
+    Unterstützt:
+    - TensorFlow Lite Modelle (wenn verfügbar)
+    - ONNX Runtime (wenn verfügbar)
+    - Fallback zu reinem Python
+
+    KEIN Training - nur Inferenz von pre-trained Modellen!
+    """
+
+    def __init__(self, model_dir: Path = None):
+        self.model_dir = model_dir or Path.home() / "holo_models"
+        self.model_dir.mkdir(parents=True, exist_ok=True)
+
+        # Verfügbare Backends
+        self.tflite_available = self._check_tflite()
+        self.onnx_available = self._check_onnx()
+
+        # Geladene Modelle
+        self.loaded_models: Dict[str, Any] = {}
+
+        self.lock = threading.RLock()
+        logger.info(f"[Pi4ML] TFLite: {self.tflite_available}, ONNX: {self.onnx_available}")
+
+    def _check_tflite(self) -> bool:
+        """Prüft ob TensorFlow Lite verfügbar ist"""
+        try:
+            import tflite_runtime.interpreter as tflite
+            return True
+        except ImportError:
+            try:
+                import tensorflow as tf
+                return hasattr(tf, 'lite')
+            except ImportError:
+                return False
+
+    def _check_onnx(self) -> bool:
+        """Prüft ob ONNX Runtime verfügbar ist"""
+        try:
+            import onnxruntime
+            return True
+        except ImportError:
+            return False
+
+    def load_model(self, model_name: str, model_path: Path = None) -> bool:
+        """
+        Lädt ein Modell für Inferenz.
+
+        Unterstützt .tflite und .onnx Dateien.
+        """
+        with self.lock:
+            if model_name in self.loaded_models:
+                return True
+
+            path = model_path or self.model_dir / model_name
+
+            if not path.exists():
+                logger.warning(f"[Pi4ML] Modell nicht gefunden: {path}")
+                return False
+
+            suffix = path.suffix.lower()
+
+            try:
+                if suffix == ".tflite" and self.tflite_available:
+                    model = self._load_tflite(path)
+                elif suffix == ".onnx" and self.onnx_available:
+                    model = self._load_onnx(path)
+                else:
+                    logger.warning(f"[Pi4ML] Unbekanntes Format oder Backend nicht verfügbar: {suffix}")
+                    return False
+
+                self.loaded_models[model_name] = {
+                    "model": model,
+                    "type": suffix,
+                    "path": str(path)
+                }
+                logger.info(f"[Pi4ML] Modell geladen: {model_name}")
+                return True
+
+            except Exception as e:
+                logger.error(f"[Pi4ML] Fehler beim Laden von {model_name}: {e}")
+                return False
+
+    def _load_tflite(self, path: Path):
+        """Lädt TFLite Modell"""
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ImportError:
+            import tensorflow as tf
+            Interpreter = tf.lite.Interpreter
+
+        interpreter = Interpreter(model_path=str(path))
+        interpreter.allocate_tensors()
+        return interpreter
+
+    def _load_onnx(self, path: Path):
+        """Lädt ONNX Modell"""
+        import onnxruntime as ort
+        return ort.InferenceSession(str(path))
+
+    def predict(self, model_name: str, input_data: List[float]) -> Optional[List[float]]:
+        """
+        Führt Inferenz aus.
+
+        Args:
+            model_name: Name des geladenen Modells
+            input_data: Input-Daten als flache Liste
+
+        Returns:
+            Output des Modells als Liste oder None bei Fehler
+        """
+        with self.lock:
+            if model_name not in self.loaded_models:
+                logger.warning(f"[Pi4ML] Modell nicht geladen: {model_name}")
+                return None
+
+            model_info = self.loaded_models[model_name]
+            model = model_info["model"]
+            model_type = model_info["type"]
+
+            try:
+                if model_type == ".tflite":
+                    return self._predict_tflite(model, input_data)
+                elif model_type == ".onnx":
+                    return self._predict_onnx(model, input_data)
+            except Exception as e:
+                logger.error(f"[Pi4ML] Inferenz-Fehler: {e}")
+                return None
+
+    def _predict_tflite(self, interpreter, input_data: List[float]) -> List[float]:
+        """TFLite Inferenz"""
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Input vorbereiten
+        input_shape = input_details[0]['shape']
+        input_dtype = input_details[0]['dtype']
+
+        # Reshape input
+        import array
+        input_array = array.array('f', input_data)
+
+        interpreter.set_tensor(input_details[0]['index'], [input_data])
+        interpreter.invoke()
+
+        output = interpreter.get_tensor(output_details[0]['index'])
+        return list(output.flatten())
+
+    def _predict_onnx(self, session, input_data: List[float]) -> List[float]:
+        """ONNX Inferenz"""
+        import numpy as np
+
+        input_name = session.get_inputs()[0].name
+        input_array = np.array([input_data], dtype=np.float32)
+
+        outputs = session.run(None, {input_name: input_array})
+        return list(outputs[0].flatten())
+
+    def get_available_models(self) -> List[str]:
+        """Listet verfügbare Modell-Dateien"""
+        models = []
+        for suffix in [".tflite", ".onnx"]:
+            models.extend([p.name for p in self.model_dir.glob(f"*{suffix}")])
+        return models
+
+    def get_stats(self) -> Dict:
+        return {
+            "tflite_available": self.tflite_available,
+            "onnx_available": self.onnx_available,
+            "loaded_models": list(self.loaded_models.keys()),
+            "available_models": self.get_available_models(),
+            "model_dir": str(self.model_dir)
+        }
+
+
+class SimpleNeuralNetwork:
+    """
+    Einfaches Neural Network in Pure Python.
+
+    Für kleine Modelle auf Pi4 ohne externe Dependencies.
+    Unterstützt nur Inferenz, kein Training.
+    """
+
+    def __init__(self):
+        self.layers: List[Dict] = []
+
+    def add_layer(self, weights: List[List[float]], biases: List[float],
+                  activation: str = "relu"):
+        """Fügt Layer hinzu"""
+        self.layers.append({
+            "weights": weights,
+            "biases": biases,
+            "activation": activation
+        })
+
+    def _relu(self, x: float) -> float:
+        return max(0.0, x)
+
+    def _sigmoid(self, x: float) -> float:
+        if x < -500:
+            return 0.0
+        if x > 500:
+            return 1.0
+        import math
+        return 1.0 / (1.0 + math.exp(-x))
+
+    def _tanh(self, x: float) -> float:
+        import math
+        return math.tanh(x)
+
+    def _softmax(self, values: List[float]) -> List[float]:
+        import math
+        max_val = max(values)
+        exp_values = [math.exp(v - max_val) for v in values]
+        sum_exp = sum(exp_values)
+        return [e / sum_exp for e in exp_values]
+
+    def predict(self, inputs: List[float]) -> List[float]:
+        """Forward Pass"""
+        current = inputs
+
+        for layer in self.layers:
+            weights = layer["weights"]
+            biases = layer["biases"]
+            activation = layer["activation"]
+
+            # Matrix-Multiplikation
+            next_layer = []
+            for j in range(len(weights[0])):
+                value = biases[j]
+                for i in range(len(current)):
+                    value += current[i] * weights[i][j]
+                next_layer.append(value)
+
+            # Aktivierung
+            if activation == "relu":
+                current = [self._relu(v) for v in next_layer]
+            elif activation == "sigmoid":
+                current = [self._sigmoid(v) for v in next_layer]
+            elif activation == "tanh":
+                current = [self._tanh(v) for v in next_layer]
+            elif activation == "softmax":
+                current = self._softmax(next_layer)
+            else:  # linear
+                current = next_layer
+
+        return current
+
+    def save(self, path: Path):
+        """Speichert Netzwerk als JSON"""
+        import json
+        with open(path, 'w') as f:
+            json.dump(self.layers, f)
+
+    def load(self, path: Path) -> bool:
+        """Lädt Netzwerk aus JSON"""
+        import json
+        try:
+            with open(path, 'r') as f:
+                self.layers = json.load(f)
+            return True
+        except Exception as e:
+            logger.error(f"[SimpleNN] Ladefehler: {e}")
+            return False
+
+
+# =============================================================================
 # HAUPT-KLASSE: HOLO POLICY ENGINE
 # =============================================================================
 

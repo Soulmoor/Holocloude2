@@ -19,11 +19,13 @@ Version: 2.0 (Refactored)
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any, TYPE_CHECKING
+from typing import List, Dict, Optional, Any, TYPE_CHECKING, Tuple, Set
 from enum import Enum
 from datetime import datetime
+from collections import defaultdict
 import random
 import logging
+import time
 
 # ============================================================================
 # IMPORTS VON BESTEHENDEN MODULEN
@@ -888,6 +890,877 @@ def analyze_what_if(scenario: str, change: str) -> Dict[str, Any]:
 
 
 # ============================================================================
+# ADVANCED CAUSALITY SYSTEM v2.0 - Für 10/10 Kausalität
+# ============================================================================
+
+class InterventionalReasoning:
+    """
+    Interventionelles Reasoning - Do-Calculus.
+
+    Unterscheidet zwischen:
+    - P(Y | X)         : Beobachtung (Korrelation)
+    - P(Y | do(X))     : Intervention (Kausalität)
+
+    Beantwortet: "Was passiert wenn wir X AKTIV ändern?"
+    (nicht nur beobachten)
+    """
+
+    def __init__(self):
+        # Bekannte Interventionseffekte
+        self.intervention_effects: Dict[str, Dict[str, float]] = defaultdict(dict)
+        # Beobachtete Korrelationen
+        self.observed_correlations: Dict[str, Dict[str, float]] = defaultdict(dict)
+        # Konfundierungs-Wissen
+        self.known_confounders: Dict[Tuple[str, str], List[str]] = {}
+
+    def observe(self, cause: str, effect: str, strength: float):
+        """Registriert beobachtete Korrelation P(effect | cause)"""
+        self.observed_correlations[cause][effect] = strength
+
+    def intervene(self, intervention: str, outcome: str, effect_strength: float):
+        """Registriert Interventionseffekt P(outcome | do(intervention))"""
+        self.intervention_effects[intervention][outcome] = effect_strength
+
+    def add_confounder(self, var_a: str, var_b: str, confounder: str):
+        """Registriert bekannten Confounder zwischen zwei Variablen"""
+        key = (min(var_a, var_b), max(var_a, var_b))
+        if key not in self.known_confounders:
+            self.known_confounders[key] = []
+        if confounder not in self.known_confounders[key]:
+            self.known_confounders[key].append(confounder)
+
+    def estimate_do_effect(self, intervention: str, outcome: str) -> Dict[str, Any]:
+        """
+        Schätzt P(outcome | do(intervention)).
+
+        Korrigiert für bekannte Confounder.
+        """
+        result = {
+            "intervention": intervention,
+            "outcome": outcome,
+            "causal_effect": 0.0,
+            "correlation": 0.0,
+            "confounders": [],
+            "is_causal": False,
+            "confidence": 0.0,
+            "reasoning": []
+        }
+
+        # 1. Beobachtete Korrelation
+        correlation = self.observed_correlations.get(intervention, {}).get(outcome, 0)
+        result["correlation"] = correlation
+
+        # 2. Bekannte Interventionseffekte
+        if intervention in self.intervention_effects:
+            if outcome in self.intervention_effects[intervention]:
+                effect = self.intervention_effects[intervention][outcome]
+                result["causal_effect"] = effect
+                result["is_causal"] = True
+                result["confidence"] = 0.9
+                result["reasoning"].append(f"Direkter Interventionseffekt bekannt: {effect:.2f}")
+                return result
+
+        # 3. Prüfe auf Confounder
+        key = (min(intervention, outcome), max(intervention, outcome))
+        confounders = self.known_confounders.get(key, [])
+        result["confounders"] = confounders
+
+        if confounders:
+            # Korrelation könnte durch Confounder erklärt werden
+            # Reduziere geschätzten Kausaleffekt
+            reduction = 0.3 * len(confounders)
+            adjusted_effect = max(0, correlation - reduction)
+            result["causal_effect"] = adjusted_effect
+            result["is_causal"] = adjusted_effect > 0.2
+            result["confidence"] = 0.5
+            result["reasoning"].append(
+                f"Confounder gefunden: {confounders}. "
+                f"Korrelation {correlation:.2f} → adjustierter Effekt {adjusted_effect:.2f}"
+            )
+        else:
+            # Keine bekannten Confounder - Korrelation könnte kausal sein
+            result["causal_effect"] = correlation * 0.7  # Konservativer Schätzer
+            result["is_causal"] = correlation > 0.3
+            result["confidence"] = 0.6
+            result["reasoning"].append(
+                f"Keine Confounder bekannt. Konservative Schätzung: {correlation * 0.7:.2f}"
+            )
+
+        return result
+
+    def would_intervention_help(self, goal: str, possible_interventions: List[str]) -> List[Dict]:
+        """Bewertet welche Interventionen am wahrscheinlichsten zum Ziel führen"""
+        results = []
+
+        for intervention in possible_interventions:
+            effect = self.estimate_do_effect(intervention, goal)
+            results.append({
+                "intervention": intervention,
+                "expected_effect": effect["causal_effect"],
+                "is_causal": effect["is_causal"],
+                "confounders": effect["confounders"],
+                "recommendation": "empfohlen" if effect["causal_effect"] > 0.5 else "unsicher"
+            })
+
+        # Sortiere nach erwartetem Effekt
+        results.sort(key=lambda x: x["expected_effect"], reverse=True)
+        return results
+
+
+class CausalDiscovery:
+    """
+    Kausale Struktur-Entdeckung.
+
+    Inspiriert vom PC-Algorithmus, aber vereinfacht für Pi4.
+    Findet kausale Beziehungen aus Beobachtungsdaten.
+    """
+
+    def __init__(self):
+        # Beobachtete Co-Occurences
+        self.co_occurrences: Dict[Tuple[str, str], int] = defaultdict(int)
+        # Zeitliche Abfolgen (A vor B)
+        self.temporal_order: Dict[Tuple[str, str], int] = defaultdict(int)
+        # Entdeckte kausale Kanten
+        self.discovered_edges: List[Tuple[str, str, float]] = []
+
+    def observe_event(self, event: str, context_events: List[str], timestamp: float = None):
+        """Registriert ein Event mit Kontext"""
+        if timestamp is None:
+            timestamp = time.time()
+
+        for ctx_event in context_events:
+            # Co-Occurrence
+            pair = (min(event, ctx_event), max(event, ctx_event))
+            self.co_occurrences[pair] += 1
+
+    def observe_sequence(self, events: List[str]):
+        """Registriert zeitliche Abfolge von Events"""
+        for i in range(len(events) - 1):
+            for j in range(i + 1, len(events)):
+                # events[i] kam vor events[j]
+                self.temporal_order[(events[i], events[j])] += 1
+
+    def discover_structure(self, min_observations: int = 5) -> Dict[str, Any]:
+        """
+        Entdeckt kausale Struktur.
+
+        Verwendet:
+        1. Korrelation (Co-Occurrence)
+        2. Zeitliche Reihenfolge (Ursache vor Wirkung)
+        3. Asymmetrie (A→B öfter als B→A)
+        """
+        variables = set()
+        for (a, b) in self.co_occurrences.keys():
+            variables.add(a)
+            variables.add(b)
+
+        edges = []
+
+        for (a, b), count in self.co_occurrences.items():
+            if count < min_observations:
+                continue
+
+            # Prüfe zeitliche Reihenfolge
+            a_before_b = self.temporal_order.get((a, b), 0)
+            b_before_a = self.temporal_order.get((b, a), 0)
+
+            # Bestimme Richtung
+            if a_before_b > b_before_a * 1.5:
+                # A verursacht wahrscheinlich B
+                strength = count / max(1, count + self.co_occurrences.get((a, a), 1))
+                edges.append((a, b, min(1.0, strength), "temporal"))
+            elif b_before_a > a_before_b * 1.5:
+                # B verursacht wahrscheinlich A
+                strength = count / max(1, count + self.co_occurrences.get((b, b), 1))
+                edges.append((b, a, min(1.0, strength), "temporal"))
+            else:
+                # Richtung unklar - möglicherweise gemeinsame Ursache
+                edges.append((a, b, 0.3, "undirected"))
+
+        self.discovered_edges = [(a, b, s) for a, b, s, _ in edges]
+
+        return {
+            "variables": list(variables),
+            "edges": edges,
+            "total_observations": sum(self.co_occurrences.values()),
+            "structure_type": self._classify_structure(edges)
+        }
+
+    def _classify_structure(self, edges: List[Tuple]) -> str:
+        """Klassifiziert die entdeckte Struktur"""
+        if not edges:
+            return "empty"
+
+        directed = sum(1 for e in edges if e[3] == "temporal")
+        undirected = len(edges) - directed
+
+        if directed > undirected * 2:
+            return "mostly_causal"
+        elif undirected > directed * 2:
+            return "mostly_correlational"
+        else:
+            return "mixed"
+
+    def get_likely_causes(self, effect: str, min_strength: float = 0.3) -> List[Tuple[str, float]]:
+        """Findet wahrscheinliche Ursachen für einen Effekt"""
+        causes = []
+        for (cause, eff, strength) in self.discovered_edges:
+            if eff == effect and strength >= min_strength:
+                causes.append((cause, strength))
+
+        causes.sort(key=lambda x: x[1], reverse=True)
+        return causes
+
+    def get_likely_effects(self, cause: str, min_strength: float = 0.3) -> List[Tuple[str, float]]:
+        """Findet wahrscheinliche Effekte einer Ursache"""
+        effects = []
+        for (c, effect, strength) in self.discovered_edges:
+            if c == cause and strength >= min_strength:
+                effects.append((effect, strength))
+
+        effects.sort(key=lambda x: x[1], reverse=True)
+        return effects
+
+
+class ConfoundingDetector:
+    """
+    Erkennt konfundierende Variablen (Scheinkausalitäten).
+
+    Wenn A und B korrelieren, aber C sowohl A als auch B verursacht,
+    ist die A-B Korrelation eine Scheinkausalität.
+    """
+
+    def __init__(self):
+        # Bekannte Variablen-Beziehungen
+        self.causal_graph: Dict[str, List[str]] = defaultdict(list)  # cause -> [effects]
+        self.correlation_pairs: Set[Tuple[str, str]] = set()
+
+    def add_causal_link(self, cause: str, effect: str):
+        """Fügt bekannte kausale Beziehung hinzu"""
+        self.causal_graph[cause].append(effect)
+
+    def add_correlation(self, var_a: str, var_b: str):
+        """Fügt beobachtete Korrelation hinzu"""
+        pair = (min(var_a, var_b), max(var_a, var_b))
+        self.correlation_pairs.add(pair)
+
+    def find_confounders(self, var_a: str, var_b: str) -> List[Dict]:
+        """
+        Sucht mögliche Confounder für eine Korrelation.
+
+        Ein Confounder C verursacht sowohl A als auch B.
+        """
+        confounders = []
+
+        for potential_confounder, effects in self.causal_graph.items():
+            if var_a in effects and var_b in effects:
+                confounders.append({
+                    "confounder": potential_confounder,
+                    "explanation": f"'{potential_confounder}' verursacht sowohl '{var_a}' als auch '{var_b}'",
+                    "spurious_correlation": True
+                })
+
+        return confounders
+
+    def is_spurious(self, var_a: str, var_b: str) -> Tuple[bool, List[str]]:
+        """
+        Prüft ob Korrelation zwischen A und B eine Scheinkorrelation ist.
+
+        Returns (is_spurious, list_of_confounders)
+        """
+        confounders = self.find_confounders(var_a, var_b)
+        confounder_names = [c["confounder"] for c in confounders]
+        return len(confounders) > 0, confounder_names
+
+    def suggest_controls(self, var_a: str, var_b: str) -> List[str]:
+        """
+        Schlägt Variablen vor, die kontrolliert werden sollten.
+
+        Um kausale Effekte von A auf B zu messen.
+        """
+        is_spurious, confounders = self.is_spurious(var_a, var_b)
+
+        if is_spurious:
+            return confounders
+        else:
+            # Suche nach möglichen Mediatoren
+            mediators = []
+            for c, effects in self.causal_graph.items():
+                if c == var_a and var_b in effects:
+                    # Direkter Effekt - keine Kontrolle nötig
+                    continue
+                if c == var_a:
+                    for eff in effects:
+                        if var_b in self.causal_graph.get(eff, []):
+                            mediators.append(eff)
+
+            return mediators
+
+
+class CausalStrengthEstimator:
+    """
+    Quantifiziert kausale Stärke präzise.
+
+    Verwendet mehrere Metriken:
+    - Average Treatment Effect (ATE)
+    - Conditional Average Treatment Effect (CATE)
+    - Probability of Necessity (PN)
+    - Probability of Sufficiency (PS)
+    """
+
+    def __init__(self):
+        # Beobachtungen: (treatment, outcome, covariates)
+        self.observations: List[Tuple[bool, float, Dict]] = []
+        self.treatment_outcomes: Dict[bool, List[float]] = {True: [], False: []}
+
+    def observe(self, treatment: bool, outcome: float, covariates: Dict = None):
+        """Registriert eine Beobachtung"""
+        self.observations.append((treatment, outcome, covariates or {}))
+        self.treatment_outcomes[treatment].append(outcome)
+
+    def calculate_ate(self) -> Dict[str, float]:
+        """
+        Average Treatment Effect.
+
+        ATE = E[Y | do(T=1)] - E[Y | do(T=0)]
+        """
+        treated = self.treatment_outcomes[True]
+        untreated = self.treatment_outcomes[False]
+
+        if not treated or not untreated:
+            return {"ate": 0.0, "confidence": 0.0, "error": "Insufficient data"}
+
+        mean_treated = sum(treated) / len(treated)
+        mean_untreated = sum(untreated) / len(untreated)
+
+        ate = mean_treated - mean_untreated
+
+        # Konfidenz basierend auf Stichprobengröße
+        n = min(len(treated), len(untreated))
+        confidence = min(1.0, n / 30)  # Bei 30+ Beobachtungen hohe Konfidenz
+
+        return {
+            "ate": ate,
+            "mean_treated": mean_treated,
+            "mean_untreated": mean_untreated,
+            "n_treated": len(treated),
+            "n_untreated": len(untreated),
+            "confidence": confidence,
+            "interpretation": self._interpret_ate(ate)
+        }
+
+    def _interpret_ate(self, ate: float) -> str:
+        """Interpretiert ATE-Wert"""
+        if ate > 0.5:
+            return "Starker positiver Kausaleffekt"
+        elif ate > 0.2:
+            return "Moderater positiver Kausaleffekt"
+        elif ate > 0:
+            return "Schwacher positiver Kausaleffekt"
+        elif ate > -0.2:
+            return "Schwacher negativer Kausaleffekt"
+        elif ate > -0.5:
+            return "Moderater negativer Kausaleffekt"
+        else:
+            return "Starker negativer Kausaleffekt"
+
+    def calculate_necessity(self, threshold: float = 0.5) -> float:
+        """
+        Probability of Necessity (PN).
+
+        Wie wahrscheinlich ist es, dass Y nicht eingetreten wäre,
+        wenn X nicht stattgefunden hätte?
+        """
+        treated = self.treatment_outcomes[True]
+        untreated = self.treatment_outcomes[False]
+
+        if not treated or not untreated:
+            return 0.0
+
+        # Anteil der Treated mit positivem Outcome
+        treated_positive = sum(1 for y in treated if y > threshold) / len(treated)
+        # Anteil der Untreated mit positivem Outcome
+        untreated_positive = sum(1 for y in untreated if y > threshold) / len(untreated)
+
+        if treated_positive == 0:
+            return 0.0
+
+        # PN = (P(Y=1|T=1) - P(Y=1|T=0)) / P(Y=1|T=1)
+        pn = (treated_positive - untreated_positive) / treated_positive
+        return max(0.0, min(1.0, pn))
+
+    def calculate_sufficiency(self, threshold: float = 0.5) -> float:
+        """
+        Probability of Sufficiency (PS).
+
+        Wie wahrscheinlich ist es, dass Y eingetreten wäre,
+        wenn X stattgefunden hätte?
+        """
+        treated = self.treatment_outcomes[True]
+        untreated = self.treatment_outcomes[False]
+
+        if not treated or not untreated:
+            return 0.0
+
+        treated_positive = sum(1 for y in treated if y > threshold) / len(treated)
+        untreated_negative = sum(1 for y in untreated if y <= threshold) / len(untreated)
+
+        if untreated_negative == 0:
+            return 0.0
+
+        # PS = (P(Y=1|T=1) - P(Y=1|T=0)) / P(Y=0|T=0)
+        untreated_positive = 1 - untreated_negative
+        ps = (treated_positive - untreated_positive) / untreated_negative
+        return max(0.0, min(1.0, ps))
+
+    def full_analysis(self) -> Dict[str, Any]:
+        """Vollständige Kausalanalyse"""
+        ate = self.calculate_ate()
+        pn = self.calculate_necessity()
+        ps = self.calculate_sufficiency()
+
+        return {
+            "average_treatment_effect": ate,
+            "probability_of_necessity": pn,
+            "probability_of_sufficiency": ps,
+            "causal_type": self._determine_causal_type(pn, ps),
+            "total_observations": len(self.observations)
+        }
+
+    def _determine_causal_type(self, pn: float, ps: float) -> str:
+        """Bestimmt Art der Kausalbeziehung"""
+        if pn > 0.7 and ps > 0.7:
+            return "necessary_and_sufficient"
+        elif pn > 0.7:
+            return "necessary_but_not_sufficient"
+        elif ps > 0.7:
+            return "sufficient_but_not_necessary"
+        elif pn > 0.3 or ps > 0.3:
+            return "contributing_factor"
+        else:
+            return "weak_or_no_causation"
+
+
+class TemporalCausality:
+    """
+    Zeitbasierte Kausalitätsanalyse.
+
+    Verwendet Granger-ähnliche Kausalität:
+    X verursacht Y, wenn vergangene X-Werte Y besser vorhersagen
+    als vergangene Y-Werte allein.
+    """
+
+    def __init__(self, max_lag: int = 5):
+        self.max_lag = max_lag
+        # Zeitreihen pro Variable
+        self.time_series: Dict[str, List[Tuple[float, float]]] = defaultdict(list)
+
+    def record(self, variable: str, value: float, timestamp: float = None):
+        """Zeichnet Wert mit Zeitstempel auf"""
+        if timestamp is None:
+            timestamp = time.time()
+        self.time_series[variable].append((timestamp, value))
+
+        # Behalte nur letzte 1000 Einträge
+        if len(self.time_series[variable]) > 1000:
+            self.time_series[variable] = self.time_series[variable][-1000:]
+
+    def test_granger_causality(self, cause: str, effect: str) -> Dict[str, Any]:
+        """
+        Testet ob 'cause' Granger-kausal für 'effect' ist.
+
+        Vereinfachte Version für Pi4.
+        """
+        cause_series = self.time_series.get(cause, [])
+        effect_series = self.time_series.get(effect, [])
+
+        if len(cause_series) < 10 or len(effect_series) < 10:
+            return {"is_causal": False, "error": "Insufficient data", "confidence": 0.0}
+
+        # Synchronisiere Zeitreihen
+        cause_values = [v for _, v in sorted(cause_series)[-100:]]
+        effect_values = [v for _, v in sorted(effect_series)[-100:]]
+
+        min_len = min(len(cause_values), len(effect_values))
+        cause_values = cause_values[:min_len]
+        effect_values = effect_values[:min_len]
+
+        if min_len < 10:
+            return {"is_causal": False, "error": "Series too short", "confidence": 0.0}
+
+        # Berechne Korrelation mit verschiedenen Lags
+        best_lag = 0
+        best_correlation = 0
+
+        for lag in range(1, min(self.max_lag + 1, min_len // 2)):
+            # Korrelation zwischen cause[t-lag] und effect[t]
+            cause_lagged = cause_values[:-lag]
+            effect_current = effect_values[lag:]
+
+            correlation = self._pearson_correlation(cause_lagged, effect_current)
+
+            if abs(correlation) > abs(best_correlation):
+                best_correlation = correlation
+                best_lag = lag
+
+        # Prüfe ob Kausalität wahrscheinlich
+        # (cause sollte effect besser vorhersagen als effect selbst)
+        auto_correlation = self._pearson_correlation(effect_values[:-1], effect_values[1:])
+
+        is_causal = abs(best_correlation) > abs(auto_correlation) * 1.2 and abs(best_correlation) > 0.3
+
+        return {
+            "is_causal": is_causal,
+            "best_lag": best_lag,
+            "correlation_at_lag": best_correlation,
+            "auto_correlation": auto_correlation,
+            "confidence": abs(best_correlation) if is_causal else 0.0,
+            "interpretation": f"'{cause}' beeinflusst '{effect}' mit Verzögerung von {best_lag} Zeiteinheiten"
+                             if is_causal else f"Keine klare Kausalität gefunden"
+        }
+
+    def _pearson_correlation(self, x: List[float], y: List[float]) -> float:
+        """Berechnet Pearson-Korrelation ohne numpy"""
+        n = len(x)
+        if n != len(y) or n < 2:
+            return 0.0
+
+        mean_x = sum(x) / n
+        mean_y = sum(y) / n
+
+        numerator = sum((x[i] - mean_x) * (y[i] - mean_y) for i in range(n))
+        denom_x = sum((xi - mean_x) ** 2 for xi in x) ** 0.5
+        denom_y = sum((yi - mean_y) ** 2 for yi in y) ** 0.5
+
+        if denom_x == 0 or denom_y == 0:
+            return 0.0
+
+        return numerator / (denom_x * denom_y)
+
+    def find_leading_indicators(self, target: str, candidates: List[str]) -> List[Dict]:
+        """Findet Variablen die target zeitlich vorhersagen"""
+        results = []
+
+        for candidate in candidates:
+            if candidate == target:
+                continue
+
+            test = self.test_granger_causality(candidate, target)
+            if test.get("is_causal"):
+                results.append({
+                    "indicator": candidate,
+                    "lag": test["best_lag"],
+                    "strength": test["correlation_at_lag"],
+                    "confidence": test["confidence"]
+                })
+
+        results.sort(key=lambda x: x["strength"], reverse=True)
+        return results
+
+
+class CausalChainValidator:
+    """
+    Validiert kausale Ketten auf logische Konsistenz.
+
+    Prüft:
+    - Keine Zyklen (A→B→C→A ist ungültig)
+    - Transitivität (A→B und B→C impliziert A→C)
+    - Keine Widersprüche
+    """
+
+    def __init__(self):
+        self.edges: List[Tuple[str, str, float]] = []  # (cause, effect, strength)
+        self.nodes: Set[str] = set()
+
+    def add_causal_link(self, cause: str, effect: str, strength: float = 1.0):
+        """Fügt kausale Verbindung hinzu"""
+        self.edges.append((cause, effect, strength))
+        self.nodes.add(cause)
+        self.nodes.add(effect)
+
+    def validate(self) -> Dict[str, Any]:
+        """Validiert die gesamte kausale Struktur"""
+        issues = []
+
+        # 1. Prüfe auf Zyklen
+        cycles = self._find_cycles()
+        if cycles:
+            issues.append({
+                "type": "cycle",
+                "description": "Kausale Zyklen gefunden",
+                "details": cycles
+            })
+
+        # 2. Prüfe auf Widersprüche (A→B und A→¬B)
+        contradictions = self._find_contradictions()
+        if contradictions:
+            issues.append({
+                "type": "contradiction",
+                "description": "Widersprüchliche Kausalbeziehungen",
+                "details": contradictions
+            })
+
+        # 3. Berechne transitive Closure
+        transitive = self._compute_transitive_closure()
+
+        return {
+            "is_valid": len(issues) == 0,
+            "issues": issues,
+            "nodes": list(self.nodes),
+            "direct_edges": len(self.edges),
+            "transitive_edges": len(transitive),
+            "transitive_closure": transitive
+        }
+
+    def _find_cycles(self) -> List[List[str]]:
+        """Findet alle Zyklen im Graphen (DFS)"""
+        cycles = []
+
+        # Baue Adjazenzliste
+        adj: Dict[str, List[str]] = defaultdict(list)
+        for cause, effect, _ in self.edges:
+            adj[cause].append(effect)
+
+        visited = set()
+        rec_stack = set()
+        path = []
+
+        def dfs(node: str):
+            visited.add(node)
+            rec_stack.add(node)
+            path.append(node)
+
+            for neighbor in adj[node]:
+                if neighbor not in visited:
+                    dfs(neighbor)
+                elif neighbor in rec_stack:
+                    # Zyklus gefunden
+                    cycle_start = path.index(neighbor)
+                    cycles.append(path[cycle_start:] + [neighbor])
+
+            path.pop()
+            rec_stack.remove(node)
+
+        for node in self.nodes:
+            if node not in visited:
+                dfs(node)
+
+        return cycles
+
+    def _find_contradictions(self) -> List[Dict]:
+        """Findet widersprüchliche Beziehungen"""
+        # Vereinfachte Implementierung: Prüfe auf entgegengesetzte Kanten
+        contradictions = []
+
+        edge_set = {(c, e) for c, e, _ in self.edges}
+
+        for cause, effect, strength in self.edges:
+            # Prüfe ob umgekehrte Kante existiert (potentieller Widerspruch)
+            if (effect, cause) in edge_set:
+                contradictions.append({
+                    "type": "bidirectional",
+                    "vars": [cause, effect],
+                    "explanation": f"Beide Richtungen: {cause}→{effect} und {effect}→{cause}"
+                })
+
+        return contradictions
+
+    def _compute_transitive_closure(self) -> List[Tuple[str, str, float]]:
+        """Berechnet transitive Hülle (alle implizierten Kausalitäten)"""
+        # Floyd-Warshall für transitive Closure mit Stärken
+        dist: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(lambda: 0.0))
+
+        for cause, effect, strength in self.edges:
+            dist[cause][effect] = max(dist[cause][effect], strength)
+
+        nodes_list = list(self.nodes)
+
+        for k in nodes_list:
+            for i in nodes_list:
+                for j in nodes_list:
+                    if i != j and i != k and j != k:
+                        # Transitive Stärke = Produkt der Teilstärken
+                        transitive_strength = dist[i][k] * dist[k][j]
+                        if transitive_strength > dist[i][j]:
+                            dist[i][j] = transitive_strength
+
+        transitive = []
+        for i in nodes_list:
+            for j in nodes_list:
+                if i != j and dist[i][j] > 0:
+                    transitive.append((i, j, dist[i][j]))
+
+        return transitive
+
+    def get_causal_path(self, start: str, end: str) -> Optional[List[str]]:
+        """Findet kausalen Pfad von start zu end"""
+        adj: Dict[str, List[str]] = defaultdict(list)
+        for cause, effect, _ in self.edges:
+            adj[cause].append(effect)
+
+        # BFS für kürzesten Pfad
+        from collections import deque
+        queue = deque([(start, [start])])
+        visited = {start}
+
+        while queue:
+            node, path = queue.popleft()
+            if node == end:
+                return path
+
+            for neighbor in adj[node]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append((neighbor, path + [neighbor]))
+
+        return None
+
+
+class CausalIntegrator:
+    """
+    Integriert alle Kausalitäts-Komponenten.
+
+    Zentraler Hub für:
+    - Interventionales Reasoning
+    - Kausale Entdeckung
+    - Confounder-Detektion
+    - Stärke-Schätzung
+    - Temporale Kausalität
+    - Ketten-Validierung
+    """
+
+    def __init__(self):
+        self.interventional = InterventionalReasoning()
+        self.discovery = CausalDiscovery()
+        self.confounding = ConfoundingDetector()
+        self.strength = CausalStrengthEstimator()
+        self.temporal = TemporalCausality()
+        self.validator = CausalChainValidator()
+
+        # Cache für Analysen
+        self._analysis_cache: Dict[str, Any] = {}
+
+    def record_observation(self, event: str, context: Dict[str, Any],
+                          outcome: float = None, timestamp: float = None):
+        """Zeichnet Beobachtung für alle Systeme auf"""
+        if timestamp is None:
+            timestamp = time.time()
+
+        # Temporal
+        self.temporal.record(event, outcome or 1.0, timestamp)
+
+        # Discovery
+        context_events = list(context.keys())
+        self.discovery.observe_event(event, context_events, timestamp)
+
+        # Korrelationen für Confounding
+        for ctx_event in context_events:
+            self.interventional.observe(ctx_event, event, context.get(ctx_event, 0.5))
+            self.confounding.add_correlation(ctx_event, event)
+
+    def record_intervention(self, action: str, outcome: str,
+                           effect_strength: float, was_successful: bool):
+        """Zeichnet Intervention auf"""
+        self.interventional.intervene(action, outcome, effect_strength)
+        self.strength.observe(True, effect_strength)
+
+        # Für Validator
+        if was_successful:
+            self.validator.add_causal_link(action, outcome, effect_strength)
+            self.confounding.add_causal_link(action, outcome)
+
+    def analyze_causality(self, cause: str, effect: str) -> Dict[str, Any]:
+        """Vollständige Kausalanalyse zwischen zwei Variablen"""
+        cache_key = f"{cause}:{effect}"
+        if cache_key in self._analysis_cache:
+            return self._analysis_cache[cache_key]
+
+        analysis = {
+            "cause": cause,
+            "effect": effect,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        # 1. Interventionales Reasoning
+        intervention = self.interventional.estimate_do_effect(cause, effect)
+        analysis["interventional"] = intervention
+
+        # 2. Confounder Check
+        is_spurious, confounders = self.confounding.is_spurious(cause, effect)
+        analysis["confounding"] = {
+            "is_spurious": is_spurious,
+            "confounders": confounders
+        }
+
+        # 3. Temporale Analyse
+        temporal = self.temporal.test_granger_causality(cause, effect)
+        analysis["temporal"] = temporal
+
+        # 4. Stärke-Analyse
+        strength = self.strength.full_analysis()
+        analysis["strength"] = strength
+
+        # 5. Gesamtbewertung
+        causal_score = 0.0
+        confidence = 0.0
+
+        if intervention["is_causal"]:
+            causal_score += 0.4 * intervention["causal_effect"]
+            confidence += 0.3
+
+        if not is_spurious:
+            causal_score += 0.2
+            confidence += 0.2
+
+        if temporal.get("is_causal"):
+            causal_score += 0.3 * temporal.get("confidence", 0)
+            confidence += 0.3
+
+        if strength["average_treatment_effect"].get("confidence", 0) > 0.5:
+            causal_score += 0.1 * abs(strength["average_treatment_effect"]["ate"])
+            confidence += 0.2
+
+        analysis["overall"] = {
+            "causal_score": min(1.0, causal_score),
+            "confidence": min(1.0, confidence),
+            "is_likely_causal": causal_score > 0.5 and not is_spurious,
+            "relationship_type": self._classify_relationship(
+                causal_score, is_spurious, temporal.get("is_causal", False)
+            )
+        }
+
+        self._analysis_cache[cache_key] = analysis
+        return analysis
+
+    def _classify_relationship(self, score: float, is_spurious: bool,
+                              is_temporal: bool) -> str:
+        """Klassifiziert die Beziehung"""
+        if is_spurious:
+            return "spurious_correlation"
+        elif score > 0.7 and is_temporal:
+            return "strong_causation"
+        elif score > 0.4:
+            return "probable_causation"
+        elif score > 0.2:
+            return "possible_causation"
+        else:
+            return "no_clear_causation"
+
+    def get_causal_graph(self) -> Dict[str, Any]:
+        """Gibt den gesamten kausalen Graphen zurück"""
+        validation = self.validator.validate()
+        discovery = self.discovery.discover_structure()
+
+        return {
+            "validation": validation,
+            "discovered_structure": discovery,
+            "interventions_recorded": len(self.interventional.intervention_effects),
+            "confounders_known": len(self.confounding.known_confounders),
+            "temporal_series": len(self.temporal.time_series)
+        }
+
+
+# ============================================================================
 # ALIASE FÜR RÜCKWÄRTSKOMPATIBILITÄT
 # ============================================================================
 
@@ -918,6 +1791,15 @@ __all__ = [
     "EventAnalyzer",
     "CounterfactualReasoningEngine",
     "CounterfactualReasoner",  # Alias
+
+    # Advanced Causality v2.0
+    "InterventionalReasoning",
+    "CausalDiscovery",
+    "ConfoundingDetector",
+    "CausalStrengthEstimator",
+    "TemporalCausality",
+    "CausalChainValidator",
+    "CausalIntegrator",
 
     # Helper functions
     "quick_counterfactual",
