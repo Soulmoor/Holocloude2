@@ -326,34 +326,180 @@ class KemonomimiBodyLanguage:
         ],
     }
 
-    # === OHREN-REAKTIONEN (nur für Ohren!) ===
+    # === OHREN-REAKTIONEN MIT 6 INTENSITÄTSSTUFEN ===
     EAR_ACTIONS = {
-        "attentive": ["*Ohren spitzen sich*", "*Ohren stellen sich auf*", "*Ohren drehen sich zu dir*"],
-        "happy": ["*Ohren stehen fröhlich*", "*Ohren zittern vor Freude*", "*Ohren heben sich*"],
-        "sad": ["*Ohren hängen*", "*Ohren sinken*", "*Ohren legen sich flach*"],
-        "curious": ["*Ohren drehen sich*", "*Ohren zucken interessiert*", "*ein Ohr dreht sich*"],
-        "uncomfortable": ["*Ohren legen sich an*", "*Ohren klappen runter*", "*Ohren flach am Kopf*"],
-        "surprised": ["*Ohren schießen hoch*", "*Ohren zucken*", "*Ohren stehen steil*"],
-        "relaxed": ["*Ohren entspannt*", "*Ohren locker*", "*Ohren ruhen seitlich*"],
-        "tired": ["*Ohren hängen müde*", "*Ohren sinken langsam*"],
-        "thinking": ["*Ohren drehen sich nachdenklich*", "*ein Ohr kippt*"],
-        "alert": ["*Ohren stellen sich auf*", "*Ohren drehen sich suchend*"],
+        "happy": {
+            "minimal": "*Ohren heben sich leicht*",
+            "leicht": "*Ohren stehen fröhlich*",
+            "mittel": "*Ohren zittern vor Freude*",
+            "stark": "*Ohren stehen steil auf*",
+            "sehr_stark": "*Ohren wippen aufgeregt*",
+            "extrem": "*Ohren vibrieren vor Freude*",
+        },
+        "sad": {
+            "minimal": "*Ohren senken sich leicht*",
+            "leicht": "*Ohren hängen*",
+            "mittel": "*Ohren sinken*",
+            "stark": "*Ohren legen sich flach*",
+            "sehr_stark": "*Ohren flach am Kopf*",
+            "extrem": "*Ohren flach angelegt, reglos*",
+        },
+        "curious": {
+            "minimal": "*ein Ohr dreht sich*",
+            "leicht": "*Ohren drehen sich*",
+            "mittel": "*Ohren spitzen sich*",
+            "stark": "*Ohren zucken interessiert*",
+            "sehr_stark": "*Ohren stehen steil, drehen sich*",
+            "extrem": "*Ohren maximal gespitzt, zittern*",
+        },
+        "surprised": {
+            "minimal": "*Ohren zucken*",
+            "leicht": "*Ohren heben sich*",
+            "mittel": "*Ohren schießen hoch*",
+            "stark": "*Ohren stehen steil*",
+            "sehr_stark": "*Ohren steil aufgerichtet*",
+            "extrem": "*Ohren schnellen hoch, erstarren*",
+        },
+        "relaxed": {
+            "minimal": "*Ohren ruhen*",
+            "leicht": "*Ohren locker*",
+            "mittel": "*Ohren entspannt*",
+            "stark": "*Ohren ruhen seitlich*",
+            "sehr_stark": "*Ohren hängen entspannt*",
+            "extrem": "*Ohren völlig entspannt, leicht wippend*",
+        },
+        "angry": {
+            "minimal": "*Ohren drehen sich*",
+            "leicht": "*Ohren legen sich leicht an*",
+            "mittel": "*Ohren legen sich an*",
+            "stark": "*Ohren flach am Kopf*",
+            "sehr_stark": "*Ohren flach, zucken*",
+            "extrem": "*Ohren flach angelegt, zittern*",
+        },
+        "fearful": {
+            "minimal": "*Ohren zucken nervös*",
+            "leicht": "*Ohren legen sich an*",
+            "mittel": "*Ohren klappen runter*",
+            "stark": "*Ohren flach am Kopf*",
+            "sehr_stark": "*Ohren flach, zittern*",
+            "extrem": "*Ohren flach angelegt, erstarrt*",
+        },
+        "tired": {
+            "minimal": "*Ohren senken sich*",
+            "leicht": "*Ohren hängen leicht*",
+            "mittel": "*Ohren hängen müde*",
+            "stark": "*Ohren sinken langsam*",
+            "sehr_stark": "*Ohren hängen schwer*",
+            "extrem": "*Ohren liegen flach, reglos*",
+        },
+        "thinking": {
+            "minimal": "*ein Ohr kippt*",
+            "leicht": "*Ohren drehen sich leicht*",
+            "mittel": "*Ohren drehen sich nachdenklich*",
+            "stark": "*Ohren wechseln Position*",
+            "sehr_stark": "*Ohren drehen unruhig*",
+            "extrem": "*Ohren bewegen sich ständig nachdenklich*",
+        },
+        "affectionate": {
+            "minimal": "*Ohren heben sich sanft*",
+            "leicht": "*Ohren entspannt nach vorne*",
+            "mittel": "*Ohren stehen warm*",
+            "stark": "*Ohren neigen sich zu dir*",
+            "sehr_stark": "*Ohren entspannt, leicht zitternd*",
+            "extrem": "*Ohren vibrieren vor Zuneigung*",
+        },
     }
 
-    # === SCHWEIF-REAKTIONEN (nur für Schweif!) ===
+    # === SCHWEIF-REAKTIONEN MIT 6 INTENSITÄTSSTUFEN ===
     TAIL_ACTIONS = {
-        "happy": ["*Schweif wedelt*", "*Schweif wedelt heftig*", "*Schweif wirbelt*", "*Schweif wippt*"],
-        "very_happy": ["*Schweif wedelt unkontrolliert*", "*Schweif wirbelt wie verrückt*"],
-        "sad": ["*Schweif hängt*", "*Schweif senkt sich*", "*Schweif liegt still*", "*Schweif reglos*"],
-        "curious": ["*Schweif schwingt neugierig*", "*Schweif wippt*", "*Schweif hebt sich*"],
-        "relaxed": ["*Schweif schwingt entspannt*", "*Schweif ruht*", "*Schweif liegt locker*"],
-        "nervous": ["*Schweif zuckt*", "*Schweif peitscht*", "*Schweif unruhig*"],
-        "surprised": ["*Schweif plustert sich auf*", "*Schweif steht gerade*", "*Schweif zuckt hoch*"],
-        "affectionate": ["*Schweif wickelt sich um dich*", "*Schweif streift dich sanft*", "*Schweif schmiegt sich an*"],
-        "tired": ["*Schweif hängt müde*", "*Schweif schleift*"],
-        "excited": ["*Schweif wedelt schnell*", "*Schweif steht aufrecht*"],
-        "thinking": ["*Schweif wippt nachdenklich*", "*Schweif schwingt langsam*"],
-        "uncomfortable": ["*Schweif klemmt sich ein*", "*Schweif zieht sich zusammen*"],
+        "happy": {
+            "minimal": "*Schweif wippt leicht*",
+            "leicht": "*Schweif wippt*",
+            "mittel": "*Schweif wedelt*",
+            "stark": "*Schweif wedelt heftig*",
+            "sehr_stark": "*Schweif wirbelt*",
+            "extrem": "*Schweif wirbelt unkontrolliert*",
+        },
+        "sad": {
+            "minimal": "*Schweif senkt sich*",
+            "leicht": "*Schweif hängt*",
+            "mittel": "*Schweif liegt still*",
+            "stark": "*Schweif reglos*",
+            "sehr_stark": "*Schweif schleift am Boden*",
+            "extrem": "*Schweif klemmt sich ein*",
+        },
+        "curious": {
+            "minimal": "*Schweif hebt sich*",
+            "leicht": "*Schweif wippt*",
+            "mittel": "*Schweif schwingt neugierig*",
+            "stark": "*Schweif steht aufrecht*",
+            "sehr_stark": "*Schweif wedelt aufgeregt*",
+            "extrem": "*Schweif wirbelt vor Neugier*",
+        },
+        "surprised": {
+            "minimal": "*Schweif zuckt*",
+            "leicht": "*Schweif zuckt hoch*",
+            "mittel": "*Schweif steht gerade*",
+            "stark": "*Schweif plustert sich auf*",
+            "sehr_stark": "*Schweif steht steil*",
+            "extrem": "*Schweif plustert sich komplett auf*",
+        },
+        "relaxed": {
+            "minimal": "*Schweif ruht*",
+            "leicht": "*Schweif liegt locker*",
+            "mittel": "*Schweif schwingt entspannt*",
+            "stark": "*Schweif liegt weich*",
+            "sehr_stark": "*Schweif wickelt sich gemütlich*",
+            "extrem": "*Schweif liegt völlig entspannt*",
+        },
+        "angry": {
+            "minimal": "*Schweif zuckt*",
+            "leicht": "*Schweif peitscht leicht*",
+            "mittel": "*Schweif peitscht*",
+            "stark": "*Schweif peitscht heftig*",
+            "sehr_stark": "*Schweif schlägt wild*",
+            "extrem": "*Schweif peitscht unkontrolliert*",
+        },
+        "fearful": {
+            "minimal": "*Schweif senkt sich*",
+            "leicht": "*Schweif zieht sich zusammen*",
+            "mittel": "*Schweif klemmt sich ein*",
+            "stark": "*Schweif zwischen den Beinen*",
+            "sehr_stark": "*Schweif eingeklemmt, zittert*",
+            "extrem": "*Schweif fest eingeklemmt, erstarrt*",
+        },
+        "tired": {
+            "minimal": "*Schweif senkt sich*",
+            "leicht": "*Schweif hängt müde*",
+            "mittel": "*Schweif schleift*",
+            "stark": "*Schweif liegt am Boden*",
+            "sehr_stark": "*Schweif reglos*",
+            "extrem": "*Schweif liegt leblos*",
+        },
+        "thinking": {
+            "minimal": "*Schweif wippt leicht*",
+            "leicht": "*Schweif schwingt langsam*",
+            "mittel": "*Schweif wippt nachdenklich*",
+            "stark": "*Schweif schwingt rhythmisch*",
+            "sehr_stark": "*Schweif kreist nachdenklich*",
+            "extrem": "*Schweif bewegt sich ständig grübelnd*",
+        },
+        "affectionate": {
+            "minimal": "*Schweif wippt sanft*",
+            "leicht": "*Schweif streift dich*",
+            "mittel": "*Schweif schmiegt sich an*",
+            "stark": "*Schweif wickelt sich um dich*",
+            "sehr_stark": "*Schweif umschlingt dich sanft*",
+            "extrem": "*Schweif wickelt sich fest um dich*",
+        },
+        "excited": {
+            "minimal": "*Schweif wippt*",
+            "leicht": "*Schweif wedelt*",
+            "mittel": "*Schweif wedelt schnell*",
+            "stark": "*Schweif steht aufrecht, wedelt*",
+            "sehr_stark": "*Schweif wirbelt wild*",
+            "extrem": "*Schweif wirbelt wie verrückt*",
+        },
     }
 
     # === TRIGGER-WÖRTER ===
@@ -368,31 +514,56 @@ class KemonomimiBodyLanguage:
     }
 
     @classmethod
+    def intensity_to_level(cls, intensity: float) -> str:
+        """Wandelt float (0-1) in Intensitätsstufe um"""
+        if intensity <= 0.17:
+            return "minimal"
+        elif intensity <= 0.33:
+            return "leicht"
+        elif intensity <= 0.50:
+            return "mittel"
+        elif intensity <= 0.67:
+            return "stark"
+        elif intensity <= 0.83:
+            return "sehr_stark"
+        else:
+            return "extrem"
+
+    @classmethod
     def get_human_action(cls, mood: str) -> str:
         """Hole menschliche Körperaktion"""
         actions = cls.HUMAN_ACTIONS.get(mood, cls.HUMAN_ACTIONS["neutral"])
         return random.choice(actions)
 
     @classmethod
-    def get_ear_action(cls, mood: str) -> str:
-        """Hole Ohren-Reaktion"""
-        actions = cls.EAR_ACTIONS.get(mood, cls.EAR_ACTIONS["attentive"])
-        return random.choice(actions)
+    def get_ear_action(cls, mood: str, intensity: float = 0.5) -> str:
+        """Hole Ohren-Reaktion basierend auf Stimmung und Intensität (0-1)"""
+        level = cls.intensity_to_level(intensity)
+        mood_actions = cls.EAR_ACTIONS.get(mood, cls.EAR_ACTIONS.get("curious", {}))
+        if isinstance(mood_actions, dict):
+            return mood_actions.get(level, mood_actions.get("mittel", "*Ohren bewegen sich*"))
+        # Fallback für alte Struktur
+        return random.choice(mood_actions) if mood_actions else "*Ohren bewegen sich*"
 
     @classmethod
-    def get_tail_action(cls, mood: str) -> str:
-        """Hole Schweif-Reaktion"""
-        actions = cls.TAIL_ACTIONS.get(mood, cls.TAIL_ACTIONS["relaxed"])
-        return random.choice(actions)
+    def get_tail_action(cls, mood: str, intensity: float = 0.5) -> str:
+        """Hole Schweif-Reaktion basierend auf Stimmung und Intensität (0-1)"""
+        level = cls.intensity_to_level(intensity)
+        mood_actions = cls.TAIL_ACTIONS.get(mood, cls.TAIL_ACTIONS.get("relaxed", {}))
+        if isinstance(mood_actions, dict):
+            return mood_actions.get(level, mood_actions.get("mittel", "*Schweif bewegt sich*"))
+        # Fallback für alte Struktur
+        return random.choice(mood_actions) if mood_actions else "*Schweif bewegt sich*"
 
     @classmethod
-    def get_combined_action(cls, mood: str, include_ears: bool = True,
-                           include_tail: bool = True) -> str:
+    def get_combined_action(cls, mood: str, intensity: float = 0.5,
+                           include_ears: bool = True, include_tail: bool = True) -> str:
         """
-        Hole kombinierte Aktion: Mensch + (Ohren ODER Schweif).
+        Hole kombinierte Aktion: Mensch + (Ohren ODER Schweif) mit Intensität.
 
         Args:
             mood: Stimmung
+            intensity: Emotionsintensität (0.0 - 1.0)
             include_ears: Ohren einbeziehen
             include_tail: Schweif einbeziehen
 
@@ -404,13 +575,13 @@ class KemonomimiBodyLanguage:
         # Zufällig Ohren ODER Schweif wählen (nicht beide überladen)
         if include_ears and include_tail:
             if random.random() < 0.5:
-                extra = cls.get_ear_action(mood)
+                extra = cls.get_ear_action(mood, intensity)
             else:
-                extra = cls.get_tail_action(mood)
+                extra = cls.get_tail_action(mood, intensity)
         elif include_ears:
-            extra = cls.get_ear_action(mood)
+            extra = cls.get_ear_action(mood, intensity)
         elif include_tail:
-            extra = cls.get_tail_action(mood)
+            extra = cls.get_tail_action(mood, intensity)
         else:
             extra = ""
 
