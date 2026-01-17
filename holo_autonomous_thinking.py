@@ -3827,6 +3827,657 @@ class CuriosityDrivenLearner:
 
 
 # ============================================================
+# KNOWLEDGE INTEGRATION SYSTEM - Wissen wirklich NUTZEN
+# ============================================================
+
+@dataclass
+class KnowledgeQuery:
+    """Eine Wissensabfrage"""
+    query_id: str
+    query_type: str           # "what_is", "how_to", "why", "compare", "relate"
+    concept: str
+    context: str              # Kontext der Abfrage
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class KnowledgeApplication:
+    """Anwendung von Wissen auf eine Situation"""
+    application_id: str
+    source_concept: str       # Das angewandte Konzept
+    target_situation: str     # Die Situation auf die angewandt wird
+    relevance: float          # Wie relevant ist das Wissen? (0-1)
+    insight: str              # Die gewonnene Erkenntnis
+    confidence: float         # Konfidenz der Anwendung
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class KnowledgeIntegrationSystem:
+    """
+    Macht gelerntes Wissen WIRKLICH nutzbar.
+
+    Dieses System verbindet das gespeicherte Wissen mit:
+    - Aktuellem Denken und Reasoning
+    - Analogie-Bildung
+    - Hypothesen-Generierung
+    - Entscheidungsfindung
+    - Selbst-Reflexion
+
+    Das Ziel: Wissen ist nicht nur gespeichert, sondern wird
+    aktiv beim Denken und Handeln genutzt.
+
+    v1.0: Echtes Verstehen und Anwenden von Wissen
+    """
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        # Verbindung zu anderen Systemen
+        self.teaching_system: Optional[SelfTeachingSystem] = None
+        self.analogy_engine: Optional[AnalogyEngine] = None
+        self.hypothesis_engine: Optional[HypothesisEngine] = None
+        self.intuitive_system: Optional[IntuitiveSystem] = None
+
+        # Wissens-Index für schnellen Zugriff
+        self.concept_index: Dict[str, Set[str]] = defaultdict(set)  # keyword → concepts
+        self.relationship_graph: Dict[str, List[Tuple[str, str, float]]] = {}  # concept → [(related, relation_type, strength)]
+
+        # Anwendungs-Log
+        self.application_log: List[KnowledgeApplication] = []
+        self.query_cache: Dict[str, Any] = {}
+
+        # Statistiken
+        self.knowledge_used_count = 0
+        self.successful_applications = 0
+
+    def connect_systems(self,
+                       teaching: Optional[SelfTeachingSystem] = None,
+                       analogy: Optional[AnalogyEngine] = None,
+                       hypothesis: Optional[HypothesisEngine] = None,
+                       intuition: Optional[IntuitiveSystem] = None) -> None:
+        """Verbindet mit anderen Denk-Systemen"""
+        if teaching:
+            self.teaching_system = teaching
+            self._build_knowledge_index()
+            logger.info("🔗 KnowledgeIntegration mit SelfTeachingSystem verbunden")
+        if analogy:
+            self.analogy_engine = analogy
+            logger.info("🔗 KnowledgeIntegration mit AnalogyEngine verbunden")
+        if hypothesis:
+            self.hypothesis_engine = hypothesis
+            logger.info("🔗 KnowledgeIntegration mit HypothesisEngine verbunden")
+        if intuition:
+            self.intuitive_system = intuition
+            logger.info("🔗 KnowledgeIntegration mit IntuitiveSystem verbunden")
+
+    def _build_knowledge_index(self) -> None:
+        """Baut einen Index über alles gelernte Wissen"""
+        if not self.teaching_system:
+            return
+
+        for concept_name, essence in self.teaching_system.learned_concepts.items():
+            # Index nach Schlüsselwörtern
+            words = concept_name.lower().split()
+            for word in words:
+                self.concept_index[word].add(concept_name)
+
+            # Index nach Eigenschaften
+            for prop in essence.necessary_properties:
+                for word in prop.lower().split():
+                    if len(word) > 3:
+                        self.concept_index[word].add(concept_name)
+
+            # Beziehungen aufbauen
+            self.relationship_graph[concept_name] = []
+            for related in essence.related_concepts:
+                self.relationship_graph[concept_name].append(
+                    (related, "related_to", 0.7)
+                )
+            for parent in essence.parent_categories:
+                self.relationship_graph[concept_name].append(
+                    (parent, "is_a", 0.9)
+                )
+
+    # ================================================================
+    # WISSEN ABRUFEN - "Was weiß ich über X?"
+    # ================================================================
+
+    def what_do_i_know_about(self, topic: str) -> Dict[str, Any]:
+        """
+        Ruft alles ab was Holo über ein Thema weiß.
+
+        Dies ist die Hauptmethode für Wissensabruf.
+        """
+        result = {
+            "topic": topic,
+            "direct_knowledge": None,
+            "related_knowledge": [],
+            "inferred_knowledge": [],
+            "confidence": 0.0,
+            "can_answer": False
+        }
+
+        if not self.teaching_system:
+            return result
+
+        topic_lower = topic.lower()
+
+        # 1. Direktes Wissen
+        if topic_lower in self.teaching_system.learned_concepts:
+            essence = self.teaching_system.learned_concepts[topic_lower]
+            result["direct_knowledge"] = {
+                "definition": essence.definition,
+                "properties": essence.necessary_properties,
+                "examples": essence.examples,
+                "what_it_is_not": essence.counterexamples,
+                "abstraction_level": essence.abstraction_level,
+                "confidence": essence.confidence
+            }
+            result["confidence"] = essence.confidence
+            result["can_answer"] = True
+
+        # 2. Verwandtes Wissen finden
+        related_concepts = self._find_related_concepts(topic_lower)
+        for related_name, relation, strength in related_concepts:
+            if related_name in self.teaching_system.learned_concepts:
+                related_essence = self.teaching_system.learned_concepts[related_name]
+                result["related_knowledge"].append({
+                    "concept": related_name,
+                    "relation": relation,
+                    "strength": strength,
+                    "definition": related_essence.definition[:100]
+                })
+
+        # 3. Inferenz aus verwandtem Wissen
+        if not result["direct_knowledge"] and result["related_knowledge"]:
+            inferred = self._infer_from_related(topic_lower, result["related_knowledge"])
+            result["inferred_knowledge"] = inferred
+            if inferred:
+                result["confidence"] = 0.4  # Niedrigere Konfidenz für Inferenz
+                result["can_answer"] = True
+
+        self.knowledge_used_count += 1
+        return result
+
+    def _find_related_concepts(self, topic: str) -> List[Tuple[str, str, float]]:
+        """Findet verwandte Konzepte"""
+        related = []
+
+        # Über Index suchen
+        words = topic.split()
+        for word in words:
+            if word in self.concept_index:
+                for concept in self.concept_index[word]:
+                    if concept != topic:
+                        related.append((concept, "shares_keyword", 0.5))
+
+        # Über Beziehungs-Graph
+        if topic in self.relationship_graph:
+            related.extend(self.relationship_graph[topic])
+
+        # Deduplizieren und sortieren
+        seen = set()
+        unique_related = []
+        for r in related:
+            if r[0] not in seen:
+                seen.add(r[0])
+                unique_related.append(r)
+
+        return sorted(unique_related, key=lambda x: x[2], reverse=True)[:5]
+
+    def _infer_from_related(self, topic: str,
+                           related: List[Dict]) -> List[str]:
+        """Schließt aus verwandtem Wissen auf das Thema"""
+        inferences = []
+
+        for rel in related[:3]:
+            relation = rel.get("relation", "")
+            concept = rel.get("concept", "")
+            definition = rel.get("definition", "")
+
+            if relation == "is_a":
+                inferences.append(
+                    f"'{topic}' könnte eine Art von '{concept}' sein, "
+                    f"also möglicherweise: {definition}"
+                )
+            elif relation == "related_to":
+                inferences.append(
+                    f"'{topic}' hängt mit '{concept}' zusammen. "
+                    f"Das bedeutet vielleicht: {definition}"
+                )
+            elif relation == "shares_keyword":
+                inferences.append(
+                    f"'{topic}' und '{concept}' teilen Gemeinsamkeiten."
+                )
+
+        return inferences
+
+    # ================================================================
+    # WISSEN ANWENDEN - "Wie hilft mir das jetzt?"
+    # ================================================================
+
+    def apply_knowledge_to_situation(self, situation: str) -> List[KnowledgeApplication]:
+        """
+        Wendet relevantes Wissen auf eine aktuelle Situation an.
+
+        Dies ist der Kern des "Verstehens" - nicht nur wissen,
+        sondern das Wissen auch nutzen können.
+        """
+        applications = []
+
+        if not self.teaching_system:
+            return applications
+
+        # Finde relevante Konzepte für die Situation
+        situation_lower = situation.lower()
+        relevant_concepts = []
+
+        for concept_name, essence in self.teaching_system.learned_concepts.items():
+            relevance = self._calculate_relevance(situation_lower, concept_name, essence)
+            if relevance > 0.3:
+                relevant_concepts.append((concept_name, essence, relevance))
+
+        # Sortiere nach Relevanz
+        relevant_concepts.sort(key=lambda x: x[2], reverse=True)
+
+        # Wende die top 3 relevantesten Konzepte an
+        for concept_name, essence, relevance in relevant_concepts[:3]:
+            insight = self._generate_insight(situation, concept_name, essence)
+
+            application = KnowledgeApplication(
+                application_id=f"app_{datetime.now().strftime('%Y%m%d%H%M%S')}_{concept_name[:8]}",
+                source_concept=concept_name,
+                target_situation=situation[:200],
+                relevance=relevance,
+                insight=insight,
+                confidence=essence.confidence * relevance
+            )
+
+            applications.append(application)
+            self.application_log.append(application)
+
+        if applications:
+            self.successful_applications += 1
+
+        return applications
+
+    def _calculate_relevance(self, situation: str, concept: str,
+                            essence: ConceptEssence) -> float:
+        """Berechnet wie relevant ein Konzept für eine Situation ist"""
+        relevance = 0.0
+
+        # Direkte Erwähnung
+        if concept in situation:
+            relevance += 0.5
+
+        # Schlüsselwörter aus Eigenschaften
+        for prop in essence.necessary_properties:
+            prop_words = prop.lower().split()
+            for word in prop_words:
+                if len(word) > 3 and word in situation:
+                    relevance += 0.1
+
+        # Beispiele erwähnt
+        for example in essence.examples:
+            if example.lower() in situation:
+                relevance += 0.2
+
+        return min(relevance, 1.0)
+
+    def _generate_insight(self, situation: str, concept: str,
+                         essence: ConceptEssence) -> str:
+        """Generiert eine Erkenntnis aus der Anwendung von Wissen"""
+        templates = [
+            f"Das erinnert mich an '{concept}': {essence.definition}. "
+            f"Vielleicht gilt hier auch: {essence.necessary_properties[0] if essence.necessary_properties else 'ähnliche Prinzipien'}.",
+
+            f"Basierend auf meinem Wissen über '{concept}' "
+            f"({essence.definition[:50]}...) denke ich: "
+            f"Die Situation folgt ähnlichen Mustern.",
+
+            f"'{concept}' ist relevant hier. Ich weiß: {essence.definition}. "
+            f"Das könnte bedeuten, dass auch hier "
+            f"{', '.join(essence.necessary_properties[:2]) if essence.necessary_properties else 'ähnliches'} gilt.",
+        ]
+
+        return random.choice(templates)
+
+    # ================================================================
+    # WISSEN ZUM DENKEN NUTZEN - "Was kann ich daraus schließen?"
+    # ================================================================
+
+    def reason_with_knowledge(self, question: str) -> Dict[str, Any]:
+        """
+        Nutzt Wissen zum aktiven Nachdenken und Schlussfolgern.
+
+        Verbindet gelerntes Wissen mit logischem Denken.
+        """
+        result = {
+            "question": question,
+            "relevant_knowledge": [],
+            "reasoning_steps": [],
+            "conclusion": None,
+            "confidence": 0.0,
+            "used_concepts": []
+        }
+
+        # 1. Sammle relevantes Wissen
+        knowledge = self.what_do_i_know_about(question)
+        if knowledge["direct_knowledge"]:
+            result["relevant_knowledge"].append(knowledge["direct_knowledge"])
+            result["used_concepts"].append(knowledge["topic"])
+
+        for related in knowledge.get("related_knowledge", []):
+            rel_knowledge = self.what_do_i_know_about(related["concept"])
+            if rel_knowledge["direct_knowledge"]:
+                result["relevant_knowledge"].append(rel_knowledge["direct_knowledge"])
+                result["used_concepts"].append(related["concept"])
+
+        if not result["relevant_knowledge"]:
+            result["conclusion"] = "Darüber weiß ich leider noch nicht genug."
+            return result
+
+        # 2. Reasoning-Schritte
+        steps = []
+        for i, k in enumerate(result["relevant_knowledge"][:3], 1):
+            definition = k.get("definition", "")
+            properties = k.get("properties", [])
+
+            steps.append(f"Schritt {i}: Ich weiß, dass {definition}")
+            if properties:
+                steps.append(f"  → Wichtig dabei: {properties[0]}")
+
+        result["reasoning_steps"] = steps
+
+        # 3. Schlussfolgerung
+        if len(result["relevant_knowledge"]) >= 2:
+            k1 = result["relevant_knowledge"][0]
+            k2 = result["relevant_knowledge"][1]
+            result["conclusion"] = (
+                f"Basierend auf meinem Wissen über '{result['used_concepts'][0]}' "
+                f"({k1.get('definition', '')[:50]}...) und '{result['used_concepts'][1]}' "
+                f"({k2.get('definition', '')[:50]}...) "
+                f"denke ich, dass diese Konzepte zusammenhängen."
+            )
+            result["confidence"] = min(k1.get("confidence", 0.5), k2.get("confidence", 0.5))
+        elif result["relevant_knowledge"]:
+            k = result["relevant_knowledge"][0]
+            result["conclusion"] = f"Ich weiß: {k.get('definition', '')}. {k.get('properties', [''])[0] if k.get('properties') else ''}"
+            result["confidence"] = k.get("confidence", 0.5)
+
+        return result
+
+    # ================================================================
+    # WISSEN FÜR ANALOGIEN NUTZEN
+    # ================================================================
+
+    def find_analogies_from_knowledge(self, current_situation: str) -> List[Dict]:
+        """
+        Findet Analogien basierend auf gelerntem Wissen.
+
+        Nutzt Konzept-Eigenschaften um Ähnlichkeiten zu erkennen.
+        """
+        analogies = []
+
+        if not self.teaching_system:
+            return analogies
+
+        # Extrahiere Schlüsselmerkmale der Situation
+        situation_features = set(current_situation.lower().split())
+
+        for concept_name, essence in self.teaching_system.learned_concepts.items():
+            # Sammle Merkmale des Konzepts
+            concept_features = set()
+            concept_features.add(concept_name)
+            for prop in essence.necessary_properties:
+                concept_features.update(prop.lower().split())
+            for example in essence.examples:
+                concept_features.update(example.lower().split())
+
+            # Berechne Ähnlichkeit
+            overlap = situation_features & concept_features
+            if len(overlap) >= 2:
+                similarity = len(overlap) / max(len(situation_features), 1)
+
+                analogies.append({
+                    "concept": concept_name,
+                    "similarity": similarity,
+                    "shared_features": list(overlap)[:5],
+                    "analogy": f"Die Situation ist wie '{concept_name}' weil beide "
+                              f"{', '.join(list(overlap)[:3])} teilen.",
+                    "lesson": essence.necessary_properties[0] if essence.necessary_properties else None
+                })
+
+        # Sortiere nach Ähnlichkeit
+        analogies.sort(key=lambda x: x["similarity"], reverse=True)
+
+        return analogies[:3]
+
+    # ================================================================
+    # WISSEN FÜR HYPOTHESEN NUTZEN
+    # ================================================================
+
+    def generate_hypothesis_from_knowledge(self, observation: str) -> Dict[str, Any]:
+        """
+        Generiert eine Hypothese basierend auf Wissen.
+
+        Nutzt bekannte Konzepte um Vorhersagen zu machen.
+        """
+        result = {
+            "observation": observation,
+            "hypothesis": None,
+            "basis": [],
+            "testable_prediction": None,
+            "confidence": 0.0
+        }
+
+        # Finde relevante Konzepte
+        applications = self.apply_knowledge_to_situation(observation)
+
+        if not applications:
+            return result
+
+        # Nutze das relevanteste Konzept
+        best_app = applications[0]
+        concept_name = best_app.source_concept
+
+        if self.teaching_system and concept_name in self.teaching_system.learned_concepts:
+            essence = self.teaching_system.learned_concepts[concept_name]
+
+            # Generiere Hypothese
+            if essence.necessary_properties:
+                prop = essence.necessary_properties[0]
+                result["hypothesis"] = (
+                    f"Wenn '{observation}' mit '{concept_name}' zusammenhängt, "
+                    f"dann sollte auch '{prop}' zutreffen."
+                )
+                result["basis"].append(f"Basiert auf: {essence.definition}")
+                result["testable_prediction"] = f"Überprüfe ob: {prop}"
+                result["confidence"] = best_app.confidence
+
+        return result
+
+    # ================================================================
+    # SELBST-REFLEXION ÜBER WISSEN
+    # ================================================================
+
+    def reflect_on_knowledge(self) -> Dict[str, Any]:
+        """
+        Holo reflektiert über ihr eigenes Wissen.
+
+        Ermöglicht Meta-Kognition: "Was weiß ich? Was verstehe ich gut?
+        Was verstehe ich noch nicht?"
+        """
+        reflection = {
+            "total_concepts": 0,
+            "well_understood": [],      # Konfidenz > 0.7
+            "partially_understood": [], # Konfidenz 0.4-0.7
+            "barely_understood": [],    # Konfidenz < 0.4
+            "knowledge_gaps": [],
+            "strongest_areas": [],
+            "self_assessment": ""
+        }
+
+        if not self.teaching_system:
+            reflection["self_assessment"] = "Ich habe noch kein strukturiertes Wissen aufgebaut."
+            return reflection
+
+        concepts = self.teaching_system.learned_concepts
+        reflection["total_concepts"] = len(concepts)
+
+        # Kategorisiere nach Verständnis
+        for name, essence in concepts.items():
+            entry = {
+                "concept": name,
+                "confidence": essence.confidence,
+                "properties_known": len(essence.necessary_properties)
+            }
+
+            if essence.confidence > 0.7:
+                reflection["well_understood"].append(entry)
+            elif essence.confidence > 0.4:
+                reflection["partially_understood"].append(entry)
+            else:
+                reflection["barely_understood"].append(entry)
+
+        # Finde Wissenslücken (Konzepte die erwähnt aber nicht verstanden werden)
+        for name, essence in concepts.items():
+            for related in essence.related_concepts:
+                if related.lower() not in concepts:
+                    reflection["knowledge_gaps"].append({
+                        "concept": related,
+                        "referenced_by": name
+                    })
+
+        # Stärkste Bereiche
+        if reflection["well_understood"]:
+            reflection["strongest_areas"] = [
+                c["concept"] for c in sorted(
+                    reflection["well_understood"],
+                    key=lambda x: x["confidence"],
+                    reverse=True
+                )[:5]
+            ]
+
+        # Selbst-Einschätzung
+        total = reflection["total_concepts"]
+        well = len(reflection["well_understood"])
+        partial = len(reflection["partially_understood"])
+        barely = len(reflection["barely_understood"])
+
+        if total == 0:
+            reflection["self_assessment"] = "*nachdenklich* Ich habe noch nicht viel strukturiertes Wissen..."
+        elif well > total * 0.5:
+            reflection["self_assessment"] = (
+                f"*zufrieden* Ich verstehe {well} von {total} Konzepten gut! "
+                f"Meine stärksten Bereiche sind: {', '.join(reflection['strongest_areas'][:3])}."
+            )
+        elif partial > total * 0.5:
+            reflection["self_assessment"] = (
+                f"*nachdenklich* Ich kenne {total} Konzepte, aber nur {well} verstehe ich wirklich gut. "
+                f"Bei {partial} bin ich mir noch unsicher..."
+            )
+        else:
+            reflection["self_assessment"] = (
+                f"*seufzt* Ich habe noch viel zu lernen. "
+                f"Von {total} Konzepten verstehe ich nur {well} wirklich. "
+                f"Aber ich lerne jeden Tag dazu!"
+            )
+
+        return reflection
+
+    def express_knowledge_thought(self) -> Optional[str]:
+        """
+        Drückt einen Gedanken über gelerntes Wissen aus.
+
+        Für spontane Reflexionen während des Gesprächs.
+        """
+        if not self.teaching_system or not self.teaching_system.learned_concepts:
+            return None
+
+        concepts = list(self.teaching_system.learned_concepts.items())
+        if not concepts:
+            return None
+
+        # Zufälliges Konzept auswählen
+        concept_name, essence = random.choice(concepts)
+
+        thoughts = [
+            f"*erinnert sich* Ach ja, '{concept_name}'... das ist wenn {essence.definition[:50]}...",
+            f"*nachdenklich* Ich denke gerade an '{concept_name}'. Das ist interessant weil {essence.necessary_properties[0] if essence.necessary_properties else 'es so vielseitig ist'}.",
+            f"*verbindet Gedanken* '{concept_name}' hängt ja mit {essence.related_concepts[0] if essence.related_concepts else 'vielem'} zusammen...",
+            f"*überlegt* Bei '{concept_name}' ist wichtig: {essence.necessary_properties[0] if essence.necessary_properties else essence.definition[:30]}...",
+        ]
+
+        return random.choice(thoughts)
+
+    # ================================================================
+    # WISSEN FÜR ENTSCHEIDUNGEN NUTZEN
+    # ================================================================
+
+    def consult_knowledge_for_decision(self, decision: str,
+                                       options: List[str]) -> Dict[str, Any]:
+        """
+        Nutzt Wissen um bei einer Entscheidung zu helfen.
+
+        Prüft welche Option basierend auf dem Wissen am besten ist.
+        """
+        result = {
+            "decision": decision,
+            "options_analysis": [],
+            "recommendation": None,
+            "reasoning": "",
+            "confidence": 0.0
+        }
+
+        for option in options:
+            # Finde relevantes Wissen für diese Option
+            applications = self.apply_knowledge_to_situation(f"{decision}: {option}")
+
+            option_score = 0.0
+            pros = []
+            cons = []
+
+            for app in applications:
+                if app.confidence > 0.5:
+                    option_score += app.relevance * app.confidence
+                    pros.append(app.insight[:100])
+
+            result["options_analysis"].append({
+                "option": option,
+                "score": option_score,
+                "relevant_knowledge": [a.source_concept for a in applications],
+                "pros": pros,
+                "cons": cons
+            })
+
+        # Sortiere nach Score
+        result["options_analysis"].sort(key=lambda x: x["score"], reverse=True)
+
+        if result["options_analysis"]:
+            best = result["options_analysis"][0]
+            result["recommendation"] = best["option"]
+            result["confidence"] = min(best["score"], 1.0)
+            result["reasoning"] = (
+                f"Basierend auf meinem Wissen über {', '.join(best['relevant_knowledge'][:2])} "
+                f"empfehle ich '{best['option']}'."
+            )
+
+        return result
+
+    def get_integration_stats(self) -> Dict[str, Any]:
+        """Gibt Statistiken über die Wissensnutzung zurück"""
+        return {
+            "knowledge_queries": self.knowledge_used_count,
+            "successful_applications": self.successful_applications,
+            "indexed_keywords": len(self.concept_index),
+            "relationship_nodes": len(self.relationship_graph),
+            "application_log_size": len(self.application_log)
+        }
+
+
+# ============================================================
 # EXAMPLE USAGE
 # ============================================================
 

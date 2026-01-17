@@ -14196,6 +14196,46 @@ class HoloPersona:
             logger.warning(f"⚠️ CuriosityDrivenLearner Fehler: {e}")
 
         # ================================================================
+        # 🧠 KNOWLEDGE INTEGRATION - Wissen wirklich NUTZEN
+        # ================================================================
+        try:
+            from holo_autonomous_thinking import KnowledgeIntegrationSystem
+            self.knowledge_integration = KnowledgeIntegrationSystem(BrainConfig.DATA_DIR)
+            logger.info("🧠 KnowledgeIntegration aktiviert (Wissensanwendung & Reasoning)")
+
+            # Verbinde mit SelfTeachingSystem
+            if hasattr(self, 'curiosity_learner') and self.curiosity_learner:
+                if hasattr(self.curiosity_learner, 'teaching_system'):
+                    self.knowledge_integration.connect_systems(
+                        teaching=self.curiosity_learner.teaching_system
+                    )
+                    logger.info("   → KnowledgeIntegration mit SelfTeachingSystem verbunden")
+
+            # Verbinde mit AutonomousThinking (wenn verfügbar)
+            if hasattr(self, 'autonomous_thinking') and self.autonomous_thinking:
+                if hasattr(self.autonomous_thinking, 'analogy'):
+                    self.knowledge_integration.connect_systems(
+                        analogy=self.autonomous_thinking.analogy
+                    )
+                    logger.info("   → KnowledgeIntegration mit AnalogyEngine verbunden")
+                if hasattr(self.autonomous_thinking, 'hypothesis'):
+                    self.knowledge_integration.connect_systems(
+                        hypothesis=self.autonomous_thinking.hypothesis
+                    )
+                    logger.info("   → KnowledgeIntegration mit HypothesisEngine verbunden")
+                if hasattr(self.autonomous_thinking, 'intuitive'):
+                    self.knowledge_integration.connect_systems(
+                        intuition=self.autonomous_thinking.intuitive
+                    )
+                    logger.info("   → KnowledgeIntegration mit IntuitiveSystem verbunden")
+        except ImportError:
+            self.knowledge_integration = None
+            logger.debug("KnowledgeIntegration nicht verfügbar (optional)")
+        except Exception as e:
+            self.knowledge_integration = None
+            logger.warning(f"⚠️ KnowledgeIntegration Fehler: {e}")
+
+        # ================================================================
         # 💬 HOLO DIALOGUE ENGINE - Dialog State Machine
         # ================================================================
         try:
@@ -19194,6 +19234,29 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                                f"(Queue: {learn_result.get('concepts_in_queue', 0)})")
             except Exception as e:
                 logger.debug(f"[CURIOSITY] process_input Fehler: {e}")
+
+        # ========== KNOWLEDGE INTEGRATION: Wissen anwenden ==========
+        knowledge_insights = []
+        if hasattr(self, 'knowledge_integration') and self.knowledge_integration:
+            try:
+                # Wende gelerntes Wissen auf die Situation an
+                applications = self.knowledge_integration.apply_knowledge_to_situation(user_input)
+
+                if applications:
+                    for app in applications[:2]:  # Max 2 Insights
+                        knowledge_insights.append(app.insight)
+                        logger.debug(f"[KNOWLEDGE] 💡 Angewandt: {app.source_concept} "
+                                   f"(Relevanz: {app.relevance:.0%})")
+
+                # Prüfe was Holo über das Thema weiß
+                words = user_input.split()
+                for word in words[:5]:  # Prüfe erste 5 Wörter
+                    if len(word) > 4:
+                        knowledge = self.knowledge_integration.what_do_i_know_about(word)
+                        if knowledge.get("can_answer"):
+                            logger.debug(f"[KNOWLEDGE] 📚 Wissen gefunden über: {word}")
+            except Exception as e:
+                logger.debug(f"[KNOWLEDGE] apply_knowledge Fehler: {e}")
 
         # ========== PROACTIVE INTELLIGENCE: User hat interagiert ==========
         if hasattr(self, 'proactive_intelligence') and self.proactive_intelligence:
