@@ -2223,7 +2223,7 @@ class IntelligentAnalyzer:
                     # (Vereinfacht: Ignoriere Hauptklassen)
                     if definition in module.classes:
                         # Klassen sind oft absichtlich exportiert
-                        if not any(definition in str(module.from_imports.values())):
+                        if definition not in str(module.from_imports.values()):
                             self.analysis.unused_classes.append((mod, definition))
                     elif definition in module.functions:
                         # Funktionen sind verdächtiger
