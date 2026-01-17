@@ -1391,6 +1391,146 @@ class CuriositySystem:
             if random.random() < 0.2:  # 20% Chance
                 self.interests.append(topic)
 
+    # =================================================================
+    # INTEGRATION MIT AUTONOMEM LERNEN
+    # =================================================================
+
+    def should_research(self, topic: str) -> Tuple[bool, float, str]:
+        """
+        Entscheidet ob ein Thema recherchiert werden sollte.
+
+        Returns:
+            (sollte_recherchieren, priorität, grund)
+        """
+        topic_lower = topic.lower()
+
+        # Ist es schon bekannt?
+        if topic_lower in self.knowledge:
+            return (False, 0.0, "Kenne ich schon!")
+
+        # Passt es zu meinen Interessen?
+        matching_interest = self.get_interest_for_topic(topic)
+        if matching_interest:
+            interest_info = self.get_interest_info(matching_interest)
+            weight = interest_info.get("weight", 0.5) if interest_info else 0.5
+            reason = interest_info.get("reason", "Interessiert mich!") if interest_info else "Interessiert mich!"
+            return (True, weight, reason)
+
+        # Zufällige Neugier
+        if random.random() < 0.3:
+            return (True, 0.4, "Einfach neugierig!")
+
+        return (False, 0.2, "Vielleicht später...")
+
+    def trigger_autonomous_learning(self, topic: str) -> Dict[str, Any]:
+        """
+        Triggert autonomes Lernen für ein Thema.
+
+        Erzeugt eine Quest und markiert sie als aktiv.
+        """
+        should, priority, reason = self.should_research(topic)
+
+        if not should:
+            return {
+                "triggered": False,
+                "reason": reason,
+                "topic": topic
+            }
+
+        # Erzeuge Quest
+        quest = self.generate_quest(trigger=topic)
+
+        return {
+            "triggered": True,
+            "quest": quest,
+            "priority": priority,
+            "reason": reason,
+            "topic": topic
+        }
+
+    def complete_quest_with_learning(self, topic: str, answer: str,
+                                    confidence: float = 0.7) -> Dict[str, Any]:
+        """
+        Beendet eine Quest mit gelerntem Wissen.
+
+        Speichert das Wissen und markiert die Quest als beantwortet.
+        """
+        # Quest als beantwortet markieren
+        self.answer_quest(topic, answer)
+
+        # Wissen speichern nach Interesse
+        matching_interest = self.get_interest_for_topic(topic)
+        if matching_interest:
+            self.add_knowledge(matching_interest, f"{topic}: {answer}")
+
+        # Auch allgemein speichern
+        self.learn_from_conversation(topic, answer)
+
+        return {
+            "completed": True,
+            "topic": topic,
+            "learned": answer[:100] + "..." if len(answer) > 100 else answer,
+            "confidence": confidence,
+            "matched_interest": matching_interest
+        }
+
+    def get_learning_suggestions(self, limit: int = 5) -> List[Dict[str, Any]]:
+        """
+        Gibt Vorschläge zurück was Holo lernen könnte.
+
+        Basiert auf Interessen und offenen Quests.
+        """
+        suggestions = []
+
+        # Offene Quests
+        for quest in self.get_active_quests()[:limit]:
+            suggestions.append({
+                "type": "quest",
+                "topic": quest.topic,
+                "question": quest.question,
+                "priority": quest.priority
+            })
+
+        # Interessen ohne viel Wissen
+        for interest, data in self.INNATE_INTERESTS.items():
+            knowledge = self.get_knowledge_about(interest)
+            if len(knowledge) < 3:  # Weniger als 3 Fakten
+                suggestions.append({
+                    "type": "interest",
+                    "topic": interest,
+                    "question": f"Was gibt es Neues über {interest}?",
+                    "priority": data.get("weight", 0.5),
+                    "reason": data.get("reason", "")
+                })
+
+        # Sortiere nach Priorität
+        suggestions.sort(key=lambda x: x.get("priority", 0), reverse=True)
+
+        return suggestions[:limit]
+
+    def express_curiosity_about_unknown(self) -> Optional[str]:
+        """
+        Drückt Neugier über etwas Unbekanntes aus.
+
+        Verwendet für spontane Lern-Momente.
+        """
+        suggestions = self.get_learning_suggestions(limit=3)
+
+        if not suggestions:
+            return None
+
+        suggestion = random.choice(suggestions)
+        topic = suggestion.get("topic", "")
+
+        expressions = [
+            f"*legt den Kopf schief* Ich frage mich was '{topic}' so besonders macht...",
+            f"*Ohren stellen sich auf* Hmm, über '{topic}' weiß ich noch nicht so viel...",
+            f"*neugierig* Irgendwann will ich mehr über {topic} herausfinden!",
+            f"*schaut nachdenklich* {topic}... da gibt es bestimmt noch viel zu lernen.",
+        ]
+
+        return random.choice(expressions)
+
 
 # =============================================================================
 # OPINION SYSTEM

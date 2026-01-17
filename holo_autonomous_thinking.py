@@ -3178,6 +3178,655 @@ class SelfTeachingSystem:
 
 
 # ============================================================
+# CURIOSITY-DRIVEN LEARNER - Autonomes Lernen v1.0
+# ============================================================
+
+class ConceptDetector:
+    """
+    Erkennt unbekannte Konzepte in Text.
+
+    Analysiert eingehenden Text und findet Begriffe,
+    die Holo noch nicht versteht.
+    """
+
+    # Wörter die auf Konzepte hinweisen
+    CONCEPT_INDICATORS = [
+        "ist ein", "ist eine", "sind", "bedeutet", "heißt",
+        "nennt man", "bezeichnet", "ist so etwas wie"
+    ]
+
+    # Fragen die auf Wissenslücken hinweisen
+    KNOWLEDGE_GAP_PATTERNS = [
+        r"(?:weißt du )?was (?:ist|sind) (?:ein(?:e)? )?(\w+)",
+        r"kennst du (\w+)",
+        r"(?:der|die|das) (\w+)",
+    ]
+
+    # Wörter die wir ignorieren
+    STOP_WORDS = {
+        "ich", "du", "wir", "ihr", "sie", "er", "es", "und", "oder",
+        "aber", "denn", "weil", "wenn", "dass", "der", "die", "das",
+        "ein", "eine", "einer", "einem", "einen", "ist", "sind", "war",
+        "waren", "sein", "haben", "hat", "hatte", "werden", "wird",
+        "wurde", "können", "kann", "müssen", "muss", "sollen", "soll",
+        "wollen", "will", "dürfen", "darf", "mögen", "mag", "nicht",
+        "auch", "nur", "schon", "noch", "sehr", "mehr", "weniger",
+        "hier", "dort", "jetzt", "dann", "heute", "morgen", "gestern",
+        "ja", "nein", "vielleicht", "also", "doch", "mal", "so",
+        "wie", "was", "wer", "wo", "wann", "warum", "welche", "welcher",
+        "holo", "hallo", "danke", "bitte", "okay", "gut", "schlecht"
+    }
+
+    # Minimum Wortlänge für Konzepte
+    MIN_WORD_LENGTH = 4
+
+    def __init__(self, known_concepts: Set[str] = None):
+        self.known_concepts = known_concepts or set()
+        self.recently_detected: List[str] = []
+        self.detection_count: Dict[str, int] = defaultdict(int)
+
+    def add_known_concept(self, concept: str):
+        """Markiert ein Konzept als bekannt"""
+        self.known_concepts.add(concept.lower())
+
+    def detect_unknown_concepts(self, text: str) -> List[str]:
+        """
+        Findet unbekannte Konzepte im Text.
+
+        Returns:
+            Liste von unbekannten Konzepten, sortiert nach Wichtigkeit
+        """
+        unknown = []
+
+        # Tokenisiere Text
+        words = self._extract_words(text)
+
+        for word in words:
+            word_lower = word.lower()
+
+            # Filter
+            if len(word) < self.MIN_WORD_LENGTH:
+                continue
+            if word_lower in self.STOP_WORDS:
+                continue
+            if word_lower in self.known_concepts:
+                continue
+            if not word[0].isupper() and not self._is_likely_concept(word_lower, text):
+                continue
+
+            # Zähle Vorkommen
+            self.detection_count[word_lower] += 1
+
+            if word_lower not in unknown:
+                unknown.append(word_lower)
+
+        # Sortiere nach Häufigkeit
+        unknown.sort(key=lambda w: self.detection_count[w], reverse=True)
+
+        # Speichere kürzlich erkannte
+        self.recently_detected = unknown[:10]
+
+        return unknown
+
+    def _extract_words(self, text: str) -> List[str]:
+        """Extrahiert Wörter aus Text"""
+        # Entferne Satzzeichen am Ende
+        import re
+        words = re.findall(r'\b[a-zA-ZäöüÄÖÜß]+\b', text)
+        return words
+
+    def _is_likely_concept(self, word: str, context: str) -> bool:
+        """
+        Prüft ob ein Wort wahrscheinlich ein Konzept ist.
+        """
+        context_lower = context.lower()
+
+        # Prüfe auf Konzept-Indikatoren in der Nähe
+        for indicator in self.CONCEPT_INDICATORS:
+            if indicator in context_lower:
+                # Prüfe ob Wort in der Nähe des Indikators ist
+                idx = context_lower.find(indicator)
+                window = context_lower[max(0, idx-50):idx+50]
+                if word in window:
+                    return True
+
+        return False
+
+    def get_priority_concepts(self, limit: int = 5) -> List[Tuple[str, int]]:
+        """
+        Gibt die wichtigsten unbekannten Konzepte zurück.
+
+        Basiert auf Häufigkeit und Aktualität.
+        """
+        # Kombiniere Häufigkeit mit Aktualität
+        priority_scores = {}
+
+        for concept, count in self.detection_count.items():
+            if concept not in self.known_concepts:
+                recency_bonus = 1.5 if concept in self.recently_detected else 1.0
+                priority_scores[concept] = count * recency_bonus
+
+        # Sortiere und limitiere
+        sorted_concepts = sorted(
+            priority_scores.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )[:limit]
+
+        return sorted_concepts
+
+
+class AutonomousLearningMode(Enum):
+    """Lernmodi für autonomes Lernen"""
+    PASSIVE = "passive"          # Lernt nur wenn explizit getriggert
+    CURIOUS = "curious"          # Stellt bei Unklarheiten Fragen
+    ACTIVE = "active"            # Lernt proaktiv im Hintergrund
+    AGGRESSIVE = "aggressive"    # Lernt alles was unbekannt ist
+
+
+@dataclass
+class LearningTrigger:
+    """Ein Auslöser für autonomes Lernen"""
+    trigger_id: str
+    concept: str
+    source: str                  # "conversation", "web", "internal"
+    priority: float              # 0-1
+    context: str                 # Kontext in dem das Konzept auftauchte
+    triggered_at: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class CuriosityDrivenLearner:
+    """
+    Autonomes Lern-System das durch Neugier angetrieben wird.
+
+    Verbindet:
+    - ConceptDetector (erkennt unbekannte Konzepte)
+    - SelfTeachingSystem (lernt durch Selbstbefragung)
+    - CuriositySystem (Holos Neugier und Interessen)
+    - WebCuriosity (Web-Recherche)
+
+    Workflow:
+    1. Erkennt unbekannte Konzepte in Gesprächen
+    2. Priorisiert basierend auf Holos Interessen
+    3. Generiert Lern-Quests
+    4. Recherchiert (intern oder Web)
+    5. Verifiziert skeptisch
+    6. Speichert verifiziertes Wissen
+    7. Generiert Folgefragen
+
+    v1.0: Erste vollständige Implementation
+    """
+
+    def __init__(self, data_dir: str = "data"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+        # Subsysteme
+        self.concept_detector = ConceptDetector()
+        self.teaching_system = SelfTeachingSystem(data_dir)
+
+        # Externe Systeme (werden bei Bedarf verbunden)
+        self.curiosity_system = None  # holo_inner_life.CuriositySystem
+        self.web_curiosity = None     # holo_web_curiosity.HoloWebCuriosity
+
+        # Lernmodus
+        self.learning_mode = AutonomousLearningMode.CURIOUS
+
+        # Lern-Warteschlange
+        self.learning_queue: List[LearningTrigger] = []
+        self.learning_history: List[Dict] = []
+
+        # Aktives Lernen
+        self.is_learning = False
+        self.current_learning_topic: Optional[str] = None
+
+        # Statistiken
+        self.concepts_learned_today = 0
+        self.max_concepts_per_day = 50  # Limit für Pi4
+        self.last_learning_time = None
+
+        # Lade bekannte Konzepte
+        self._load_known_concepts()
+
+    def connect_curiosity_system(self, curiosity_system) -> None:
+        """Verbindet das CuriositySystem aus holo_inner_life"""
+        self.curiosity_system = curiosity_system
+        logger.info("🔗 CuriositySystem verbunden")
+
+    def connect_web_curiosity(self, web_curiosity) -> None:
+        """Verbindet das WebCuriosity-System"""
+        self.web_curiosity = web_curiosity
+        logger.info("🔗 WebCuriosity verbunden")
+
+    def set_learning_mode(self, mode: AutonomousLearningMode) -> str:
+        """Setzt den Lernmodus"""
+        old_mode = self.learning_mode
+        self.learning_mode = mode
+
+        mode_descriptions = {
+            AutonomousLearningMode.PASSIVE: "Ich lerne nur wenn du mich fragst",
+            AutonomousLearningMode.CURIOUS: "Ich frage nach wenn ich etwas nicht verstehe",
+            AutonomousLearningMode.ACTIVE: "Ich lerne im Hintergrund dazu",
+            AutonomousLearningMode.AGGRESSIVE: "Ich will ALLES wissen!"
+        }
+
+        return f"*Ohren stellen sich auf* {mode_descriptions[mode]}"
+
+    def process_input(self, text: str, source: str = "conversation") -> Dict[str, Any]:
+        """
+        Verarbeitet eingehenden Text und erkennt Lernmöglichkeiten.
+
+        Dies ist die Hauptmethode die bei jedem Gesprächs-Input
+        aufgerufen werden sollte.
+
+        Args:
+            text: Der eingehende Text
+            source: Quelle ("conversation", "web", "internal")
+
+        Returns:
+            Dict mit erkannten Konzepten und Lern-Aktionen
+        """
+        result = {
+            "detected_concepts": [],
+            "learning_triggered": False,
+            "questions_for_user": [],
+            "background_learning_started": False,
+            "concepts_in_queue": len(self.learning_queue)
+        }
+
+        # Passive Mode: Nur erkennen, nicht lernen
+        if self.learning_mode == AutonomousLearningMode.PASSIVE:
+            unknown = self.concept_detector.detect_unknown_concepts(text)
+            result["detected_concepts"] = unknown[:5]
+            return result
+
+        # Erkenne unbekannte Konzepte
+        unknown_concepts = self.concept_detector.detect_unknown_concepts(text)
+        result["detected_concepts"] = unknown_concepts[:10]
+
+        if not unknown_concepts:
+            return result
+
+        # Priorisiere basierend auf Holos Interessen
+        prioritized = self._prioritize_by_interests(unknown_concepts, text)
+
+        # Verarbeite je nach Modus
+        if self.learning_mode == AutonomousLearningMode.CURIOUS:
+            # Frage den Benutzer bei wichtigen Konzepten
+            top_concepts = prioritized[:2]
+            for concept, priority in top_concepts:
+                if priority > 0.5:
+                    question = self._generate_curiosity_question(concept)
+                    result["questions_for_user"].append(question)
+
+        elif self.learning_mode in [AutonomousLearningMode.ACTIVE,
+                                     AutonomousLearningMode.AGGRESSIVE]:
+            # Füge zur Lern-Warteschlange hinzu
+            for concept, priority in prioritized:
+                threshold = 0.3 if self.learning_mode == AutonomousLearningMode.AGGRESSIVE else 0.5
+
+                if priority > threshold:
+                    trigger = LearningTrigger(
+                        trigger_id=f"trig_{datetime.now().strftime('%Y%m%d%H%M%S')}_{concept[:8]}",
+                        concept=concept,
+                        source=source,
+                        priority=priority,
+                        context=text[:200]
+                    )
+                    self.learning_queue.append(trigger)
+
+            # Sortiere Queue nach Priorität
+            self.learning_queue.sort(key=lambda t: t.priority, reverse=True)
+
+            # Starte Hintergrund-Lernen wenn nicht aktiv
+            if not self.is_learning and self.learning_queue:
+                result["background_learning_started"] = True
+                # Das eigentliche Lernen wird durch learn_next_concept() ausgeführt
+
+        result["learning_triggered"] = len(result["questions_for_user"]) > 0 or result["background_learning_started"]
+        result["concepts_in_queue"] = len(self.learning_queue)
+
+        return result
+
+    def _prioritize_by_interests(self, concepts: List[str],
+                                 context: str) -> List[Tuple[str, float]]:
+        """
+        Priorisiert Konzepte basierend auf Holos Interessen.
+
+        Returns:
+            Liste von (Konzept, Priorität) Tupeln
+        """
+        prioritized = []
+
+        for concept in concepts:
+            priority = 0.5  # Basis-Priorität
+
+            # Erhöhe Priorität wenn CuriositySystem verbunden ist
+            if self.curiosity_system:
+                # Prüfe ob Konzept zu Interessen passt
+                matching_interest = self.curiosity_system.get_interest_for_topic(concept)
+                if matching_interest:
+                    interest_data = self.curiosity_system.get_interest_info(matching_interest)
+                    if interest_data:
+                        priority += interest_data.get("weight", 0) * 0.3
+
+            # Erhöhe Priorität wenn es ein wichtiges Wort ist (groß geschrieben)
+            if concept[0].isupper():
+                priority += 0.1
+
+            # Erhöhe Priorität wenn das Konzept mehrfach vorkommt
+            count = self.concept_detector.detection_count.get(concept.lower(), 0)
+            priority += min(count * 0.05, 0.2)
+
+            # Reduziere wenn wir heute schon viel gelernt haben
+            if self.concepts_learned_today >= self.max_concepts_per_day * 0.8:
+                priority *= 0.5
+
+            prioritized.append((concept, min(priority, 1.0)))
+
+        # Sortiere nach Priorität
+        prioritized.sort(key=lambda x: x[1], reverse=True)
+
+        return prioritized
+
+    def _generate_curiosity_question(self, concept: str) -> str:
+        """Generiert eine neugierige Frage für den Benutzer"""
+        templates = [
+            f"*legt den Kopf schief* Was ist eigentlich '{concept}'?",
+            f"*Ohren stellen sich auf* '{concept}'... was bedeutet das?",
+            f"*neugierig* Ich kenne '{concept}' nicht - kannst du mir das erklären?",
+            f"*tippt mit der Pfote* Hmm, was genau ist '{concept}'?",
+        ]
+        return random.choice(templates)
+
+    def learn_next_concept(self) -> Optional[Dict[str, Any]]:
+        """
+        Lernt das nächste Konzept aus der Warteschlange.
+
+        Returns:
+            Lernbericht oder None wenn nichts zu lernen
+        """
+        if self.is_learning:
+            return None
+
+        if not self.learning_queue:
+            return None
+
+        if self.concepts_learned_today >= self.max_concepts_per_day:
+            logger.warning("📚 Tägliches Lernlimit erreicht")
+            return None
+
+        # Hole nächstes Konzept
+        trigger = self.learning_queue.pop(0)
+        self.is_learning = True
+        self.current_learning_topic = trigger.concept
+
+        try:
+            logger.info(f"🎓 Starte Lernen: '{trigger.concept}'")
+
+            # Lerne durch SelfTeachingSystem
+            report = self.teaching_system.learn_concept(trigger.concept)
+
+            # Wenn Web-Curiosity verfügbar, recherchiere online
+            if self.web_curiosity and report["overall_confidence"] < 0.6:
+                web_result = self._research_online(trigger.concept)
+                if web_result:
+                    report["web_research"] = web_result
+                    # Aktualisiere Konfidenz
+                    if web_result.get("found_info"):
+                        report["overall_confidence"] = min(
+                            report["overall_confidence"] + 0.2, 0.95
+                        )
+
+            # Wenn erfolgreich, als bekannt markieren
+            if report["overall_confidence"] > 0.4:
+                self.concept_detector.add_known_concept(trigger.concept)
+                self.concepts_learned_today += 1
+
+                # Zu CuriositySystem hinzufügen
+                if self.curiosity_system:
+                    essence = report.get("essence", {})
+                    definition = essence.get("definition", "")
+                    if definition:
+                        self.curiosity_system.learn_from_conversation(
+                            trigger.concept, definition
+                        )
+
+            # Speichere in Historie
+            self.learning_history.append({
+                "concept": trigger.concept,
+                "success": report["overall_confidence"] > 0.4,
+                "confidence": report["overall_confidence"],
+                "source": trigger.source,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            self._save_known_concepts()
+            self.last_learning_time = datetime.now()
+
+            return report
+
+        except Exception as e:
+            logger.error(f"❌ Fehler beim Lernen von '{trigger.concept}': {e}")
+            return None
+
+        finally:
+            self.is_learning = False
+            self.current_learning_topic = None
+
+    def _research_online(self, concept: str) -> Optional[Dict]:
+        """Recherchiert ein Konzept online"""
+        if not self.web_curiosity:
+            return None
+
+        try:
+            # Verwende WebCuriosity für Recherche
+            search_results = self.web_curiosity.search_web(concept, limit=3)
+
+            if search_results:
+                return {
+                    "found_info": True,
+                    "sources": len(search_results),
+                    "summary": search_results[0].get("snippet", "")[:200] if search_results else ""
+                }
+        except Exception as e:
+            logger.warning(f"Web-Recherche fehlgeschlagen: {e}")
+
+        return None
+
+    def answer_user_explanation(self, concept: str, explanation: str) -> Dict:
+        """
+        Verarbeitet eine Erklärung vom Benutzer.
+
+        Wenn der Benutzer ein Konzept erklärt, wird es gelernt.
+        """
+        # Verifiziere die Erklärung
+        verification = self.teaching_system.verifier.verify(explanation)
+
+        result = {
+            "concept": concept,
+            "accepted": verification.is_verified,
+            "confidence": verification.confidence,
+            "response": ""
+        }
+
+        if verification.is_verified:
+            # Lernen von Benutzer
+            self.concept_detector.add_known_concept(concept)
+
+            # Erstelle Konzept-Essenz
+            essence = ConceptEssence(
+                concept_id=f"usr_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                concept_name=concept,
+                definition=explanation[:200],
+                necessary_properties=[explanation.split('.')[0] if '.' in explanation else explanation],
+                sufficient_properties=[],
+                typical_properties=[],
+                distinguishing_features=[],
+                examples=[],
+                counterexamples=[],
+                related_concepts=[],
+                parent_categories=[],
+                abstraction_level=3,
+                confidence=verification.confidence,
+                source="user_explanation"
+            )
+
+            self.teaching_system.learned_concepts[concept.lower()] = essence
+
+            if self.curiosity_system:
+                self.curiosity_system.learn_from_conversation(concept, explanation)
+
+            result["response"] = f"*merkt sich das aufmerksam* Danke! Jetzt verstehe ich '{concept}' besser!"
+
+            # Generiere Folgefrage
+            if verification.confidence < 0.8:
+                follow_up = random.choice([
+                    f"Gibt es ein Beispiel für '{concept}'?",
+                    f"Und wofür verwendet man '{concept}'?",
+                    f"Gibt es verschiedene Arten von '{concept}'?"
+                ])
+                result["follow_up_question"] = follow_up
+        else:
+            result["response"] = "*kratzt sich am Ohr* Hmm, ich bin mir nicht ganz sicher ob ich das richtig verstehe..."
+            result["concerns"] = verification.red_flags
+
+        self._save_known_concepts()
+        return result
+
+    def get_learning_status(self) -> Dict[str, Any]:
+        """Gibt den aktuellen Lern-Status zurück"""
+        return {
+            "mode": self.learning_mode.value,
+            "is_learning": self.is_learning,
+            "current_topic": self.current_learning_topic,
+            "queue_length": len(self.learning_queue),
+            "concepts_learned_today": self.concepts_learned_today,
+            "max_daily_limit": self.max_concepts_per_day,
+            "total_known_concepts": len(self.concept_detector.known_concepts),
+            "recently_detected": self.concept_detector.recently_detected[:5],
+            "last_learning_time": self.last_learning_time.isoformat() if self.last_learning_time else None
+        }
+
+    def what_should_i_learn_next(self) -> Optional[str]:
+        """Gibt das nächste empfohlene Lern-Thema zurück"""
+        # Aus Warteschlange
+        if self.learning_queue:
+            return f"*neugierig* Ich würde gerne mehr über '{self.learning_queue[0].concept}' lernen!"
+
+        # Aus kürzlich erkannten
+        priority = self.concept_detector.get_priority_concepts(limit=1)
+        if priority:
+            return f"*legt den Kopf schief* Was ist eigentlich '{priority[0][0]}'?"
+
+        # Aus Interessen
+        if self.curiosity_system:
+            random_interest = random.choice(list(self.curiosity_system.INNATE_INTERESTS.keys()))
+            return f"*Schweif wedelt* Ich würde gerne mehr über {random_interest} erfahren!"
+
+        return "*zufrieden* Im Moment habe ich keine offenen Fragen!"
+
+    def learn_from_mistake(self, concept: str, wrong_understanding: str,
+                          correct_understanding: str) -> Dict:
+        """
+        Lernt aus einem Missverständnis.
+
+        Wenn Holo etwas falsch verstanden hat, korrigiert sie sich.
+        """
+        # Entferne altes Wissen
+        if concept.lower() in self.teaching_system.learned_concepts:
+            old_essence = self.teaching_system.learned_concepts[concept.lower()]
+            old_essence.confidence *= 0.5  # Reduziere Konfidenz
+
+        # Lerne neue Version
+        result = self.answer_user_explanation(concept, correct_understanding)
+
+        # Speichere den Fehler für zukünftiges Lernen
+        self.learning_history.append({
+            "concept": concept,
+            "type": "correction",
+            "wrong": wrong_understanding,
+            "correct": correct_understanding,
+            "timestamp": datetime.now().isoformat()
+        })
+
+        result["correction_acknowledged"] = True
+        result["response"] = f"*senkt beschämt die Ohren* Oh, ich hatte '{concept}' falsch verstanden! " \
+                            f"Jetzt weiß ich es besser: {correct_understanding[:100]}..."
+
+        return result
+
+    def continuous_background_learning(self) -> List[Dict]:
+        """
+        Führt kontinuierliches Hintergrund-Lernen durch.
+
+        Sollte periodisch aufgerufen werden (z.B. alle 10 Minuten).
+        Lernt bis zu 3 Konzepte pro Aufruf.
+        """
+        if self.learning_mode in [AutonomousLearningMode.PASSIVE,
+                                  AutonomousLearningMode.CURIOUS]:
+            return []
+
+        results = []
+        max_per_cycle = 3
+
+        for _ in range(max_per_cycle):
+            if not self.learning_queue:
+                break
+
+            report = self.learn_next_concept()
+            if report:
+                results.append(report)
+
+        return results
+
+    def _load_known_concepts(self) -> None:
+        """Lädt bekannte Konzepte aus Datei"""
+        filepath = self.data_dir / "known_concepts.json"
+        if filepath.exists():
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.concept_detector.known_concepts = set(data.get("concepts", []))
+                    logger.info(f"📚 {len(self.concept_detector.known_concepts)} bekannte Konzepte geladen")
+            except Exception as e:
+                logger.warning(f"Fehler beim Laden der Konzepte: {e}")
+
+    def _save_known_concepts(self) -> None:
+        """Speichert bekannte Konzepte in Datei"""
+        filepath = self.data_dir / "known_concepts.json"
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "concepts": list(self.concept_detector.known_concepts),
+                    "saved_at": datetime.now().isoformat()
+                }, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.warning(f"Fehler beim Speichern der Konzepte: {e}")
+
+    def reset_daily_counter(self) -> None:
+        """Setzt den täglichen Lern-Zähler zurück"""
+        self.concepts_learned_today = 0
+        logger.info("📚 Täglicher Lern-Zähler zurückgesetzt")
+
+    def express_learning_desire(self) -> str:
+        """Drückt Holos Lernwunsch aus"""
+        if self.learning_queue:
+            concept = self.learning_queue[0].concept
+            expressions = [
+                f"*Ohren stellen sich auf* Ich frage mich was '{concept}' bedeutet...",
+                f"*neugierig* Irgendwann will ich verstehen was '{concept}' ist!",
+                f"*schaut nachdenklich* '{concept}'... da muss ich noch mehr drüber lernen.",
+            ]
+            return random.choice(expressions)
+
+        if self.is_learning:
+            return f"*konzentriert* Ich lerne gerade über '{self.current_learning_topic}'..."
+
+        return "*zufrieden* Im Moment lerne ich nichts Bestimmtes."
+
+
+# ============================================================
 # EXAMPLE USAGE
 # ============================================================
 

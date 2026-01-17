@@ -14170,6 +14170,32 @@ class HoloPersona:
             logger.warning(f"⚠️ WebCuriosity Fehler: {e}")
 
         # ================================================================
+        # 🎓 CURIOSITY-DRIVEN LEARNER - Autonomes Selbst-Lernen
+        # ================================================================
+        try:
+            from holo_autonomous_thinking import CuriosityDrivenLearner, AutonomousLearningMode
+            self.curiosity_learner = CuriosityDrivenLearner(BrainConfig.DATA_DIR)
+            self.curiosity_learner.set_learning_mode(AutonomousLearningMode.CURIOUS)
+            logger.info("🎓 CuriosityDrivenLearner aktiviert (Autonomes Konzept-Lernen)")
+
+            # Verbinde mit WebCuriosity
+            if hasattr(self, 'web_curiosity') and self.web_curiosity:
+                self.curiosity_learner.connect_web_curiosity(self.web_curiosity)
+                logger.info("   → CuriosityDrivenLearner mit WebCuriosity verbunden")
+
+            # Verbinde mit CuriositySystem aus inner_life
+            if hasattr(self, 'inner_life') and self.inner_life:
+                if hasattr(self.inner_life, 'curiosity') and self.inner_life.curiosity:
+                    self.curiosity_learner.connect_curiosity_system(self.inner_life.curiosity)
+                    logger.info("   → CuriosityDrivenLearner mit CuriositySystem verbunden")
+        except ImportError:
+            self.curiosity_learner = None
+            logger.debug("CuriosityDrivenLearner nicht verfügbar (optional)")
+        except Exception as e:
+            self.curiosity_learner = None
+            logger.warning(f"⚠️ CuriosityDrivenLearner Fehler: {e}")
+
+        # ================================================================
         # 💬 HOLO DIALOGUE ENGINE - Dialog State Machine
         # ================================================================
         try:
@@ -14556,14 +14582,50 @@ class HoloPersona:
 
             logger.info(f"🔍 Holo recherchiert aus Neugier: {topic}")
 
-            # Nutze Web Curiosity zum Recherchieren
+            # 🎓 NEUES: CuriosityDrivenLearner für autonomes Lernen
+            if hasattr(self, 'curiosity_learner') and self.curiosity_learner:
+                try:
+                    # Verarbeite das Thema für autonomes Lernen
+                    learn_result = self.curiosity_learner.process_input(
+                        text=topic,
+                        source="curiosity_callback"
+                    )
+
+                    if learn_result.get("detected_concepts"):
+                        logger.info(f"   🎓 Erkannte Konzepte: {learn_result['detected_concepts'][:3]}")
+
+                    # Wenn Fragen für den Benutzer generiert wurden
+                    if learn_result.get("questions_for_user"):
+                        for question in learn_result["questions_for_user"][:1]:
+                            logger.info(f"   ❓ Frage: {question}")
+
+                    # Hintergrund-Lernen wenn aktiviert
+                    if learn_result.get("background_learning_started"):
+                        report = self.curiosity_learner.learn_next_concept()
+                        if report:
+                            logger.info(f"   ✅ Gelernt: {report.get('concept', topic)} "
+                                       f"(Konfidenz: {report.get('overall_confidence', 0):.0%})")
+
+                            # Speichere gelerntes Wissen in CuriositySystem
+                            if hasattr(self, 'inner_life') and self.inner_life:
+                                if hasattr(self.inner_life, 'curiosity'):
+                                    essence = report.get("essence", {})
+                                    definition = essence.get("definition", "")
+                                    if definition:
+                                        self.inner_life.curiosity.learn_from_conversation(
+                                            topic, definition
+                                        )
+                except Exception as e:
+                    logger.debug(f"CuriosityLearner: {e}")
+
+            # Nutze Web Curiosity zum Recherchieren (Fallback)
             if hasattr(self, 'web_curiosity') and self.web_curiosity:
                 try:
                     # Suche nach dem Thema
                     if hasattr(self.web_curiosity, 'search_web'):
                         results = self.web_curiosity.search_web(topic, limit=3)
                         if results:
-                            logger.info(f"   → {len(results)} Ergebnisse gefunden")
+                            logger.info(f"   → {len(results)} Web-Ergebnisse gefunden")
                             # Energie verbrauchen für Recherche
                             if hasattr(self, 'energy') and self.energy:
                                 if hasattr(self.energy, 'consume_for_activity'):
@@ -19107,6 +19169,31 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                 self.user_model.update_from_message(user_input, entities=extracted_entities)
             except Exception:
                 pass
+
+        # ========== CURIOSITY-DRIVEN LEARNER: Konzepte erkennen ==========
+        curiosity_questions = []
+        if hasattr(self, 'curiosity_learner') and self.curiosity_learner:
+            try:
+                learn_result = self.curiosity_learner.process_input(
+                    text=user_input,
+                    source="conversation"
+                )
+
+                # Sammle Fragen für eventuelle Nachfrage
+                if learn_result.get("questions_for_user"):
+                    curiosity_questions = learn_result["questions_for_user"]
+
+                # Logge erkannte Konzepte
+                if learn_result.get("detected_concepts"):
+                    logger.debug(f"[CURIOSITY] Erkannte Konzepte: "
+                                f"{learn_result['detected_concepts'][:5]}")
+
+                # Wenn Hintergrund-Lernen gestartet wurde
+                if learn_result.get("background_learning_started"):
+                    logger.info(f"[CURIOSITY] 🎓 Hintergrund-Lernen aktiviert "
+                               f"(Queue: {learn_result.get('concepts_in_queue', 0)})")
+            except Exception as e:
+                logger.debug(f"[CURIOSITY] process_input Fehler: {e}")
 
         # ========== PROACTIVE INTELLIGENCE: User hat interagiert ==========
         if hasattr(self, 'proactive_intelligence') and self.proactive_intelligence:
