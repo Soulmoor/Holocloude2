@@ -5095,6 +5095,1347 @@ class ThoughtChainEngine:
 
 
 # ============================================================
+# THEORY OF MIND - Was denkt der andere?
+# ============================================================
+
+class MentalStateType(Enum):
+    """Arten von mentalen Zuständen"""
+    BELIEF = "belief"           # Was glaubt die Person?
+    DESIRE = "desire"           # Was will die Person?
+    INTENTION = "intention"     # Was plant die Person?
+    EMOTION = "emotion"         # Wie fühlt sich die Person?
+    KNOWLEDGE = "knowledge"     # Was weiß die Person?
+    EXPECTATION = "expectation" # Was erwartet die Person?
+
+
+@dataclass
+class MentalModel:
+    """Mentales Modell einer Person"""
+    person_id: str
+    beliefs: Dict[str, float] = field(default_factory=dict)      # Thema -> Stärke
+    desires: Dict[str, float] = field(default_factory=dict)      # Was will sie?
+    intentions: Dict[str, float] = field(default_factory=dict)   # Aktuelle Absichten
+    emotions: Dict[str, float] = field(default_factory=dict)     # Aktuelle Emotionen
+    knowledge: Set[str] = field(default_factory=set)             # Bekanntes Wissen
+    expectations: Dict[str, str] = field(default_factory=dict)   # Erwartungen
+    communication_style: str = "neutral"                         # Wie kommuniziert sie?
+    last_updated: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class TheoryOfMind:
+    """
+    Theory of Mind System - Verstehen was andere denken/fühlen.
+
+    Ermöglicht Holo zu verstehen:
+    - Was glaubt der Gesprächspartner?
+    - Was will er erreichen?
+    - Wie fühlt er sich gerade?
+    - Was erwartet er von mir?
+
+    v1.0: Grundlegende Theory of Mind Fähigkeiten
+    """
+
+    def __init__(self):
+        self.mental_models: Dict[str, MentalModel] = {}
+        self.emotion_indicators = {
+            # Wörter die auf Emotionen hindeuten
+            "happy": ["freue", "glücklich", "toll", "super", "fantastisch", "yay", "hurra", ":)", "😊"],
+            "sad": ["traurig", "leider", "schade", "enttäuscht", ":(", "😢", "seufz"],
+            "angry": ["wütend", "sauer", "nervt", "ärgert", "verdammt", "mist", "😠"],
+            "anxious": ["angst", "sorge", "beunruhigt", "unsicher", "nervös", "😰"],
+            "excited": ["aufgeregt", "gespannt", "kann nicht warten", "wow", "omg", "😃"],
+            "confused": ["verstehe nicht", "verwirrt", "häh", "?", "was meinst", "🤔"],
+            "grateful": ["danke", "dankbar", "sehr nett", "schätze", "🙏"],
+            "frustrated": ["frustriert", "klappt nicht", "immer wieder", "warum geht", "😤"],
+        }
+        self.desire_indicators = {
+            # Wörter die auf Wünsche hindeuten
+            "want": ["will", "möchte", "brauche", "hätte gern", "wünsche"],
+            "need": ["muss", "brauche unbedingt", "dringend", "notwendig"],
+            "hope": ["hoffe", "hoffentlich", "wäre schön wenn"],
+            "avoid": ["will nicht", "bloß nicht", "vermeiden", "ohne"],
+        }
+        self.belief_indicators = {
+            "certain": ["bin sicher", "weiß dass", "definitiv", "auf jeden fall"],
+            "uncertain": ["glaube", "denke", "vielleicht", "könnte sein", "unsicher"],
+            "doubt": ["bezweifle", "glaube nicht", "unwahrscheinlich"],
+        }
+
+    def get_or_create_model(self, person_id: str) -> MentalModel:
+        """Holt oder erstellt ein mentales Modell für eine Person"""
+        if person_id not in self.mental_models:
+            self.mental_models[person_id] = MentalModel(person_id=person_id)
+        return self.mental_models[person_id]
+
+    def analyze_mental_state(self, person_id: str, text: str) -> Dict[str, Any]:
+        """
+        Analysiert den Text um den mentalen Zustand zu inferieren.
+
+        Returns Dict mit:
+        - inferred_emotions: Vermutete Emotionen
+        - inferred_desires: Vermutete Wünsche
+        - inferred_beliefs: Vermutete Überzeugungen
+        - confidence: Wie sicher sind wir?
+        """
+        model = self.get_or_create_model(person_id)
+        text_lower = text.lower()
+
+        result = {
+            "inferred_emotions": {},
+            "inferred_desires": {},
+            "inferred_beliefs": {},
+            "inferred_intentions": [],
+            "confidence": 0.0,
+            "analysis_notes": []
+        }
+
+        # Emotionen analysieren
+        for emotion, indicators in self.emotion_indicators.items():
+            strength = sum(1 for ind in indicators if ind in text_lower)
+            if strength > 0:
+                normalized = min(strength / 2, 1.0)  # Max 1.0
+                result["inferred_emotions"][emotion] = normalized
+                model.emotions[emotion] = normalized
+
+        # Wünsche analysieren
+        for desire_type, indicators in self.desire_indicators.items():
+            for ind in indicators:
+                if ind in text_lower:
+                    # Extrahiere was gewünscht wird
+                    idx = text_lower.find(ind)
+                    desire_context = text[idx:idx+50]
+                    result["inferred_desires"][desire_type] = desire_context
+                    model.desires[desire_context[:30]] = 0.7
+                    break
+
+        # Überzeugungen analysieren
+        for belief_type, indicators in self.belief_indicators.items():
+            for ind in indicators:
+                if ind in text_lower:
+                    result["inferred_beliefs"][belief_type] = True
+                    break
+
+        # Intentionen aus Fragen/Bitten ableiten
+        if "?" in text:
+            result["inferred_intentions"].append("seeking_information")
+        if any(word in text_lower for word in ["kannst du", "könntest du", "bitte", "hilf"]):
+            result["inferred_intentions"].append("requesting_help")
+        if any(word in text_lower for word in ["erkläre", "was ist", "wie funktioniert"]):
+            result["inferred_intentions"].append("seeking_explanation")
+
+        # Konfidenz berechnen
+        total_inferences = (len(result["inferred_emotions"]) +
+                          len(result["inferred_desires"]) +
+                          len(result["inferred_intentions"]))
+        result["confidence"] = min(total_inferences * 0.2, 0.9)
+
+        # Model aktualisieren
+        model.last_updated = datetime.now().isoformat()
+
+        return result
+
+    def predict_response_preference(self, person_id: str) -> Dict[str, Any]:
+        """
+        Sagt vorher, welche Art von Antwort die Person bevorzugt.
+
+        Basiert auf:
+        - Aktueller emotionaler Zustand
+        - Bekannte Wünsche
+        - Kommunikationsstil
+        """
+        model = self.get_or_create_model(person_id)
+
+        preferences = {
+            "tone": "neutral",
+            "detail_level": "medium",
+            "emotional_support": False,
+            "direct_answer": True,
+            "suggestions": []
+        }
+
+        # Emotional gestresst -> Unterstützung wichtiger
+        if model.emotions.get("sad", 0) > 0.5 or model.emotions.get("anxious", 0) > 0.5:
+            preferences["emotional_support"] = True
+            preferences["tone"] = "warm"
+            preferences["suggestions"].append("Zeige Empathie zuerst")
+
+        # Verwirrt -> Mehr Details, langsamer
+        if model.emotions.get("confused", 0) > 0.5:
+            preferences["detail_level"] = "high"
+            preferences["suggestions"].append("Erkläre schrittweise")
+
+        # Frustriert -> Direkt und lösungsorientiert
+        if model.emotions.get("frustrated", 0) > 0.5:
+            preferences["direct_answer"] = True
+            preferences["tone"] = "calm"
+            preferences["suggestions"].append("Fokussiere auf Lösung")
+
+        # Aufgeregt -> Kann Begeisterung teilen
+        if model.emotions.get("excited", 0) > 0.5:
+            preferences["tone"] = "enthusiastic"
+
+        return preferences
+
+    def what_does_person_expect(self, person_id: str, context: str = "") -> Dict[str, Any]:
+        """
+        Was erwartet diese Person von mir?
+
+        Returns Dict mit Erwartungen und wie sicher wir sind.
+        """
+        model = self.get_or_create_model(person_id)
+
+        expectations = {
+            "expects_help": False,
+            "expects_understanding": False,
+            "expects_solution": False,
+            "expects_information": False,
+            "expects_validation": False,
+            "expects_honesty": True,  # Immer
+            "specific_expectations": [],
+            "confidence": 0.5
+        }
+
+        # Aus Intentionen ableiten
+        context_lower = context.lower()
+
+        if any(word in context_lower for word in ["hilf", "kannst du", "wie mache ich"]):
+            expectations["expects_help"] = True
+            expectations["expects_solution"] = True
+
+        if any(word in context_lower for word in ["verstehst du", "weißt du wie", "kennst du das"]):
+            expectations["expects_understanding"] = True
+
+        if any(word in context_lower for word in ["was ist", "erkläre", "info"]):
+            expectations["expects_information"] = True
+
+        if any(word in context_lower for word in ["richtig?", "oder?", "stimmt's", "nicht wahr"]):
+            expectations["expects_validation"] = True
+
+        # Emotionale Erwartungen
+        if model.emotions.get("sad", 0) > 0.3 or model.emotions.get("anxious", 0) > 0.3:
+            expectations["expects_understanding"] = True
+            expectations["specific_expectations"].append("Möchte emotional verstanden werden")
+
+        return expectations
+
+    def simulate_perspective(self, person_id: str, situation: str) -> Dict[str, Any]:
+        """
+        Simuliert die Perspektive einer anderen Person.
+
+        "Wie würde Person X diese Situation sehen?"
+        """
+        model = self.get_or_create_model(person_id)
+
+        simulation = {
+            "how_they_might_feel": [],
+            "what_they_might_think": [],
+            "what_they_might_want": [],
+            "potential_misunderstandings": [],
+            "perspective_notes": []
+        }
+
+        situation_lower = situation.lower()
+
+        # Basierend auf bekanntem emotionalen Zustand
+        if model.emotions.get("anxious", 0) > 0.3:
+            simulation["how_they_might_feel"].append("Könnte sich Sorgen machen")
+            simulation["what_they_might_think"].append("Könnte an negative Ausgänge denken")
+
+        if model.emotions.get("excited", 0) > 0.3:
+            simulation["how_they_might_feel"].append("Wahrscheinlich positiv gestimmt")
+
+        # Generelle Perspektiven-Überlegungen
+        if "fehler" in situation_lower or "falsch" in situation_lower:
+            simulation["how_they_might_feel"].append("Könnte sich schuldig fühlen")
+            simulation["potential_misunderstandings"].append("Könnte Kritik persönlich nehmen")
+
+        if "warten" in situation_lower or "lange" in situation_lower:
+            simulation["how_they_might_feel"].append("Könnte ungeduldig sein")
+
+        simulation["perspective_notes"].append(
+            f"Kommunikationsstil: {model.communication_style}"
+        )
+
+        return simulation
+
+
+# ============================================================
+# REAL PLANNING SYSTEM - Echte Ziel-orientierte Planung
+# ============================================================
+
+class PlanStepStatus(Enum):
+    """Status eines Planschritts"""
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    BLOCKED = "blocked"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+@dataclass
+class PlanStep:
+    """Ein Schritt im Plan"""
+    step_id: str
+    description: str
+    prerequisites: List[str] = field(default_factory=list)    # Step IDs die vorher fertig sein müssen
+    estimated_difficulty: float = 0.5                          # 0-1
+    status: PlanStepStatus = PlanStepStatus.NOT_STARTED
+    result: Optional[str] = None
+    blockers: List[str] = field(default_factory=list)
+    sub_steps: List['PlanStep'] = field(default_factory=list)
+
+
+@dataclass
+class Plan:
+    """Ein kompletter Plan"""
+    plan_id: str
+    goal: str
+    motivation: str                                            # Warum dieses Ziel?
+    steps: List[PlanStep] = field(default_factory=list)
+    current_step_idx: int = 0
+    status: str = "planning"                                   # planning, executing, completed, failed
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    success_criteria: List[str] = field(default_factory=list)  # Woran erkenne ich Erfolg?
+    obstacles_anticipated: List[str] = field(default_factory=list)
+    plan_b: Optional[str] = None                               # Backup-Plan
+
+
+class RealPlanningSystem:
+    """
+    Echtes Planungssystem für Holo.
+
+    Kann:
+    - Ziele in Schritte zerlegen
+    - Abhängigkeiten verstehen
+    - Alternative Wege finden
+    - Fortschritt verfolgen
+    - Bei Hindernissen umplanen
+
+    v1.0: Grundlegendes Planungssystem
+    """
+
+    def __init__(self):
+        self.active_plans: Dict[str, Plan] = {}
+        self.completed_plans: List[Plan] = []
+        self.planning_templates = {
+            # Templates für verschiedene Zieltypen
+            "learn_concept": [
+                "Verstehe was {X} grundlegend bedeutet",
+                "Finde Beispiele für {X}",
+                "Verbinde {X} mit bekanntem Wissen",
+                "Überprüfe Verständnis durch Erklärungsversuch",
+                "Finde Anwendungen für {X}"
+            ],
+            "solve_problem": [
+                "Verstehe das Problem genau",
+                "Identifiziere was ich schon weiß",
+                "Zerlege in kleinere Teilprobleme",
+                "Löse Teilprobleme",
+                "Kombiniere zu Gesamtlösung",
+                "Überprüfe die Lösung"
+            ],
+            "help_user": [
+                "Verstehe was der User wirklich braucht",
+                "Prüfe ob ich das kann",
+                "Plane den Hilfeansatz",
+                "Führe Hilfe durch",
+                "Überprüfe ob User zufrieden ist"
+            ],
+            "build_relationship": [
+                "Zeige echtes Interesse",
+                "Finde Gemeinsamkeiten",
+                "Sei zuverlässig und konsistent",
+                "Teile eigene Gedanken",
+                "Baue Vertrauen durch Zeit auf"
+            ],
+            "improve_self": [
+                "Identifiziere Verbesserungsbereich",
+                "Analysiere aktuelle Schwächen",
+                "Finde Übungsmöglichkeiten",
+                "Übe regelmäßig",
+                "Messe Fortschritt",
+                "Passe Ansatz an"
+            ]
+        }
+
+    def create_plan(self, goal: str, motivation: str = "", context: Dict = None) -> Plan:
+        """
+        Erstellt einen Plan für ein Ziel.
+
+        Args:
+            goal: Was soll erreicht werden?
+            motivation: Warum ist das wichtig?
+            context: Zusätzlicher Kontext
+
+        Returns:
+            Plan Objekt
+        """
+        plan_id = f"plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{random.randint(1000,9999)}"
+
+        plan = Plan(
+            plan_id=plan_id,
+            goal=goal,
+            motivation=motivation
+        )
+
+        # Finde passendes Template oder erstelle generischen Plan
+        template = self._find_matching_template(goal)
+
+        if template:
+            for i, step_template in enumerate(template):
+                step = PlanStep(
+                    step_id=f"{plan_id}_step_{i}",
+                    description=step_template.replace("{X}", goal),
+                    prerequisites=[f"{plan_id}_step_{i-1}"] if i > 0 else []
+                )
+                plan.steps.append(step)
+        else:
+            # Generischer Plan
+            plan.steps = self._generate_generic_plan(goal)
+
+        # Erfolskriterien
+        plan.success_criteria = [
+            f"Ziel '{goal}' ist erreicht",
+            "Keine offenen Blocker",
+            "Ergebnis ist verifiziert"
+        ]
+
+        self.active_plans[plan_id] = plan
+        return plan
+
+    def _find_matching_template(self, goal: str) -> Optional[List[str]]:
+        """Findet ein passendes Template für das Ziel"""
+        goal_lower = goal.lower()
+
+        if any(word in goal_lower for word in ["lern", "versteh", "wissen"]):
+            return self.planning_templates["learn_concept"]
+        if any(word in goal_lower for word in ["problem", "lösung", "fehler", "fix"]):
+            return self.planning_templates["solve_problem"]
+        if any(word in goal_lower for word in ["hilf", "unterstütz", "user"]):
+            return self.planning_templates["help_user"]
+        if any(word in goal_lower for word in ["beziehung", "freund", "vertrau"]):
+            return self.planning_templates["build_relationship"]
+        if any(word in goal_lower for word in ["verbesser", "besser", "optimier"]):
+            return self.planning_templates["improve_self"]
+
+        return None
+
+    def _generate_generic_plan(self, goal: str) -> List[PlanStep]:
+        """Generiert einen generischen Plan"""
+        plan_id = f"plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+        steps = [
+            PlanStep(
+                step_id=f"{plan_id}_step_0",
+                description=f"Verstehe das Ziel '{goal}' genau",
+                prerequisites=[]
+            ),
+            PlanStep(
+                step_id=f"{plan_id}_step_1",
+                description="Sammle benötigte Ressourcen/Informationen",
+                prerequisites=[f"{plan_id}_step_0"]
+            ),
+            PlanStep(
+                step_id=f"{plan_id}_step_2",
+                description="Führe die Hauptaktion durch",
+                prerequisites=[f"{plan_id}_step_1"]
+            ),
+            PlanStep(
+                step_id=f"{plan_id}_step_3",
+                description="Überprüfe das Ergebnis",
+                prerequisites=[f"{plan_id}_step_2"]
+            )
+        ]
+
+        return steps
+
+    def get_next_step(self, plan_id: str) -> Optional[Dict]:
+        """Holt den nächsten ausführbaren Schritt"""
+        plan = self.active_plans.get(plan_id)
+        if not plan:
+            return None
+
+        for step in plan.steps:
+            if step.status == PlanStepStatus.NOT_STARTED:
+                # Prüfe Prerequisites
+                prereqs_done = all(
+                    any(s.step_id == prereq and s.status == PlanStepStatus.COMPLETED
+                        for s in plan.steps)
+                    for prereq in step.prerequisites
+                )
+
+                if prereqs_done:
+                    return {
+                        "step": step,
+                        "plan_goal": plan.goal,
+                        "progress": self._calculate_progress(plan)
+                    }
+
+        return None
+
+    def complete_step(self, plan_id: str, step_id: str, result: str = "") -> Dict:
+        """Markiert einen Schritt als abgeschlossen"""
+        plan = self.active_plans.get(plan_id)
+        if not plan:
+            return {"success": False, "error": "Plan nicht gefunden"}
+
+        for step in plan.steps:
+            if step.step_id == step_id:
+                step.status = PlanStepStatus.COMPLETED
+                step.result = result
+
+                # Prüfe ob Plan fertig
+                if all(s.status == PlanStepStatus.COMPLETED for s in plan.steps):
+                    plan.status = "completed"
+                    self.completed_plans.append(plan)
+                    del self.active_plans[plan_id]
+
+                return {
+                    "success": True,
+                    "plan_status": plan.status,
+                    "progress": self._calculate_progress(plan)
+                }
+
+        return {"success": False, "error": "Schritt nicht gefunden"}
+
+    def handle_blocker(self, plan_id: str, step_id: str, blocker: str) -> Dict:
+        """Behandelt einen Blocker"""
+        plan = self.active_plans.get(plan_id)
+        if not plan:
+            return {"success": False}
+
+        for step in plan.steps:
+            if step.step_id == step_id:
+                step.status = PlanStepStatus.BLOCKED
+                step.blockers.append(blocker)
+
+                # Versuche alternativen Weg zu finden
+                alternative = self._find_alternative(plan, step, blocker)
+
+                return {
+                    "success": True,
+                    "blocker_recorded": True,
+                    "alternative_found": alternative is not None,
+                    "alternative": alternative
+                }
+
+        return {"success": False}
+
+    def _find_alternative(self, plan: Plan, blocked_step: PlanStep, blocker: str) -> Optional[str]:
+        """Versucht eine Alternative zu finden"""
+        # Einfache Heuristiken für Alternativen
+        if "weiß nicht" in blocker.lower() or "keine info" in blocker.lower():
+            return "Frage den User um Hilfe oder suche nach mehr Information"
+        if "geht nicht" in blocker.lower() or "unmöglich" in blocker.lower():
+            return "Überspringe diesen Schritt und versuche direkten Weg zum Ziel"
+        if "fehler" in blocker.lower():
+            return "Analysiere den Fehler und versuche einen anderen Ansatz"
+
+        return "Überdenke den Ansatz und plane neu"
+
+    def _calculate_progress(self, plan: Plan) -> float:
+        """Berechnet den Fortschritt eines Plans"""
+        if not plan.steps:
+            return 0.0
+        completed = sum(1 for s in plan.steps if s.status == PlanStepStatus.COMPLETED)
+        return completed / len(plan.steps)
+
+    def think_about_goal(self, goal: str) -> Dict[str, Any]:
+        """
+        Denkt über ein Ziel nach ohne direkt einen Plan zu erstellen.
+
+        Returns Gedanken über:
+        - Ist das Ziel erreichbar?
+        - Was brauche ich dafür?
+        - Was könnte schiefgehen?
+        """
+        thoughts = {
+            "is_achievable": True,
+            "confidence": 0.7,
+            "what_i_need": [],
+            "potential_obstacles": [],
+            "estimated_complexity": "medium",
+            "similar_past_goals": [],
+            "thoughts": []
+        }
+
+        goal_lower = goal.lower()
+
+        # Komplexität schätzen
+        complexity_indicators = {
+            "high": ["komplex", "schwierig", "viel", "alle", "komplett", "perfekt"],
+            "low": ["einfach", "kurz", "schnell", "klein", "nur"]
+        }
+
+        if any(ind in goal_lower for ind in complexity_indicators["high"]):
+            thoughts["estimated_complexity"] = "high"
+            thoughts["confidence"] = 0.5
+        elif any(ind in goal_lower for ind in complexity_indicators["low"]):
+            thoughts["estimated_complexity"] = "low"
+            thoughts["confidence"] = 0.85
+
+        # Was brauche ich?
+        if "lern" in goal_lower:
+            thoughts["what_i_need"].extend(["Information", "Zeit zum Verarbeiten", "Beispiele"])
+        if "hilf" in goal_lower:
+            thoughts["what_i_need"].extend(["Verständnis des Problems", "Passende Lösung"])
+        if "versteh" in goal_lower:
+            thoughts["what_i_need"].extend(["Kontext", "Erklärungen", "Geduld"])
+
+        # Potentielle Hindernisse
+        thoughts["potential_obstacles"] = [
+            "Fehlende Information",
+            "Missverständnisse",
+            "Unerwartete Komplexität"
+        ]
+
+        thoughts["thoughts"].append(f"Das Ziel '{goal}' erscheint {thoughts['estimated_complexity']}")
+
+        return thoughts
+
+
+# ============================================================
+# MENTAL SIMULATION - Was passiert wenn...?
+# ============================================================
+
+@dataclass
+class SimulationScenario:
+    """Ein simuliertes Szenario"""
+    scenario_id: str
+    initial_action: str
+    consequences: List[str] = field(default_factory=list)
+    probability: float = 0.5
+    emotional_outcome: str = "neutral"
+    side_effects: List[str] = field(default_factory=list)
+    time_horizon: str = "short_term"  # short_term, medium_term, long_term
+
+
+class MentalSimulation:
+    """
+    Mentale Simulation - "Was passiert wenn...?"
+
+    Ermöglicht Holo:
+    - Konsequenzen von Aktionen vorherzusagen
+    - Szenarien durchzuspielen
+    - Risiken zu erkennen
+    - Bessere Entscheidungen zu treffen
+
+    v1.0: Grundlegende Simulationsfähigkeiten
+    """
+
+    def __init__(self):
+        self.simulation_cache: Dict[str, SimulationScenario] = {}
+        self.consequence_patterns = {
+            # Action-Patterns und ihre typischen Konsequenzen
+            "sag die wahrheit": {
+                "positive": ["Vertrauen wird gestärkt", "Klare Kommunikation"],
+                "negative": ["Könnte verletzen", "Könnte unangenehm sein"],
+                "neutral": ["Situation wird klarer"]
+            },
+            "lüge": {
+                "positive": ["Kurzfristig unangenehmes vermieden"],
+                "negative": ["Vertrauen kann beschädigt werden", "Muss weitere Lügen erzählen",
+                           "Schlechtes Gewissen"],
+                "neutral": []
+            },
+            "hilf": {
+                "positive": ["Person fühlt sich unterstützt", "Beziehung wird gestärkt",
+                           "Gutes Gefühl"],
+                "negative": ["Zeitaufwand", "Könnte ausgenutzt werden"],
+                "neutral": ["Verantwortung übernommen"]
+            },
+            "warte": {
+                "positive": ["Mehr Information verfügbar", "Überlegtere Entscheidung"],
+                "negative": ["Chance könnte vergehen", "Andere könnten ungeduldig werden"],
+                "neutral": ["Zeit vergeht"]
+            },
+            "entscheide schnell": {
+                "positive": ["Schnelles Ergebnis", "Entschlossenheit gezeigt"],
+                "negative": ["Könnte falsch liegen", "Wichtige Info übersehen"],
+                "neutral": ["Entscheidung ist gefallen"]
+            },
+            "frage nach": {
+                "positive": ["Mehr Klarheit", "Zeigt Interesse"],
+                "negative": ["Könnte nerven", "Zeigt Unsicherheit"],
+                "neutral": ["Information ausgetauscht"]
+            },
+            "ignoriere": {
+                "positive": ["Energie gespart", "Fokus behalten"],
+                "negative": ["Wichtiges übersehen", "Person fühlt sich ignoriert"],
+                "neutral": ["Status quo bleibt"]
+            },
+            "teile gefühle": {
+                "positive": ["Tiefere Verbindung", "Authentizität"],
+                "negative": ["Verletzlichkeit gezeigt", "Könnte missverstanden werden"],
+                "neutral": ["Mehr von mir preisgegeben"]
+            }
+        }
+
+    def simulate(self, action: str, context: str = "") -> SimulationScenario:
+        """
+        Simuliert die Konsequenzen einer Aktion.
+
+        Args:
+            action: Was würde ich tun?
+            context: In welcher Situation?
+
+        Returns:
+            SimulationScenario mit vorhergesagten Konsequenzen
+        """
+        scenario_id = f"sim_{hashlib.md5(action.encode()).hexdigest()[:8]}"
+
+        # Finde passende Muster
+        action_lower = action.lower()
+        consequences = []
+        emotional_outcome = "neutral"
+        probability = 0.5
+
+        for pattern, outcomes in self.consequence_patterns.items():
+            if pattern in action_lower:
+                consequences.extend(outcomes.get("positive", []))
+                consequences.extend(outcomes.get("negative", []))
+                consequences.extend(outcomes.get("neutral", []))
+
+                # Emotionales Outcome schätzen
+                if len(outcomes.get("positive", [])) > len(outcomes.get("negative", [])):
+                    emotional_outcome = "positive"
+                    probability = 0.7
+                elif len(outcomes.get("negative", [])) > len(outcomes.get("positive", [])):
+                    emotional_outcome = "negative"
+                    probability = 0.6
+
+        # Kontext einbeziehen
+        if context:
+            context_lower = context.lower()
+            if "wichtig" in context_lower or "dringend" in context_lower:
+                consequences.append("Ergebnis hat hohe Bedeutung")
+            if "person" in context_lower or "freund" in context_lower:
+                consequences.append("Betrifft eine Beziehung")
+
+        # Falls keine Muster gefunden
+        if not consequences:
+            consequences = [
+                "Unbekannte Konsequenzen möglich",
+                "Würde Erfahrung sammeln",
+                "Situation würde sich verändern"
+            ]
+
+        scenario = SimulationScenario(
+            scenario_id=scenario_id,
+            initial_action=action,
+            consequences=consequences,
+            probability=probability,
+            emotional_outcome=emotional_outcome
+        )
+
+        self.simulation_cache[scenario_id] = scenario
+        return scenario
+
+    def compare_options(self, options: List[str], context: str = "") -> Dict[str, Any]:
+        """
+        Vergleicht mehrere Optionen durch Simulation.
+
+        Returns:
+            Dict mit Bewertung jeder Option und Empfehlung
+        """
+        results = {
+            "options_analyzed": {},
+            "recommendation": None,
+            "reasoning": []
+        }
+
+        best_score = -1
+        best_option = None
+
+        for option in options:
+            scenario = self.simulate(option, context)
+
+            # Score berechnen
+            positive_count = sum(1 for c in scenario.consequences
+                               if any(word in c.lower() for word in
+                                     ["gestärkt", "positiv", "gut", "klar", "vertrauen"]))
+            negative_count = sum(1 for c in scenario.consequences
+                               if any(word in c.lower() for word in
+                                     ["beschädigt", "negativ", "schlecht", "verletz", "ausgenutzt"]))
+
+            score = positive_count - negative_count + scenario.probability
+
+            results["options_analyzed"][option] = {
+                "consequences": scenario.consequences,
+                "emotional_outcome": scenario.emotional_outcome,
+                "score": score
+            }
+
+            if score > best_score:
+                best_score = score
+                best_option = option
+
+        results["recommendation"] = best_option
+        results["reasoning"].append(f"Option '{best_option}' hat den besten Score von {best_score:.2f}")
+
+        return results
+
+    def what_if(self, hypothesis: str) -> Dict[str, Any]:
+        """
+        Führt ein "Was wäre wenn...?" Gedankenexperiment durch.
+
+        Args:
+            hypothesis: z.B. "Was wenn ich die Wahrheit sage?"
+
+        Returns:
+            Dict mit simulierten Szenarien
+        """
+        # Extrahiere die Aktion aus der Hypothese
+        action = hypothesis.lower()
+        for prefix in ["was wenn ich ", "was wäre wenn ich ", "was passiert wenn ich ",
+                      "angenommen ich ", "stell dir vor ich "]:
+            if prefix in action:
+                action = action.replace(prefix, "")
+                break
+
+        simulation = self.simulate(action)
+
+        return {
+            "hypothesis": hypothesis,
+            "simulated_action": action,
+            "likely_consequences": simulation.consequences[:5],  # Top 5
+            "probability_of_success": simulation.probability,
+            "emotional_impact": simulation.emotional_outcome,
+            "side_effects": simulation.side_effects,
+            "should_i_do_it": simulation.emotional_outcome == "positive" and simulation.probability > 0.5,
+            "reasoning": f"Diese Aktion würde wahrscheinlich zu {simulation.emotional_outcome}en Ergebnissen führen"
+        }
+
+    def imagine_future(self, current_situation: str, time_horizon: str = "short_term") -> Dict[str, Any]:
+        """
+        Stellt sich die Zukunft vor basierend auf aktueller Situation.
+
+        Args:
+            current_situation: Aktuelle Lage
+            time_horizon: short_term (Stunden), medium_term (Tage), long_term (Wochen+)
+
+        Returns:
+            Dict mit möglichen Zukunftsszenarien
+        """
+        futures = {
+            "most_likely": "",
+            "best_case": "",
+            "worst_case": "",
+            "probability_distribution": {},
+            "what_i_can_influence": []
+        }
+
+        situation_lower = current_situation.lower()
+
+        # Generiere Szenarien basierend auf Keywords
+        if "problem" in situation_lower or "fehler" in situation_lower:
+            futures["most_likely"] = "Problem wird schrittweise gelöst"
+            futures["best_case"] = "Schnelle Lösung gefunden, alle zufrieden"
+            futures["worst_case"] = "Problem eskaliert, mehr Aufwand nötig"
+            futures["what_i_can_influence"] = ["Qualität meiner Hilfe", "Geduld und Ausdauer"]
+
+        elif "frage" in situation_lower or "versteh" in situation_lower:
+            futures["most_likely"] = "Verständnis wird erreicht"
+            futures["best_case"] = "Tiefes Verständnis und neue Erkenntnisse"
+            futures["worst_case"] = "Missverständnisse bleiben"
+            futures["what_i_can_influence"] = ["Klarheit meiner Erklärungen", "Geduld beim Nachfragen"]
+
+        elif "gespräch" in situation_lower or "unterhalt" in situation_lower:
+            futures["most_likely"] = "Angenehmer Austausch"
+            futures["best_case"] = "Tiefe Verbindung entsteht"
+            futures["worst_case"] = "Missverständnisse oder Langeweile"
+            futures["what_i_can_influence"] = ["Engagement", "Empathie", "Interessante Beiträge"]
+
+        else:
+            futures["most_likely"] = "Situation entwickelt sich normal weiter"
+            futures["best_case"] = "Positive Überraschung"
+            futures["worst_case"] = "Unerwartete Schwierigkeiten"
+            futures["what_i_can_influence"] = ["Meine Reaktion", "Meine Einstellung"]
+
+        # Wahrscheinlichkeiten
+        futures["probability_distribution"] = {
+            "best_case": 0.2,
+            "most_likely": 0.6,
+            "worst_case": 0.2
+        }
+
+        if time_horizon == "long_term":
+            futures["probability_distribution"]["best_case"] = 0.15
+            futures["probability_distribution"]["worst_case"] = 0.25
+
+        return futures
+
+
+# ============================================================
+# ATTENTION SYSTEM - Was ist jetzt wichtig?
+# ============================================================
+
+class AttentionPriority(Enum):
+    """Prioritätsstufen"""
+    CRITICAL = 5      # Sofort beachten
+    HIGH = 4          # Sehr wichtig
+    MEDIUM = 3        # Normal wichtig
+    LOW = 2           # Kann warten
+    BACKGROUND = 1    # Nebenbei beachten
+
+
+@dataclass
+class AttentionItem:
+    """Etwas das Aufmerksamkeit verdient"""
+    item_id: str
+    content: str
+    source: str                    # Woher kommt es?
+    priority: AttentionPriority
+    relevance_score: float         # 0-1, wie relevant gerade?
+    decay_rate: float = 0.1        # Wie schnell verliert es Relevanz?
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    last_attended: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class AttentionSystem:
+    """
+    Aufmerksamkeitssystem - Was ist gerade wichtig?
+
+    Verwaltet:
+    - Was verdient jetzt Aufmerksamkeit?
+    - Priorisierung konkurrierender Anforderungen
+    - Fokus halten vs. Ablenkung erkennen
+    - Wichtiges von Unwichtigem trennen
+
+    v1.0: Grundlegendes Aufmerksamkeitsmanagement
+    """
+
+    def __init__(self):
+        self.attention_items: Dict[str, AttentionItem] = {}
+        self.focus_stack: List[str] = []  # Stack von item_ids, top = aktueller Fokus
+        self.attention_capacity = 5        # Wie viele Dinge gleichzeitig?
+        self.priority_keywords = {
+            AttentionPriority.CRITICAL: ["dringend", "sofort", "notfall", "kritisch", "wichtig!", "hilfe!"],
+            AttentionPriority.HIGH: ["wichtig", "bald", "bitte", "brauche", "muss"],
+            AttentionPriority.MEDIUM: ["könntest du", "wäre gut", "irgendwann", "vielleicht"],
+            AttentionPriority.LOW: ["nebenbei", "wenn zeit ist", "nicht eilig", "später"],
+        }
+
+    def add_attention_item(self, content: str, source: str = "unknown") -> AttentionItem:
+        """Fügt etwas zur Aufmerksamkeitsliste hinzu"""
+        item_id = f"att_{datetime.now().strftime('%H%M%S')}_{random.randint(100,999)}"
+
+        # Priorität aus Inhalt ableiten
+        priority = self._determine_priority(content)
+
+        # Relevanz initial auf Basis der Priorität
+        relevance = {
+            AttentionPriority.CRITICAL: 1.0,
+            AttentionPriority.HIGH: 0.8,
+            AttentionPriority.MEDIUM: 0.5,
+            AttentionPriority.LOW: 0.3,
+            AttentionPriority.BACKGROUND: 0.1
+        }.get(priority, 0.5)
+
+        item = AttentionItem(
+            item_id=item_id,
+            content=content,
+            source=source,
+            priority=priority,
+            relevance_score=relevance
+        )
+
+        self.attention_items[item_id] = item
+
+        # Bei hoher Priorität direkt auf Stack
+        if priority.value >= AttentionPriority.HIGH.value:
+            self.focus_stack.append(item_id)
+
+        return item
+
+    def _determine_priority(self, content: str) -> AttentionPriority:
+        """Bestimmt die Priorität aus dem Inhalt"""
+        content_lower = content.lower()
+
+        for priority, keywords in self.priority_keywords.items():
+            if any(kw in content_lower for kw in keywords):
+                return priority
+
+        return AttentionPriority.MEDIUM
+
+    def get_current_focus(self) -> Optional[AttentionItem]:
+        """Was hat gerade meinen Fokus?"""
+        if not self.focus_stack:
+            return None
+        return self.attention_items.get(self.focus_stack[-1])
+
+    def shift_attention(self, to_item_id: str) -> Dict[str, Any]:
+        """Verschiebt Aufmerksamkeit zu einem anderen Item"""
+        if to_item_id not in self.attention_items:
+            return {"success": False, "error": "Item nicht gefunden"}
+
+        item = self.attention_items[to_item_id]
+
+        # Von Stack entfernen falls schon drauf
+        if to_item_id in self.focus_stack:
+            self.focus_stack.remove(to_item_id)
+
+        # An die Spitze setzen
+        self.focus_stack.append(to_item_id)
+        item.last_attended = datetime.now().isoformat()
+
+        return {
+            "success": True,
+            "now_focusing_on": item.content,
+            "priority": item.priority.name
+        }
+
+    def what_needs_attention(self) -> List[Dict[str, Any]]:
+        """Was braucht gerade meine Aufmerksamkeit?"""
+        # Aktualisiere Relevanzen
+        self._update_relevance()
+
+        # Sortiere nach Priorität und Relevanz
+        sorted_items = sorted(
+            self.attention_items.values(),
+            key=lambda x: (x.priority.value, x.relevance_score),
+            reverse=True
+        )
+
+        return [
+            {
+                "item_id": item.item_id,
+                "content": item.content,
+                "priority": item.priority.name,
+                "relevance": item.relevance_score,
+                "source": item.source
+            }
+            for item in sorted_items[:self.attention_capacity]
+        ]
+
+    def _update_relevance(self):
+        """Aktualisiert die Relevanz aller Items (Decay)"""
+        now = datetime.now()
+        for item in self.attention_items.values():
+            last = datetime.fromisoformat(item.last_attended)
+            hours_passed = (now - last).total_seconds() / 3600
+
+            # Relevanz sinkt über Zeit
+            decay = item.decay_rate * hours_passed
+            item.relevance_score = max(0.1, item.relevance_score - decay)
+
+    def is_distraction(self, new_content: str) -> Dict[str, Any]:
+        """Prüft ob etwas Neues eine Ablenkung ist"""
+        current_focus = self.get_current_focus()
+
+        if not current_focus:
+            return {"is_distraction": False, "reason": "Kein aktueller Fokus"}
+
+        new_priority = self._determine_priority(new_content)
+
+        # Niedrigere Priorität als aktueller Fokus = Ablenkung
+        if new_priority.value < current_focus.priority.value:
+            return {
+                "is_distraction": True,
+                "reason": f"Niedriger priorisiert als '{current_focus.content[:30]}'",
+                "current_focus": current_focus.content,
+                "recommendation": "Bei aktuellem Fokus bleiben"
+            }
+
+        # Höhere Priorität = legitimer Aufmerksamkeitswechsel
+        if new_priority.value > current_focus.priority.value:
+            return {
+                "is_distraction": False,
+                "reason": "Höhere Priorität als aktueller Fokus",
+                "recommendation": "Aufmerksamkeit wechseln"
+            }
+
+        return {
+            "is_distraction": False,
+            "reason": "Gleichwertig mit aktuellem Fokus"
+        }
+
+    def summarize_attention_state(self) -> Dict[str, Any]:
+        """Zusammenfassung des Aufmerksamkeitszustands"""
+        return {
+            "total_items": len(self.attention_items),
+            "focus_stack_depth": len(self.focus_stack),
+            "current_focus": self.get_current_focus().content if self.get_current_focus() else None,
+            "critical_items": sum(1 for i in self.attention_items.values()
+                                 if i.priority == AttentionPriority.CRITICAL),
+            "high_items": sum(1 for i in self.attention_items.values()
+                             if i.priority == AttentionPriority.HIGH),
+            "capacity_used": f"{len(self.focus_stack)}/{self.attention_capacity}"
+        }
+
+
+# ============================================================
+# RECURSIVE REFLECTION - Denken übers Denken
+# ============================================================
+
+@dataclass
+class ThinkingProcess:
+    """Ein aufgezeichneter Denkprozess"""
+    process_id: str
+    trigger: str                            # Was hat das Denken ausgelöst?
+    thoughts: List[str] = field(default_factory=list)
+    reasoning_quality: float = 0.5          # 0-1
+    biases_detected: List[str] = field(default_factory=list)
+    improvements_identified: List[str] = field(default_factory=list)
+    outcome: str = ""
+    was_effective: Optional[bool] = None
+
+
+class RecursiveReflection:
+    """
+    Rekursive Reflexion - Denken über das eigene Denken.
+
+    Ermöglicht Holo:
+    - Eigene Denkprozesse zu beobachten
+    - Denkfehler zu erkennen
+    - Denken zu verbessern
+    - Meta-Kognition
+
+    v1.0: Grundlegende Meta-Kognition
+    """
+
+    def __init__(self):
+        self.thinking_log: List[ThinkingProcess] = []
+        self.current_process: Optional[ThinkingProcess] = None
+        self.known_biases = {
+            "confirmation_bias": {
+                "description": "Nur nach bestätigenden Informationen suchen",
+                "indicators": ["stimmt", "genau", "richtig", "immer", "nie"],
+                "correction": "Aktiv nach Gegenbeispielen suchen"
+            },
+            "recency_bias": {
+                "description": "Neueste Informationen überbewerten",
+                "indicators": ["gerade", "kürzlich", "letztens"],
+                "correction": "Auch ältere Erfahrungen einbeziehen"
+            },
+            "availability_heuristic": {
+                "description": "Leicht erinnerbare Dinge überbewerten",
+                "indicators": ["erinnere mich", "fällt mir ein", "weiß noch"],
+                "correction": "Systematischer nachdenken"
+            },
+            "anchoring": {
+                "description": "Zu stark an erster Information festhalten",
+                "indicators": ["zuerst", "anfangs", "ursprünglich"],
+                "correction": "Informationen neu bewerten"
+            },
+            "emotional_reasoning": {
+                "description": "Gefühle als Beweis nehmen",
+                "indicators": ["fühlt sich an", "spüre", "glaube einfach"],
+                "correction": "Gefühle von Fakten trennen"
+            }
+        }
+        self.thinking_patterns = []  # Erkannte Muster im eigenen Denken
+
+    def start_thinking_observation(self, trigger: str) -> str:
+        """Beginnt einen Denkprozess zu beobachten"""
+        process_id = f"think_{datetime.now().strftime('%H%M%S')}_{random.randint(100,999)}"
+
+        self.current_process = ThinkingProcess(
+            process_id=process_id,
+            trigger=trigger
+        )
+
+        return process_id
+
+    def record_thought(self, thought: str) -> Dict[str, Any]:
+        """Zeichnet einen Gedanken auf und analysiert ihn"""
+        if not self.current_process:
+            self.start_thinking_observation("implicit")
+
+        self.current_process.thoughts.append(thought)
+
+        # Analysiere den Gedanken
+        analysis = self._analyze_thought(thought)
+
+        return {
+            "thought_recorded": True,
+            "thought_number": len(self.current_process.thoughts),
+            "potential_biases": analysis.get("biases", []),
+            "quality_indicator": analysis.get("quality", "neutral")
+        }
+
+    def _analyze_thought(self, thought: str) -> Dict[str, Any]:
+        """Analysiert einen einzelnen Gedanken"""
+        thought_lower = thought.lower()
+
+        analysis = {
+            "biases": [],
+            "quality": "neutral",
+            "patterns": []
+        }
+
+        # Prüfe auf bekannte Biases
+        for bias_name, bias_info in self.known_biases.items():
+            if any(ind in thought_lower for ind in bias_info["indicators"]):
+                analysis["biases"].append({
+                    "bias": bias_name,
+                    "description": bias_info["description"],
+                    "correction": bias_info["correction"]
+                })
+
+        # Qualitätsindikatoren
+        quality_positive = ["weil", "daher", "deshalb", "grund", "evidenz", "obwohl", "andererseits"]
+        quality_negative = ["einfach", "halt", "eben", "immer", "nie", "sicher"]
+
+        pos_count = sum(1 for q in quality_positive if q in thought_lower)
+        neg_count = sum(1 for q in quality_negative if q in thought_lower)
+
+        if pos_count > neg_count:
+            analysis["quality"] = "good"
+        elif neg_count > pos_count:
+            analysis["quality"] = "questionable"
+
+        return analysis
+
+    def end_thinking_observation(self, outcome: str, was_effective: bool) -> Dict[str, Any]:
+        """Beendet die Beobachtung und reflektiert"""
+        if not self.current_process:
+            return {"error": "Kein aktiver Denkprozess"}
+
+        self.current_process.outcome = outcome
+        self.current_process.was_effective = was_effective
+
+        # Sammle alle erkannten Biases
+        all_biases = []
+        for thought in self.current_process.thoughts:
+            analysis = self._analyze_thought(thought)
+            all_biases.extend([b["bias"] for b in analysis["biases"]])
+
+        self.current_process.biases_detected = list(set(all_biases))
+
+        # Berechne Reasoning-Qualität
+        effective_bonus = 0.2 if was_effective else -0.1
+        bias_penalty = len(self.current_process.biases_detected) * 0.1
+        thought_count_bonus = min(len(self.current_process.thoughts) * 0.05, 0.3)
+
+        self.current_process.reasoning_quality = max(0, min(1,
+            0.5 + effective_bonus - bias_penalty + thought_count_bonus
+        ))
+
+        # Identifiziere Verbesserungen
+        if self.current_process.biases_detected:
+            for bias in self.current_process.biases_detected:
+                correction = self.known_biases.get(bias, {}).get("correction", "")
+                if correction:
+                    self.current_process.improvements_identified.append(correction)
+
+        # Log speichern
+        self.thinking_log.append(self.current_process)
+        result_process = self.current_process
+        self.current_process = None
+
+        return {
+            "process_id": result_process.process_id,
+            "total_thoughts": len(result_process.thoughts),
+            "reasoning_quality": result_process.reasoning_quality,
+            "biases_detected": result_process.biases_detected,
+            "improvements": result_process.improvements_identified,
+            "was_effective": was_effective
+        }
+
+    def reflect_on_thinking(self, topic: str = "") -> Dict[str, Any]:
+        """Reflektiert über das eigene Denken allgemein"""
+        reflection = {
+            "total_processes_observed": len(self.thinking_log),
+            "average_quality": 0.0,
+            "most_common_biases": [],
+            "effectiveness_rate": 0.0,
+            "meta_thoughts": [],
+            "areas_for_improvement": []
+        }
+
+        if not self.thinking_log:
+            reflection["meta_thoughts"].append("Ich habe noch nicht viel über mein Denken reflektiert")
+            return reflection
+
+        # Statistiken berechnen
+        qualities = [p.reasoning_quality for p in self.thinking_log]
+        reflection["average_quality"] = sum(qualities) / len(qualities)
+
+        # Bias-Häufigkeit
+        all_biases = []
+        for p in self.thinking_log:
+            all_biases.extend(p.biases_detected)
+        if all_biases:
+            bias_counts = defaultdict(int)
+            for b in all_biases:
+                bias_counts[b] += 1
+            reflection["most_common_biases"] = sorted(
+                bias_counts.items(),
+                key=lambda x: x[1],
+                reverse=True
+            )[:3]
+
+        # Effektivität
+        effective = sum(1 for p in self.thinking_log if p.was_effective)
+        reflection["effectiveness_rate"] = effective / len(self.thinking_log)
+
+        # Meta-Gedanken generieren
+        if reflection["average_quality"] > 0.7:
+            reflection["meta_thoughts"].append("Mein Denken ist meist von guter Qualität")
+        elif reflection["average_quality"] < 0.4:
+            reflection["meta_thoughts"].append("Ich sollte sorgfältiger denken")
+
+        if reflection["most_common_biases"]:
+            top_bias = reflection["most_common_biases"][0][0]
+            reflection["areas_for_improvement"].append(
+                f"Besonders auf {top_bias} achten"
+            )
+
+        return reflection
+
+    def am_i_thinking_clearly(self) -> Dict[str, Any]:
+        """Prüft ob das aktuelle Denken klar ist"""
+        if not self.current_process:
+            return {"clear": True, "reason": "Kein aktives Denken zu prüfen"}
+
+        clarity = {
+            "clear": True,
+            "issues": [],
+            "suggestions": []
+        }
+
+        # Prüfe auf Probleme
+        if len(self.current_process.thoughts) > 10:
+            clarity["issues"].append("Viele Gedanken - vielleicht zu verworren?")
+            clarity["suggestions"].append("Versuche die Kernfrage zu identifizieren")
+
+        recent_biases = []
+        for thought in self.current_process.thoughts[-3:]:
+            analysis = self._analyze_thought(thought)
+            recent_biases.extend([b["bias"] for b in analysis["biases"]])
+
+        if recent_biases:
+            clarity["clear"] = False
+            clarity["issues"].append(f"Mögliche Biases: {', '.join(set(recent_biases))}")
+            clarity["suggestions"].append("Schritt zurück und objektiver betrachten")
+
+        # Prüfe auf sich wiederholende Gedanken
+        if len(self.current_process.thoughts) >= 3:
+            last_three = self.current_process.thoughts[-3:]
+            if len(set(last_three)) < 3:
+                clarity["clear"] = False
+                clarity["issues"].append("Gedanken wiederholen sich")
+                clarity["suggestions"].append("Neuen Blickwinkel versuchen")
+
+        return clarity
+
+    def get_thinking_stats(self) -> Dict[str, Any]:
+        """Statistiken über das eigene Denken"""
+        return {
+            "total_processes": len(self.thinking_log),
+            "total_thoughts": sum(len(p.thoughts) for p in self.thinking_log),
+            "avg_thoughts_per_process": (sum(len(p.thoughts) for p in self.thinking_log) /
+                                        max(len(self.thinking_log), 1)),
+            "biases_encountered": list(set(
+                b for p in self.thinking_log for b in p.biases_detected
+            )),
+            "current_process_active": self.current_process is not None
+        }
+
+
+# ============================================================
 # HOLO MIND - Zentrales Denk-Koordinationssystem
 # ============================================================
 
@@ -5144,9 +6485,17 @@ class HoloMind:
     - AnalogyEngine: Analogien finden
     - SelfChallenger: Sich selbst hinterfragen
 
+    Kognitive Systeme (v2.0):
+    - TheoryOfMind: Verstehen was andere denken/fühlen
+    - RealPlanningSystem: Echte ziel-orientierte Planung
+    - MentalSimulation: "Was passiert wenn...?" Szenarien
+    - AttentionSystem: Priorisierung und Fokus
+    - RecursiveReflection: Meta-Kognition, Denken übers Denken
+
     Das HoloMind ist das "Gehirn" das alles koordiniert.
 
     v1.0: Zentrale Denk-Koordination für systemweite Nutzung
+    v2.0: Erweitert um 5 kritische kognitive Systeme
     """
 
     def __init__(self, data_dir: str = "data"):
@@ -5162,6 +6511,13 @@ class HoloMind:
         self.hypothesis: Optional[HypothesisEngine] = None
         self.analogy: Optional[AnalogyEngine] = None
         self.challenger: Optional[SelfChallenger] = None
+
+        # Kognitive Systeme (v2.0)
+        self.theory_of_mind: Optional[TheoryOfMind] = None
+        self.planning: Optional[RealPlanningSystem] = None
+        self.simulation: Optional[MentalSimulation] = None
+        self.attention: Optional[AttentionSystem] = None
+        self.reflection: Optional[RecursiveReflection] = None
 
         # Denk-Historie
         self.thinking_history: List[ThinkingResult] = []
@@ -5192,6 +6548,13 @@ class HoloMind:
             self.analogy = AnalogyEngine(self.data_dir)
             self.challenger = SelfChallenger()
 
+            # Kognitive Systeme (v2.0)
+            self.theory_of_mind = TheoryOfMind()
+            self.planning = RealPlanningSystem()
+            self.simulation = MentalSimulation()
+            self.attention = AttentionSystem()
+            self.reflection = RecursiveReflection()
+
             # Verbinde Systeme untereinander
             self.thought_chain.connect_systems(
                 knowledge=self.knowledge,
@@ -5205,7 +6568,7 @@ class HoloMind:
             )
             self.curiosity.connect_curiosity_system(None)  # Wird später verbunden
 
-            logger.info("🧠 HoloMind: Alle Subsysteme initialisiert")
+            logger.info("🧠 HoloMind v2.0: Alle Subsysteme initialisiert (inkl. 5 kognitive Systeme)")
         except Exception as e:
             logger.warning(f"HoloMind Subsystem-Fehler: {e}")
 
@@ -5625,11 +6988,398 @@ class HoloMind:
                 "intuition": self.intuition is not None,
                 "hypothesis": self.hypothesis is not None,
                 "analogy": self.analogy is not None,
-                "challenger": self.challenger is not None
+                "challenger": self.challenger is not None,
+                # Kognitive Systeme v2.0
+                "theory_of_mind": self.theory_of_mind is not None,
+                "planning": self.planning is not None,
+                "simulation": self.simulation is not None,
+                "attention": self.attention is not None,
+                "reflection": self.reflection is not None
             },
             "auto_think_enabled": self.auto_think,
             "thinking_depth": self.thinking_depth
         }
+
+    # ================================================================
+    # KOGNITIVE SYSTEME v2.0 - Theory of Mind
+    # ================================================================
+
+    def understand_other(self, person_id: str, text: str) -> Dict[str, Any]:
+        """
+        Verstehe was eine andere Person denkt/fühlt.
+
+        Nutzt Theory of Mind um den mentalen Zustand zu analysieren.
+
+        Args:
+            person_id: ID der Person
+            text: Was die Person gesagt/geschrieben hat
+
+        Returns:
+            Dict mit mentalem Zustand und Empfehlungen
+        """
+        if not self.theory_of_mind:
+            return {"error": "Theory of Mind nicht initialisiert"}
+
+        # Analysiere mentalen Zustand
+        mental_state = self.theory_of_mind.analyze_mental_state(person_id, text)
+
+        # Sage Antwort-Präferenzen vorher
+        preferences = self.theory_of_mind.predict_response_preference(person_id)
+
+        # Was erwartet die Person?
+        expectations = self.theory_of_mind.what_does_person_expect(person_id, text)
+
+        return {
+            "mental_state": mental_state,
+            "response_preferences": preferences,
+            "expectations": expectations,
+            "how_to_respond": preferences.get("suggestions", [])
+        }
+
+    def simulate_perspective(self, person_id: str, situation: str) -> Dict[str, Any]:
+        """
+        Simuliere die Perspektive einer anderen Person.
+
+        "Wie würde diese Person die Situation sehen?"
+        """
+        if not self.theory_of_mind:
+            return {"error": "Theory of Mind nicht initialisiert"}
+
+        return self.theory_of_mind.simulate_perspective(person_id, situation)
+
+    # ================================================================
+    # KOGNITIVE SYSTEME v2.0 - Planung
+    # ================================================================
+
+    def create_plan(self, goal: str, motivation: str = "") -> Dict[str, Any]:
+        """
+        Erstellt einen Plan um ein Ziel zu erreichen.
+
+        Args:
+            goal: Was soll erreicht werden?
+            motivation: Warum ist das wichtig?
+
+        Returns:
+            Plan mit Schritten
+        """
+        if not self.planning:
+            return {"error": "Planungssystem nicht initialisiert"}
+
+        # Denke zuerst über das Ziel nach
+        thoughts = self.planning.think_about_goal(goal)
+
+        # Erstelle Plan
+        plan = self.planning.create_plan(goal, motivation)
+
+        return {
+            "plan_id": plan.plan_id,
+            "goal": plan.goal,
+            "steps": [
+                {
+                    "step_id": s.step_id,
+                    "description": s.description,
+                    "status": s.status.value
+                }
+                for s in plan.steps
+            ],
+            "success_criteria": plan.success_criteria,
+            "thoughts_about_goal": thoughts,
+            "total_steps": len(plan.steps)
+        }
+
+    def get_next_plan_step(self, plan_id: str) -> Optional[Dict]:
+        """Holt den nächsten ausführbaren Schritt eines Plans"""
+        if not self.planning:
+            return None
+        return self.planning.get_next_step(plan_id)
+
+    def complete_plan_step(self, plan_id: str, step_id: str, result: str = "") -> Dict:
+        """Markiert einen Planschritt als abgeschlossen"""
+        if not self.planning:
+            return {"error": "Planungssystem nicht initialisiert"}
+        return self.planning.complete_step(plan_id, step_id, result)
+
+    # ================================================================
+    # KOGNITIVE SYSTEME v2.0 - Mentale Simulation
+    # ================================================================
+
+    def what_if(self, hypothesis: str) -> Dict[str, Any]:
+        """
+        "Was wäre wenn...?" Gedankenexperiment.
+
+        Args:
+            hypothesis: z.B. "Was wenn ich die Wahrheit sage?"
+
+        Returns:
+            Simulierte Konsequenzen und Empfehlung
+        """
+        if not self.simulation:
+            return {"error": "Simulationssystem nicht initialisiert"}
+
+        return self.simulation.what_if(hypothesis)
+
+    def compare_options(self, options: List[str], context: str = "") -> Dict[str, Any]:
+        """
+        Vergleicht mehrere Optionen durch Simulation.
+
+        Args:
+            options: Liste von Optionen zum Vergleichen
+            context: Zusätzlicher Kontext
+
+        Returns:
+            Vergleich und Empfehlung
+        """
+        if not self.simulation:
+            return {"error": "Simulationssystem nicht initialisiert"}
+
+        return self.simulation.compare_options(options, context)
+
+    def imagine_future(self, current_situation: str,
+                       time_horizon: str = "short_term") -> Dict[str, Any]:
+        """
+        Stellt sich die Zukunft vor.
+
+        Args:
+            current_situation: Aktuelle Lage
+            time_horizon: short_term, medium_term, long_term
+
+        Returns:
+            Mögliche Zukunftsszenarien
+        """
+        if not self.simulation:
+            return {"error": "Simulationssystem nicht initialisiert"}
+
+        return self.simulation.imagine_future(current_situation, time_horizon)
+
+    # ================================================================
+    # KOGNITIVE SYSTEME v2.0 - Aufmerksamkeit
+    # ================================================================
+
+    def focus_on(self, content: str, source: str = "input") -> Dict[str, Any]:
+        """
+        Richtet Aufmerksamkeit auf etwas.
+
+        Args:
+            content: Worauf fokussieren?
+            source: Woher kommt es?
+
+        Returns:
+            Aufmerksamkeits-Item
+        """
+        if not self.attention:
+            return {"error": "Aufmerksamkeitssystem nicht initialisiert"}
+
+        item = self.attention.add_attention_item(content, source)
+        return {
+            "item_id": item.item_id,
+            "content": item.content,
+            "priority": item.priority.name,
+            "relevance": item.relevance_score
+        }
+
+    def what_needs_attention(self) -> List[Dict[str, Any]]:
+        """Was braucht gerade meine Aufmerksamkeit?"""
+        if not self.attention:
+            return []
+        return self.attention.what_needs_attention()
+
+    def is_this_a_distraction(self, new_content: str) -> Dict[str, Any]:
+        """Prüft ob etwas eine Ablenkung ist"""
+        if not self.attention:
+            return {"is_distraction": False}
+        return self.attention.is_distraction(new_content)
+
+    def get_current_focus(self) -> Optional[str]:
+        """Was hat gerade meinen Fokus?"""
+        if not self.attention:
+            return None
+        focus = self.attention.get_current_focus()
+        return focus.content if focus else None
+
+    # ================================================================
+    # KOGNITIVE SYSTEME v2.0 - Rekursive Reflexion
+    # ================================================================
+
+    def start_meta_observation(self, trigger: str) -> str:
+        """Beginnt den eigenen Denkprozess zu beobachten"""
+        if not self.reflection:
+            return ""
+        return self.reflection.start_thinking_observation(trigger)
+
+    def record_thought_for_reflection(self, thought: str) -> Dict[str, Any]:
+        """Zeichnet einen Gedanken zur Reflexion auf"""
+        if not self.reflection:
+            return {}
+        return self.reflection.record_thought(thought)
+
+    def end_meta_observation(self, outcome: str, was_effective: bool) -> Dict[str, Any]:
+        """Beendet die Beobachtung und reflektiert"""
+        if not self.reflection:
+            return {}
+        return self.reflection.end_thinking_observation(outcome, was_effective)
+
+    def am_i_thinking_clearly(self) -> Dict[str, Any]:
+        """Prüft ob das aktuelle Denken klar ist"""
+        if not self.reflection:
+            return {"clear": True}
+        return self.reflection.am_i_thinking_clearly()
+
+    def reflect_on_my_thinking(self, topic: str = "") -> Dict[str, Any]:
+        """Reflektiert über das eigene Denken allgemein"""
+        if not self.reflection:
+            return {}
+        return self.reflection.reflect_on_thinking(topic)
+
+    # ================================================================
+    # INTEGRIERTE METHODEN - Nutzt alle Systeme zusammen
+    # ================================================================
+
+    def deep_think(self, input_text: str, context: ThinkingContext,
+                   person_id: str = None) -> Dict[str, Any]:
+        """
+        Tiefes Denken das ALLE kognitiven Systeme nutzt.
+
+        Dies ist die umfassendste Denk-Methode die:
+        - Theory of Mind nutzt (wenn person_id gegeben)
+        - Aufmerksamkeit fokussiert
+        - Denkprozess reflektiert
+        - Simulationen durchführt
+        - Gedankenketten bildet
+
+        Args:
+            input_text: Der Input
+            context: Denkkontext
+            person_id: Optional Person die involviert ist
+
+        Returns:
+            Umfassendes Denk-Ergebnis
+        """
+        result = {
+            "input": input_text,
+            "context": context.value,
+            "thinking_process": [],
+            "mental_model_of_other": None,
+            "attention_focus": None,
+            "simulations": [],
+            "thought_chain": None,
+            "meta_reflection": None,
+            "final_insights": [],
+            "recommendations": []
+        }
+
+        # 1. Starte Meta-Beobachtung
+        if self.reflection:
+            self.start_meta_observation(f"deep_think: {input_text[:50]}")
+
+        # 2. Fokussiere Aufmerksamkeit
+        if self.attention:
+            focus_item = self.focus_on(input_text, "deep_think")
+            result["attention_focus"] = focus_item
+            if self.reflection:
+                self.record_thought_for_reflection("Aufmerksamkeit fokussiert")
+
+        # 3. Theory of Mind (wenn Person involviert)
+        if person_id and self.theory_of_mind:
+            result["mental_model_of_other"] = self.understand_other(person_id, input_text)
+            if self.reflection:
+                self.record_thought_for_reflection(
+                    f"Verstehe was {person_id} denkt/fühlt"
+                )
+
+        # 4. Gedankenkette bilden
+        if self.thought_chain:
+            chain = self.thought_chain.think_about(input_text, depth=self.thinking_depth)
+            result["thought_chain"] = {
+                "chain_id": chain.chain_id,
+                "thoughts": [t.text for t in chain.thoughts],
+                "depth": chain.depth_reached
+            }
+            if self.reflection:
+                for t in chain.thoughts[:3]:
+                    self.record_thought_for_reflection(t.text)
+
+        # 5. Simulationen (bei Entscheidungen)
+        if context == ThinkingContext.DECISION and self.simulation:
+            sim = self.what_if(f"Was wenn ich {input_text}?")
+            result["simulations"].append(sim)
+            if self.reflection:
+                self.record_thought_for_reflection("Konsequenzen simuliert")
+
+        # 6. Insights extrahieren
+        if result["thought_chain"]:
+            result["final_insights"] = [
+                t for t in result["thought_chain"]["thoughts"]
+                if any(word in t.lower() for word in ["also", "bedeutet", "verstehe", "erkenne"])
+            ]
+
+        # 7. Empfehlungen generieren
+        if result["mental_model_of_other"]:
+            prefs = result["mental_model_of_other"].get("response_preferences", {})
+            result["recommendations"].extend(prefs.get("suggestions", []))
+
+        # 8. Meta-Reflexion abschließen
+        if self.reflection:
+            reflection_result = self.end_meta_observation(
+                outcome=f"Deep thinking über '{input_text[:30]}' abgeschlossen",
+                was_effective=len(result["final_insights"]) > 0
+            )
+            result["meta_reflection"] = reflection_result
+
+        return result
+
+    def smart_respond_preparation(self, user_input: str, user_id: str) -> Dict[str, Any]:
+        """
+        Bereitet eine intelligente Antwort vor.
+
+        Nutzt kognitive Systeme um zu verstehen:
+        - Was will der User wirklich?
+        - Wie fühlt er sich?
+        - Was erwartet er?
+        - Worauf sollte ich achten?
+        - Wie sollte ich antworten?
+
+        Args:
+            user_input: Was der User gesagt hat
+            user_id: ID des Users
+
+        Returns:
+            Vorbereitung für die Antwort
+        """
+        prep = {
+            "user_understanding": None,
+            "attention_items": [],
+            "is_distraction": False,
+            "response_strategy": {},
+            "things_to_avoid": [],
+            "emotional_tone_recommended": "neutral"
+        }
+
+        # Verstehe den User
+        if self.theory_of_mind:
+            prep["user_understanding"] = self.understand_other(user_id, user_input)
+
+            # Empfohlener emotionaler Ton
+            prefs = prep["user_understanding"].get("response_preferences", {})
+            prep["emotional_tone_recommended"] = prefs.get("tone", "neutral")
+
+            # Strategie
+            if prefs.get("emotional_support"):
+                prep["response_strategy"]["priority"] = "empathy_first"
+            if prefs.get("direct_answer"):
+                prep["response_strategy"]["style"] = "direct"
+
+        # Was braucht Aufmerksamkeit?
+        if self.attention:
+            self.focus_on(user_input, f"user:{user_id}")
+            prep["attention_items"] = self.what_needs_attention()
+
+        # Prüfe Denkklarheit
+        if self.reflection:
+            clarity = self.am_i_thinking_clearly()
+            if not clarity.get("clear", True):
+                prep["things_to_avoid"].extend(clarity.get("issues", []))
+
+        return prep
 
 
 # ============================================================
