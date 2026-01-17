@@ -84,6 +84,28 @@ try:
 except ImportError:
     ThoughtGenerator = None  # Fallback wird unten definiert
 
+# TopicTracker aus holo_context_mind importieren
+try:
+    from holo_context_mind import TopicTracker
+except ImportError:
+    TopicTracker = None  # Fallback wird unten definiert
+
+# InitiativeMessageGenerator und KemonomimiExpression aus holo_personality importieren
+try:
+    from holo_personality import InitiativeMessageGenerator, KemonomimiExpression
+    KemonominiExpressions = KemonomimiExpression  # Alias für Kompatibilität
+except ImportError:
+    InitiativeMessageGenerator = None
+    KemonomimiExpression = None
+    KemonominiExpressions = None
+
+# DaydreamEngine und PersonalGrowth aus holo_consciousness importieren
+try:
+    from holo_consciousness import DaydreamEngine, PersonalGrowth
+except ImportError:
+    DaydreamEngine = None
+    PersonalGrowth = None
+
 # HoloCreativeMind für intelligente autonome Bildgenerierung
 try:
     from holo_creative_mind import HoloCreativeMind, ImageType
@@ -8850,16 +8872,16 @@ class HoloAutonomy:
         self.web_curiosity = web_curiosity
 
         # Komponenten (aus self_agency)
-        self.expressions = KemonominiExpressions()
+        self.expressions = KemonominiExpressions() if KemonominiExpressions else None
         self.projects = ProjectManager()
-        self.daydreams = DaydreamEngine()
+        self.daydreams = DaydreamEngine() if DaydreamEngine else None
         self.activities = SoloActivities()
-        self.growth = PersonalGrowth()
+        self.growth = PersonalGrowth() if PersonalGrowth else None
 
         # Komponenten (aus hub)
-        self.relationship = RelationshipTracker(memory_system)
+        self.relationship = RelationshipTracker()
         self.opinions = OpinionSystem()
-        self.initiative = InitiativeCoordinator(energy_system, autonomous_life)
+        self.initiative = InitiativeCoordinator()
 
         # State
         self.last_update: float = time.time()
@@ -9239,8 +9261,8 @@ class HoloAutonomyEngine:
         # Komponenten
         self.initiative = InitiativeEngine(self.config)
         self.thoughts = ThoughtGenerator() if ThoughtGenerator else None
-        self.topics = TopicTracker(self.config)
-        self.messages = InitiativeMessageGenerator()
+        self.topics = TopicTracker() if TopicTracker else None
+        self.messages = InitiativeMessageGenerator() if InitiativeMessageGenerator else None
 
         # State
         self.goals: List[HoloGoal] = []
@@ -9268,15 +9290,16 @@ class HoloAutonomyEngine:
 
         # Gedanken generieren (alle 30 Min) - nur wenn ThoughtGenerator verfügbar
         if self.thoughts and now - self.thoughts.last_thought_time > self.config.thought_interval_minutes * 60:
+            tracked = list(self.topics.topics.values()) if self.topics else []
             thought = self.thoughts.generate_thought(
-                tracked_topics=list(self.topics.topics.values())
+                tracked_topics=tracked
             )
             if thought:
                 self.thoughts.add_thought(thought)
                 self.thoughts.last_thought_time = now
 
         # Prüfe ob Initiative nötig
-        has_pending = len(self.topics.get_followup_topics()) > 0
+        has_pending = len(self.topics.get_followup_topics()) > 0 if self.topics else False
 
         should_act, init_type = self.initiative.should_take_initiative(
             energy=energy,
@@ -9304,16 +9327,17 @@ class HoloAutonomyEngine:
         self.initiative.update_interaction()
         self.pending_message = None
 
-        # Themen extrahieren und tracken
-        extracted = self.topics.extract_topics(message, sentiment)
-        for trigger, context, category in extracted:
-            needs_followup = category in ["high", "emotional", "future"]
-            self.topics.track(
-                topic=trigger,
-                context=context,
-                sentiment=sentiment,
-                needs_followup=needs_followup,
-            )
+        # Themen extrahieren und tracken (nur wenn TopicTracker verfügbar)
+        if self.topics:
+            extracted = self.topics.extract_topics(message, sentiment)
+            for trigger, context, category in extracted:
+                needs_followup = category in ["high", "emotional", "future"]
+                self.topics.track(
+                    topic=trigger,
+                    context=context,
+                    sentiment=sentiment,
+                    needs_followup=needs_followup,
+                )
 
     def on_holo_response(self, response: str):
         """Verarbeite Holos eigene Antwort"""
@@ -9343,12 +9367,17 @@ class HoloAutonomyEngine:
     def _generate_initiative_message(self, init_type: InitiativeType) -> Optional[str]:
         """Generiere Nachricht für Initiative-Typ"""
 
+        # Kein MessageGenerator verfügbar
+        if not self.messages:
+            return None
+
         # Für ASK_FOLLOWUP brauchen wir ein Topic
         if init_type == InitiativeType.ASK_FOLLOWUP:
-            followup_topics = self.topics.get_followup_topics()
+            followup_topics = self.topics.get_followup_topics() if self.topics else []
             if followup_topics:
                 topic = followup_topics[0]
-                self.topics.mark_followup_sent(topic.topic)
+                if self.topics:
+                    self.topics.mark_followup_sent(topic.topic)
                 return self.messages.generate(init_type, topic=topic)
             else:
                 # Fallback zu CHECK_IN
@@ -9405,8 +9434,8 @@ class HoloAutonomyEngine:
         return {
             "time_since_interaction": time.time() - self.initiative.last_interaction,
             "initiatives_today": self.initiative.initiatives_today,
-            "tracked_topics": len(self.topics.topics),
-            "pending_followups": len(self.topics.get_followup_topics()),
+            "tracked_topics": len(self.topics.topics) if self.topics else 0,
+            "pending_followups": len(self.topics.get_followup_topics()) if self.topics else 0,
             "stored_thoughts": len(self.thoughts.thoughts) if self.thoughts else 0,
             "unshared_thoughts": len(self.thoughts.get_unshared_thoughts()) if self.thoughts else 0,
             "active_goals": len(self.get_active_goals()),
@@ -9428,10 +9457,14 @@ class HoloAutonomyEngine:
             return
 
         try:
+            topics_data = {}
+            if self.topics:
+                topics_data = {k: v.__dict__ for k, v in self.topics.topics.items()}
+
             data = {
                 "last_interaction": self.initiative.last_interaction,
                 "initiatives_today": self.initiative.initiatives_today,
-                "topics": {k: v.__dict__ for k, v in self.topics.topics.items()},
+                "topics": topics_data,
                 "timestamp": time.time(),
             }
 
@@ -10750,9 +10783,7 @@ class HoloAgentLoop:
 # KOMPATIBILITÄTS-ALIASE
 # =============================================================================
 
-# KemonominiExpressions (aus autonomy.py) -> KemonomimiExpression in personality
-# Import bei Bedarf: from holo_personality import KemonomimiExpression as KemonominiExpressions
-KemonominiExpressions = None  # Alias wird bei Import von personality gesetzt
+# KemonominiExpressions wird oben importiert als Alias für KemonomimiExpression
 
 
 # =============================================================================
