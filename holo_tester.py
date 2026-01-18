@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.0                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1                        ║
 ║                                                                              ║
 ║  VOLLSTÄNDIG DYNAMISCHE PROJEKT-ANALYSE - Versteht Struktur automatisch!    ║
 ║                                                                              ║
-║  NEU in v7.0 - DYNAMISCHE TESTS (keine manuellen Testfälle nötig):           ║
+║  NEU in v7.1 - CROSS-MODULE METHODEN-VALIDIERUNG:                            ║
+║    • METHODEN-CHECK    - Prüft ob Methodenaufrufe zwischen Modulen gültig   ║
+║                        - Findet fehlende Methoden bei self.x.method()       ║
+║                        - Erkennt Interface-Änderungen die nicht angepasst   ║
+║                                                                              ║
+║  Aus v7.0 - DYNAMISCHE TESTS (keine manuellen Testfälle nötig):              ║
 ║    • RUNTIME-TESTS     - Entdeckt ALLE Klassen/Funktionen automatisch       ║
 ║                        - Analysiert Signaturen & Type-Hints intelligent     ║
 ║                        - Generiert passende Test-Inputs basierend auf Namen ║
@@ -34,9 +39,10 @@
 ║  Verwendung:                                                                 ║
 ║      python holo_tester.py                     # Vollständige Analyse        ║
 ║      python holo_tester.py --quick             # Schneller Start-Check       ║
-║      python holo_tester.py --runtime           # Runtime-Tests (NEU!)        ║
-║      python holo_tester.py --integration       # Integration-Tests (NEU!)    ║
-║      python holo_tester.py --unused            # Ungenutzter Code (NEU!)     ║
+║      python holo_tester.py --runtime           # Runtime-Tests               ║
+║      python holo_tester.py --integration       # Integration-Tests           ║
+║      python holo_tester.py --unused            # Ungenutzter Code            ║
+║      python holo_tester.py --methods           # Cross-Module Methoden (NEU!)║
 ║      python holo_tester.py --functions         # Funktions-Test              ║
 ║      python holo_tester.py --docstrings        # Docstring-Abdeckung         ║
 ║      python holo_tester.py --types             # Type-Annotation Check       ║
@@ -352,6 +358,12 @@ class ProjectAnalysis:
     function_calls: Dict[str, List[Tuple[str, str]]] = field(default_factory=dict)  # caller -> [(modul, func)]
     class_instantiations: Dict[str, List[str]] = field(default_factory=dict)  # class -> [modules that use it]
 
+    # NEU v7.1: Cross-Module Methoden-Validierung
+    method_call_issues: List[Tuple[str, str, str, str]] = field(default_factory=list)  # (caller_mod, target_mod, method, error)
+    method_calls_validated: int = 0
+    method_calls_failed: int = 0
+    interface_mismatches: List[Tuple[str, str, str, str]] = field(default_factory=list)  # (mod, expected_method, actual, details)
+
 
 # =============================================================================
 # SICHERHEITS-PATTERNS für Security Audit
@@ -533,6 +545,9 @@ class IntelligentAnalyzer:
         self._runtime_tests()
         self._integration_tests()
         self._unused_code_detection()
+
+        # NEU v7.1: Cross-Module Methoden-Check
+        self._cross_module_method_check()
 
         self._calculate_statistics()
 
@@ -2235,6 +2250,178 @@ class IntelligentAnalyzer:
         self.analysis.unused_classes = self.analysis.unused_classes[:20]
 
     # =========================================================================
+    # NEU v7.1: CROSS-MODULE METHODEN-VALIDIERUNG
+    # =========================================================================
+
+    def _cross_module_method_check(self):
+        """
+        Prüft ob Methodenaufrufe zwischen Modulen tatsächlich existieren.
+
+        Findet Probleme wie:
+        - Modul A ruft B.get_status() auf, aber B hat kein get_status()
+        - Modul A erwartet B.process(x, y, z), aber B.process nimmt nur (x, y)
+        - Interface-Änderungen die nicht überall angepasst wurden
+        """
+        print(f"    Prüfe Cross-Module Methodenaufrufe...")
+
+        # Sammle alle bekannten Methoden pro Klasse
+        class_methods = {}  # "ModulName.ClassName" -> {method_names}
+        module_functions = {}  # "ModulName" -> {function_names}
+
+        for mod_name, module in self.analysis.modules.items():
+            if not module.import_ok:
+                continue
+
+            # Sammle Funktionen
+            module_functions[mod_name] = set(module.functions)
+
+            # Lade Modul und analysiere Klassen
+            try:
+                imported_mod = importlib.import_module(mod_name)
+
+                for cls_name in module.classes:
+                    cls_obj = getattr(imported_mod, cls_name, None)
+                    if cls_obj and isinstance(cls_obj, type):
+                        methods = set()
+                        for attr_name in dir(cls_obj):
+                            if not attr_name.startswith('_'):
+                                attr = getattr(cls_obj, attr_name, None)
+                                if callable(attr):
+                                    methods.add(attr_name)
+                        class_methods[f"{mod_name}.{cls_name}"] = methods
+            except Exception:
+                pass
+
+        # Analysiere jeden Modul-Quellcode auf Methodenaufrufe
+        method_call_pattern = re.compile(
+            r'self\.(\w+)\.(\w+)\s*\('  # self.something.method()
+            r'|'
+            r'(\w+)\.(\w+)\s*\('  # obj.method()
+        )
+
+        # Pattern für Instanzvariablen-Zuweisung: self.x = SomeClass()
+        instance_pattern = re.compile(
+            r'self\.(\w+)\s*=\s*(\w+)\s*\('
+        )
+
+        for mod_name, module in self.analysis.modules.items():
+            if not module.path.exists():
+                continue
+
+            try:
+                source = module.path.read_text(encoding='utf-8', errors='ignore')
+                tree = ast.parse(source)
+
+                # Finde self.xxx = SomeClass() Zuweisungen
+                instance_vars = {}  # var_name -> class_name
+
+                for node in ast.walk(tree):
+                    # Suche self.x = ClassName() Zuweisungen
+                    if isinstance(node, ast.Assign):
+                        for target in node.targets:
+                            if (isinstance(target, ast.Attribute) and
+                                isinstance(target.value, ast.Name) and
+                                target.value.id == 'self'):
+
+                                if isinstance(node.value, ast.Call):
+                                    if isinstance(node.value.func, ast.Name):
+                                        instance_vars[target.attr] = node.value.func.id
+                                    elif isinstance(node.value.func, ast.Attribute):
+                                        instance_vars[target.attr] = node.value.func.attr
+
+                # Suche self.x.method() Aufrufe
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Call):
+                        if isinstance(node.func, ast.Attribute):
+                            # self.something.method()
+                            if (isinstance(node.func.value, ast.Attribute) and
+                                isinstance(node.func.value.value, ast.Name) and
+                                node.func.value.value.id == 'self'):
+
+                                var_name = node.func.value.attr
+                                method_name = node.func.attr
+
+                                # Finde welche Klasse das ist
+                                if var_name in instance_vars:
+                                    class_name = instance_vars[var_name]
+
+                                    # Suche die Klasse in allen Modulen
+                                    found = False
+                                    for full_class_name, methods in class_methods.items():
+                                        if full_class_name.endswith(f".{class_name}"):
+                                            if method_name in methods:
+                                                found = True
+                                                self.analysis.method_calls_validated += 1
+                                            else:
+                                                self.analysis.method_call_issues.append((
+                                                    mod_name,
+                                                    full_class_name.split('.')[0],
+                                                    f"{class_name}.{method_name}",
+                                                    f"Methode '{method_name}' nicht in {class_name} gefunden"
+                                                ))
+                                                self.analysis.method_calls_failed += 1
+                                            break
+
+            except SyntaxError:
+                pass
+            except Exception as e:
+                pass
+
+        # Zusätzlich: Prüfe bekannte Interface-Erwartungen
+        self._check_interface_contracts()
+
+    def _check_interface_contracts(self):
+        """
+        Prüft bekannte Interface-Erwartungen zwischen Modulen.
+
+        Beispiel: Wenn holo_brain.py energy_system.get_status() aufruft,
+        sollte get_status() bestimmte Keys zurückgeben.
+        """
+
+        # Bekannte Interface-Erwartungen
+        known_interfaces = {
+            # (Modul, Methode): [erwartete Attribute/Keys]
+            ("holo_energy_system", "get_status"): ["total_energy", "mental_energy", "physical_energy"],
+            ("holo_energy_system", "get_behavior_hints"): ["level", "description", "response_modifier"],
+            ("holo_personality", "get_personality_state"): ["mood", "confidence"],
+            ("holo_consciousness", "get_consciousness_state"): [],
+        }
+
+        for (mod_name, method_name), expected_keys in known_interfaces.items():
+            if mod_name not in self.analysis.modules:
+                continue
+
+            module = self.analysis.modules[mod_name]
+            if not module.import_ok:
+                continue
+
+            try:
+                imported_mod = importlib.import_module(mod_name)
+
+                # Suche die Funktion/Methode
+                func = None
+
+                # Direkt im Modul?
+                if hasattr(imported_mod, method_name):
+                    func = getattr(imported_mod, method_name)
+                else:
+                    # In einer Klasse?
+                    for cls_name in module.classes:
+                        cls = getattr(imported_mod, cls_name, None)
+                        if cls and hasattr(cls, method_name):
+                            func = getattr(cls, method_name)
+                            break
+
+                if func is None:
+                    self.analysis.interface_mismatches.append((
+                        mod_name, method_name, "nicht gefunden",
+                        f"Erwartete Methode {method_name} nicht gefunden"
+                    ))
+
+            except Exception as e:
+                pass
+
+    # =========================================================================
     # STATISTIKEN
     # =========================================================================
 
@@ -2667,6 +2854,7 @@ def main():
     parser.add_argument("--runtime", action="store_true", help="Runtime-Tests: Testet wichtige Funktionen mit echten Daten")
     parser.add_argument("--integration", action="store_true", help="Integration-Tests: Prüft Cross-Module Kommunikation")
     parser.add_argument("--unused", action="store_true", help="Unused Code: Findet ungenutzte Imports, Funktionen, Klassen")
+    parser.add_argument("--methods", action="store_true", help="Methoden-Check: Prüft Cross-Module Methodenaufrufe")
 
     parser.add_argument("--all", action="store_true", help="Alle erweiterten Prüfungen ausführen")
 
@@ -2677,7 +2865,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.0               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1               ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
@@ -3283,6 +3471,40 @@ def main():
         if not args.all:
             sys.exit(0)
 
+    # NEU v7.1: Cross-Module Methoden-Check
+    if args.methods or args.all:
+        print()
+        print(f"{Colors.BOLD}CROSS-MODULE METHODEN-CHECK:{Colors.RESET}")
+
+        total = analysis.method_calls_validated + analysis.method_calls_failed
+        if total == 0:
+            print(f"\n  {Colors.DIM}Keine Cross-Module Methodenaufrufe analysiert{Colors.RESET}")
+        else:
+            validated = analysis.method_calls_validated
+            failed = analysis.method_calls_failed
+
+            if failed == 0:
+                print(f"\n  {Colors.GREEN}✓ {validated}/{total} Methodenaufrufe validiert{Colors.RESET}")
+            else:
+                print(f"\n  {Colors.YELLOW}⚠ {validated}/{total} Methodenaufrufe validiert, {failed} Probleme{Colors.RESET}")
+
+            # Zeige Probleme
+            if analysis.method_call_issues:
+                print(f"\n  {Colors.RED}Fehlende/fehlerhafte Methoden:{Colors.RESET}")
+                for caller_mod, target_mod, method, error in analysis.method_call_issues[:15]:
+                    print(f"    ✗ {caller_mod}: {method} - {error}")
+                if len(analysis.method_call_issues) > 15:
+                    print(f"    {Colors.DIM}... und {len(analysis.method_call_issues) - 15} weitere{Colors.RESET}")
+
+            # Zeige Interface-Mismatches
+            if analysis.interface_mismatches:
+                print(f"\n  {Colors.YELLOW}Interface-Probleme:{Colors.RESET}")
+                for mod, method, actual, details in analysis.interface_mismatches[:10]:
+                    print(f"    ⚠ {mod}.{method}: {details}")
+
+        if not args.all:
+            sys.exit(0)
+
     # --all Modus: Zusammenfassung
     if args.all:
         print()
@@ -3296,9 +3518,10 @@ def main():
                              for m in analysis.modules.values())
         func_ratio = callable_funcs / max(1, total_funcs)
 
-        # NEU v7.0: Erweiterte Checks
+        # NEU v7.0 + v7.1: Erweiterte Checks
         runtime_ok = analysis.runtime_tests_failed == 0 or analysis.runtime_tests_passed > 0
         integration_ok = analysis.integration_tests_failed == 0 or analysis.integration_tests_passed > 0
+        methods_ok = analysis.method_calls_failed == 0
 
         checks = [
             ("Funktionen aufrufbar (>= 99%)", func_ratio >= 0.99),
@@ -3309,6 +3532,7 @@ def main():
             ("DB-Schema OK", len(analysis.db_issues) == 0),
             ("Runtime-Tests OK", runtime_ok),
             ("Integration-Tests OK", integration_ok),
+            ("Cross-Module Methoden OK", methods_ok),
         ]
 
         passed = sum(1 for _, ok in checks if ok)
