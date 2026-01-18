@@ -5113,6 +5113,39 @@ class EmotionalCore:
         else:
             return "freundlich-warmherzig"
 
+    def trigger_emotion(self, emotion: str, intensity: float = 0.5):
+        """
+        Löst eine spezifische Emotion aus.
+
+        Args:
+            emotion: Name der Emotion (pride, curiosity, joy, sadness, etc.)
+            intensity: Stärke der Emotion (0.0 - 1.0)
+        """
+        # Mapping von Emotionen zu Dimensionen
+        emotion_mappings = {
+            "pride": {"confidence": 0.3, "mood": 0.2},
+            "curiosity": {"creativity": 0.3, "energy": 0.1},
+            "joy": {"mood": 0.4, "energy": 0.2, "playfulness": 0.2},
+            "sadness": {"mood": -0.3, "energy": -0.1},
+            "excitement": {"energy": 0.3, "arousal": 0.3, "mood": 0.2},
+            "love": {"affection": 0.4, "mood": 0.2},
+            "fear": {"confidence": -0.2, "arousal": 0.2},
+            "anger": {"arousal": 0.3, "mood": -0.2},
+            "calm": {"arousal": -0.2, "energy": -0.1},
+            "playful": {"playfulness": 0.3, "mood": 0.1},
+        }
+
+        if emotion in emotion_mappings:
+            changes = emotion_mappings[emotion]
+            for dim, base_change in changes.items():
+                if dim in self.dimensions:
+                    change = base_change * intensity
+                    self.dimensions[dim] = max(0.0, min(1.0, self.dimensions[dim] + change))
+
+        # Cache invalidieren
+        self._cached_results.pop("detailed_state", None)
+        self._cached_results.pop("personality", None)
+
     def get_seasonal_greeting(self) -> Optional[str]:
         """Gibt einen saisonalen Gruß zurück wenn ein Event aktiv ist"""
         for event_info in self.current_events:

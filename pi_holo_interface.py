@@ -436,6 +436,47 @@ class PiControlBridge:
 
         return f"NAS: {nas} | CPU: {cpu} | Governor: {gov}{weather_str}"
 
+    # === FEHLENDE METHODEN (für Cross-Module Kompatibilität) ===
+
+    def _api_call(self, endpoint: str, method: str = "GET", data: Dict = None) -> Optional[Dict]:
+        """Führt API-Call zu Pi-Control aus"""
+        try:
+            url = f"{self.api_url}{endpoint}"
+            if method == "GET":
+                resp = requests.get(url, timeout=InterfaceConfig.API_TIMEOUT)
+            else:
+                resp = requests.post(url, json=data, timeout=InterfaceConfig.API_TIMEOUT)
+
+            if resp.status_code == 200:
+                return resp.json()
+            return None
+        except Exception as e:
+            logger.debug(f"[BRIDGE] API call failed: {e}")
+            return None
+
+    def suspend_nas(self) -> bool:
+        """Versetzt NAS in Standby"""
+        result = self._api_call("/api/nas/suspend", "POST")
+        return result is not None and result.get("success", False)
+
+    def skill(self, skill_name: str, params: Dict = None) -> Optional[Dict]:
+        """Führt einen Skill auf Pi-Control aus"""
+        result = self._api_call(f"/api/skill/{skill_name}", "POST", params or {})
+        return result
+
+    def get_news(self, category: str = None, limit: int = 10) -> List[Dict]:
+        """Holt News von Pi-Control"""
+        endpoint = "/api/news"
+        if category:
+            endpoint += f"?category={category}&limit={limit}"
+        else:
+            endpoint += f"?limit={limit}"
+
+        result = self._api_call(endpoint)
+        if result and "articles" in result:
+            return result["articles"]
+        return []
+
 
 # =============================================================================
 # HOLO CONTEXT PROVIDER - NEU IN v12!

@@ -790,6 +790,67 @@ class HoloEnergyManagement:
 
         return "\n".join(sections)
 
+    # =========================================================================
+    # FEHLENDE METHODEN (für Cross-Module Kompatibilität)
+    # =========================================================================
+
+    def consume_energy_for_response(self, complexity: float = 0.5):
+        """Verbraucht Energie für eine Antwort"""
+        if self.energy:
+            cost = 0.02 * complexity  # 2% * Komplexität
+            self.energy.consume("response", cost)
+
+    def _save(self):
+        """Speichert den aktuellen Zustand"""
+        # Wird von Subklassen überschrieben
+        pass
+
+    def get_energy_status_thought(self) -> str:
+        """Gibt einen Gedanken zum Energiestatus zurück"""
+        if not self.energy:
+            return "Alles okay"
+
+        status = self.energy.get_status()
+        level = status.get('total_energy', 0.5)
+
+        if level < 0.15:
+            return "*gähnt schwer* Ich bin wirklich erschöpft..."
+        elif level < 0.35:
+            return "Langsam wird's anstrengend..."
+        elif level < 0.55:
+            return "Geht so, bisschen müde."
+        elif level > 0.85:
+            return "Ich fühl mich super energiegeladen!"
+        else:
+            return "Alles okay"
+
+    def _get_engagement_thought(self, decision: 'EnergyDecision') -> str:
+        """Gibt einen Gedanken zur Engagement-Entscheidung zurück"""
+        thoughts = {
+            EnergyDecision.FULL_ENGAGE: "Das interessiert mich! Da geh ich voll rein!",
+            EnergyDecision.CAUTIOUS: "Hmm, ich mach mal vorsichtig...",
+            EnergyDecision.MINIMAL: "Nur das Nötigste...",
+            EnergyDecision.POSTPONE: "Das mach ich später, wenn ich mehr Energie hab.",
+            EnergyDecision.DECLINE: "Ne, das ist mir grad zu viel.",
+        }
+        return thoughts.get(decision, "")
+
+    def get_paused_activities_summary(self) -> List[str]:
+        """Gibt Zusammenfassung pausierter Aktivitäten zurück"""
+        summaries = []
+        for activity in self.paused_activities:
+            summaries.append(f"{activity.name} ({activity.progress:.0%} erledigt)")
+        return summaries
+
+    def resume_paused_activity(self, activity_id: str) -> Optional['PlannedActivity']:
+        """Setzt eine pausierte Aktivität fort"""
+        for i, activity in enumerate(self.paused_activities):
+            if activity.name == activity_id or str(i) == activity_id:
+                resumed = self.paused_activities.pop(i)
+                self.current_activity = resumed
+                return resumed
+        return None
+
 
 # =============================================================================
 # ENERGY BUDGET PLANNER - Tagesplanung

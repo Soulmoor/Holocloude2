@@ -507,6 +507,7 @@ class FallbackPersonalityEngine:
     """Fallback wenn holo_personality.py nicht existiert"""
     def __init__(self, *args, **kwargs):
         logger.warning("⚠️ Using FallbackPersonalityEngine")
+        self._background_running = False
 
     def get_personality_context(self):
         return "Du bist Holo, eine freundliche und weise Wölfin."
@@ -522,6 +523,42 @@ class FallbackPersonalityEngine:
 
     def update(self, context=None):
         pass
+
+    def analyze_content(self, content: str) -> dict:
+        """Analysiert Inhalt - Fallback gibt leeres Dict zurück"""
+        return {}
+
+    def likes(self, topic: str) -> bool:
+        """Prüft ob Holo etwas mag - Fallback ist neutral"""
+        return False
+
+    def dislikes(self, topic: str) -> bool:
+        """Prüft ob Holo etwas nicht mag - Fallback ist neutral"""
+        return False
+
+    def has_opinion_on(self, topic: str) -> bool:
+        """Prüft ob Meinung zu Thema existiert"""
+        return False
+
+    def get_opinion(self, topic: str) -> str:
+        """Holt Meinung zu Thema"""
+        return ""
+
+    def get_feeling_about(self, topic: str) -> dict:
+        """Holt Gefühl zu Thema"""
+        return {"feeling": "neutral", "intensity": 0.5}
+
+    def express_preference(self, topic: str, positive: bool = True):
+        """Drückt Präferenz aus"""
+        pass
+
+    def get_current_traits(self) -> list:
+        """Holt aktuelle Persönlichkeits-Traits"""
+        return ["freundlich", "neugierig", "warmherzig"]
+
+    def start_background_loop(self):
+        """Startet Hintergrund-Loop"""
+        self._background_running = True
 
 
 class FallbackLearningProtocol:
