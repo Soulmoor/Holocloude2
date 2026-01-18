@@ -3811,6 +3811,545 @@ class SmartResponseGenerator:
 
 
 # =============================================================================
+# USER PROFILE - Speichert Fakten über den User
+# =============================================================================
+
+@dataclass
+class UserProfile:
+    """
+    Speichert persönliche Informationen über den User für Personalisierung.
+    """
+    name: Optional[str] = None
+    nickname: Optional[str] = None
+    interests: List[str] = field(default_factory=list)
+    dislikes: List[str] = field(default_factory=list)
+    mood_history: List[Tuple[str, str]] = field(default_factory=list)  # (timestamp, mood)
+    facts: Dict[str, str] = field(default_factory=dict)  # Beliebige Fakten
+    last_topics: List[str] = field(default_factory=list)
+    conversation_count: int = 0
+
+    def add_interest(self, interest: str):
+        """Füge ein Interesse hinzu."""
+        if interest.lower() not in [i.lower() for i in self.interests]:
+            self.interests.append(interest)
+
+    def add_dislike(self, dislike: str):
+        """Füge ein Dislike hinzu."""
+        if dislike.lower() not in [d.lower() for d in self.dislikes]:
+            self.dislikes.append(dislike)
+
+    def add_fact(self, key: str, value: str):
+        """Speichere einen Fakt."""
+        self.facts[key.lower()] = value
+
+    def get_fact(self, key: str) -> Optional[str]:
+        """Hole einen Fakt."""
+        return self.facts.get(key.lower())
+
+    def record_mood(self, mood: str):
+        """Speichere aktuelle Stimmung."""
+        self.mood_history.append((datetime.now().isoformat(), mood))
+        # Nur letzte 20 behalten
+        if len(self.mood_history) > 20:
+            self.mood_history.pop(0)
+
+    def get_recent_mood(self) -> Optional[str]:
+        """Hole letzte bekannte Stimmung."""
+        if self.mood_history:
+            return self.mood_history[-1][1]
+        return None
+
+    def to_dict(self) -> Dict:
+        """Exportiere als Dictionary."""
+        return {
+            "name": self.name,
+            "nickname": self.nickname,
+            "interests": self.interests,
+            "dislikes": self.dislikes,
+            "facts": self.facts,
+            "conversation_count": self.conversation_count,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> "UserProfile":
+        """Erstelle aus Dictionary."""
+        profile = cls()
+        profile.name = data.get("name")
+        profile.nickname = data.get("nickname")
+        profile.interests = data.get("interests", [])
+        profile.dislikes = data.get("dislikes", [])
+        profile.facts = data.get("facts", {})
+        profile.conversation_count = data.get("conversation_count", 0)
+        return profile
+
+
+# =============================================================================
+# CONVERSATION ENGINE - Natürliche Gespräche führen
+# =============================================================================
+
+class ConversationEngine:
+    """
+    Erweiterte Engine für natürliche Gespräche.
+
+    Features:
+    - Aktive Kontext-Nutzung (Bezug auf vorherige Aussagen)
+    - Themen-Kontinuität (beim Thema bleiben, nachfragen)
+    - User-Profil (Fakten merken, Interessen)
+    - Natürliche Gesprächsübergänge
+    - Smalltalk-Fähigkeiten
+    """
+
+    # Kontext-bezogene Phrasen
+    CONTEXT_PHRASES = {
+        "reference_back": [
+            "Du hast vorhin erwähnt, dass {topic}...",
+            "Apropos {topic}, von dem du erzählt hast...",
+            "Zurück zu dem, was du über {topic} gesagt hast...",
+            "Das erinnert mich an das, was du über {topic} erzählt hast.",
+        ],
+        "follow_up": [
+            "Wie ist das denn ausgegangen?",
+            "Und was ist dann passiert?",
+            "Erzähl weiter!",
+            "Das klingt interessant, und dann?",
+            "Wie ging es weiter?",
+        ],
+        "show_interest": [
+            "Das klingt spannend!",
+            "Echt? Erzähl mehr!",
+            "Oh, das ist interessant!",
+            "Wow, wirklich?",
+            "*spitzt die Ohren* Und weiter?",
+        ],
+        "remember_fact": [
+            "Ich erinnere mich, du magst {fact}!",
+            "Du hast mal erzählt, dass {fact}.",
+            "Stimmt, {fact} war dir wichtig!",
+        ],
+        "topic_change": [
+            "Übrigens, ganz anderes Thema...",
+            "Ach, da fällt mir ein...",
+            "Apropos...",
+            "Was anderes:",
+        ],
+    }
+
+    # Smalltalk-Erweiterung
+    SMALLTALK_PHRASES = {
+        "general": [
+            "Und, was gibt's Neues bei dir?",
+            "Wie läuft dein Tag so?",
+            "Was beschäftigt dich gerade?",
+            "Erzähl mal, was macht das Leben?",
+            "Na, alles gut bei dir?",
+        ],
+        "reactions": {
+            "positive": [
+                "Das freut mich zu hören!",
+                "Klingt gut!",
+                "Schön!",
+                "Das ist toll!",
+            ],
+            "negative": [
+                "Oh nein...",
+                "Das tut mir leid.",
+                "Das klingt nicht so toll.",
+                "Ach menno...",
+            ],
+            "neutral": [
+                "Verstehe.",
+                "Aha, okay.",
+                "Mhm.",
+                "Interessant.",
+            ],
+        },
+        "fillers": [
+            "Hmm...",
+            "Also...",
+            "Naja...",
+            "*überlegt*",
+            "Lass mich kurz nachdenken...",
+        ],
+        "agreements": [
+            "Ja, das stimmt!",
+            "Da hast du recht.",
+            "Absolut!",
+            "Ganz genau!",
+            "Sehe ich auch so.",
+        ],
+        "disagreements": [
+            "Hmm, ich weiß nicht so recht...",
+            "Da bin ich mir nicht sicher.",
+            "Vielleicht, aber...",
+            "Kann man so sehen, aber...",
+        ],
+    }
+
+    # Fragen für verschiedene Themen
+    TOPIC_QUESTIONS = {
+        "work": [
+            "Wie läuft es bei der Arbeit?",
+            "Viel Stress im Job gerade?",
+            "Was macht die Arbeit?",
+        ],
+        "health": [
+            "Geht es dir gesundheitlich besser?",
+            "Wie fühlst du dich?",
+            "Passt du gut auf dich auf?",
+        ],
+        "hobbies": [
+            "Hattest du Zeit für deine Hobbys?",
+            "Was hast du in letzter Zeit so gemacht?",
+        ],
+        "relationships": [
+            "Wie geht es deinen Lieben?",
+            "Alles gut bei Freunden und Familie?",
+        ],
+        "gaming": [
+            "Zockst du gerade was Cooles?",
+            "Was spielst du so?",
+        ],
+        "music": [
+            "Hörst du gerade gute Musik?",
+            "Entdeckt du neue Songs?",
+        ],
+        "food": [
+            "Was Leckeres gegessen heute?",
+            "Kochst du gerade viel?",
+        ],
+        "weather": [
+            "Wie ist das Wetter bei dir?",
+            "Genießt du das Wetter?",
+        ],
+        "general": [
+            "Was beschäftigt dich so?",
+            "Erzähl mal, was gibt's Neues?",
+            "Wie geht's dir heute?",
+        ],
+    }
+
+    # Muster für Fakten-Erkennung
+    FACT_PATTERNS = {
+        "name": [
+            r"ich heiße (\w+)",
+            r"mein name ist (\w+)",
+            r"ich bin (?:der |die )?(\w+)",
+            r"nenn mich (\w+)",
+        ],
+        "age": [
+            r"ich bin (\d+)(?: jahre)?",
+            r"(\d+) jahre alt",
+        ],
+        "job": [
+            r"ich arbeite als (\w+)",
+            r"ich bin (\w+) von beruf",
+            r"beruflich bin ich (\w+)",
+        ],
+        "hobby": [
+            r"ich mag (\w+)",
+            r"ich liebe (\w+)",
+            r"mein hobby ist (\w+)",
+            r"ich spiele gern (\w+)",
+        ],
+        "dislike": [
+            r"ich hasse (\w+)",
+            r"ich mag kein(?:e|en)? (\w+)",
+            r"(\w+) nervt mich",
+        ],
+        "pet": [
+            r"ich habe (?:eine?n? )?(\w+)(?: als haustier)?",
+            r"mein(?:e)? (\w+) heißt",
+        ],
+        "location": [
+            r"ich wohne in (\w+)",
+            r"ich komme aus (\w+)",
+            r"ich lebe in (\w+)",
+        ],
+    }
+
+    def __init__(self, user_profile: UserProfile = None):
+        self.response_generator = SmartResponseGenerator()
+        self.analyzer = TextAnalyzer()
+        self.user_profile = user_profile or UserProfile()
+        import random
+        self.random = random
+
+        # Gesprächs-Tracking
+        self.current_topic: Optional[str] = None
+        self.topic_depth: int = 0  # Wie tief im Thema
+        self.messages_on_topic: int = 0
+        self.last_question_asked: Optional[str] = None
+
+    def chat(self, user_message: str, energy_level: float = 0.7) -> str:
+        """
+        Hauptmethode für Gespräche.
+
+        Args:
+            user_message: Die Nachricht des Users
+            energy_level: Holos Energie-Level
+
+        Returns:
+            Holos Antwort
+        """
+        # 1. Nachricht analysieren
+        analysis = self.analyzer.analyze(user_message)
+
+        # 2. Fakten extrahieren und speichern
+        self._extract_and_store_facts(user_message)
+
+        # 3. Stimmung tracken
+        if analysis.user_emotion:
+            self.user_profile.record_mood(analysis.user_emotion)
+
+        # 4. Thema aktualisieren
+        self._update_topic(analysis.topics)
+
+        # 5. Antwort generieren basierend auf Kontext
+        response = self._generate_contextual_response(
+            user_message, analysis, energy_level
+        )
+
+        # 6. Konversation zählen
+        self.user_profile.conversation_count += 1
+
+        # 7. Im Generator speichern
+        self.response_generator.remember_message(user_message, response)
+
+        return response
+
+    def _extract_and_store_facts(self, text: str):
+        """Extrahiere und speichere Fakten aus der Nachricht."""
+        text_lower = text.lower()
+
+        for fact_type, patterns in self.FACT_PATTERNS.items():
+            for pattern in patterns:
+                match = re.search(pattern, text_lower)
+                if match:
+                    value = match.group(1)
+
+                    if fact_type == "name":
+                        self.user_profile.name = value.capitalize()
+                        self.response_generator.set_user_name(value.capitalize())
+                    elif fact_type == "hobby":
+                        self.user_profile.add_interest(value)
+                    elif fact_type == "dislike":
+                        self.user_profile.add_dislike(value)
+                    else:
+                        self.user_profile.add_fact(fact_type, value)
+
+    def _update_topic(self, topics: List[str]):
+        """Aktualisiere das aktuelle Gesprächsthema."""
+        if topics:
+            new_topic = topics[0]
+            if new_topic == self.current_topic:
+                self.messages_on_topic += 1
+                self.topic_depth += 1
+            else:
+                # Neues Thema
+                self.current_topic = new_topic
+                self.messages_on_topic = 1
+                self.topic_depth = 1
+                self.user_profile.last_topics.append(new_topic)
+                # Nur letzte 5 Topics behalten
+                if len(self.user_profile.last_topics) > 5:
+                    self.user_profile.last_topics.pop(0)
+
+    def _generate_contextual_response(self,
+                                      user_message: str,
+                                      analysis: MessageAnalysis,
+                                      energy_level: float) -> str:
+        """Generiere eine kontextbezogene Antwort."""
+        parts = []
+
+        # Intent erkennen
+        intent = self.response_generator.detect_intent(user_message, analysis)
+
+        # 1. Auf direkte Fragen/Greetings reagieren
+        if intent == UserIntent.GREETING:
+            return self._handle_greeting_with_context()
+
+        if intent == UserIntent.FAREWELL:
+            return self._handle_farewell_with_context()
+
+        if intent == UserIntent.QUESTION:
+            return self._handle_question_with_context(user_message, analysis)
+
+        # 2. Basis-Antwort vom SmartResponseGenerator
+        base_response = self.response_generator._generate_standard_response(
+            user_message,
+            analysis.user_emotion,
+            analysis.topics,
+            True,  # include_action
+            energy_level,
+            analysis
+        )
+        parts.append(base_response)
+
+        # 3. Kontext-basierte Ergänzungen
+        context_addition = self._add_context_element(analysis)
+        if context_addition:
+            parts.append(context_addition)
+
+        # 4. Gelegentlich Rückfragen stellen
+        if self._should_ask_followup():
+            followup = self._generate_followup_question(analysis)
+            if followup:
+                parts.append(followup)
+                self.last_question_asked = followup
+
+        return " ".join(parts)
+
+    def _handle_greeting_with_context(self) -> str:
+        """Begrüßung mit Kontext (kennt User schon?)."""
+        base = self.response_generator._handle_greeting("", 0.7)
+
+        # Wenn wir den User kennen
+        if self.user_profile.name:
+            name = self.user_profile.name
+            greetings = [
+                f"Hey {name}! *wedelt* Schön dich zu sehen!",
+                f"Na {name}! Wie geht's dir?",
+                f"Oh, {name}! *freut sich* Da bist du ja!",
+                f"Hallo {name}! *wedelt aufgeregt*",
+            ]
+            base = self.random.choice(greetings)
+
+            # Bezug auf letzte Stimmung
+            last_mood = self.user_profile.get_recent_mood()
+            if last_mood and last_mood in ["sad", "anxious", "tired"]:
+                base += f" Geht es dir heute besser?"
+            elif self.user_profile.conversation_count > 5:
+                base += " Schön dass du wieder da bist!"
+
+        return base
+
+    def _handle_farewell_with_context(self) -> str:
+        """Verabschiedung mit Kontext."""
+        base = self.response_generator._handle_farewell("", 0.7)
+
+        if self.user_profile.name:
+            name = self.user_profile.name
+            farewells = [
+                f"Bis bald, {name}! *wedelt* Pass auf dich auf!",
+                f"Tschüss {name}! Meld dich bald wieder!",
+                f"Mach's gut, {name}! *kuschelt kurz*",
+            ]
+            base = self.random.choice(farewells)
+
+        return base
+
+    def _handle_question_with_context(self, text: str, analysis: MessageAnalysis) -> str:
+        """Fragen mit Kontext beantworten."""
+        text_lower = text.lower()
+
+        # Fragen über gespeicherte Fakten
+        if "wer bin ich" in text_lower or "kennst du mich" in text_lower:
+            if self.user_profile.name:
+                response = f"Klar kenne ich dich, {self.user_profile.name}!"
+                if self.user_profile.interests:
+                    response += f" Du magst {', '.join(self.user_profile.interests[:3])}."
+                return response
+            else:
+                return "Hmm, ich glaube du hast mir deinen Namen noch nicht verraten. Wie heißt du?"
+
+        if "was weißt du über mich" in text_lower:
+            return self._summarize_user_profile()
+
+        # Standard Frage-Handling
+        return self.response_generator._handle_question(text, analysis, 0.7)
+
+    def _summarize_user_profile(self) -> str:
+        """Fasse das User-Profil zusammen."""
+        parts = []
+
+        if self.user_profile.name:
+            parts.append(f"Du heißt {self.user_profile.name}.")
+
+        if self.user_profile.interests:
+            interests = ", ".join(self.user_profile.interests[:5])
+            parts.append(f"Du magst: {interests}.")
+
+        if self.user_profile.dislikes:
+            dislikes = ", ".join(self.user_profile.dislikes[:3])
+            parts.append(f"Du magst nicht: {dislikes}.")
+
+        for key, value in list(self.user_profile.facts.items())[:3]:
+            parts.append(f"Dein {key}: {value}.")
+
+        if parts:
+            return " ".join(parts) + " *wedelt stolz*"
+        else:
+            return "Hmm, ich weiß noch nicht so viel über dich. Erzähl mir was!"
+
+    def _add_context_element(self, analysis: MessageAnalysis) -> Optional[str]:
+        """Füge ein Kontext-Element hinzu (Bezug auf Vorheriges)."""
+        # Nur manchmal
+        if self.random.random() > 0.3:
+            return None
+
+        # Bezug auf Interesse des Users
+        if self.user_profile.interests and self.random.random() < 0.2:
+            interest = self.random.choice(self.user_profile.interests)
+            if interest.lower() in str(analysis.topics).lower():
+                phrases = self.CONTEXT_PHRASES["remember_fact"]
+                return self.random.choice(phrases).format(fact=f"du {interest} magst")
+
+        # Bezug auf vorheriges Thema
+        if len(self.user_profile.last_topics) > 1 and self.random.random() < 0.15:
+            old_topic = self.user_profile.last_topics[-2]
+            if old_topic != self.current_topic:
+                phrases = self.CONTEXT_PHRASES["reference_back"]
+                return self.random.choice(phrases).format(topic=old_topic)
+
+        return None
+
+    def _should_ask_followup(self) -> bool:
+        """Soll eine Rückfrage gestellt werden?"""
+        # Nicht zu oft fragen
+        if self.last_question_asked and self.random.random() > 0.3:
+            return False
+
+        # Nach 2-3 Nachrichten zum gleichen Thema
+        if self.messages_on_topic >= 2 and self.random.random() < 0.4:
+            return True
+
+        # Generell manchmal
+        return self.random.random() < 0.2
+
+    def _generate_followup_question(self, analysis: MessageAnalysis) -> Optional[str]:
+        """Generiere eine Rückfrage."""
+        # Themen-spezifische Frage
+        if self.current_topic and self.current_topic in self.TOPIC_QUESTIONS:
+            questions = self.TOPIC_QUESTIONS[self.current_topic]
+            return self.random.choice(questions)
+
+        # Allgemeine Follow-ups
+        if analysis.user_emotion:
+            return self.random.choice(self.CONTEXT_PHRASES["follow_up"])
+
+        # Interesse zeigen
+        return self.random.choice(self.CONTEXT_PHRASES["show_interest"])
+
+    def get_user_profile(self) -> UserProfile:
+        """Gibt das User-Profil zurück."""
+        return self.user_profile
+
+    def set_user_profile(self, profile: UserProfile):
+        """Setze ein User-Profil."""
+        self.user_profile = profile
+        if profile.name:
+            self.response_generator.set_user_name(profile.name)
+
+    def reset_conversation(self):
+        """Setze die Konversation zurück (aber behalte Profil)."""
+        self.current_topic = None
+        self.topic_depth = 0
+        self.messages_on_topic = 0
+        self.last_question_asked = None
+        self.response_generator.clear_context()
+
+
+# =============================================================================
 # REASONING ENGINE
 # =============================================================================
 
