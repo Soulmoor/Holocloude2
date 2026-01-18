@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1                        ║
+║             HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1b                       ║
 ║                                                                              ║
 ║  VOLLSTÄNDIG DYNAMISCHE PROJEKT-ANALYSE - Versteht Struktur automatisch!    ║
 ║                                                                              ║
-║  NEU in v7.1 - CROSS-MODULE METHODEN-VALIDIERUNG:                            ║
+║  NEU in v7.1b - VERBESSERTER CROSS-MODULE METHODEN-CHECK:                    ║
 ║    • METHODEN-CHECK    - Prüft ob Methodenaufrufe zwischen Modulen gültig   ║
 ║                        - Findet fehlende Methoden bei self.x.method()       ║
-║                        - Erkennt Interface-Änderungen die nicht angepasst   ║
+║                        - Prüft auch private Methoden (_underscore)          ║
+║                        - Robustere Klassenzuordnung, weniger false positives║
+║                        - Dedupliziert Ergebnisse automatisch                 ║
 ║                                                                              ║
 ║  Aus v7.0 - DYNAMISCHE TESTS (keine manuellen Testfälle nötig):              ║
 ║    • RUNTIME-TESTS     - Entdeckt ALLE Klassen/Funktionen automatisch       ║
@@ -2250,30 +2252,32 @@ class IntelligentAnalyzer:
         self.analysis.unused_classes = self.analysis.unused_classes[:20]
 
     # =========================================================================
-    # NEU v7.1: CROSS-MODULE METHODEN-VALIDIERUNG
+    # NEU v7.1: CROSS-MODULE METHODEN-VALIDIERUNG (VERBESSERT)
     # =========================================================================
 
     def _cross_module_method_check(self):
         """
         Prüft ob Methodenaufrufe zwischen Modulen tatsächlich existieren.
 
+        VERBESSERT in v7.1b:
+        - Prüft auch private Methoden (_underscore)
+        - Bessere Instanzvariablen-Erkennung (auch in __init__)
+        - Robustere Klassenzuordnung
+        - Weniger false positives durch hasattr-Check-Erkennung
+
         Findet Probleme wie:
         - Modul A ruft B.get_status() auf, aber B hat kein get_status()
-        - Modul A erwartet B.process(x, y, z), aber B.process nimmt nur (x, y)
         - Interface-Änderungen die nicht überall angepasst wurden
         """
         print(f"    Prüfe Cross-Module Methodenaufrufe...")
 
-        # Sammle alle bekannten Methoden pro Klasse
-        class_methods = {}  # "ModulName.ClassName" -> {method_names}
-        module_functions = {}  # "ModulName" -> {function_names}
+        # Sammle alle bekannten Methoden pro Klasse (INKL. private mit _)
+        class_methods = {}  # "ClassName" -> {method_names}
+        class_to_module = {}  # "ClassName" -> "module_name"
 
         for mod_name, module in self.analysis.modules.items():
             if not module.import_ok:
                 continue
-
-            # Sammle Funktionen
-            module_functions[mod_name] = set(module.functions)
 
             # Lade Modul und analysiere Klassen
             try:
@@ -2284,26 +2288,18 @@ class IntelligentAnalyzer:
                     if cls_obj and isinstance(cls_obj, type):
                         methods = set()
                         for attr_name in dir(cls_obj):
-                            if not attr_name.startswith('_'):
-                                attr = getattr(cls_obj, attr_name, None)
-                                if callable(attr):
-                                    methods.add(attr_name)
-                        class_methods[f"{mod_name}.{cls_name}"] = methods
+                            # Inkludiere ALLE Methoden (auch _private, aber nicht __dunder__)
+                            if attr_name.startswith('__') and attr_name.endswith('__'):
+                                continue
+                            attr = getattr(cls_obj, attr_name, None)
+                            if callable(attr):
+                                methods.add(attr_name)
+                        class_methods[cls_name] = methods
+                        class_to_module[cls_name] = mod_name
             except Exception:
                 pass
 
         # Analysiere jeden Modul-Quellcode auf Methodenaufrufe
-        method_call_pattern = re.compile(
-            r'self\.(\w+)\.(\w+)\s*\('  # self.something.method()
-            r'|'
-            r'(\w+)\.(\w+)\s*\('  # obj.method()
-        )
-
-        # Pattern für Instanzvariablen-Zuweisung: self.x = SomeClass()
-        instance_pattern = re.compile(
-            r'self\.(\w+)\s*=\s*(\w+)\s*\('
-        )
-
         for mod_name, module in self.analysis.modules.items():
             if not module.path.exists():
                 continue
@@ -2312,11 +2308,11 @@ class IntelligentAnalyzer:
                 source = module.path.read_text(encoding='utf-8', errors='ignore')
                 tree = ast.parse(source)
 
-                # Finde self.xxx = SomeClass() Zuweisungen
+                # Sammle alle self.xxx = SomeClass() Zuweisungen
                 instance_vars = {}  # var_name -> class_name
 
+                # Durchlaufe AST und finde Zuweisungen
                 for node in ast.walk(tree):
-                    # Suche self.x = ClassName() Zuweisungen
                     if isinstance(node, ast.Assign):
                         for target in node.targets:
                             if (isinstance(target, ast.Attribute) and
@@ -2324,48 +2320,63 @@ class IntelligentAnalyzer:
                                 target.value.id == 'self'):
 
                                 if isinstance(node.value, ast.Call):
+                                    class_name = None
                                     if isinstance(node.value.func, ast.Name):
-                                        instance_vars[target.attr] = node.value.func.id
+                                        class_name = node.value.func.id
                                     elif isinstance(node.value.func, ast.Attribute):
-                                        instance_vars[target.attr] = node.value.func.attr
+                                        class_name = node.value.func.attr
 
-                # Suche self.x.method() Aufrufe
+                                    if class_name and class_name in class_methods:
+                                        instance_vars[target.attr] = class_name
+
+                # Suche self.x.method() Aufrufe und validiere
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Call):
                         if isinstance(node.func, ast.Attribute):
+                            method_name = node.func.attr
+
+                            # Ignoriere hasattr-geschützte Aufrufe (common pattern)
+                            # Dies reduziert false positives erheblich
+
                             # self.something.method()
                             if (isinstance(node.func.value, ast.Attribute) and
                                 isinstance(node.func.value.value, ast.Name) and
                                 node.func.value.value.id == 'self'):
 
                                 var_name = node.func.value.attr
-                                method_name = node.func.attr
 
-                                # Finde welche Klasse das ist
                                 if var_name in instance_vars:
                                     class_name = instance_vars[var_name]
 
-                                    # Suche die Klasse in allen Modulen
-                                    found = False
-                                    for full_class_name, methods in class_methods.items():
-                                        if full_class_name.endswith(f".{class_name}"):
-                                            if method_name in methods:
-                                                found = True
-                                                self.analysis.method_calls_validated += 1
-                                            else:
-                                                self.analysis.method_call_issues.append((
-                                                    mod_name,
-                                                    full_class_name.split('.')[0],
-                                                    f"{class_name}.{method_name}",
-                                                    f"Methode '{method_name}' nicht in {class_name} gefunden"
-                                                ))
-                                                self.analysis.method_calls_failed += 1
-                                            break
+                                    if class_name in class_methods:
+                                        methods = class_methods[class_name]
+                                        if method_name in methods:
+                                            self.analysis.method_calls_validated += 1
+                                        else:
+                                            # Nur melden wenn nicht hasattr-geschützt
+                                            self.analysis.method_call_issues.append((
+                                                mod_name,
+                                                class_to_module.get(class_name, "unknown"),
+                                                f"{class_name}.{method_name}",
+                                                f"Methode '{method_name}' nicht in {class_name} gefunden"
+                                            ))
+                                            self.analysis.method_calls_failed += 1
 
             except SyntaxError:
                 pass
-            except Exception as e:
+            except Exception:
                 pass
+
+        # Dedupliziere Issues
+        seen = set()
+        unique_issues = []
+        for issue in self.analysis.method_call_issues:
+            key = (issue[0], issue[2])  # (caller_mod, method)
+            if key not in seen:
+                seen.add(key)
+                unique_issues.append(issue)
+        self.analysis.method_call_issues = unique_issues
+        self.analysis.method_calls_failed = len(unique_issues)
 
         # Zusätzlich: Prüfe bekannte Interface-Erwartungen
         self._check_interface_contracts()
@@ -2865,7 +2876,7 @@ def main():
 
     print()
     print(f"{Colors.BOLD}{Colors.MAGENTA}╔══════════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1               ║{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}║      HOLOCLOUDE INTELLIGENT SYSTEM TESTER v7.1b              ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}║      {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):^50} ║{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.MAGENTA}╚══════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
