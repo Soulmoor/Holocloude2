@@ -997,6 +997,21 @@ class DialogueActClassifier:
 
         return "STATEMENT", 0.5
 
+    def get_expected_response_acts(self, act: str) -> List[str]:
+        """Gibt erwartete Response-Acts für einen Dialogue Act zurück."""
+        response_map = {
+            "GREETING": ["GREETING", "INFORM"],
+            "FAREWELL": ["FAREWELL"],
+            "QUESTION": ["INFORM", "CONFIRM", "DENY"],
+            "CONFIRM": ["INFORM", "THANKS"],
+            "DENY": ["QUESTION", "INFORM"],
+            "THANKS": ["STATEMENT"],
+            "REQUEST": ["CONFIRM", "DENY", "INFORM"],
+            "INFORM": ["CONFIRM", "QUESTION", "INFORM"],
+            "STATEMENT": ["INFORM", "QUESTION", "CONFIRM"],
+        }
+        return response_map.get(act, ["STATEMENT"])
+
 
 # =============================================================================
 # MAIN CLASS - HoloNLP
