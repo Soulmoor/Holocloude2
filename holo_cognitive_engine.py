@@ -631,6 +631,342 @@ class TextAnalyzer:
             "frustrated af", "so done", "over it", "giving up", "cant even",
             "why wont it work", "its not working", "nothing works", "broken",
         ],
+        # === NEUE KATEGORIEN (16 zusätzliche) ===
+        "nostalgic": [
+            # Grundformen
+            "nostalgisch", "wehmütig", "sehnsüchtig", "vergangenheitsbezogen",
+            "erinnernd", "schwelgend", "rückblickend", "melancholisch", "sentimentalisch",
+            "romantisierend", "verklärt", "vermissend", "sehnsuchtsvoll",
+            # Phrasen
+            "früher war alles besser", "erinnere mich an", "damals als", "weißt du noch",
+            "die guten alten zeiten", "das waren noch zeiten", "vermisse die zeit",
+            "denke oft an früher", "wünschte es wäre wieder so", "wie früher",
+            "als ich jung war", "als wir noch", "in meiner kindheit", "in meiner jugend",
+            "hab gerade an dich gedacht", "erinnert mich an", "riecht nach kindheit",
+            "schmeckt wie früher", "fühlt sich an wie damals", "wie zu hause",
+            "alte erinnerungen", "schöne erinnerungen", "traurige erinnerungen",
+            "bitter süß", "wehmut im herzen", "sehnsucht nach der vergangenheit",
+            # Verstärkungen
+            "so nostalgisch", "mega nostalgisch", "total wehmütig", "richtig sehnsüchtig",
+            "bin ganz sentimental", "kommen alte gefühle hoch", "tränen der erinnerung",
+            # Jugendsprache
+            "nostalgia hitting", "right in the feels", "throwback", "tbt", "memories",
+            "good old days", "take me back", "i miss this", "childhood memories",
+        ],
+        "content": [
+            # Grundformen
+            "zufrieden", "ausgeglichen", "gelassen", "entspannt", "ruhig",
+            "friedlich", "harmonisch", "im reinen", "erfüllt", "gesättigt",
+            "befriedigt", "genügsam", "bescheiden", "dankbar", "wohlauf",
+            "satt", "selig", "behaglich", "wohlig", "gemütlich",
+            # Phrasen
+            "bin zufrieden", "passt so", "ist gut so", "reicht mir", "hab genug",
+            "brauch nicht mehr", "bin im reinen mit mir", "alles ist gut",
+            "kann nicht klagen", "läuft alles", "bin ganz entspannt", "chille gerade",
+            "genieße den moment", "lebe im hier und jetzt", "bin bei mir",
+            "fühle mich wohl", "fühle mich gut", "geht mir gut", "bin glücklich",
+            "nichts zu beklagen", "alles in ordnung", "alles bestens", "passt alles",
+            "so solls sein", "genau richtig", "perfekt so", "mehr brauch ich nicht",
+            # Verstärkungen
+            "total zufrieden", "richtig ausgeglichen", "komplett entspannt",
+            "völlig im reinen", "absolut erfüllt", "mega chillig", "super relaxed",
+            # Jugendsprache
+            "im fine", "all good", "vibing", "just vibing", "life is good",
+            "no complaints", "living the life", "blessed", "grateful", "at peace",
+        ],
+        "relieved": [
+            # Grundformen
+            "erleichtert", "befreit", "entlastet", "erlöst", "entspannt",
+            "aufatmend", "losgelöst", "frei", "unbeschwert", "gelöst",
+            "beruhigt", "getröstet", "besänftigt", "beschwichtigt",
+            # Phrasen
+            "puh", "gott sei dank", "zum glück", "endlich vorbei", "geschafft",
+            "stein vom herzen", "last von den schultern", "kann aufatmen",
+            "bin so erleichtert", "das wärs", "hab ichs hinter mir",
+            "war ja doch nicht so schlimm", "ging ja doch gut", "hat geklappt",
+            "ist gut gegangen", "war nur ein fehlalarm", "alles halb so wild",
+            "kann wieder ruhig schlafen", "sorgen waren umsonst", "panik war unnötig",
+            "bin erleichtert dass", "gut dass es vorbei ist", "endlich rum",
+            "durchatmen", "aufatmen", "luft holen", "verschnaufpause",
+            # Verstärkungen
+            "so erleichtert", "mega erleichtert", "total befreit", "richtig froh",
+            "unfassbar erleichtert", "könnte heulen vor erleichterung",
+            # Jugendsprache
+            "thank god", "phew", "close call", "dodged a bullet", "that was close",
+            "im so relieved", "finally", "its over", "we made it", "survived",
+        ],
+        "curious": [
+            # Grundformen
+            "neugierig", "interessiert", "wissbegierig", "wissensdurstig",
+            "forschend", "fragend", "erkundend", "entdeckend", "suchend",
+            "gespannt", "aufmerksam", "wachsam", "hellhörig", "aufgeschlossen",
+            "offen", "empfänglich", "lernbereit", "lernwillig",
+            # Phrasen
+            "was ist das", "wie funktioniert das", "warum ist das so",
+            "will wissen", "möchte verstehen", "interessiert mich", "erzähl mehr",
+            "will mehr erfahren", "bin neugierig", "frage mich", "wundere mich",
+            "wie geht das", "was bedeutet", "woher kommt", "wer hat", "wann war",
+            "zeig mir", "erkläre mir", "bring mir bei", "ich will lernen",
+            "das klingt interessant", "klingt spannend", "erzähl weiter",
+            "und dann", "was passierte dann", "wie ging es weiter",
+            "hab so viele fragen", "muss das wissen", "will alles wissen",
+            # Verstärkungen
+            "mega neugierig", "total interessiert", "richtig gespannt",
+            "brennend interessiert", "sterbe vor neugier", "platze vor neugier",
+            # Jugendsprache
+            "curious af", "need to know", "spill the tea", "tell me everything",
+            "im intrigued", "interesting", "go on", "wait what", "explain",
+        ],
+        "inspired": [
+            # Grundformen
+            "inspiriert", "beflügelt", "motiviert", "angeregt", "begeistert",
+            "elektrisiert", "entflammt", "angetrieben", "angespornt",
+            "kreativ", "schöpferisch", "ideenreich", "einfallsreich", "innovativ",
+            "visionär", "träumerisch", "fantasievoll", "imaginativ",
+            # Phrasen
+            "hab ne idee", "mir ist was eingefallen", "plötzlich weiß ich",
+            "das hat mich inspiriert", "jetzt bin ich motiviert", "will loslegen",
+            "muss das sofort machen", "kann nicht mehr warten", "bin on fire",
+            "ideen sprudeln", "kreativität fließt", "bin im flow", "hab den flow",
+            "sehe alles vor mir", "weiß genau was ich will", "hab eine vision",
+            "das regt mich an", "das beflügelt mich", "macht mich kreativ",
+            "will was erschaffen", "will was kreieren", "muss das umsetzen",
+            # Verstärkungen
+            "mega inspiriert", "total motiviert", "richtig beflügelt",
+            "voller ideen", "explodiere vor kreativität", "bin nicht zu stoppen",
+            # Jugendsprache
+            "inspired af", "feeling creative", "ideas flowing", "in the zone",
+            "so motivated", "lets go", "ready to create", "vision board energy",
+        ],
+        "determined": [
+            # Grundformen
+            "entschlossen", "entschieden", "bestimmt", "fest", "standhaft",
+            "unbeirrbar", "unerschütterlich", "beharrlich", "hartnäckig",
+            "zielstrebig", "ambitioniert", "ehrgeizig", "fokussiert", "konzentriert",
+            "willensstark", "resolut", "energisch", "tatkräftig", "durchsetzungsstark",
+            # Phrasen
+            "ich werde das schaffen", "ich geb nicht auf", "jetzt erst recht",
+            "nichts hält mich auf", "komme was wolle", "egal was passiert",
+            "bin fest entschlossen", "hab mir vorgenommen", "ist mein ziel",
+            "werde nicht aufgeben", "bleibe dran", "mache weiter", "halte durch",
+            "werde es beweisen", "zeige es allen", "niemand kann mich stoppen",
+            "das ist mein weg", "kein zurück", "volle kraft voraus",
+            "eyes on the prize", "das ziel vor augen", "weiß was ich will",
+            # Verstärkungen
+            "mega entschlossen", "total fokussiert", "absolut sicher",
+            "zu 100% committed", "nichts wird mich aufhalten", "bin nicht zu bremsen",
+            # Jugendsprache
+            "determined af", "locked in", "tunnel vision", "grind mode",
+            "no excuses", "built different", "on a mission", "unstoppable",
+        ],
+        "vulnerable": [
+            # Grundformen
+            "verletzlich", "verwundbar", "sensibel", "empfindlich", "zerbrechlich",
+            "fragil", "dünnhäutig", "schutzlos", "wehrlos", "ausgeliefert",
+            "offen", "ehrlich", "authentisch", "ungeschützt", "bloßgestellt",
+            "entblößt", "nackt", "exponiert", "angreifbar",
+            # Phrasen
+            "fühle mich verletzlich", "bin gerade sehr sensibel", "bin nah am wasser",
+            "alles trifft mich", "bin dünnhäutig gerade", "verkrafte nicht viel",
+            "brauche schutz", "brauche geborgenheit", "fühle mich schutzlos",
+            "hab meine mauer fallen lassen", "zeige mich wie ich bin",
+            "bin ehrlich mit dir", "öffne mich", "lasse dich rein",
+            "das macht mich verwundbar", "riskiere etwas", "wage es",
+            "bin unsicher", "hab angst verletzt zu werden", "tu mir nicht weh",
+            # Verstärkungen
+            "sehr verletzlich gerade", "extrem sensibel", "total offen",
+            "komplett schutzlos", "hab alle mauern eingerissen",
+            # Jugendsprache
+            "feeling vulnerable", "being real rn", "opening up", "letting you in",
+            "this is hard to say", "being honest", "no walls up", "raw emotions",
+        ],
+        "overwhelmed": [
+            # Grundformen
+            "überwältigt", "übermannt", "überfordert", "überlastet", "überflutet",
+            "erschlagen", "erdrückt", "bedrängt", "überrannt", "überrollt",
+            "überrumpelt", "überhäuft", "zugeschüttet", "bombardiert",
+            # Phrasen
+            "ist zu viel", "kann nicht mehr", "alles auf einmal", "schaffe das nicht",
+            "weiß nicht wo anfangen", "bin überfordert", "das überfordert mich",
+            "komme nicht hinterher", "ertrinke in arbeit", "berge von aufgaben",
+            "alles stürzt auf mich ein", "werde erschlagen", "bin am limit",
+            "brauche eine pause", "muss durchatmen", "alles zu viel gerade",
+            "bin überlastet", "kapazität erschöpft", "am anschlag",
+            "zu viele eindrücke", "zu viele gefühle", "bin emotional überflutet",
+            # Verstärkungen
+            "total überwältigt", "komplett überfordert", "völlig erschlagen",
+            "absolut am limit", "kurz vorm zusammenbruch", "kann einfach nicht mehr",
+            # Jugendsprache
+            "overwhelmed af", "too much", "cant deal", "drowning", "buried",
+            "swamped", "slammed", "maxed out", "at capacity", "about to crash",
+        ],
+        "peaceful": [
+            # Grundformen
+            "friedlich", "friedvoll", "ruhig", "still", "gelassen",
+            "sanft", "mild", "harmonisch", "ausgeglichen", "entspannt",
+            "selig", "seelenruhig", "geerdet", "zentriert", "meditativ",
+            "kontemplativ", "besinnlich", "andächtig", "verzückt",
+            # Phrasen
+            "alles ist ruhig", "kein stress", "keine sorgen", "entspanne gerade",
+            "bin ganz bei mir", "genieße die stille", "höre mich selbst denken",
+            "fühle mich geerdet", "bin im einklang", "alles ist im lot",
+            "spüre den frieden", "innerlich ruhig", "äußerlich ruhig",
+            "atme tief durch", "bin ganz entspannt", "genieße den moment",
+            "bin präsent", "lebe im jetzt", "alles fließt", "bin im fluss",
+            "keine eile", "lass mir zeit", "genieße langsam", "achtsam",
+            # Verstärkungen
+            "total friedlich", "komplett entspannt", "absolut gelassen",
+            "innerlich ganz ruhig", "völlig in frieden", "deep peace",
+            # Jugendsprache
+            "at peace", "zen mode", "so calm", "peaceful vibes", "serene",
+            "tranquil", "chill af", "no stress", "easy going", "floating",
+        ],
+        "embarrassed": [
+            # Grundformen
+            "peinlich", "verlegen", "beschämt", "verschämt", "geniert",
+            "befangen", "gehemmt", "unsicher", "unwohl", "beklommen",
+            "rot", "errötend", "bloßgestellt", "blamiert", "lächerlich",
+            # Phrasen
+            "wie peinlich", "das ist mir peinlich", "könnte im boden versinken",
+            "will verschwinden", "schäme mich", "mir ist das unangenehm",
+            "war mir so peinlich", "bin rot geworden", "hab mich blamiert",
+            "hab mich lächerlich gemacht", "peinliche situation", "peinlicher moment",
+            "will nicht drüber reden", "vergiss das bitte", "ignorier das",
+            "tu so als wärs nicht passiert", "das hab ich nicht gesagt",
+            "das war nicht ich", "wollen wir das vergessen", "thema wechseln",
+            # Verstärkungen
+            "mega peinlich", "so peinlich", "extrem beschämend", "zum fremdschämen",
+            "cringe bis zum geht nicht mehr", "peinlicher gehts nicht",
+            # Jugendsprache
+            "cringe", "so cringe", "embarrassed af", "want to die", "kill me now",
+            "cant look", "second hand embarrassment", "fremdschämen", "awkward",
+        ],
+        "guilty": [
+            # Grundformen
+            "schuldig", "schuldbewusst", "reuig", "zerknirscht", "reumütig",
+            "gewissensbisse", "schlechtes gewissen", "bereuen", "bedauern",
+            "verantwortlich", "schuld", "mitschuld", "beschuldigt",
+            # Phrasen
+            "ich bin schuld", "war mein fehler", "hätte nicht sollen",
+            "tut mir leid", "bereue es", "wünschte ich hätte nicht",
+            "fühle mich schuldig", "hab schlechtes gewissen", "nagt an mir",
+            "kann nicht vergessen", "denke ständig dran", "quält mich",
+            "hätte es anders machen sollen", "bin schuld daran",
+            "hab jemanden verletzt", "hab jemandem wehgetan", "war unfair",
+            "hab gelogen", "hab betrogen", "war nicht ehrlich", "hab versagt",
+            "bitte verzeih mir", "kannst du mir vergeben", "mach es wieder gut",
+            # Verstärkungen
+            "so schuldig", "mega schlechtes gewissen", "frisst mich auf",
+            "kann nicht damit leben", "verfolgt mich", "quält mich ständig",
+            # Jugendsprache
+            "feeling guilty", "guilty af", "my bad", "im sorry", "i messed up",
+            "its my fault", "i feel terrible", "cant forgive myself", "haunted",
+        ],
+        "lonely": [
+            # Grundformen
+            "einsam", "allein", "isoliert", "verlassen", "abgeschieden",
+            "abgesondert", "abgetrennt", "ausgeschlossen", "ausgegrenzt",
+            "verloren", "vergessen", "übersehen", "ignoriert", "gemieden",
+            # Phrasen
+            "bin so allein", "hab niemanden", "fühle mich einsam",
+            "keiner ist da", "keiner versteht mich", "keiner hört mir zu",
+            "vermisse gesellschaft", "vermisse freunde", "vermisse menschen",
+            "will nicht allein sein", "brauche jemanden", "brauch gesellschaft",
+            "bin für mich", "keiner denkt an mich", "alle haben mich vergessen",
+            "fühle mich ausgeschlossen", "gehöre nicht dazu", "bin das fünfte rad",
+            "hab keine freunde", "keiner mag mich", "bin unbeliebt",
+            # Verstärkungen
+            "so einsam", "total allein", "komplett isoliert", "völlig verlassen",
+            "niemand da", "ganz für mich allein", "absolute einsamkeit",
+            # Jugendsprache
+            "lonely af", "all alone", "no one there", "forgotten", "invisible",
+            "billy no mates", "friendless", "isolated", "left out", "ghosted",
+        ],
+        "playful": [
+            # Grundformen
+            "verspielt", "spielerisch", "albern", "lustig", "witzig",
+            "spaßig", "ausgelassen", "übermütig", "fröhlich", "heiter",
+            "neckisch", "schelmisch", "schalkhaft", "spitzbübisch", "kokett",
+            "flirtend", "tanzend", "hüpfend", "springend",
+            # Phrasen
+            "lass uns spielen", "ich will spaß", "komm wir machen quatsch",
+            "bin zum scherzen aufgelegt", "bin albern drauf", "albere rum",
+            "mach blödsinn", "mach witze", "lach mich kaputt", "hab so gelacht",
+            "das ist lustig", "zu witzig", "ich kann nicht mehr", "bauchschmerzen",
+            "lass uns was verrücktes machen", "bin übermütig", "fühl mich jung",
+            "wie ein kind", "kindisch aber egal", "will spaß haben",
+            "lass uns lachen", "sei nicht so ernst", "chill mal", "hab humor",
+            # Verstärkungen
+            "mega verspielt", "total albern", "richtig ausgelassen",
+            "komplett übermütig", "bin nicht zu bremsen", "party mode",
+            # Jugendsprache
+            "feeling goofy", "silly mode", "being random", "chaotic energy",
+            "lets have fun", "vibes", "good vibes", "play time", "lets goooo",
+        ],
+        "melancholic": [
+            # Grundformen
+            "melancholisch", "wehmütig", "schwermütig", "trübsinnig",
+            "düster", "gedämpft", "gedrückt", "betrübt", "bekümmert",
+            "nachdenklich", "grüblerisch", "verträumt", "versunken",
+            "weltschmerz", "sehnsucht", "fernweh", "heimweh",
+            # Phrasen
+            "fühle mich melancholisch", "bin in melancholischer stimmung",
+            "ist so ein melancholischer tag", "regenwetter im herzen",
+            "alles fühlt sich schwer an", "gedanken kreisen", "sinne nach",
+            "denke viel nach", "bin in gedanken versunken", "tagträume",
+            "fühle mich fern", "fühle mich anders", "passe nicht rein",
+            "bin nicht von dieser welt", "schwebe zwischen welten",
+            "bitter süß", "schön traurig", "traurig schön", "poetisch traurig",
+            "schmerz der sich gut anfühlt", "wohlige traurigkeit",
+            # Verstärkungen
+            "sehr melancholisch", "zutiefst wehmütig", "schwer im herzen",
+            "versunken in schwermut", "von melancholie umhüllt",
+            # Jugendsprache
+            "melancholic vibes", "sad aesthetic", "dark academia mood",
+            "rainy day mood", "pensive", "wistful", "bittersweet", "yearning",
+        ],
+        "amused": [
+            # Grundformen
+            "amüsiert", "belustigt", "erheitert", "unterhalten", "vergnügt",
+            "lachend", "kichernd", "grinsend", "schmunzelnd", "feixend",
+            "fröhlich", "heiter", "lustig", "spaßig", "humorvoll",
+            # Phrasen
+            "das ist lustig", "zu witzig", "musste lachen", "hab gelacht",
+            "das ist ja witzig", "zum totlachen", "zum schreien", "zum brüllen",
+            "lach mich schlapp", "lach mich kaputt", "kann nicht aufhören",
+            "tränen gelacht", "bauch tut weh vom lachen", "seitenstechen",
+            "haha", "hihi", "höhö", "muhaha", "lol", "lmao", "rofl", "xD",
+            "der war gut", "guter witz", "nice one", "funny", "comedy gold",
+            "bin amüsiert", "unterhält mich", "bringt mich zum lachen",
+            # Verstärkungen
+            "mega amüsiert", "total belustigt", "richtig gut unterhalten",
+            "lache immer noch", "kann nicht aufhören zu lachen", "am boden",
+            # Jugendsprache
+            "lmao", "rofl", "dead", "im dead", "crying laughing", "wheeze",
+            "literally dying", "cant breathe", "stop im dying", "too funny",
+        ],
+        "indifferent": [
+            # Grundformen
+            "gleichgültig", "egal", "desinteressiert", "unbeteiligt", "teilnahmslos",
+            "apathisch", "lethargisch", "passiv", "neutral", "emotionslos",
+            "gefühllos", "abgestumpft", "abgebrüht", "unberührt", "kalt",
+            "distanziert", "reserviert", "zurückhaltend",
+            # Phrasen
+            "ist mir egal", "interessiert mich nicht", "juckt mich nicht",
+            "tangiert mich nicht", "kann ich nichts mit anfangen",
+            "hab keine meinung", "mir egal", "wayne", "whatever",
+            "ist mir wurst", "ist mir wumpe", "ist mir schnuppe", "ist mir latte",
+            "hab keinen bock", "kein interesse", "nicht mein problem",
+            "soll mir recht sein", "meinetwegen", "von mir aus", "wenn du meinst",
+            "macht keinen unterschied", "ändert nichts", "bringt mir nichts",
+            "fühle nichts dabei", "berührt mich nicht", "lässt mich kalt",
+            # Verstärkungen
+            "total egal", "absolut gleichgültig", "null interesse",
+            "könnte nicht egaler sein", "interessiert mich null",
+            # Jugendsprache
+            "idc", "dont care", "whatever", "meh", "shrug", "not my problem",
+            "couldnt care less", "unbothered", "zero interest", "nope",
+        ],
     }
     
     # Topic Keywords - Ultra-erweitert (9x mehr pro Kategorie)
@@ -1232,6 +1568,550 @@ class TextAnalyzer:
             # Phrasen
             "will auto kaufen", "brauche neues auto", "auto kaputt", "muss tanken",
             "stehe im stau", "hab unfall gebaut", "muss in die werkstatt",
+        ],
+        # === NEUE KATEGORIEN (21 zusätzliche) ===
+        "finance": [
+            # Grundlagen
+            "geld", "finanzen", "konto", "bank", "sparkasse", "überweisung",
+            "gehalt", "lohn", "einkommen", "ausgaben", "sparen", "investieren",
+            "kredit", "schulden", "zinsen", "rendite", "aktien", "fonds",
+            # Erweitert
+            "girokonto", "sparkonto", "tagesgeld", "festgeld", "depot",
+            "online banking", "pin", "tan", "kontostand", "kontoauszug",
+            "dauerauftrag", "lastschrift", "einzugsermächtigung", "sepa",
+            "kreditkarte", "ec karte", "debitkarte", "bargeld", "münzen", "scheine",
+            "steuern", "steuererklärung", "finanzamt", "steuerberater", "lohnsteuer",
+            "mehrwertsteuer", "einkommensteuer", "kapitalertragssteuer", "freibetrag",
+            "budget", "haushaltsbuch", "ausgaben tracken", "sparziel", "notgroschen",
+            "etf", "anleihen", "dividende", "portfolio", "diversifikation", "risiko",
+            "bitcoin", "ethereum", "krypto", "trading", "broker", "trade republic",
+            "rente", "altersvorsorge", "riester", "betriebsrente", "lebensversicherung",
+            "erbschaft", "schenkung", "testament", "vermögen", "immobilie",
+            # Phrasen
+            "hab kein geld", "bin pleite", "brauche geld", "muss sparen",
+            "will investieren", "wie viel kostet", "zu teuer", "kann mir nicht leisten",
+            "wann kommt gehalt", "konto ist leer", "schulden abbezahlen",
+        ],
+        "sports": [
+            # Grundlagen
+            "sport", "training", "fitness", "workout", "gym", "studio",
+            "laufen", "joggen", "schwimmen", "radfahren", "wandern",
+            "fußball", "basketball", "tennis", "volleyball", "handball",
+            # Erweitert
+            "mannschaft", "verein", "liga", "bundesliga", "champions league",
+            "meisterschaft", "pokal", "turnier", "spiel", "match", "partie",
+            "tor", "punkt", "satz", "gewonnen", "verloren", "unentschieden",
+            "trainer", "coach", "spieler", "athlet", "sportler", "profi", "amateur",
+            "marathon", "triathlon", "ironman", "olympia", "weltmeisterschaft",
+            "krafttraining", "ausdauer", "cardio", "hiit", "crossfit", "calisthenics",
+            "yoga", "pilates", "stretching", "warm up", "cool down", "dehnen",
+            "muskel", "muskelkater", "regeneration", "erholung", "pause", "ruhetag",
+            "personal record", "pr", "bestzeit", "steigerung", "fortschritt",
+            "sportkleidung", "sportschuhe", "ausrüstung", "gewichte", "hanteln",
+            "laufband", "crosstrainer", "rudergerät", "klimmzugstange",
+            # Phrasen
+            "war beim sport", "gehe trainieren", "mache workout", "hab trainiert",
+            "bin fit", "will fitter werden", "muss mehr sport machen",
+            "wer hat gewonnen", "wie steht es", "wann spielt", "live gucken",
+        ],
+        "education": [
+            # Grundlagen
+            "lernen", "bildung", "schule", "uni", "studium", "ausbildung",
+            "unterricht", "kurs", "seminar", "vorlesung", "workshop",
+            "prüfung", "klausur", "test", "abitur", "abschluss", "zeugnis",
+            # Erweitert
+            "grundschule", "hauptschule", "realschule", "gymnasium", "gesamtschule",
+            "berufsschule", "fachhochschule", "universität", "hochschule",
+            "bachelor", "master", "promotion", "doktor", "professor",
+            "semester", "trimester", "schuljahr", "ferien", "semesterferien",
+            "fach", "mathe", "deutsch", "englisch", "physik", "chemie", "biologie",
+            "geschichte", "geografie", "kunst", "musik", "sport", "religion",
+            "hausaufgaben", "referat", "präsentation", "hausarbeit", "bachelorarbeit",
+            "note", "bewertung", "zeugnis", "durchschnitt", "numerus clausus",
+            "nachhilfe", "tutor", "mentor", "lerngruppe", "bibliothek",
+            "online lernen", "e-learning", "mooc", "udemy", "coursera", "duolingo",
+            "weiterbildung", "fortbildung", "zertifikat", "qualifikation",
+            "stipendium", "bafög", "studienkredit", "semesterbeitrag",
+            # Phrasen
+            "muss lernen", "hab prüfung", "schreibe klausur", "mache hausaufgaben",
+            "verstehe nicht", "ist schwer", "ist kompliziert", "brauch nachhilfe",
+            "hab bestanden", "bin durchgefallen", "gute note", "schlechte note",
+        ],
+        "social_media": [
+            # Grundlagen
+            "social media", "soziale medien", "post", "posten", "teilen",
+            "follower", "following", "like", "liken", "kommentar", "kommentieren",
+            "story", "stories", "reel", "reels", "feed", "timeline",
+            # Erweitert
+            "instagram", "insta", "facebook", "fb", "twitter", "x",
+            "tiktok", "snapchat", "snap", "youtube", "yt", "twitch",
+            "linkedin", "xing", "pinterest", "reddit", "discord", "telegram",
+            "whatsapp", "messenger", "dm", "direct message", "nachricht",
+            "hashtag", "tag", "taggen", "mention", "erwähnung",
+            "viral", "trending", "trend", "challenge", "hype",
+            "influencer", "content creator", "blogger", "vlogger", "streamer",
+            "content", "video", "bild", "foto", "meme", "gif",
+            "algorithm", "algorithmus", "reichweite", "engagement", "views",
+            "abonnieren", "abo", "subscribe", "notification", "benachrichtigung",
+            "profil", "bio", "profilbild", "avatar", "username", "handle",
+            "verifiziert", "blauer haken", "fake account", "bot", "troll",
+            # Phrasen
+            "hast du gesehen auf", "ist viral gegangen", "hab gepostet",
+            "follow mich", "hab neuen follower", "wurde getaggt", "schreib mir dm",
+            "neue story", "hab gelikt", "hab kommentiert", "ist im trend",
+        ],
+        "fashion": [
+            # Grundlagen
+            "mode", "kleidung", "outfit", "style", "look", "trend",
+            "tragen", "anziehen", "anprobieren", "passt", "steht mir",
+            "hose", "jeans", "hemd", "bluse", "t-shirt", "pullover",
+            # Erweitert
+            "kleid", "rock", "anzug", "jacke", "mantel", "hoodie", "cardigan",
+            "shorts", "leggings", "jogginghose", "sweatpants", "chino", "cargo",
+            "bh", "unterwäsche", "socken", "strumpfhose", "nachthemd", "pyjama",
+            "schuhe", "sneaker", "stiefel", "sandalen", "high heels", "pumps",
+            "accessoires", "gürtel", "schal", "mütze", "handschuhe", "tasche",
+            "schmuck", "kette", "armband", "ohrringe", "ring", "uhr",
+            "brille", "sonnenbrille", "hut", "cap", "kappe",
+            "marke", "designer", "luxus", "high fashion", "streetwear", "vintage",
+            "zara", "h&m", "primark", "uniqlo", "gucci", "prada", "louis vuitton",
+            "größe", "xs", "s", "m", "l", "xl", "xxl", "passform", "schnitt",
+            "farbe", "muster", "gestreift", "kariert", "uni", "print",
+            "waschen", "bügeln", "chemische reinigung", "fleck", "kaputt",
+            # Phrasen
+            "was soll ich anziehen", "steht mir das", "ist das modern",
+            "brauche neue klamotten", "will shoppen gehen", "hab nichts anzuziehen",
+            "ist das zu overdressed", "zu casual", "passt das zusammen",
+        ],
+        "beauty": [
+            # Grundformen
+            "schönheit", "beauty", "pflege", "kosmetik", "makeup", "schminke",
+            "haut", "haare", "nägel", "körperpflege", "hygiene",
+            "creme", "lotion", "serum", "öl", "maske",
+            # Erweitert
+            "gesichtspflege", "hautpflege", "skincare", "routine", "morgens", "abends",
+            "reinigung", "peeling", "toner", "essence", "moisturizer", "sonnenschutz",
+            "anti aging", "falten", "pickel", "akne", "unreinheiten", "mitesser",
+            "trockene haut", "fettige haut", "mischhaut", "empfindliche haut",
+            "foundation", "concealer", "puder", "rouge", "highlighter", "contouring",
+            "lidschatten", "eyeliner", "mascara", "augenbrauen", "wimpern",
+            "lippenstift", "lipgloss", "lipliner", "lipbalm",
+            "nagellack", "maniküre", "pediküre", "nagelstudio", "gelnägel",
+            "friseur", "haarschnitt", "färben", "tönen", "blondieren", "highlights",
+            "föhnen", "glätten", "locken", "styling", "haargel", "haarspray",
+            "parfum", "duft", "deo", "bodylotion", "duschgel", "shampoo",
+            "spa", "wellness", "massage", "sauna", "gesichtsbehandlung",
+            # Phrasen
+            "muss zum friseur", "neue frisur", "haare schneiden",
+            "brauche neue creme", "haut ist trocken", "hab pickel",
+            "welches makeup", "wie schminke ich", "beauty routine",
+        ],
+        "environment": [
+            # Grundlagen
+            "umwelt", "natur", "klima", "erde", "planet", "ökologie",
+            "nachhaltig", "nachhaltigkeit", "grün", "bio", "öko",
+            "umweltschutz", "klimaschutz", "naturschutz", "tierschutz",
+            # Erweitert
+            "klimawandel", "erderwärmung", "treibhauseffekt", "co2", "emissionen",
+            "erneuerbare energie", "solar", "wind", "wasserkraft", "geothermie",
+            "recycling", "mülltrennung", "kompost", "müllvermeidung", "zero waste",
+            "plastik", "mikroplastik", "einweg", "mehrweg", "verpackung",
+            "wasser", "trinkwasser", "grundwasser", "meer", "ozean", "verschmutzung",
+            "luft", "luftqualität", "smog", "feinstaub", "abgase",
+            "wald", "regenwald", "abholzung", "aufforstung", "baum pflanzen",
+            "artensterben", "biodiversität", "artenschutz", "wildtiere", "lebensraum",
+            "ökologischer fußabdruck", "co2 fußabdruck", "kompensieren", "ausgleichen",
+            "vegetarisch", "vegan", "fleischkonsum", "regional", "saisonal", "fairtrade",
+            "elektroauto", "fahrrad", "öffentliche verkehrsmittel", "fliegen vermeiden",
+            "fridays for future", "klimastreik", "aktivismus", "demonstration",
+            # Phrasen
+            "müssen was tun", "für die umwelt", "nachhaltiger leben",
+            "weniger plastik", "mehr recyceln", "klimaneutral",
+            "ist das gut für die umwelt", "ökologisch sinnvoll",
+        ],
+        "science": [
+            # Grundlagen
+            "wissenschaft", "forschung", "studie", "experiment", "labor",
+            "entdeckung", "erfindung", "theorie", "hypothese", "beweis",
+            "physik", "chemie", "biologie", "mathematik", "informatik",
+            # Erweitert
+            "wissenschaftler", "forscher", "professor", "doktor", "nobelpreis",
+            "universität", "institut", "akademie", "publikation", "peer review",
+            "quantenphysik", "relativitätstheorie", "teilchen", "atom", "molekül",
+            "evolution", "genetik", "dna", "rna", "gen", "mutation", "genom",
+            "zelle", "bakterie", "virus", "mikroorganismus", "organismus",
+            "ökosystem", "photosynthese", "stoffwechsel", "enzyme", "proteine",
+            "astronomie", "weltall", "universum", "galaxie", "stern", "planet",
+            "schwarzes loch", "urknall", "big bang", "dunkle materie", "dunkle energie",
+            "raumfahrt", "nasa", "esa", "spacex", "rakete", "satellit", "raumstation",
+            "künstliche intelligenz", "machine learning", "algorithmus", "neuronales netz",
+            "robotik", "automatisierung", "quantencomputer", "nanotechnologie",
+            "medizinische forschung", "impfstoff", "therapie", "klinische studie",
+            # Phrasen
+            "hab gelesen dass", "wissenschaftler haben herausgefunden",
+            "neue studie zeigt", "ist das wissenschaftlich", "gibt es beweise",
+            "wie funktioniert das", "warum ist das so", "erkläre mir",
+        ],
+        "art": [
+            # Grundlagen
+            "kunst", "künstler", "kunstwerk", "malen", "zeichnen",
+            "bild", "gemälde", "zeichnung", "skulptur", "plastik",
+            "museum", "galerie", "ausstellung", "vernissage",
+            # Erweitert
+            "malerei", "ölmalerei", "aquarell", "acryl", "pastell", "kohle",
+            "portrait", "landschaft", "stillleben", "abstrakt", "impressionismus",
+            "expressionismus", "surrealismus", "kubismus", "pop art", "moderne kunst",
+            "bildhauerei", "ton", "bronze", "marmor", "holz", "stein",
+            "fotografie", "foto", "fotograf", "kamera", "objektiv", "belichtung",
+            "grafik", "design", "illustration", "comic", "cartoon", "animation",
+            "street art", "graffiti", "mural", "urban art", "banksy",
+            "pinsel", "farbe", "leinwand", "staffelei", "palette", "atelier",
+            "kunstgeschichte", "alte meister", "renaissance", "barock", "romantik",
+            "picasso", "van gogh", "monet", "da vinci", "rembrandt", "warhol",
+            "kunstmarkt", "auktion", "sammler", "original", "kopie", "fälschung",
+            "kunsttherapie", "kreativität", "selbstausdruck", "inspiration",
+            # Phrasen
+            "gehe ins museum", "tolle ausstellung", "schönes kunstwerk",
+            "wer hat das gemalt", "was bedeutet das", "interpretiere das",
+            "will malen lernen", "bin kreativ", "hab was gezeichnet",
+        ],
+        "language": [
+            # Grundlagen
+            "sprache", "sprachen", "sprechen", "reden", "kommunikation",
+            "wort", "wörter", "satz", "grammatik", "vokabeln",
+            "übersetzen", "übersetzung", "dolmetschen", "dolmetscher",
+            # Erweitert
+            "deutsch", "englisch", "französisch", "spanisch", "italienisch",
+            "russisch", "chinesisch", "japanisch", "koreanisch", "arabisch",
+            "muttersprache", "fremdsprache", "zweitsprache", "bilingualisch",
+            "sprachkurs", "sprachschule", "tandem", "austausch", "immersion",
+            "aussprache", "akzent", "dialekt", "mundart", "hochdeutsch",
+            "lesen", "schreiben", "hören", "verstehen", "sprechen",
+            "anfänger", "fortgeschritten", "fließend", "muttersprachlich",
+            "zertifikat", "sprachtest", "toefl", "ielts", "delf", "goethe zertifikat",
+            "vokabel", "verb", "nomen", "adjektiv", "adverb", "präposition",
+            "konjugation", "deklination", "zeitform", "vergangenheit", "zukunft",
+            "redewendung", "sprichwort", "idiom", "slang", "umgangssprache",
+            "linguistik", "sprachwissenschaft", "etymologie", "semantik",
+            # Phrasen
+            "lerne gerade", "kann ein bisschen", "spreche fließend",
+            "wie sagt man", "was heißt das", "kannst du übersetzen",
+            "verstehe nicht", "zu schnell", "nochmal bitte", "langsamer bitte",
+        ],
+        "creativity": [
+            # Grundlagen
+            "kreativ", "kreativität", "idee", "einfall", "inspiration",
+            "erschaffen", "gestalten", "designen", "entwerfen", "entwickeln",
+            "phantasie", "fantasie", "vorstellung", "imagination",
+            # Erweitert
+            "brainstorming", "ideenfindung", "konzept", "entwurf", "skizze",
+            "innovation", "originell", "einzigartig", "neu", "anders",
+            "künstlerisch", "schöpferisch", "erfinderisch", "einfallsreich",
+            "diy", "selbst machen", "basteln", "handarbeit", "handwerk",
+            "upcycling", "recycling kunst", "aus alt mach neu",
+            "schreiben", "dichten", "texten", "storytelling", "erzählen",
+            "komponieren", "musik machen", "beat", "melodie", "song schreiben",
+            "tanzen", "choreografie", "bewegung", "ausdruck", "performance",
+            "theater", "schauspiel", "improvisation", "rollenspiel",
+            "fotografie", "film", "video", "animation", "content creation",
+            "flow", "zone", "inspiriert", "beflügelt", "motiviert",
+            "blockade", "kreativblock", "schreibblockade", "keine ideen",
+            # Phrasen
+            "hab ne idee", "mir ist was eingefallen", "bin kreativ",
+            "will was erschaffen", "mache was selbst", "bin inspiriert",
+            "keine inspiration", "brauche ideen", "hilf mir denken",
+        ],
+        "sleep": [
+            # Grundlagen
+            "schlaf", "schlafen", "müde", "wach", "aufwachen",
+            "bett", "matratze", "kissen", "decke", "schlafzimmer",
+            "einschlafen", "durchschlafen", "aufstehen", "wecker",
+            # Erweitert
+            "schlafqualität", "tiefschlaf", "rem schlaf", "leichtschlaf",
+            "schlafzyklus", "schlafphasen", "schlafrhythmus", "biorhythmus",
+            "schlafstörung", "insomnie", "schlaflosigkeit", "schlafapnoe",
+            "albtraum", "schlechter traum", "nachtschweiß", "unruhig",
+            "gute nacht", "schlaf gut", "träum süß", "guten morgen",
+            "früh aufstehen", "spät aufstehen", "ausschlafen", "überschlafen",
+            "nickerchen", "power nap", "mittagsschlaf", "siesta",
+            "schlafhygiene", "abendroutine", "entspannung", "runterkommen",
+            "melatonin", "schlafmittel", "baldrian", "tee", "entspannungsmusik",
+            "dunkel", "still", "kühl", "temperatur", "luftfeuchtigkeit",
+            "snooze", "schlummern", "dösen", "dahindämmern",
+            "morgenmuffel", "nachtmensch", "frühaufsteher", "langschläfer",
+            # Phrasen
+            "bin müde", "will schlafen", "gehe ins bett", "kann nicht schlafen",
+            "hab schlecht geschlafen", "gut geschlafen", "bin ausgeruht",
+            "muss früh raus", "schlafe aus", "brauch mehr schlaf",
+        ],
+        "dreams": [
+            # Grundlagen
+            "traum", "träumen", "traumwelt", "traumhaft", "verträumt",
+            "albtraum", "alptraum", "nachts", "schlafend",
+            "wunsch", "wünschen", "hoffen", "sehnen", "ersehnen",
+            # Erweitert
+            "tagtraum", "tagträumen", "fantasieren", "vorstellen", "ausmalen",
+            "luzider traum", "klartraum", "traumkontrolle", "bewusst träumen",
+            "traumdeutung", "traumsymbol", "unterbewusstsein", "psyche",
+            "fliegen im traum", "fallen im traum", "verfolgt werden", "zähne verlieren",
+            "prophezeiung", "vorahnung", "déjà vu", "vision",
+            "lebenstraum", "traumjob", "traumhaus", "traumpartner", "traumreise",
+            "verwirklichen", "erreichen", "erfüllen", "wahr werden",
+            "träumer", "idealist", "romantiker", "visionär",
+            "traumfänger", "traumtagebuch", "traum erinnern", "traum aufschreiben",
+            "surreal", "unwirklich", "bizarr", "seltsam", "merkwürdig",
+            "wiederkehrender traum", "immer derselbe traum", "oft träumen von",
+            "schlafwandeln", "sprechen im schlaf", "zucken", "aufschrecken",
+            # Phrasen
+            "hab geträumt", "hatte einen traum", "das war ein traum",
+            "träume von", "wünsche mir", "hoffe dass", "stelle mir vor",
+            "war nur ein traum", "traum ist wahr geworden", "lebe meinen traum",
+        ],
+        "memories": [
+            # Grundlagen
+            "erinnerung", "erinnern", "gedächtnis", "denken an", "vergessen",
+            "vergangenheit", "früher", "damals", "einst", "gestern",
+            "nostalgie", "nostalgisch", "wehmut", "sentimental",
+            # Erweitert
+            "kindheitserinnerung", "jugend", "schulzeit", "studienzeit",
+            "erlebnis", "erfahrung", "moment", "augenblick", "ereignis",
+            "foto", "bild", "video", "aufnahme", "dokumentieren",
+            "fotoalbum", "tagebuch", "journal", "chronik", "aufzeichnung",
+            "andenken", "souvenir", "mitbringsel", "erinnerungsstück",
+            "gedenkstätte", "denkmal", "gedenktag", "jahrestag", "jubiläum",
+            "kurzzeitgedächtnis", "langzeitgedächtnis", "speichern", "abrufen",
+            "vergesslich", "blackout", "verdrängen", "unterdrücken",
+            "flashback", "zurückversetzt", "wie damals", "als wärs gestern",
+            "generationen", "großeltern erzählen", "familiengeschichte",
+            "tradition", "brauch", "ritual", "gewohnheit",
+            "memoir", "biografie", "autobiografie", "lebensgeschichte",
+            # Phrasen
+            "erinnere mich an", "weißt du noch", "damals als",
+            "hab vergessen", "fällt mir nicht ein", "wie war das nochmal",
+            "gute zeiten", "schöne erinnerungen", "vermisse die zeit",
+        ],
+        "future": [
+            # Grundlagen
+            "zukunft", "morgen", "bald", "später", "irgendwann",
+            "werden", "planen", "vorhaben", "beabsichtigen",
+            "erwarten", "hoffen", "wünschen", "träumen",
+            # Erweitert
+            "zukunftsplan", "lebensplan", "fünfjahresplan", "langfristig",
+            "vision", "ziel", "ambition", "aspiration", "streben",
+            "prognose", "vorhersage", "trend", "entwicklung", "tendenz",
+            "technologie der zukunft", "innovation", "fortschritt", "evolution",
+            "künstliche intelligenz", "automation", "roboter", "virtual reality",
+            "klimazukunft", "nachhaltigkeit", "erneuerbare energie", "grün",
+            "nächste generation", "kinder", "enkelkinder", "nachkommen",
+            "karriereplan", "berufsziel", "traumjob", "position",
+            "familiengründung", "heiraten", "kinder bekommen", "haus bauen",
+            "ruhestand", "rente", "pension", "lebensabend",
+            "möglichkeit", "potenzial", "chance", "option", "alternative",
+            "ungewiss", "unsicher", "offen", "unklar", "abwarten",
+            # Phrasen
+            "was bringt die zukunft", "wie wird es werden", "was kommt noch",
+            "freue mich auf", "plane zu", "will irgendwann", "eines tages",
+            "in zukunft werde ich", "stelle mir vor dass", "hoffe auf",
+        ],
+        "goals": [
+            # Grundlagen
+            "ziel", "ziele", "vorhaben", "plan", "vorsatz",
+            "erreichen", "schaffen", "verwirklichen", "umsetzen",
+            "motivation", "antrieb", "wille", "ehrgeiz", "ambition",
+            # Erweitert
+            "smart ziele", "messbar", "erreichbar", "realistisch", "terminiert",
+            "kurzfristiges ziel", "langfristiges ziel", "etappenziel", "meilenstein",
+            "priorität", "wichtig", "dringend", "fokus", "konzentration",
+            "to do liste", "aufgabenliste", "checklist", "abhaken", "erledigt",
+            "fortschritt", "progress", "entwicklung", "verbesserung", "steigerung",
+            "durchhalten", "dranbleiben", "nicht aufgeben", "weitermachen",
+            "rückschlag", "hindernis", "hürde", "problem", "herausforderung",
+            "neujahrsvorsatz", "bucket list", "life goals", "dream big",
+            "erfolg", "achievement", "accomplishment", "leistung", "resultat",
+            "selbstdisziplin", "willenskraft", "konsequenz", "ausdauer",
+            "coach", "mentor", "accountability partner", "unterstützung",
+            "visualisieren", "manifestieren", "positiv denken", "mindset",
+            # Phrasen
+            "mein ziel ist", "will erreichen", "arbeite daran", "bin dran",
+            "hab mir vorgenommen", "nehme mir vor", "dieses jahr will ich",
+            "habs geschafft", "ziel erreicht", "nächstes ziel",
+        ],
+        "problems": [
+            # Grundlagen
+            "problem", "probleme", "schwierigkeit", "hindernis", "hürde",
+            "herausforderung", "krise", "konflikt", "streit", "ärger",
+            "sorge", "sorgen", "angst", "befürchtung", "bedenken",
+            # Erweitert
+            "lösung", "lösen", "beheben", "klären", "regeln",
+            "situation", "lage", "umstand", "zustand", "sachverhalt",
+            "ursache", "grund", "auslöser", "trigger", "wurzel",
+            "konsequenz", "folge", "auswirkung", "effekt", "resultat",
+            "hilfe", "unterstützung", "beistand", "rat", "ratschlag",
+            "beratung", "therapie", "coaching", "mediation", "vermittlung",
+            "stress", "druck", "belastung", "überforderung", "burnout",
+            "schulden", "geldprobleme", "finanzielle schwierigkeiten",
+            "beziehungsproblem", "streit", "trennung", "scheidung",
+            "arbeitsproblem", "jobverlust", "arbeitslos", "gekündigt",
+            "gesundheitsproblem", "krankheit", "diagnose", "behandlung",
+            "technikproblem", "bug", "fehler", "funktioniert nicht",
+            # Phrasen
+            "hab ein problem", "brauche hilfe", "weiß nicht weiter",
+            "was soll ich tun", "was mache ich jetzt", "wie löse ich das",
+            "stecke fest", "komme nicht weiter", "ist kompliziert",
+        ],
+        "help": [
+            # Grundlagen
+            "hilfe", "helfen", "unterstützen", "beistand", "assistenz",
+            "brauche", "benötige", "suche", "frage", "bitte",
+            "kannst du", "könntest du", "würdest du", "hilfst du mir",
+            # Erweitert
+            "unterstützung", "beistand", "rückhalt", "stütze", "halt",
+            "rat", "ratschlag", "tipp", "hinweis", "empfehlung",
+            "anleitung", "erklärung", "tutorial", "how to", "wie geht",
+            "notfall", "dringend", "sofort", "schnell", "asap",
+            "sos", "mayday", "alarm", "notruf", "rettung",
+            "beratung", "auskunft", "information", "service", "hotline",
+            "fachmann", "experte", "spezialist", "profi", "fachkraft",
+            "ehrenamt", "freiwillig", "gemeinnützig", "spende", "charity",
+            "gegenseitig", "füreinander", "miteinander", "zusammen", "team",
+            "selbsthilfe", "selbst lösen", "eigenständig", "alleine schaffen",
+            "überfordert", "hilflos", "verzweifelt", "am ende", "ratlos",
+            "angewiesen auf", "abhängig von", "brauche dringend",
+            # Phrasen
+            "kannst du mir helfen", "ich brauche hilfe", "hilf mir bitte",
+            "wie mache ich das", "was soll ich tun", "zeig mir wie",
+            "verstehe nicht", "erkläre mir", "hab ein problem mit",
+        ],
+        "greetings": [
+            # Grundlagen
+            "hallo", "hi", "hey", "guten tag", "guten morgen",
+            "guten abend", "gute nacht", "moin", "servus", "grüß gott",
+            "wie gehts", "wie geht es dir", "alles klar", "was geht",
+            # Erweitert
+            "hallöchen", "halli hallo", "tach", "na", "jo", "ey",
+            "grüß dich", "grüezi", "ahoi", "huhu", "heyho",
+            "willkommen", "herzlich willkommen", "schön dich zu sehen",
+            "lang nicht gesehen", "freut mich", "schön dass du da bist",
+            "wie läufts", "was machst du so", "was gibts neues",
+            "alles fit", "alles gut bei dir", "gehts dir gut",
+            "bin wieder da", "bin zurück", "melde mich", "hier bin ich",
+            "wollte mal hallo sagen", "dachte an dich", "schreibe dir mal",
+            "guten start", "schönen tag noch", "schönes wochenende",
+            "schönen feierabend", "erhol dich gut", "genieß den tag",
+            "morgen zusammen", "nabend", "mahlzeit", "n8", "gn8",
+            # Jugendsprache
+            "yo", "wassup", "whats up", "sup", "howdy", "heya",
+            "heyy", "hiiii", "waddup", "ayoo", "yooo",
+        ],
+        "farewells": [
+            # Grundlagen
+            "tschüss", "bye", "ciao", "auf wiedersehen", "bis bald",
+            "bis später", "bis dann", "bis morgen", "bis gleich",
+            "mach's gut", "pass auf dich auf", "alles gute",
+            # Erweitert
+            "tschö", "tschüssi", "tschau", "servus", "ade", "pfüdi",
+            "bis zum nächsten mal", "bis die tage", "bis demnächst",
+            "wir sehen uns", "wir hören uns", "wir schreiben uns",
+            "hab dich lieb", "hdl", "kuss", "bussi", "drück dich",
+            "vermiss mich nicht", "werde dich vermissen", "denk an mich",
+            "bleib gesund", "komm gut heim", "fahr vorsichtig",
+            "gute reise", "komm gut an", "schönen urlaub",
+            "viel erfolg", "viel glück", "toi toi toi", "wird schon",
+            "schlaf gut", "träum süß", "gute nacht", "bis morgen früh",
+            "muss los", "muss weg", "bin dann mal weg", "hau rein",
+            "man sieht sich", "bis später alligator", "peace out",
+            # Jugendsprache
+            "peace", "later", "laters", "see ya", "catch you later",
+            "byeee", "baii", "bb", "byebye", "deuces", "im out",
+        ],
+        "smalltalk": [
+            # Grundlagen
+            "wie gehts", "was machst du", "was gibts neues", "alles gut",
+            "schönes wetter", "heute", "gestern", "morgen", "wochenende",
+            "arbeit", "freizeit", "urlaub", "ferien", "feiertag",
+            # Erweitert
+            "wie war dein tag", "wie war die woche", "was hast du gemacht",
+            "hast du was vor", "was machst du später", "pläne fürs wochenende",
+            "wie lief die arbeit", "viel zu tun gehabt", "stressiger tag",
+            "schon gehört dass", "wusstest du dass", "übrigens",
+            "apropos", "ach ja", "fällt mir ein", "da war noch was",
+            "lustige geschichte", "stell dir vor", "rate mal",
+            "krass", "echt", "wirklich", "im ernst", "no way",
+            "find ich auch", "stimmt", "genau", "ja voll", "total",
+            "verstehe", "kann ich nachvollziehen", "geht mir auch so",
+            "kenne ich", "hab ich auch", "bei mir genauso",
+            "na dann", "also gut", "ok", "alles klar", "passt",
+            "erzähl", "und dann", "und weiter", "was passierte dann",
+            "interessant", "spannend", "cool", "nice", "schön",
+            # Phrasen
+            "wie läufts", "alles fit", "gehts dir gut", "und selbst",
+            "nix besonderes", "alles wie immer", "das übliche halt",
+        ],
+        "opinions": [
+            # Grundlagen
+            "meinung", "ansicht", "standpunkt", "perspektive", "sichtweise",
+            "denke", "glaube", "finde", "meine", "halte für",
+            "stimme zu", "stimme nicht zu", "bin dagegen", "bin dafür",
+            # Erweitert
+            "meiner meinung nach", "ich denke dass", "ich glaube dass",
+            "aus meiner sicht", "soweit ich weiß", "wenn du mich fragst",
+            "ehrlich gesagt", "offen gesagt", "um ehrlich zu sein",
+            "zustimmung", "einverstanden", "akzeptiere", "befürworte",
+            "ablehnung", "widerspruch", "einwand", "kritik", "bedenken",
+            "pro", "contra", "vorteile", "nachteile", "abwägen",
+            "überzeugt", "sicher", "gewiss", "bestimmt", "definitiv",
+            "unsicher", "vielleicht", "eventuell", "möglicherweise",
+            "neutral", "keine meinung", "mir egal", "ist mir gleich",
+            "interessante frage", "gute frage", "schwer zu sagen",
+            "kommt drauf an", "je nachdem", "unterschiedlich", "individuell",
+            "respektiere deine meinung", "sehe das anders", "verstehe aber",
+            # Phrasen
+            "was denkst du", "wie siehst du das", "deine meinung",
+            "ich finde dass", "für mich ist", "würde sagen dass",
+            "bin der meinung", "sehe das so", "stehe dazu",
+        ],
+        "requests": [
+            # Grundlagen
+            "bitte", "könntest du", "würdest du", "kannst du",
+            "brauche", "möchte", "will", "hätte gern", "wünsche mir",
+            "frag", "fragen", "erkundigen", "bitten", "anfragen",
+            # Erweitert
+            "wärst du so nett", "wenn es nicht zu viel verlangt",
+            "wenn du zeit hast", "wenn es geht", "wenn möglich",
+            "nur wenn du willst", "kein druck", "nur falls",
+            "mach dir keine umstände", "ist nicht so wichtig", "kein stress",
+            "wäre toll wenn", "wäre super wenn", "das wäre lieb",
+            "ich hätte eine bitte", "darf ich fragen", "eine frage",
+            "kurze frage", "schnelle frage", "dumme frage vielleicht",
+            "sorry dass ich frage", "hoffe das ist ok", "stört es dich wenn",
+            "erlaubst du", "gestattest du", "ist es in ordnung wenn",
+            "tu mir einen gefallen", "kannst du mir helfen bei",
+            "wärst du bereit zu", "hättest du lust auf", "wie wärs mit",
+            "vorschlag", "idee", "angebot", "einladung", "aufforderung",
+            # Phrasen
+            "kannst du mal", "mach mal bitte", "gib mir mal",
+            "ich bräuchte", "es wäre toll wenn", "wäre es möglich dass",
+        ],
+        "confirmation": [
+            # Grundlagen
+            "ja", "nein", "okay", "ok", "alles klar",
+            "stimmt", "richtig", "korrekt", "genau", "exakt",
+            "falsch", "nicht richtig", "stimmt nicht", "nope",
+            # Erweitert
+            "jawohl", "jap", "jo", "jup", "yep", "yeah", "yes",
+            "nö", "nee", "nä", "nope", "no", "niemals", "auf keinen fall",
+            "absolut", "definitiv", "hundertprozentig", "auf jeden fall",
+            "natürlich", "klar", "logo", "sicher", "selbstverständlich",
+            "vielleicht", "eventuell", "möglicherweise", "könnte sein",
+            "wahrscheinlich", "vermutlich", "wohl", "denke schon",
+            "glaube nicht", "bezweifle", "eher nicht", "eher unwahrscheinlich",
+            "bestätigen", "zustimmen", "bejahen", "einwilligen", "akzeptieren",
+            "ablehnen", "verneinen", "widersprechen", "abstreiten",
+            "einverstanden", "geht klar", "machen wir", "passt", "deal",
+            "geht nicht", "keine chance", "vergiss es", "unmöglich",
+            # Phrasen
+            "ja genau", "ja richtig", "so ist es", "stimmt genau",
+            "nein danke", "lieber nicht", "besser nicht", "lass mal",
         ],
     }
     
