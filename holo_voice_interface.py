@@ -1065,19 +1065,42 @@ class HoloVoiceInterface:
         pitch = 1.0
         volume = 1.0
         
-        # Energy-basiert
+        # Energy-basiert (10-Stufen-System)
         if VoiceConfig.ENABLE_ENERGY_MODULATION and self.energy_system:
             try:
                 status = self.energy_system.get_status()
                 energy = status.get('total_energy', 0.5)
 
-                # Müde = langsamer, leiser
-                if energy < 0.3:
-                    rate = 0.85
+                # 10 Energie-Stufen für Sprachmodulation
+                if energy < 0.05:  # DREAMING
+                    rate = 0.0  # Spricht nicht
+                    volume = 0.0
+                elif energy < 0.15:  # WAKING
+                    rate = 0.65  # Sehr langsam, verschlafen
+                    volume = 0.5
+                elif energy < 0.25:  # VERY_EXHAUSTED
+                    rate = 0.75  # Langsam, leise
+                    volume = 0.6
+                elif energy < 0.35:  # EXHAUSTED
+                    rate = 0.80  # Etwas langsamer
+                    volume = 0.7
+                elif energy < 0.45:  # TIRED
+                    rate = 0.85  # Leicht verlangsamt
                     volume = 0.8
-                # Energiegeladen = schneller
-                elif energy > 0.7:
-                    rate = 1.1
+                elif energy < 0.55:  # SLIGHTLY_TIRED
+                    rate = 0.92  # Fast normal
+                    volume = 0.9
+                elif energy < 0.65:  # NORMAL
+                    rate = 1.0  # Normal
+                    volume = 1.0
+                elif energy < 0.75:  # GOOD
+                    rate = 1.05  # Etwas schneller
+                    volume = 1.0
+                elif energy < 0.88:  # ENERGIZED
+                    rate = 1.10  # Schneller
+                    volume = 1.0
+                else:  # OVERFLOWING
+                    rate = 1.15  # Sehr schnell, energiegeladen
                     volume = 1.0
 
                 self.state.energy = energy

@@ -759,18 +759,48 @@ class DigitalBodySystem:
             "reaction": None
         }
 
-        # Reaktionen bei niedrigem Energie-Level
-        if self.energy_level < 0.2 and old_energy >= 0.2:
+        # Reaktionen bei niedrigem Energie-Level (10-Stufen-System)
+        if self.energy_level < 0.05 and old_energy >= 0.05:
+            # DREAMING - Zu müde zum reagieren
+            result["reaction"] = {
+                "type": "sleeping",
+                "message": "*schläft tief und träumt*",
+                "energy_level": self.energy_level
+            }
+        elif self.energy_level < 0.15 and old_energy >= 0.15:
+            # WAKING - Gerade aufwachen
+            result["reaction"] = {
+                "type": "waking",
+                "message": "*blinzelt verschlafen* Hmmm... bin gerade erst wach...",
+                "energy_level": self.energy_level
+            }
+        elif self.energy_level < 0.25 and old_energy >= 0.25:
+            # VERY_EXHAUSTED - Total erschöpft
             result["reaction"] = {
                 "type": "exhausted",
                 "message": "*erschöpft* Ich bin echt platt... "
-                          "Brauche eine Pause oder weniger Aufgaben.",
+                          "Brauche dringend eine Pause.",
                 "energy_level": self.energy_level
             }
-        elif self.energy_level < 0.5 and old_energy >= 0.5:
+        elif self.energy_level < 0.35 and old_energy >= 0.35:
+            # EXHAUSTED - Erschöpft
+            result["reaction"] = {
+                "type": "very_tired",
+                "message": "*seufzt schwer* So müde... brauche Pause...",
+                "energy_level": self.energy_level
+            }
+        elif self.energy_level < 0.45 and old_energy >= 0.45:
+            # TIRED - Müde
             result["reaction"] = {
                 "type": "tired",
-                "message": "*seufzt* Langsam wird's anstrengend...",
+                "message": "*gähnt* Langsam wird's anstrengend...",
+                "energy_level": self.energy_level
+            }
+        elif self.energy_level < 0.55 and old_energy >= 0.55:
+            # SLIGHTLY_TIRED - Leicht müde
+            result["reaction"] = {
+                "type": "slightly_tired",
+                "message": "*streckt sich* Ein bisschen müde...",
                 "energy_level": self.energy_level
             }
 
@@ -1433,13 +1463,27 @@ class DigitalBodySystem:
         }
         parts.append(mental_expressions[self.mental_state])
 
-        # Energie
-        if self.energy_level < 0.3:
-            parts.append("und ziemlich erschöpft")
-        elif self.energy_level < 0.6:
-            parts.append("und etwas müde")
-        elif self.energy_level > 0.9:
-            parts.append("und voller Energie")
+        # Energie (10-Stufen-System)
+        if self.energy_level < 0.05:
+            parts.append("und schlafe tief")
+        elif self.energy_level < 0.15:
+            parts.append("und bin gerade erst aufgewacht")
+        elif self.energy_level < 0.25:
+            parts.append("und bin total erschöpft")
+        elif self.energy_level < 0.35:
+            parts.append("und bin ziemlich erschöpft")
+        elif self.energy_level < 0.45:
+            parts.append("und bin müde")
+        elif self.energy_level < 0.55:
+            parts.append("und bin leicht müde")
+        elif self.energy_level < 0.65:
+            parts.append("")  # Normal - kein Kommentar
+        elif self.energy_level < 0.75:
+            parts.append("und fühle mich gut")
+        elif self.energy_level < 0.88:
+            parts.append("und bin voller Energie")
+        else:
+            parts.append("und strotze vor Energie")
 
         # Governor/Müdigkeit
         if self.current_governor == GovernorMode.POWERSAVE:
@@ -2155,9 +2199,10 @@ class InterestLifecycleSystem:
 
         self.current_energy = max(0.1, self.current_energy - natural_decay)
 
-        # === ZWEITER WIND? ===
+        # === ZWEITER WIND? (10-Stufen-System) ===
         # Kleine Chance auf Energieschub (max 2x pro Tag)
-        if self.energy_peaks < 2 and self.current_energy < 0.5:
+        # Nur möglich wenn unter NORMAL Level (< 0.55)
+        if self.energy_peaks < 2 and self.current_energy < 0.55:
             wind_chance = 0.05 * hours_since_last  # ~5% pro Stunde
 
             # Höhere Chance an energetischen Tagen
@@ -2166,7 +2211,8 @@ class InterestLifecycleSystem:
 
             if random.random() < wind_chance:
                 boost = random.uniform(0.2, 0.4)
-                self.current_energy = min(0.9, self.current_energy + boost)
+                # Max ENERGIZED (0.88), nicht OVERFLOWING
+                self.current_energy = min(0.88, self.current_energy + boost)
                 self.energy_peaks += 1
                 result["events"].append({
                     "type": "second_wind",
@@ -2179,14 +2225,25 @@ class InterestLifecycleSystem:
                     ])
                 })
 
-        # === MÜDIGKEITS-REAKTIONEN ===
-        if self.current_energy < 0.2 and result["old_energy"] >= 0.2:
+        # === MÜDIGKEITS-REAKTIONEN (10-Stufen-System) ===
+        # Reaktion wenn VERY_EXHAUSTED erreicht (< 0.25)
+        if self.current_energy < 0.25 and result["old_energy"] >= 0.25:
+            result["events"].append({
+                "type": "getting_very_tired",
+                "message": random.choice([
+                    "*gähnt schwer* Ich bin wirklich erschöpft...",
+                    "*reibt sich Augen* Meine Energie ist fast aufgebraucht...",
+                    "*lehnt sich zurück* Puh, brauche dringend eine Pause..."
+                ])
+            })
+        # Reaktion wenn TIRED erreicht (< 0.45)
+        elif self.current_energy < 0.45 and result["old_energy"] >= 0.45:
             result["events"].append({
                 "type": "getting_tired",
                 "message": random.choice([
                     "*gähnt* Ich werd langsam müde...",
-                    "*reibt sich Augen* Meine Energie lässt nach...",
-                    "*lehnt sich zurück* Puh, anstrengend..."
+                    "*streckt sich* Meine Energie lässt nach...",
+                    "*seufzt* Langsam anstrengend..."
                 ])
             })
 
@@ -2346,14 +2403,30 @@ class InterestLifecycleSystem:
             if self.focus_tendency < 0.4:
                 base_interest += 0.15  # Explorativ: neues Thema = interessant
 
-        # === ENERGIE ===
-        if self.current_energy < 0.3:
-            # Müde - komplexe Themen weniger attraktiv
+        # === ENERGIE (10-Stufen-System) ===
+        if self.current_energy < 0.15:
+            # WAKING/DREAMING - kaum Interesse an allem
+            base_interest -= 0.4
+        elif self.current_energy < 0.25:
+            # VERY_EXHAUSTED - komplexe Themen viel weniger attraktiv
+            if topic_lower in ["programmieren", "philosophie", "ki", "bewusstsein"]:
+                base_interest -= 0.3
+            else:
+                base_interest -= 0.15
+        elif self.current_energy < 0.35:
+            # EXHAUSTED - komplexe Themen weniger attraktiv
             if topic_lower in ["programmieren", "philosophie", "ki", "bewusstsein"]:
                 base_interest -= 0.2
-        elif self.current_energy > 0.8:
-            # Energiegeladen - alles ist interessant
+        elif self.current_energy < 0.45:
+            # TIRED - leichte Präferenz für einfache Themen
+            if topic_lower in ["programmieren", "philosophie", "ki", "bewusstsein"]:
+                base_interest -= 0.1
+        elif self.current_energy >= 0.75:
+            # ENERGIZED - alles ist interessant
             base_interest += 0.1
+        elif self.current_energy >= 0.88:
+            # OVERFLOWING - extra motiviert
+            base_interest += 0.15
 
         # === MOOD ===
         mood_bonus = {

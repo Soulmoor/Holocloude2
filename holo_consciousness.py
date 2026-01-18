@@ -609,14 +609,23 @@ class InnerMonologue:
                 weights[ThoughtType.WONDER] = 0.9
                 weights[ThoughtType.MORAL] = 0.6
 
-            # Bei niedriger Energie mehr Zweifel
+            # Energie-basierte Gewichtung (10-Stufen-System)
             energy = context.get('energy', 0.5)
-            if energy < 0.3:
+            if energy < 0.15:  # WAKING - sehr müde
+                weights[ThoughtType.DOUBT] = 0.9
+                weights[ThoughtType.CURIOSITY] = 0.3
+            elif energy < 0.35:  # EXHAUSTED - erschöpft
                 weights[ThoughtType.DOUBT] = 0.7
-
-            # Bei hoher Energie mehr Neugier
-            if energy > 0.7:
+                weights[ThoughtType.CURIOSITY] = 0.5
+            elif energy < 0.45:  # TIRED - müde
+                weights[ThoughtType.DOUBT] = 0.5
+            elif energy > 0.88:  # OVERFLOWING - übersprudelnd
+                weights[ThoughtType.CURIOSITY] = 1.5
+                weights[ThoughtType.WONDER] = 1.3
+            elif energy > 0.75:  # ENERGIZED - energiegeladen
                 weights[ThoughtType.CURIOSITY] = 1.2
+            elif energy > 0.65:  # GOOD - gut drauf
+                weights[ThoughtType.CURIOSITY] = 1.0
 
             # Bei moralisch relevantem Kontext
             if context.get('moral_relevance', False):
@@ -3829,23 +3838,45 @@ class HoloConsciousness:
         return result
 
     def _apply_energy_to_consciousness(self, energy_level: float) -> Dict:
-        """Wendet Energie-Zustand auf Bewusstsein an"""
+        """Wendet Energie-Zustand auf Bewusstsein an (10-Stufen-System)"""
         result = {
             "energy_level": energy_level,
             "consciousness_modifier": None
         }
 
-        if energy_level < 0.3:
-            result["consciousness_modifier"] = "müde"
-            # Reduziere Bewusstseinstiefe bei Müdigkeit
+        # 10-Stufen Energie-System
+        if energy_level < 0.05:  # DREAMING
+            result["consciousness_modifier"] = "träumend"
+            self.introspection_depth = max(0, self.introspection_depth - 2)
+            result["thought_addition"] = "*träumt tief* "
+        elif energy_level < 0.15:  # WAKING
+            result["consciousness_modifier"] = "gerade aufgewacht"
+            self.introspection_depth = max(0, self.introspection_depth - 2)
+            result["thought_addition"] = "*blinzelt verschlafen* "
+        elif energy_level < 0.25:  # VERY_EXHAUSTED
+            result["consciousness_modifier"] = "sehr erschöpft"
+            self.introspection_depth = max(0, self.introspection_depth - 1)
+            result["thought_addition"] = "*kämpft gegen Müdigkeit* "
+        elif energy_level < 0.35:  # EXHAUSTED
+            result["consciousness_modifier"] = "erschöpft"
             self.introspection_depth = max(0, self.introspection_depth - 1)
             result["thought_addition"] = "*gähnt innerlich* "
-        elif energy_level < 0.5:
-            result["consciousness_modifier"] = "etwas erschöpft"
-        elif energy_level > 0.8:
+        elif energy_level < 0.45:  # TIRED
+            result["consciousness_modifier"] = "müde"
+            result["thought_addition"] = "*etwas müde* "
+        elif energy_level < 0.55:  # SLIGHTLY_TIRED
+            result["consciousness_modifier"] = "leicht müde"
+        elif energy_level < 0.65:  # NORMAL
+            result["consciousness_modifier"] = "wach"
+        elif energy_level < 0.75:  # GOOD
+            result["consciousness_modifier"] = "aufmerksam"
+        elif energy_level < 0.88:  # ENERGIZED
             result["consciousness_modifier"] = "hellwach"
-            # Erhöhe Bewusstseinstiefe bei hoher Energie
             self.introspection_depth = min(5, self.introspection_depth + 1)
+        else:  # OVERFLOWING
+            result["consciousness_modifier"] = "übersprudelnd wach"
+            self.introspection_depth = min(5, self.introspection_depth + 2)
+            result["thought_addition"] = "*voller Energie und Ideen* "
 
         return result
 

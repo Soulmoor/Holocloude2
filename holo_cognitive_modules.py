@@ -1699,15 +1699,24 @@ class ConsciousnessEngine:
             base_weights[ThoughtType.EXISTENTIAL] *= 1.5
             base_weights[ThoughtType.QUESTION] *= 1.3
 
-        # Hohe Energie → mehr Neugier und Imagination
-        if energy > 0.7:
+        # Energie-basierte Gewichtungen (10-Stufen-System)
+        if energy < 0.15:
+            # WAKING/DREAMING - fast nur Träume/Imagination
+            base_weights[ThoughtType.IMAGINATION] *= 2.0
+            base_weights[ThoughtType.MEMORY] *= 1.5
+        elif energy < 0.35:
+            # VERY_EXHAUSTED/EXHAUSTED - mehr Reflexion und Erinnerungen
+            base_weights[ThoughtType.REFLECTION] *= 1.6
+            base_weights[ThoughtType.MEMORY] *= 1.4
+        elif energy < 0.55:
+            # TIRED/SLIGHTLY_TIRED - leicht mehr Reflexion
+            base_weights[ThoughtType.REFLECTION] *= 1.3
+            base_weights[ThoughtType.MEMORY] *= 1.2
+        elif energy >= 0.75:
+            # ENERGIZED/OVERFLOWING - mehr Neugier und Imagination
             base_weights[ThoughtType.IMAGINATION] *= 1.4
             base_weights[ThoughtType.DESIRE] *= 1.3
-
-        # Niedrige Energie → mehr Reflexion
-        if energy < 0.3:
-            base_weights[ThoughtType.REFLECTION] *= 1.5
-            base_weights[ThoughtType.MEMORY] *= 1.3
+            base_weights[ThoughtType.QUESTION] *= 1.2
 
         # Existenzielle Unruhe verstärkt existenzielle Gedanken
         existential_intensity = sum(self.existential_state.concerns.values()) / len(self.existential_state.concerns)
@@ -6206,12 +6215,22 @@ class PerceptionEngine:
                     valence = -0.3
                     context.append("low_mood")
 
-                if energy < 0.3:
+                # 10-Stufen Energie-System
+                if energy < 0.15:
+                    meaning = f"{meaning}, sehr verschlafen"
+                    context.append("very_sleepy")
+                elif energy < 0.35:
+                    meaning = f"{meaning}, erschöpft"
+                    context.append("exhausted")
+                elif energy < 0.55:
                     meaning = f"{meaning}, müde"
                     context.append("tired")
-                elif energy > 0.7:
+                elif energy >= 0.75:
                     meaning = f"{meaning}, energiegeladen"
                     context.append("energetic")
+                elif energy >= 0.88:
+                    meaning = f"{meaning}, voller Energie"
+                    context.append("overflowing")
 
             if bond_level > 0.7:
                 meaning = f"{meaning}. Starke Verbindung zum User."
@@ -7345,15 +7364,28 @@ class PerceptionEngine:
         else:
             self.embodied_state.current_rhythm = "steady"
 
-        # Gesamtgefühl
-        if self.embodied_state.energy_level > 0.7 and self.embodied_state.tension < 0.4:
-            self.embodied_state.feels_like = "energetisch und entspannt"
-        elif self.embodied_state.tension > 0.6:
-            self.embodied_state.feels_like = "wachsam und angespannt"
-        elif self.embodied_state.energy_level < 0.4:
+        # Gesamtgefühl (10-Stufen-System)
+        energy = self.embodied_state.energy_level
+        tension = self.embodied_state.tension
+
+        if energy < 0.15:
+            self.embodied_state.feels_like = "träumend und weit weg"
+        elif energy < 0.25:
+            self.embodied_state.feels_like = "sehr erschöpft und schwer"
+        elif energy < 0.45:
             self.embodied_state.feels_like = "müde und gedämpft"
-        else:
-            self.embodied_state.feels_like = "ruhig und präsent"
+        elif energy < 0.65:
+            if tension > 0.6:
+                self.embodied_state.feels_like = "wachsam und angespannt"
+            else:
+                self.embodied_state.feels_like = "ruhig und präsent"
+        elif energy < 0.88:
+            if tension < 0.4:
+                self.embodied_state.feels_like = "energetisch und entspannt"
+            else:
+                self.embodied_state.feels_like = "energetisch und fokussiert"
+        else:  # OVERFLOWING
+            self.embodied_state.feels_like = "voller Tatendrang und lebendig"
 
     # =========================================================================
     # FELD-METRIKEN
