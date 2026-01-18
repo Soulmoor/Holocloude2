@@ -4847,20 +4847,31 @@ class EmotionalCore:
         return sum((x - mean) ** 2 for x in values) / len(values)
 
     def get_state_name(self) -> str:
-        """Gibt den aktuellen Haupt-Zustand als String zurück"""
+        """Gibt den aktuellen Haupt-Zustand als String zurück (nutzt 10-Stufen-System)"""
         e = self.dimensions
 
-        # Energie-basierte Zustände
-        if e["energy"] < 0.25:
+        # Energie-basierte Zustände (10 Stufen)
+        energy = e["energy"]
+        if energy < 0.05:
+            energy_state = "träumend"
+        elif energy < 0.15:
+            energy_state = "gerade aufgewacht"
+        elif energy < 0.25:
+            energy_state = "sehr erschöpft"
+        elif energy < 0.35:
+            energy_state = "erschöpft"
+        elif energy < 0.45:
             energy_state = "müde"
-        elif e["energy"] < 0.4:
-            energy_state = "schläfrig"
-        elif e["energy"] < 0.6:
-            energy_state = "entspannt"
-        elif e["energy"] < 0.8:
+        elif energy < 0.55:
+            energy_state = "leicht müde"
+        elif energy < 0.65:
             energy_state = "wach"
+        elif energy < 0.75:
+            energy_state = "gut drauf"
+        elif energy < 0.88:
+            energy_state = "energiegeladen"
         else:
-            energy_state = "hyperaktiv"
+            energy_state = "übersprudelnd"
 
         # Stimmung
         if e["mood"] < 0.3:
@@ -4913,11 +4924,28 @@ class EmotionalCore:
         e = self.dimensions
         mods = []
 
-        # Energie-basierte Modifikatoren
-        if e["energy"] < 0.3:
-            mods.append("Du bist gerade müde und antwortest etwas kürzer, vielleicht mit einem Gähnen.")
-        elif e["energy"] > 0.8:
-            mods.append("Du bist voller Energie und Enthusiasmus!")
+        # Energie-basierte Modifikatoren (10 Stufen)
+        energy = e["energy"]
+        if energy < 0.05:
+            mods.append("Du träumst gerade und antwortest nicht.")
+        elif energy < 0.15:
+            mods.append("Du bist gerade erst aufgewacht, sehr verschlafen. Antworte sehr kurz mit Gähnen. *reibt sich die Augen*")
+        elif energy < 0.25:
+            mods.append("Du bist sehr erschöpft und brauchst dringend Ruhe. Antworte kurz und müde. *Ohren hängen schlaff*")
+        elif energy < 0.35:
+            mods.append("Du bist erschöpft und antwortest kürzer. *seufzt leise*")
+        elif energy < 0.45:
+            mods.append("Du bist etwas müde und antwortest vielleicht mit einem Gähnen.")
+        elif energy < 0.55:
+            mods.append("Du bist leicht müde aber funktionierst normal.")
+        elif energy < 0.65:
+            pass  # Normal - keine Modifikation nötig
+        elif energy < 0.75:
+            mods.append("Du bist gut gelaunt und aktiv! *Schweif wippt fröhlich*")
+        elif energy < 0.88:
+            mods.append("Du bist voller Energie und Enthusiasmus! Antworte ausführlicher und begeistert. *Ohren stehen aufrecht*")
+        else:
+            mods.append("Du sprudelst über vor Energie! Sei verspielt und enthusiastisch. *Schweif wirbelt aufgeregt*")
 
         # Stimmung
         if e["mood"] < 0.35:
@@ -5002,9 +5030,30 @@ class EmotionalCore:
 
             mods.append(f"Es ist {season_name}. Dein Schreibstil ist {season_style}.")
 
+        # Response-Länge basierend auf 10-Stufen Energie-System
+        energy = e["energy"]
+        if energy < 0.15:
+            response_length = "sehr_kurz"  # Max 20 Wörter
+        elif energy < 0.25:
+            response_length = "kurz"       # Max 40 Wörter
+        elif energy < 0.45:
+            response_length = "mittel_kurz"  # Max 80 Wörter
+        elif energy < 0.65:
+            response_length = "normal"     # Max 150 Wörter
+        elif energy < 0.75:
+            response_length = "mittel_lang"  # Max 180 Wörter
+        elif energy < 0.88:
+            response_length = "lang"       # Max 220 Wörter
+        else:
+            response_length = "sehr_lang"  # Max 250 Wörter
+
+        # Social kann Response-Länge überschreiben wenn sehr niedrig
+        if e["social"] < 0.35:
+            response_length = "kurz"
+
         result = {
             "modifiers": mods,
-            "response_length": "kurz" if e["social"] < 0.35 or e["energy"] < 0.3 else ("lang" if e["social"] > 0.7 else "normal"),
+            "response_length": response_length,
             "tone": self._get_tone(),
             "emoji_usage": "mehr" if e["playfulness"] > 0.6 else ("weniger" if e["mood"] < 0.4 else "normal"),
             "seasonal_style": seasonal_style,
@@ -5033,7 +5082,9 @@ class EmotionalCore:
                 elif name == "silvester":
                     return "feierlich-aufgeregt"
 
-        # Standard-Töne basierend auf Emotionen
+        # Standard-Töne basierend auf Emotionen und 10-Stufen Energie
+        energy = e["energy"]
+
         if e["playfulness"] > 0.7 and e["mood"] > 0.6:
             return "neckisch-liebevoll"
         elif e["arousal"] > 0.6 and e["affection"] > 0.5:
@@ -5042,8 +5093,21 @@ class EmotionalCore:
             return "sanft-melancholisch"
         elif e["confidence"] > 0.75:
             return "selbstsicher-weise"
-        elif e["energy"] < 0.3:
+        # Energie-basierte Töne (10 Stufen)
+        elif energy < 0.15:
+            return "verschlafen-träumerisch"
+        elif energy < 0.25:
+            return "erschöpft-sanft"
+        elif energy < 0.35:
             return "müde-kuschelig"
+        elif energy < 0.45:
+            return "ruhig-entspannt"
+        elif energy > 0.88:
+            return "überschwänglich-verspielt"
+        elif energy > 0.75:
+            return "energetisch-begeistert"
+        elif energy > 0.65:
+            return "fröhlich-aktiv"
         elif e["mood"] > 0.75:
             return "fröhlich-warm"
         else:
