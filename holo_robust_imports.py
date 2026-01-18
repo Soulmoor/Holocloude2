@@ -369,6 +369,10 @@ class FallbackSmartLLM:
     def check_connection(self):
         return {"connected": False, "host": self.ollama_host}
 
+    def is_generating(self) -> bool:
+        """Prüft ob gerade generiert wird"""
+        return False
+
 
 class FallbackUnifiedLLM(FallbackSmartLLM):
     """Fallback für UnifiedLLM v15"""
@@ -502,6 +506,18 @@ class FallbackEnergySystem:
     def get_energy_modifier(self):
         return {"energy_level": self._energy, "modifiers": []}
 
+    def set_activity(self, activity: str):
+        """Setzt aktuelle Aktivität"""
+        pass
+
+    def consume_for_activity(self, activity: str, duration: float = 1.0):
+        """Verbraucht Energie für Aktivität"""
+        self._energy = max(0, self._energy - 0.01 * duration)
+
+    def save_state(self):
+        """Speichert Zustand"""
+        pass
+
 
 class FallbackPersonalityEngine:
     """Fallback wenn holo_personality.py nicht existiert"""
@@ -560,6 +576,10 @@ class FallbackPersonalityEngine:
         """Startet Hintergrund-Loop"""
         self._background_running = True
 
+    def process_message(self, message: str, positive: bool = True):
+        """Verarbeitet eine Nachricht für Persönlichkeits-Update"""
+        pass
+
 
 class FallbackLearningProtocol:
     """Fallback wenn HoloLearningSystem nicht verfügbar"""
@@ -606,6 +626,10 @@ class FallbackSafetyCore:
     def filter_response(self, response):
         return response
 
+    def check_action(self, action: str, context: dict = None) -> dict:
+        """Prüft ob Aktion erlaubt ist"""
+        return {"allowed": True, "reason": "fallback_mode"}
+
 
 class FallbackConsciousness:
     """Fallback für HoloConsciousness"""
@@ -632,6 +656,10 @@ class FallbackConsciousness:
 
     def generate_inner_thought(self):
         return None
+
+    def _save_state(self):
+        """Speichert Bewusstseins-Zustand"""
+        pass
 
 
 class FallbackInnerLife:
