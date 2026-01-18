@@ -175,77 +175,289 @@ class TextAnalyzer:
     ]
     
     # Emotions-Keywords
+    # EMOTION_KEYWORDS - Massiv erweitert (3x mehr Wörter pro Kategorie)
     EMOTION_KEYWORDS = {
-        "happy": ["freue", "glücklich", "toll", "super", "geil", "nice", "cool",
-                  "yay", "hurra", "fantastisch", "wunderbar", "großartig", "perfekt",
-                  "herrlich", "genial", "klasse", "prima", "spitze", "mega", "hammer",
-                  "freut mich", "bin froh", "macht spaß", "liebe es", "begeistert"],
-        "sad": ["traurig", "schlecht", "mies", "down", "depri", "unglücklich",
-                "einsam", "allein", "verletzt", "enttäuscht", "niedergeschlagen",
-                "bedrückt", "weinen", "tränen", "schmerzt", "tut weh", "vermisse",
-                "hoffnungslos", "leer", "schwer ums herz", "melancholisch"],
-        "angry": ["wütend", "sauer", "genervt", "frustriert", "verärgert",
-                  "kotzt mich an", "nervt", "hasse", "aggressiv", "zornig",
-                  "stinksauer", "aufgebracht", "empört", "entrüstet", "rasend",
-                  "zum kotzen", "unfassbar", "unverschämt", "frechheit"],
-        "anxious": ["angst", "sorge", "nervös", "unsicher", "ängstlich",
-                    "beunruhigt", "gestresst", "stress", "panik", "befürchte",
-                    "mache mir sorgen", "besorgt", "unruhig", "aufgewühlt",
-                    "überfordert", "überwältigt", "angespannt", "bange"],
-        "tired": ["müde", "erschöpft", "kaputt", "fertig", "platt", "ko",
-                  "ausgelaugt", "schlapp", "energielos", "kraftlos", "matt",
-                  "todmüde", "hundemüde", "am ende", "ausgebrannt", "burnout"],
-        "excited": ["aufgeregt", "gespannt", "kann nicht warten", "hyped",
-                    "kribbelt", "zappelig", "ungeduldig", "freue mich riesig",
-                    "kann es kaum erwarten", "total gespannt", "elektrisiert"],
-        "confused": ["verwirrt", "verstehe nicht", "kapier nicht", "hä", "was",
-                     "irritiert", "ratlos", "perplex", "durcheinander", "lost",
-                     "keinen plan", "keine ahnung", "check ich nicht", "unklar"],
-        "grateful": ["danke", "dankbar", "lieb von dir", "nett", "wertschätze",
-                     "bedeutet mir viel", "bin dir dankbar", "schätze es"],
-        "loving": ["liebe dich", "mag dich", "hab dich lieb", "gern", "vermisse dich",
-                   "bist mir wichtig", "schätze dich", "zuneigung", "verbunden"],
-        "hopeful": ["hoffe", "hoffnung", "zuversichtlich", "optimistisch",
-                    "wird schon", "glaube daran", "positiv gestimmt"],
-        "bored": ["langweilig", "öde", "fade", "nichts los", "gelangweilt",
-                  "langweile mich", "monoton", "eintönig", "stumpfsinnig"],
+        "happy": [
+            # Grundformen
+            "freue", "glücklich", "toll", "super", "geil", "nice", "cool", "yay", "hurra",
+            "fantastisch", "wunderbar", "großartig", "perfekt", "herrlich", "genial",
+            "klasse", "prima", "spitze", "mega", "hammer", "krass", "lit", "awesome",
+            # Phrasen
+            "freut mich", "bin froh", "macht spaß", "liebe es", "begeistert", "happy",
+            "bin happy", "freu mich", "juhu", "endlich", "geschafft", "gewonnen",
+            # Verstärkungen
+            "richtig gut", "echt toll", "total schön", "so froh", "überglücklich",
+            "im siebten himmel", "auf wolke sieben", "strahle", "lache", "lächle",
+            # Jugendsprache
+            "gönnung", "läuft bei mir", "isso", "safe", "vallah gut", "mashallah",
+            "no cap", "fr fr", "slay", "based", "goated", "w", "dub",
+        ],
+        "sad": [
+            # Grundformen
+            "traurig", "schlecht", "mies", "down", "depri", "unglücklich", "einsam",
+            "allein", "verletzt", "enttäuscht", "niedergeschlagen", "bedrückt",
+            "weinen", "tränen", "schmerzt", "tut weh", "vermisse", "hoffnungslos",
+            "leer", "schwer ums herz", "melancholisch", "deprimiert", "gebrochen",
+            # Phrasen
+            "geht mir schlecht", "fühle mich mies", "am boden", "am ende",
+            "will nicht mehr", "keine kraft", "trauere", "heule", "weine",
+            "tut mir leid", "bereue", "schuldig", "versagt", "gescheitert",
+            # Verstärkungen
+            "so traurig", "todunglücklich", "am verzweifeln", "zerstört",
+            "innerlich leer", "kaputt gemacht", "fertig mit der welt",
+        ],
+        "angry": [
+            # Grundformen
+            "wütend", "sauer", "genervt", "frustriert", "verärgert", "hasse",
+            "aggressiv", "zornig", "stinksauer", "aufgebracht", "empört",
+            "entrüstet", "rasend", "böse", "angepisst", "getriggert",
+            # Phrasen
+            "kotzt mich an", "nervt", "zum kotzen", "unfassbar", "unverschämt",
+            "frechheit", "geht gar nicht", "regt mich auf", "macht mich wahnsinnig",
+            "könnte platzen", "könnte ausrasten", "bring mich um",
+            # Verstärkungen
+            "so sauer", "mega genervt", "richtig wütend", "fuchsteufelswild",
+            "auf 180", "am ausrasten", "kurz vorm explodieren",
+            # Jugendsprache
+            "tilted", "triggered", "salzig", "salty", "toxic", "cringe",
+        ],
+        "anxious": [
+            # Grundformen
+            "angst", "sorge", "nervös", "unsicher", "ängstlich", "beunruhigt",
+            "gestresst", "stress", "panik", "befürchte", "besorgt", "unruhig",
+            "aufgewühlt", "überfordert", "überwältigt", "angespannt", "bange",
+            # Phrasen
+            "mache mir sorgen", "hab angst", "kriege panik", "zittere",
+            "kann nicht schlafen", "drehe durch", "werde verrückt",
+            "schaffe das nicht", "zu viel", "halte das nicht aus",
+            # Verstärkungen
+            "totale panik", "richtig angst", "mega stress", "am durchdrehen",
+            "am limit", "kurz vorm zusammenbruch", "anxiety", "panikanfall",
+        ],
+        "tired": [
+            # Grundformen
+            "müde", "erschöpft", "kaputt", "fertig", "platt", "ko", "ausgelaugt",
+            "schlapp", "energielos", "kraftlos", "matt", "todmüde", "hundemüde",
+            "ausgebrannt", "burnout", "übermüdet", "schlaflos", "groggy",
+            # Phrasen
+            "am ende", "keine energie", "brauche schlaf", "will ins bett",
+            "kann nicht mehr", "bin am arsch", "bin im eimer", "bin durch",
+            # Verstärkungen
+            "so müde", "total fertig", "richtig kaputt", "komplett am ende",
+            "könnte sofort einschlafen", "schlafe gleich ein", "döse weg",
+        ],
+        "excited": [
+            # Grundformen
+            "aufgeregt", "gespannt", "hyped", "kribbelt", "zappelig", "ungeduldig",
+            "elektrisiert", "fiebere", "begeistert", "enthusiastisch",
+            # Phrasen
+            "kann nicht warten", "freue mich riesig", "kann es kaum erwarten",
+            "total gespannt", "so aufgeregt", "bin so hyped", "zähle die tage",
+            "platze gleich", "halte es nicht aus", "so excited",
+            # Jugendsprache
+            "les goooo", "lets go", "omg", "oh mein gott", "krass",
+        ],
+        "confused": [
+            # Grundformen
+            "verwirrt", "irritiert", "ratlos", "perplex", "durcheinander", "lost",
+            "unklar", "verstehe nicht", "kapier nicht", "check nicht",
+            # Phrasen
+            "hä", "was", "wie bitte", "keinen plan", "keine ahnung", "wtf",
+            "was zum", "häh", "öhm", "ähm", "hm", "hmm",
+            "verstehe bahnhof", "blicke nicht durch", "bin raus",
+            # Verstärkungen
+            "total verwirrt", "komplett lost", "null plan", "gar keine ahnung",
+        ],
+        "grateful": [
+            # Grundformen
+            "danke", "dankbar", "wertschätze", "schätze", "erkenne an",
+            # Phrasen
+            "lieb von dir", "nett von dir", "bedeutet mir viel", "bin dir dankbar",
+            "schätze es sehr", "vielen dank", "tausend dank", "danke sehr",
+            "danke schön", "herzlichen dank", "besten dank",
+            # Verstärkungen
+            "so dankbar", "mega lieb", "echt nett", "richtig cool von dir",
+        ],
+        "loving": [
+            # Grundformen
+            "liebe", "lieb", "mag", "gern", "zuneigung", "verbunden", "nah",
+            # Phrasen
+            "liebe dich", "mag dich", "hab dich lieb", "vermisse dich",
+            "bist mir wichtig", "schätze dich", "hdl", "hdgdl", "ily",
+            "denke an dich", "bist toll", "bist super", "bist besonders",
+            # Verstärkungen
+            "liebe dich so sehr", "hab dich so lieb", "bist das beste",
+        ],
+        "hopeful": [
+            # Grundformen
+            "hoffe", "hoffnung", "zuversichtlich", "optimistisch", "erwarte",
+            # Phrasen
+            "wird schon", "glaube daran", "positiv gestimmt", "wird besser",
+            "schaffe das", "klappt schon", "geht schon", "alles wird gut",
+            "sehe licht", "am ende des tunnels",
+        ],
+        "bored": [
+            # Grundformen
+            "langweilig", "öde", "fade", "gelangweilt", "monoton", "eintönig",
+            # Phrasen
+            "nichts los", "langweile mich", "stumpfsinnig", "mir ist langweilig",
+            "keine ahnung was machen", "weiß nicht was tun", "gammle rum",
+            # Verstärkungen
+            "so langweilig", "sterbe vor langeweile", "totale langeweile",
+        ],
+        "proud": [
+            # Grundformen
+            "stolz", "geschafft", "erreicht", "gewonnen", "erfolgreich",
+            # Phrasen
+            "bin stolz", "habs geschafft", "endlich geschafft", "ja mann",
+            "yeees", "boah geil", "läuft bei mir", "king", "queen",
+        ],
+        "surprised": [
+            # Grundformen
+            "überrascht", "erstaunt", "verblüfft", "baff", "sprachlos",
+            # Phrasen
+            "wow", "krass", "echt jetzt", "wirklich", "no way", "was",
+            "oh", "oha", "alter", "boah", "omg", "wtf", "heftig",
+        ],
+        "disgusted": [
+            # Grundformen
+            "eklig", "widerlich", "abstoßend", "grausig", "bäh", "igitt",
+            # Phrasen
+            "ist das eklig", "zum würgen", "mir wird schlecht", "kotz",
+        ],
+        "jealous": [
+            # Grundformen
+            "neidisch", "eifersüchtig", "missgünstig",
+            # Phrasen
+            "will das auch", "unfair", "warum ich nicht", "gönne nicht",
+        ],
     }
     
-    # Topic Keywords - Erweitert für bessere Erkennung
+    # Topic Keywords - Massiv erweitert (3x mehr pro Kategorie)
     TOPIC_KEYWORDS = {
-        "weather": ["wetter", "regen", "sonne", "warm", "kalt", "temperatur", "grad",
-                    "schnee", "wolken", "sturm", "gewitter", "nebel", "wind", "frost",
-                    "sonnig", "bewölkt", "regnerisch", "schwül", "feucht", "trocken"],
-        "time": ["uhr", "zeit", "spät", "früh", "datum", "tag", "woche", "monat",
-                 "jahr", "stunde", "minute", "morgen", "abend", "nacht", "mittag",
-                 "wochenende", "feiertag", "termin", "kalender", "deadline"],
-        "system": ["nas", "server", "cpu", "ram", "system", "computer", "pc",
-                   "festplatte", "speicher", "backup", "update", "netzwerk", "wifi",
-                   "internet", "verbindung", "download", "upload", "software"],
-        "smart_home": ["licht", "lampe", "temperatur", "heizung", "steckdose",
-                       "rollladen", "jalousie", "sensor", "schalter", "dimmen",
-                       "automation", "szene", "timer", "bewegung", "alarm"],
-        "health": ["gesund", "krank", "schmerz", "arzt", "medizin", "kopfschmerzen",
-                   "erkältet", "fieber", "müdigkeit", "sport", "fitness", "training",
-                   "ernährung", "schlaf", "stress", "entspannung", "wellness"],
-        "work": ["arbeit", "job", "projekt", "meeting", "chef", "kollege", "büro",
-                 "homeoffice", "deadline", "aufgabe", "task", "präsentation",
-                 "besprechung", "termin", "karriere", "gehalt", "urlaub"],
-        "food": ["essen", "hunger", "kochen", "rezept", "lecker", "frühstück",
-                 "mittagessen", "abendessen", "snack", "getränk", "trinken",
-                 "restaurant", "bestellen", "liefern", "backen", "grillen"],
-        "entertainment": ["film", "serie", "musik", "spiel", "buch", "lesen",
-                          "anime", "manga", "gaming", "stream", "youtube", "netflix",
-                          "konzert", "kino", "theater", "podcast", "hörbuch"],
-        "relationships": ["freund", "familie", "partner", "liebe", "beziehung",
-                          "eltern", "geschwister", "kind", "hochzeit", "trennung",
-                          "streit", "versöhnung", "vertrauen", "zusammen"],
-        "hobbies": ["hobby", "basteln", "malen", "zeichnen", "fotografieren",
-                    "gärtnern", "sammeln", "wandern", "reisen", "kreativ"],
-        "emotions": ["gefühl", "emotion", "stimmung", "laune", "herz", "seele"],
-        "holo_self": ["holo", "du", "dir", "dich", "dein", "wie geht es dir",
-                      "was machst du", "was denkst du", "fühlst du"],
-        "holo": ["du", "dir", "dich", "holo", "wolf", "wölfin"],
+        "weather": [
+            "wetter", "regen", "sonne", "warm", "kalt", "temperatur", "grad",
+            "schnee", "wolken", "sturm", "gewitter", "nebel", "wind", "frost",
+            "sonnig", "bewölkt", "regnerisch", "schwül", "feucht", "trocken",
+            "hagel", "blitz", "donner", "schauer", "niesel", "orkan", "hurrikan",
+            "hitze", "hitzewelle", "kältewelle", "frieren", "schwitzen", "wetterbericht",
+            "vorhersage", "prognose", "klima", "klimawandel", "jahreszeit",
+        ],
+        "time": [
+            "uhr", "zeit", "spät", "früh", "datum", "tag", "woche", "monat",
+            "jahr", "stunde", "minute", "sekunde", "morgen", "abend", "nacht", "mittag",
+            "wochenende", "feiertag", "termin", "kalender", "deadline", "zeitplan",
+            "gestern", "heute", "übermorgen", "vorgestern", "neulich", "kürzlich",
+            "bald", "gleich", "nachher", "später", "irgendwann", "wann", "wie lange",
+            "wie spät", "pünktlich", "verspätet", "rechtzeitig",
+        ],
+        "system": [
+            "nas", "server", "cpu", "ram", "system", "computer", "pc", "laptop",
+            "festplatte", "speicher", "backup", "update", "netzwerk", "wifi", "wlan",
+            "internet", "verbindung", "download", "upload", "software", "hardware",
+            "prozessor", "grafikkarte", "gpu", "ssd", "hdd", "router", "switch",
+            "firewall", "antivirus", "virus", "malware", "crash", "bug", "fehler",
+            "betriebssystem", "windows", "linux", "mac", "app", "programm",
+            "installation", "treiber", "bios", "boot", "neustart", "herunterfahren",
+        ],
+        "smart_home": [
+            "licht", "lampe", "temperatur", "heizung", "steckdose", "schalter",
+            "rollladen", "jalousie", "sensor", "dimmen", "automation", "szene",
+            "timer", "bewegung", "alarm", "kamera", "türklingel", "schloss",
+            "thermostat", "klimaanlage", "ventilator", "rauchmelder", "wassermelder",
+            "alexa", "siri", "google home", "homekit", "zigbee", "zwave",
+            "smart", "iot", "fernbedienung", "app steuerung", "sprachsteuerung",
+        ],
+        "health": [
+            "gesund", "krank", "schmerz", "arzt", "medizin", "kopfschmerzen",
+            "erkältet", "fieber", "müdigkeit", "sport", "fitness", "training",
+            "ernährung", "schlaf", "stress", "entspannung", "wellness", "therapie",
+            "krankenhaus", "apotheke", "rezept", "tablette", "impfung", "allergie",
+            "husten", "schnupfen", "grippe", "corona", "covid", "symptom",
+            "diagnose", "behandlung", "operation", "reha", "genesung", "vitamine",
+            "diät", "abnehmen", "zunehmen", "gewicht", "blutdruck", "zucker",
+            "mental health", "psyche", "depression", "burnout", "meditation", "yoga",
+        ],
+        "work": [
+            "arbeit", "job", "projekt", "meeting", "chef", "kollege", "büro",
+            "homeoffice", "deadline", "aufgabe", "task", "präsentation",
+            "besprechung", "termin", "karriere", "gehalt", "urlaub", "kündigung",
+            "bewerbung", "vorstellungsgespräch", "vertrag", "firma", "unternehmen",
+            "abteilung", "team", "teamleiter", "manager", "praktikum", "ausbildung",
+            "studium", "uni", "schule", "prüfung", "klausur", "hausaufgaben",
+            "stress", "überstunden", "feierabend", "pause", "mittagspause",
+            "home office", "remote", "pendeln", "dienstreise", "fortbildung",
+        ],
+        "food": [
+            "essen", "hunger", "kochen", "rezept", "lecker", "frühstück",
+            "mittagessen", "abendessen", "snack", "getränk", "trinken",
+            "restaurant", "bestellen", "liefern", "backen", "grillen", "braten",
+            "pizza", "pasta", "burger", "sushi", "salat", "suppe", "kuchen",
+            "kaffee", "tee", "bier", "wein", "wasser", "saft", "smoothie",
+            "vegan", "vegetarisch", "fleisch", "fisch", "gemüse", "obst",
+            "süß", "salzig", "scharf", "sauer", "bitter", "würzig",
+            "appetit", "satt", "durst", "heißhunger", "naschen", "diät",
+        ],
+        "entertainment": [
+            "film", "serie", "musik", "spiel", "buch", "lesen", "schauen",
+            "anime", "manga", "gaming", "stream", "youtube", "netflix", "disney",
+            "amazon prime", "spotify", "twitch", "tiktok", "instagram",
+            "konzert", "kino", "theater", "podcast", "hörbuch", "comic",
+            "videospiel", "playstation", "xbox", "nintendo", "switch", "pc gaming",
+            "multiplayer", "singleplayer", "online", "offline", "esports",
+            "band", "künstler", "sänger", "album", "song", "playlist",
+            "staffel", "folge", "episode", "trailer", "premiere", "spoiler",
+        ],
+        "relationships": [
+            "freund", "freundin", "familie", "partner", "liebe", "beziehung",
+            "eltern", "mutter", "vater", "geschwister", "bruder", "schwester",
+            "kind", "hochzeit", "trennung", "scheidung", "streit", "versöhnung",
+            "vertrauen", "zusammen", "single", "date", "dating", "tinder",
+            "crush", "verliebt", "ex", "beste freundin", "bester freund", "bff",
+            "oma", "opa", "großeltern", "onkel", "tante", "cousin", "cousine",
+            "schwiegermutter", "schwiegervater", "nachbar", "bekannter",
+            "kennenlernen", "treffen", "verabredung", "party", "feier",
+        ],
+        "hobbies": [
+            "hobby", "basteln", "malen", "zeichnen", "fotografieren", "foto",
+            "gärtnern", "sammeln", "wandern", "reisen", "kreativ", "kunst",
+            "musik machen", "gitarre", "klavier", "singen", "tanzen", "sport",
+            "fußball", "basketball", "tennis", "schwimmen", "laufen", "joggen",
+            "radfahren", "fitness", "gym", "yoga", "meditation", "angeln",
+            "kochen", "backen", "nähen", "stricken", "häkeln", "modellbau",
+            "gaming", "streaming", "bloggen", "vloggen", "schreiben", "lesen",
+        ],
+        "emotions": [
+            "gefühl", "emotion", "stimmung", "laune", "herz", "seele", "psyche",
+            "fühlen", "empfinden", "spüren", "emotional", "gefühlsmäßig",
+            "innerlich", "mental", "seelisch", "psychisch",
+        ],
+        "holo_self": [
+            "holo", "du", "dir", "dich", "dein", "deine", "deinem", "deinen",
+            "wie geht es dir", "was machst du", "was denkst du", "fühlst du",
+            "magst du", "kannst du", "weißt du", "bist du", "hast du",
+            "deine meinung", "was sagst du", "wie findest du",
+        ],
+        "holo": [
+            "du", "dir", "dich", "holo", "wolf", "wölfin", "kemonomimi",
+            "ohren", "schweif", "fell", "pfote", "pfoten",
+        ],
+        "technology": [
+            "technik", "technologie", "ki", "ai", "künstliche intelligenz",
+            "roboter", "automatisierung", "programmieren", "code", "coding",
+            "python", "javascript", "app", "website", "digital", "virtuell",
+            "vr", "ar", "metaverse", "blockchain", "crypto", "bitcoin",
+        ],
+        "news": [
+            "news", "nachrichten", "aktuell", "neuigkeiten", "meldung",
+            "politik", "wirtschaft", "gesellschaft", "ereignis", "passiert",
+            "heute", "weltgeschehen", "headline", "breaking",
+        ],
+        "philosophy": [
+            "sinn", "leben", "tod", "existenz", "wahrheit", "glück",
+            "philosophie", "denken", "gedanke", "bewusstsein", "realität",
+            "träumen", "schicksal", "zufall", "gott", "religion", "glaube",
+        ],
     }
     
     # Referenz-Wörter (verweisen auf Vorheriges)

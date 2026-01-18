@@ -4343,22 +4343,22 @@ class OrganicPresenceConfig:
     TYPING_BURST_CHANCE = 0.15          # Chance für schnelles Tippen
     TYPING_TYPO_CHANCE = 0.02           # Chance für Tippfehler-Korrektur
 
-    # === IDLE PRESENCE ===
-    IDLE_CHECK_INTERVAL = 60            # Sekunden zwischen Checks
-    IDLE_SHORT_THRESHOLD = 900          # 15 Min → kleine Reaktion (3x länger)
-    IDLE_MEDIUM_THRESHOLD = 5400        # 90 Min → mittlere Reaktion (3x länger)
-    IDLE_LONG_THRESHOLD = 21600         # 6 Std → große Reaktion (3x länger)
-    IDLE_MESSAGE_COOLDOWN = 1800        # Min. 30 Min zwischen Nachrichten (3x länger)
+    # === IDLE PRESENCE === (9x länger als Original)
+    IDLE_CHECK_INTERVAL = 120           # Sekunden zwischen Checks (2 Min)
+    IDLE_SHORT_THRESHOLD = 2700         # 45 Min → kleine Reaktion (9x)
+    IDLE_MEDIUM_THRESHOLD = 16200       # 4.5 Std → mittlere Reaktion (9x)
+    IDLE_LONG_THRESHOLD = 64800         # 18 Std → große Reaktion (9x)
+    IDLE_MESSAGE_COOLDOWN = 5400        # Min. 90 Min zwischen Nachrichten (9x)
 
     # === ENERGY RESPONSE ===
-    ENERGY_LOW_THRESHOLD = 0.3
-    ENERGY_HIGH_THRESHOLD = 0.8
-    ENERGY_EXHAUSTED_THRESHOLD = 0.15
+    ENERGY_LOW_THRESHOLD = 0.25
+    ENERGY_HIGH_THRESHOLD = 0.85
+    ENERGY_EXHAUSTED_THRESHOLD = 0.1
 
-    # === SPONTANEOUS THOUGHTS ===
-    THOUGHT_BASE_CHANCE = 0.03          # Basis-Chance pro Minute (reduziert)
-    THOUGHT_BOREDOM_MULTIPLIER = 2.0    # Bei Langeweile (reduziert)
-    THOUGHT_COOLDOWN = 900              # Min. 15 Min zwischen Gedanken (3x länger)
+    # === SPONTANEOUS THOUGHTS === (sehr selten)
+    THOUGHT_BASE_CHANCE = 0.01          # Basis-Chance pro Minute (sehr niedrig)
+    THOUGHT_BOREDOM_MULTIPLIER = 1.5    # Bei Langeweile (reduziert)
+    THOUGHT_COOLDOWN = 2700             # Min. 45 Min zwischen Gedanken (9x)
 
     # === DREAM SYSTEM ===
     DREAM_START_HOUR = 23               # Ab wann träumen

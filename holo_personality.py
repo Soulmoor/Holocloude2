@@ -2938,17 +2938,17 @@ class OrganicPresenceConfig:
     TYPING_BURST_CHANCE = 0.15
     TYPING_TYPO_CHANCE = 0.02
 
-    # === IDLE PRESENCE ===
-    IDLE_CHECK_INTERVAL = 60
-    IDLE_SHORT_THRESHOLD = 900          # 15 Min (3x länger)
-    IDLE_MEDIUM_THRESHOLD = 5400        # 90 Min (3x länger)
-    IDLE_LONG_THRESHOLD = 21600         # 6 Std (3x länger)
-    IDLE_MESSAGE_COOLDOWN = 1800        # 30 Min (3x länger)
+    # === IDLE PRESENCE === (9x länger als Original)
+    IDLE_CHECK_INTERVAL = 120           # 2 Min
+    IDLE_SHORT_THRESHOLD = 2700         # 45 Min (9x)
+    IDLE_MEDIUM_THRESHOLD = 16200       # 4.5 Std (9x)
+    IDLE_LONG_THRESHOLD = 64800         # 18 Std (9x)
+    IDLE_MESSAGE_COOLDOWN = 5400        # 90 Min (9x)
 
     # === ENERGY RESPONSE ===
-    ENERGY_LOW_THRESHOLD = 0.3
-    ENERGY_HIGH_THRESHOLD = 0.8
-    ENERGY_EXHAUSTED_THRESHOLD = 0.15
+    ENERGY_LOW_THRESHOLD = 0.25
+    ENERGY_HIGH_THRESHOLD = 0.85
+    ENERGY_EXHAUSTED_THRESHOLD = 0.1
 
 
 
