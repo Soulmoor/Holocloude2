@@ -176,31 +176,75 @@ class TextAnalyzer:
     
     # Emotions-Keywords
     EMOTION_KEYWORDS = {
-        "happy": ["freue", "glücklich", "toll", "super", "geil", "nice", "cool", 
-                  "yay", "hurra", "fantastisch", "wunderbar", "großartig"],
+        "happy": ["freue", "glücklich", "toll", "super", "geil", "nice", "cool",
+                  "yay", "hurra", "fantastisch", "wunderbar", "großartig", "perfekt",
+                  "herrlich", "genial", "klasse", "prima", "spitze", "mega", "hammer",
+                  "freut mich", "bin froh", "macht spaß", "liebe es", "begeistert"],
         "sad": ["traurig", "schlecht", "mies", "down", "depri", "unglücklich",
-                "einsam", "allein", "verletzt", "enttäuscht"],
+                "einsam", "allein", "verletzt", "enttäuscht", "niedergeschlagen",
+                "bedrückt", "weinen", "tränen", "schmerzt", "tut weh", "vermisse",
+                "hoffnungslos", "leer", "schwer ums herz", "melancholisch"],
         "angry": ["wütend", "sauer", "genervt", "frustriert", "verärgert",
-                  "kotzt mich an", "nervt", "hasse"],
+                  "kotzt mich an", "nervt", "hasse", "aggressiv", "zornig",
+                  "stinksauer", "aufgebracht", "empört", "entrüstet", "rasend",
+                  "zum kotzen", "unfassbar", "unverschämt", "frechheit"],
         "anxious": ["angst", "sorge", "nervös", "unsicher", "ängstlich",
-                    "beunruhigt", "gestresst", "stress"],
-        "tired": ["müde", "erschöpft", "kaputt", "fertig", "platt", "ko"],
-        "excited": ["aufgeregt", "gespannt", "kann nicht warten", "hyped"],
-        "confused": ["verwirrt", "verstehe nicht", "kapier nicht", "hä", "was"],
-        "grateful": ["danke", "dankbar", "lieb von dir", "nett"],
+                    "beunruhigt", "gestresst", "stress", "panik", "befürchte",
+                    "mache mir sorgen", "besorgt", "unruhig", "aufgewühlt",
+                    "überfordert", "überwältigt", "angespannt", "bange"],
+        "tired": ["müde", "erschöpft", "kaputt", "fertig", "platt", "ko",
+                  "ausgelaugt", "schlapp", "energielos", "kraftlos", "matt",
+                  "todmüde", "hundemüde", "am ende", "ausgebrannt", "burnout"],
+        "excited": ["aufgeregt", "gespannt", "kann nicht warten", "hyped",
+                    "kribbelt", "zappelig", "ungeduldig", "freue mich riesig",
+                    "kann es kaum erwarten", "total gespannt", "elektrisiert"],
+        "confused": ["verwirrt", "verstehe nicht", "kapier nicht", "hä", "was",
+                     "irritiert", "ratlos", "perplex", "durcheinander", "lost",
+                     "keinen plan", "keine ahnung", "check ich nicht", "unklar"],
+        "grateful": ["danke", "dankbar", "lieb von dir", "nett", "wertschätze",
+                     "bedeutet mir viel", "bin dir dankbar", "schätze es"],
+        "loving": ["liebe dich", "mag dich", "hab dich lieb", "gern", "vermisse dich",
+                   "bist mir wichtig", "schätze dich", "zuneigung", "verbunden"],
+        "hopeful": ["hoffe", "hoffnung", "zuversichtlich", "optimistisch",
+                    "wird schon", "glaube daran", "positiv gestimmt"],
+        "bored": ["langweilig", "öde", "fade", "nichts los", "gelangweilt",
+                  "langweile mich", "monoton", "eintönig", "stumpfsinnig"],
     }
     
-    # Topic Keywords
+    # Topic Keywords - Erweitert für bessere Erkennung
     TOPIC_KEYWORDS = {
-        "weather": ["wetter", "regen", "sonne", "warm", "kalt", "temperatur", "grad"],
-        "time": ["uhr", "zeit", "spät", "früh", "datum", "tag", "woche"],
-        "system": ["nas", "server", "cpu", "ram", "system", "computer", "pc"],
-        "smart_home": ["licht", "lampe", "temperatur", "heizung", "steckdose"],
-        "health": ["gesund", "krank", "schmerz", "arzt", "medizin"],
-        "work": ["arbeit", "job", "projekt", "meeting", "chef", "kollege"],
-        "food": ["essen", "hunger", "kochen", "rezept", "lecker"],
-        "entertainment": ["film", "serie", "musik", "spiel", "buch", "lesen"],
-        "relationships": ["freund", "familie", "partner", "liebe", "beziehung"],
+        "weather": ["wetter", "regen", "sonne", "warm", "kalt", "temperatur", "grad",
+                    "schnee", "wolken", "sturm", "gewitter", "nebel", "wind", "frost",
+                    "sonnig", "bewölkt", "regnerisch", "schwül", "feucht", "trocken"],
+        "time": ["uhr", "zeit", "spät", "früh", "datum", "tag", "woche", "monat",
+                 "jahr", "stunde", "minute", "morgen", "abend", "nacht", "mittag",
+                 "wochenende", "feiertag", "termin", "kalender", "deadline"],
+        "system": ["nas", "server", "cpu", "ram", "system", "computer", "pc",
+                   "festplatte", "speicher", "backup", "update", "netzwerk", "wifi",
+                   "internet", "verbindung", "download", "upload", "software"],
+        "smart_home": ["licht", "lampe", "temperatur", "heizung", "steckdose",
+                       "rollladen", "jalousie", "sensor", "schalter", "dimmen",
+                       "automation", "szene", "timer", "bewegung", "alarm"],
+        "health": ["gesund", "krank", "schmerz", "arzt", "medizin", "kopfschmerzen",
+                   "erkältet", "fieber", "müdigkeit", "sport", "fitness", "training",
+                   "ernährung", "schlaf", "stress", "entspannung", "wellness"],
+        "work": ["arbeit", "job", "projekt", "meeting", "chef", "kollege", "büro",
+                 "homeoffice", "deadline", "aufgabe", "task", "präsentation",
+                 "besprechung", "termin", "karriere", "gehalt", "urlaub"],
+        "food": ["essen", "hunger", "kochen", "rezept", "lecker", "frühstück",
+                 "mittagessen", "abendessen", "snack", "getränk", "trinken",
+                 "restaurant", "bestellen", "liefern", "backen", "grillen"],
+        "entertainment": ["film", "serie", "musik", "spiel", "buch", "lesen",
+                          "anime", "manga", "gaming", "stream", "youtube", "netflix",
+                          "konzert", "kino", "theater", "podcast", "hörbuch"],
+        "relationships": ["freund", "familie", "partner", "liebe", "beziehung",
+                          "eltern", "geschwister", "kind", "hochzeit", "trennung",
+                          "streit", "versöhnung", "vertrauen", "zusammen"],
+        "hobbies": ["hobby", "basteln", "malen", "zeichnen", "fotografieren",
+                    "gärtnern", "sammeln", "wandern", "reisen", "kreativ"],
+        "emotions": ["gefühl", "emotion", "stimmung", "laune", "herz", "seele"],
+        "holo_self": ["holo", "du", "dir", "dich", "dein", "wie geht es dir",
+                      "was machst du", "was denkst du", "fühlst du"],
         "holo": ["du", "dir", "dich", "holo", "wolf", "wölfin"],
     }
     
@@ -402,18 +446,37 @@ class TextAnalyzer:
         return None, 0.0
     
     def _analyze_sentiment(self, text: str) -> str:
-        """Analysiere Sentiment"""
-        
-        positive_words = ["gut", "super", "toll", "schön", "freue", "danke", "liebe", "mag"]
-        negative_words = ["schlecht", "mies", "hasse", "nicht", "kein", "nie", "problem"]
-        
-        pos_count = sum(1 for w in positive_words if w in text)
-        neg_count = sum(1 for w in negative_words if w in text)
-        
+        """Analysiere Sentiment mit erweitertem deutschen Wortschatz"""
+
+        positive_words = [
+            "gut", "super", "toll", "schön", "freue", "danke", "liebe", "mag",
+            "wunderbar", "fantastisch", "großartig", "perfekt", "genial", "klasse",
+            "prima", "spitze", "herrlich", "glücklich", "froh", "begeistert",
+            "zufrieden", "erfreut", "dankbar", "hoffnungsvoll", "optimistisch",
+            "positiv", "angenehm", "nett", "freundlich", "herzlich", "warm",
+            "erfolgreich", "gelungen", "gefreut", "lecker", "interessant"
+        ]
+        negative_words = [
+            "schlecht", "mies", "hasse", "nicht", "kein", "nie", "problem",
+            "traurig", "wütend", "sauer", "ärgerlich", "enttäuscht", "frustriert",
+            "genervt", "müde", "erschöpft", "stress", "angst", "sorge", "schwer",
+            "schwierig", "kompliziert", "nervig", "langweilig", "furchtbar",
+            "schrecklich", "grauenhaft", "eklig", "peinlich", "unangenehm",
+            "leider", "schade", "dumm", "blöd", "doof", "kaputt", "fehler"
+        ]
+
+        text_lower = text.lower()
+        pos_count = sum(1 for w in positive_words if w in text_lower)
+        neg_count = sum(1 for w in negative_words if w in text_lower)
+
+        # Negation Detection (kehrt Sentiment um)
+        negation_words = ["nicht", "kein", "keine", "keinen", "niemals", "nie", "ohne"]
+        has_negation = any(n in text_lower for n in negation_words)
+
         if pos_count > neg_count:
-            return "positive"
+            return "negative" if has_negation and neg_count == 0 else "positive"
         elif neg_count > pos_count:
-            return "negative"
+            return "positive" if has_negation and pos_count == 0 else "negative"
         return "neutral"
     
     def _has_references(self, text: str) -> bool:

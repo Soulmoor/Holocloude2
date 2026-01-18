@@ -2940,10 +2940,10 @@ class OrganicPresenceConfig:
 
     # === IDLE PRESENCE ===
     IDLE_CHECK_INTERVAL = 60
-    IDLE_SHORT_THRESHOLD = 300
-    IDLE_MEDIUM_THRESHOLD = 1800
-    IDLE_LONG_THRESHOLD = 7200
-    IDLE_MESSAGE_COOLDOWN = 600
+    IDLE_SHORT_THRESHOLD = 900          # 15 Min (3x länger)
+    IDLE_MEDIUM_THRESHOLD = 5400        # 90 Min (3x länger)
+    IDLE_LONG_THRESHOLD = 21600         # 6 Std (3x länger)
+    IDLE_MESSAGE_COOLDOWN = 1800        # 30 Min (3x länger)
 
     # === ENERGY RESPONSE ===
     ENERGY_LOW_THRESHOLD = 0.3

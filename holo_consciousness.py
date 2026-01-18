@@ -4345,10 +4345,10 @@ class OrganicPresenceConfig:
 
     # === IDLE PRESENCE ===
     IDLE_CHECK_INTERVAL = 60            # Sekunden zwischen Checks
-    IDLE_SHORT_THRESHOLD = 300          # 5 Min → kleine Reaktion
-    IDLE_MEDIUM_THRESHOLD = 1800        # 30 Min → mittlere Reaktion
-    IDLE_LONG_THRESHOLD = 7200          # 2 Std → große Reaktion
-    IDLE_MESSAGE_COOLDOWN = 600         # Min. 10 Min zwischen Nachrichten
+    IDLE_SHORT_THRESHOLD = 900          # 15 Min → kleine Reaktion (3x länger)
+    IDLE_MEDIUM_THRESHOLD = 5400        # 90 Min → mittlere Reaktion (3x länger)
+    IDLE_LONG_THRESHOLD = 21600         # 6 Std → große Reaktion (3x länger)
+    IDLE_MESSAGE_COOLDOWN = 1800        # Min. 30 Min zwischen Nachrichten (3x länger)
 
     # === ENERGY RESPONSE ===
     ENERGY_LOW_THRESHOLD = 0.3
@@ -4356,9 +4356,9 @@ class OrganicPresenceConfig:
     ENERGY_EXHAUSTED_THRESHOLD = 0.15
 
     # === SPONTANEOUS THOUGHTS ===
-    THOUGHT_BASE_CHANCE = 0.05          # Basis-Chance pro Minute
-    THOUGHT_BOREDOM_MULTIPLIER = 3.0    # Bei Langeweile
-    THOUGHT_COOLDOWN = 300              # Min. 5 Min zwischen Gedanken
+    THOUGHT_BASE_CHANCE = 0.03          # Basis-Chance pro Minute (reduziert)
+    THOUGHT_BOREDOM_MULTIPLIER = 2.0    # Bei Langeweile (reduziert)
+    THOUGHT_COOLDOWN = 900              # Min. 15 Min zwischen Gedanken (3x länger)
 
     # === DREAM SYSTEM ===
     DREAM_START_HOUR = 23               # Ab wann träumen

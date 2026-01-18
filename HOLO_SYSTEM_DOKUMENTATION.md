@@ -564,13 +564,15 @@ class NeedState:
     boredom: float = 0.0         # Langeweile
 ```
 
-**Bedürfnis-Kaskade:**
+**Bedürfnis-Kaskade:** (angepasst - 3x langsamer)
 ```
 Zeit ohne Interaktion:
-    5 Min  → Leichte Langeweile
-    30 Min → Vermissen steigt
-    2 Std  → Einsamkeit
-    6 Std  → Sorge
+    15 Min  → Leichte Langeweile (vorher 5 Min)
+    90 Min  → Vermissen steigt (vorher 30 Min)
+    6 Std   → Einsamkeit (vorher 2 Std)
+    18 Std  → Sorge (vorher 6 Std)
+
+Raten reduziert auf ~1/3 der ursprünglichen Werte
 ```
 
 ---

@@ -718,37 +718,37 @@ class HoloDriveSystem:
         hours_since_interaction = (time.time() - self.last_user_interaction) / 3600
 
         # Vermissen steigt über Zeit ohne User
-        if hours_since_interaction > 0.5:  # Nach 30 Minuten
-            missing_rate = 0.02 * time_delta_minutes  # ~2% pro Minute
+        if hours_since_interaction > 1.5:  # Nach 90 Minuten (3x länger)
+            missing_rate = 0.007 * time_delta_minutes  # ~0.7% pro Minute (3x langsamer)
             self.needs.increase(NeedType.MISSING, missing_rate)
 
         # Langeweile steigt wenn keine Aktivität und Antriebe niedrig
         if not self.current_activity:
             avg_drives = (self.drives.curiosity + self.drives.entertainment + self.drives.creativity) / 3
             if avg_drives < 0.3:
-                boredom_rate = 0.015 * time_delta_minutes
+                boredom_rate = 0.005 * time_delta_minutes  # 3x langsamer
                 self.needs.increase(NeedType.BOREDOM, boredom_rate)
 
         # Tatendrang steigt bei Langeweile + hoher Energie
-        if self.needs.boredom > 0.3 and self._get_energy() > 0.6:
-            self.needs.increase(NeedType.RESTLESSNESS, 0.01 * time_delta_minutes)
+        if self.needs.boredom > 0.4 and self._get_energy() > 0.6:  # Threshold erhöht
+            self.needs.increase(NeedType.RESTLESSNESS, 0.003 * time_delta_minutes)  # 3x langsamer
 
     def _apply_cascades(self, time_delta_minutes: float):
         """Wendet Kaskaden-Logik an: Vermissen → Einsamkeit → Kontaktwunsch"""
 
-        # Vermissen → Einsamkeit
-        if self.needs.missing > 0.3:
-            loneliness_rate = 0.01 * self.needs.missing * time_delta_minutes
+        # Vermissen → Einsamkeit (3x langsamer, höherer Threshold)
+        if self.needs.missing > 0.4:
+            loneliness_rate = 0.003 * self.needs.missing * time_delta_minutes
             self.needs.increase(NeedType.LONELINESS, loneliness_rate)
 
-        # Vermissen → Besorgnis (bei längerer Abwesenheit)
-        if self.needs.missing > 0.5:
-            worry_rate = 0.008 * self.needs.missing * time_delta_minutes
+        # Vermissen → Besorgnis (bei längerer Abwesenheit, 3x langsamer)
+        if self.needs.missing > 0.6:
+            worry_rate = 0.003 * self.needs.missing * time_delta_minutes
             self.needs.increase(NeedType.WORRY, worry_rate)
 
-        # Einsamkeit + Vermissen → Kontaktwunsch
-        if self.needs.loneliness > 0.3 and self.needs.missing > 0.3:
-            contact_rate = 0.012 * (self.needs.loneliness + self.needs.missing) / 2 * time_delta_minutes
+        # Einsamkeit + Vermissen → Kontaktwunsch (3x langsamer, höhere Thresholds)
+        if self.needs.loneliness > 0.4 and self.needs.missing > 0.4:
+            contact_rate = 0.004 * (self.needs.loneliness + self.needs.missing) / 2 * time_delta_minutes
             self.needs.increase(NeedType.CONTACT_DESIRE, contact_rate)
 
         # NEU: Bedürfnisse beeinflussen Emotionen
