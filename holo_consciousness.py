@@ -4370,6 +4370,19 @@ class OrganicPresenceConfig:
     MEMORY_EMOTION_INTENSITY_DECAY = 0.1  # Pro Stunde
     MEMORY_TRIGGER_THRESHOLD = 0.6        # Ab wann Erinnerung triggert
 
+    def __init__(self):
+        """Initialisiert Config mit lowercase Attributen für Kompatibilität."""
+        # Spontaneous Thoughts
+        self.min_thought_interval = self.THOUGHT_COOLDOWN
+        self.spontaneous_thought_chance = self.THOUGHT_BASE_CHANCE
+        self.thought_boredom_multiplier = self.THOUGHT_BOREDOM_MULTIPLIER
+
+        # Dream System
+        self.max_dreams_per_night = self.MAX_DREAMS_PER_NIGHT
+        self.dream_start_hour = self.DREAM_START_HOUR
+        self.dream_end_hour = self.DREAM_END_HOUR
+        self.dream_generation_interval = self.DREAM_GENERATION_INTERVAL
+
 
 # =============================================================================
 # MEMORY EMOTION SYSTEM (aus holo_organic_presence.py)
