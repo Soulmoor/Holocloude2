@@ -179,6 +179,55 @@ if not EMOTIONAL_TRACKER_AVAILABLE:
                 scores[e["emotion"]] += e["intensity"] * weight
             return max(scores, key=scores.get) if scores else None
 
+        # === FEHLENDE METHODEN (für Cross-Module Kompatibilität) ===
+
+        def detect_emotion_from_text(self, text: str) -> tuple:
+            """Erkennt Emotion aus Text"""
+            text_lower = text.lower()
+            positive = ["freude", "glücklich", "super", "toll", "danke", "liebe", "schön"]
+            negative = ["traurig", "wütend", "frustriert", "ärger", "schlecht", "stress"]
+
+            for word in positive:
+                if word in text_lower:
+                    return ("happy", 0.7, 0.8)
+            for word in negative:
+                if word in text_lower:
+                    return ("sad", -0.5, 0.7)
+
+            return ("neutral", 0.0, 0.5)
+
+        def add_emotion(self, emotion: str, valence: float, is_user: bool = True, confidence: float = 0.5):
+            """Fügt Emotion hinzu"""
+            if is_user:
+                self.add_user_emotion(emotion, abs(valence))
+            else:
+                self.add_holo_emotion(emotion, abs(valence))
+
+        def get_current_mood(self) -> tuple:
+            """Gibt aktuelle Stimmung zurück"""
+            return (self.current_mood, self.mood_intensity)
+
+        def get_trend(self) -> str:
+            """Gibt Mood-Trend zurück"""
+            if len(self.mood_history) < 2:
+                return "stable"
+            recent = self.mood_history[-5:]
+            avg_intensity = sum(m[1] for m in recent) / len(recent)
+            if avg_intensity > 0.6:
+                return "positive"
+            elif avg_intensity < 0.4:
+                return "negative"
+            return "stable"
+
+        def needs_support(self) -> bool:
+            """Prüft ob User emotionale Unterstützung braucht"""
+            recent = self.user_emotions[-5:] if self.user_emotions else []
+            if not recent:
+                return False
+            negative = {"sad", "angry", "frustrated", "anxious", "stressed", "depressed"}
+            neg_count = sum(1 for e in recent if e.get("emotion", "").lower() in negative)
+            return neg_count >= 2
+
 
 # =============================================================================
 # IMPORT: EmotionTracker (Alias für MoodEvolution aus holo_inner_life)

@@ -4312,6 +4312,25 @@ class PiCommunicator:
 
         return []
 
+    def get_data(self, key: str = None) -> Optional[Dict]:
+        """
+        Holt Daten von Pi-Control.
+
+        Args:
+            key: Optionaler Schlüssel für spezifische Daten
+
+        Returns:
+            Dict mit Daten oder None
+        """
+        try:
+            state = self.get_cached_status()
+            if key:
+                return state.get(key)
+            return state
+        except Exception as e:
+            logger.debug(f"get_data failed: {e}")
+            return None
+
 
 # =============================================================================
 # CREATIVE CORE v12 (DIE MUSE)

@@ -3634,6 +3634,46 @@ class AnalogyEngine:
             "structural_mappings": len(self.structural_mappings),
         }
 
+    def find_similar_situation(self, trigger: str) -> Optional[Dict[str, Any]]:
+        """
+        Findet eine ähnliche Situation aus der Erfahrung.
+
+        Args:
+            trigger: Beschreibung der aktuellen Situation
+
+        Returns:
+            Dict mit ähnlicher Erfahrung oder None
+        """
+        if not self.experiences:
+            return None
+
+        trigger_lower = trigger.lower()
+        best_match = None
+        best_score = 0.0
+
+        for exp_id, experience in self.experiences.items():
+            # Einfache Keyword-basierte Ähnlichkeit
+            exp_words = set(experience.situation.lower().split())
+            trigger_words = set(trigger_lower.split())
+
+            overlap = len(exp_words & trigger_words)
+            if overlap > 0:
+                score = overlap / max(len(exp_words), len(trigger_words))
+                if score > best_score:
+                    best_score = score
+                    best_match = experience
+
+        if best_match and best_score > 0.1:
+            return {
+                "situation": best_match.situation,
+                "outcome": best_match.outcome,
+                "lessons_learned": best_match.lessons_learned,
+                "emotional_impact": best_match.emotional_impact,
+                "similarity_score": best_score
+            }
+
+        return None
+
 
 # ============================================================
 # REGRET LEARNING SYSTEM - Reue und Lernen aus Fehlern (Level 10/10)
@@ -5042,6 +5082,44 @@ class DeepAbstractionEngine:
         elif len(common_list) == 1:
             return f"'{a}' und '{b}' teilen die Eigenschaft: {common_list[0]}"
         return None
+
+    def _estimate_abstraction_level(self, concept: str) -> int:
+        """
+        Schätzt das aktuelle Abstraktions-Level eines Konzepts.
+
+        Args:
+            concept: Das zu analysierende Konzept
+
+        Returns:
+            Level von 1-10
+        """
+        concept_lower = concept.lower()
+
+        # Philosophische/Meta-Konzepte (9-10)
+        meta_keywords = ["prinzip", "konzept", "idee", "abstraktion", "meta", "philosophie"]
+        if any(k in concept_lower for k in meta_keywords):
+            return 9
+
+        # Funktionale Abstraktionen (7-8)
+        functional_keywords = ["system", "prozess", "methode", "mechanismus"]
+        if any(k in concept_lower for k in functional_keywords):
+            return 7
+
+        # Oberkategorien (5-6)
+        category_keywords = ["mittel", "werkzeug", "gerät", "maschine"]
+        if any(k in concept_lower for k in category_keywords):
+            return 5
+
+        # Allgemeine Kategorien (3-4)
+        if concept_lower in ["auto", "tier", "pflanze", "möbel", "essen", "kleidung"]:
+            return 4
+
+        # Spezifische Instanzen (1-2)
+        if any(c.isupper() for c in concept[1:]):  # Eigenname wahrscheinlich
+            return 2
+
+        # Default: mittlere Abstraktion
+        return 3
 
 
 class SelfQuestioningEngine:

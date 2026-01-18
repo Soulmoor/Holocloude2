@@ -10159,6 +10159,70 @@ class AdvancedLearningEngine:
 
         return wonder_text
 
+    # =========================================================================
+    # FEHLENDE METHODEN (für Cross-Module Kompatibilität)
+    # =========================================================================
+
+    def add_knowledge(self, topic: str, context: Dict = None):
+        """Fügt neues Wissen hinzu"""
+        concept = Concept(
+            id=f"concept_{len(self.concepts)}_{int(time.time())}",
+            name=topic,
+            knowledge_type=KnowledgeType.FACTUAL,
+            understanding_level=UnderstandingLevel.FAMILIAR,
+            confidence=0.5,
+            created_at=datetime.now().isoformat(),
+            last_accessed=datetime.now().isoformat()
+        )
+        self.concepts[concept.id] = concept
+
+    def extract_concepts_from_text(self, text: str) -> List['Concept']:
+        """Extrahiert Konzepte aus einem Text"""
+        # Einfache Extraktion basierend auf Großbuchstaben-Wörtern
+        import re
+        words = re.findall(r'\b[A-ZÄÖÜ][a-zäöü]+(?:\s+[A-ZÄÖÜ][a-zäöü]+)*\b', text)
+
+        extracted = []
+        for word in set(words):
+            if len(word) > 3:
+                concept = self._find_concept_by_name(word)
+                if concept:
+                    extracted.append(concept)
+
+        return extracted[:5]
+
+    def find_relevant_concepts(self, query: str) -> List['Concept']:
+        """Findet relevante Konzepte zu einer Anfrage"""
+        query_lower = query.lower()
+        relevant = []
+
+        for concept in self.concepts.values():
+            if concept.name.lower() in query_lower or query_lower in concept.name.lower():
+                relevant.append(concept)
+
+        # Nach Konfidenz sortieren
+        return sorted(relevant, key=lambda c: c.confidence, reverse=True)[:5]
+
+    def identify_knowledge_gaps(self) -> List['KnowledgeGap']:
+        """Identifiziert aktuelle Wissenslücken"""
+        gaps = [g for g in self.knowledge_gaps.values() if g.status == "open"]
+        # Nach Motivation sortieren
+        return sorted(gaps, key=lambda g: g.exploration_motivation, reverse=True)[:5]
+
+    def record_learning_episode(self, episode_data: Dict):
+        """Zeichnet eine Lernepisode auf"""
+        episode = LearningEpisode(
+            id=f"ep_{int(time.time())}",
+            timestamp=datetime.now().isoformat(),
+            trigger=episode_data.get("trigger", ""),
+            concepts_involved=[],
+            strategies_used=[],
+            outcome=LearningOutcome.SUCCESSFUL if episode_data.get("outcome", "").startswith("success") else LearningOutcome.NEUTRAL,
+            insights=[],
+            emotional_state=episode_data.get("emotional_state", {}),
+            meta_observations=episode_data.get("meta_observations", [])
+        )
+        self.learning_history.append(episode)
 
 
 # =============================================================================
