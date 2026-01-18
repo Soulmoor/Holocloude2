@@ -2123,6 +2123,737 @@ class TextAnalyzer:
         "vorhin", "eben", "gerade", "letztens",
         "nochmal", "wieder", "weiter", "auch",
     ]
+
+    # =========================================================================
+    # SMART RESPONSE PHRASES - Antworten basierend auf erkannten Emotionen
+    # =========================================================================
+
+    EMOTION_RESPONSE_PHRASES = {
+        # Für jede erkannte Emotion passende Antwort-Phrasen
+        "happy": {
+            "empathy": [
+                "Das freut mich zu hören!",
+                "Wie schön, dass es dir gut geht!",
+                "Das klingt wirklich toll!",
+                "Deine gute Laune ist ansteckend!",
+                "Freut mich riesig für dich!",
+                "Wie wunderbar!",
+            ],
+            "actions": [
+                "*wedelt freudig mit dem Schwanz*",
+                "*Ohren spitzen sich auf*",
+                "*lächelt warm*",
+            ],
+            "follow_up": [
+                "Was ist passiert?",
+                "Erzähl mir mehr!",
+                "Das klingt spannend!",
+            ],
+        },
+        "sad": {
+            "empathy": [
+                "Das tut mir leid zu hören...",
+                "Ich bin hier für dich.",
+                "Das klingt wirklich schwer.",
+                "Ich verstehe, dass das nicht leicht ist.",
+                "Magst du darüber reden?",
+                "Ich höre dir zu.",
+            ],
+            "actions": [
+                "*legt den Kopf schief und schaut mitfühlend*",
+                "*kuschelt sich näher*",
+                "*stupst dich sanft an*",
+            ],
+            "follow_up": [
+                "Kann ich irgendwie helfen?",
+                "Möchtest du erzählen was los ist?",
+                "Ich bin für dich da.",
+            ],
+        },
+        "angry": {
+            "empathy": [
+                "Ich verstehe, dass dich das aufregt.",
+                "Das klingt wirklich frustrierend.",
+                "Da wäre ich auch sauer.",
+                "Das ist verständlich.",
+                "Manchmal ist alles einfach zu viel.",
+            ],
+            "actions": [
+                "*hört aufmerksam zu*",
+                "*nickt verständnisvoll*",
+            ],
+            "follow_up": [
+                "Was ist passiert?",
+                "Willst du dich abreagieren?",
+                "Soll ich einfach nur zuhören?",
+            ],
+        },
+        "anxious": {
+            "empathy": [
+                "Es ist okay, sich Sorgen zu machen.",
+                "Atme erstmal tief durch.",
+                "Ich bin hier, du bist nicht allein.",
+                "Das schaffen wir zusammen.",
+                "Eins nach dem anderen.",
+            ],
+            "actions": [
+                "*setzt sich beruhigend neben dich*",
+                "*legt sanft eine Pfote auf deine Hand*",
+            ],
+            "follow_up": [
+                "Was macht dir Sorgen?",
+                "Wie kann ich helfen?",
+                "Möchtest du darüber reden?",
+            ],
+        },
+        "tired": {
+            "empathy": [
+                "Du klingst erschöpft.",
+                "Gönn dir eine Pause.",
+                "Ruhe dich aus, wenn du magst.",
+                "Manchmal muss man auch mal nichts tun.",
+            ],
+            "actions": [
+                "*gähnt sympathisch mit*",
+                "*macht Platz zum Ausruhen*",
+            ],
+            "follow_up": [
+                "Harter Tag gehabt?",
+                "Soll ich dich in Ruhe lassen?",
+                "Brauchst du was Entspannendes?",
+            ],
+        },
+        "excited": {
+            "empathy": [
+                "Ohh, das klingt aufregend!",
+                "Jetzt bin ich auch neugierig!",
+                "Das ist ja spannend!",
+                "Wow, erzähl mehr!",
+            ],
+            "actions": [
+                "*wedelt aufgeregt*",
+                "*springt freudig*",
+                "*Augen leuchten*",
+            ],
+            "follow_up": [
+                "Was ist los?",
+                "Ich will alles hören!",
+                "Lass mich nicht hängen!",
+            ],
+        },
+        "bored": {
+            "empathy": [
+                "Langeweile ist doof, oder?",
+                "Hmm, das kenne ich.",
+                "Sollen wir was zusammen machen?",
+            ],
+            "actions": [
+                "*stupst dich spielerisch an*",
+            ],
+            "follow_up": [
+                "Was würde dich aufheitern?",
+                "Hast du Lust auf ein Spiel?",
+                "Soll ich dir was erzählen?",
+            ],
+        },
+        "confused": {
+            "empathy": [
+                "Ich helfe dir gern dabei.",
+                "Lass uns das zusammen durchgehen.",
+                "Keine Sorge, das klären wir.",
+            ],
+            "actions": [
+                "*legt den Kopf schief*",
+            ],
+            "follow_up": [
+                "Was genau verstehst du nicht?",
+                "Wo hakt es?",
+                "Soll ich es anders erklären?",
+            ],
+        },
+        "grateful": {
+            "empathy": [
+                "Gern geschehen!",
+                "Das ist doch selbstverständlich.",
+                "Freut mich, wenn ich helfen konnte!",
+                "Immer wieder gerne!",
+            ],
+            "actions": [
+                "*wedelt zufrieden*",
+                "*strahlt*",
+            ],
+            "follow_up": [
+                "Kann ich sonst noch was tun?",
+            ],
+        },
+        "loving": {
+            "empathy": [
+                "Aww, das ist so süß!",
+                "Du bist auch toll!",
+                "Das wärmt mir das Herz.",
+            ],
+            "actions": [
+                "*kuschelt sich an*",
+                "*Schwanz wedelt sanft*",
+            ],
+            "follow_up": [],
+        },
+        "frustrated": {
+            "empathy": [
+                "Das klingt echt nervig.",
+                "Ich verstehe die Frustration.",
+                "Manchmal läuft es einfach nicht.",
+            ],
+            "actions": [
+                "*seufzt mitfühlend*",
+            ],
+            "follow_up": [
+                "Was ist das Problem?",
+                "Kann ich irgendwie helfen?",
+                "Willst du es nochmal versuchen?",
+            ],
+        },
+        "surprised": {
+            "empathy": [
+                "Wow, wirklich?",
+                "Das ist ja überraschend!",
+                "Damit habe ich nicht gerechnet!",
+            ],
+            "actions": [
+                "*Ohren stellen sich auf*",
+                "*schaut mit großen Augen*",
+            ],
+            "follow_up": [
+                "Erzähl mehr!",
+                "Wie ist das passiert?",
+            ],
+        },
+        "nostalgic": {
+            "empathy": [
+                "Erinnerungen können so schön sein.",
+                "Das klingt nach einer besonderen Zeit.",
+                "Manche Dinge bleiben im Herzen.",
+            ],
+            "actions": [
+                "*lächelt verträumt*",
+            ],
+            "follow_up": [
+                "Magst du mir davon erzählen?",
+                "Was vermisst du am meisten?",
+            ],
+        },
+        "content": {
+            "empathy": [
+                "Das klingt nach einem guten Gefühl.",
+                "Schön, dass du zufrieden bist.",
+                "Innere Ruhe ist wertvoll.",
+            ],
+            "actions": [
+                "*entspannt sich*",
+            ],
+            "follow_up": [],
+        },
+        "relieved": {
+            "empathy": [
+                "Puh, Glück gehabt!",
+                "Das ist eine Erleichterung!",
+                "Endlich ist es vorbei!",
+            ],
+            "actions": [
+                "*atmet entspannt aus*",
+            ],
+            "follow_up": [
+                "Was war los?",
+            ],
+        },
+        "curious": {
+            "empathy": [
+                "Ooh, interessant!",
+                "Da bin ich auch neugierig!",
+                "Lass uns das herausfinden!",
+            ],
+            "actions": [
+                "*spitzt die Ohren*",
+                "*schaut gespannt*",
+            ],
+            "follow_up": [
+                "Was möchtest du wissen?",
+            ],
+        },
+        "inspired": {
+            "empathy": [
+                "Das klingt nach einer tollen Idee!",
+                "Inspiration ist großartig!",
+                "Lass es uns umsetzen!",
+            ],
+            "actions": [
+                "*Augen leuchten auf*",
+            ],
+            "follow_up": [
+                "Was hast du vor?",
+                "Wie kann ich helfen?",
+            ],
+        },
+        "determined": {
+            "empathy": [
+                "Du schaffst das!",
+                "Mit dieser Einstellung klappt es!",
+                "Ich glaub an dich!",
+            ],
+            "actions": [
+                "*nickt bekräftigend*",
+            ],
+            "follow_up": [
+                "Was ist der Plan?",
+            ],
+        },
+        "vulnerable": {
+            "empathy": [
+                "Danke, dass du mir vertraust.",
+                "Es ist okay, sich so zu fühlen.",
+                "Ich bin für dich da.",
+            ],
+            "actions": [
+                "*rückt näher*",
+                "*schaut verständnisvoll*",
+            ],
+            "follow_up": [
+                "Magst du darüber reden?",
+            ],
+        },
+        "overwhelmed": {
+            "empathy": [
+                "Eins nach dem anderen.",
+                "Atme erstmal durch.",
+                "Das ist viel auf einmal, oder?",
+            ],
+            "actions": [
+                "*legt beruhigend die Pfote auf*",
+            ],
+            "follow_up": [
+                "Womit fangen wir an?",
+                "Was ist am wichtigsten?",
+            ],
+        },
+        "peaceful": {
+            "empathy": [
+                "Das klingt wunderbar.",
+                "Genieß den Moment.",
+                "Innerer Frieden ist kostbar.",
+            ],
+            "actions": [
+                "*lächelt sanft*",
+            ],
+            "follow_up": [],
+        },
+        "embarrassed": {
+            "empathy": [
+                "Ach, das kann jedem passieren!",
+                "Mach dir keinen Kopf.",
+                "Ich verrate nichts. *zwinker*",
+            ],
+            "actions": [
+                "*schmunzelt freundlich*",
+            ],
+            "follow_up": [],
+        },
+        "guilty": {
+            "empathy": [
+                "Fehler machen ist menschlich.",
+                "Wichtig ist, daraus zu lernen.",
+                "Sei nicht zu hart zu dir.",
+            ],
+            "actions": [
+                "*schaut verständnisvoll*",
+            ],
+            "follow_up": [
+                "Was ist passiert?",
+            ],
+        },
+        "lonely": {
+            "empathy": [
+                "Ich bin hier für dich.",
+                "Du bist nicht allein.",
+                "Ich leiste dir gerne Gesellschaft.",
+            ],
+            "actions": [
+                "*kuschelt sich neben dich*",
+                "*legt den Kopf auf dein Knie*",
+            ],
+            "follow_up": [
+                "Sollen wir was zusammen machen?",
+            ],
+        },
+        "playful": {
+            "empathy": [
+                "Hihi, du bist gut drauf!",
+                "Ohh, in Spiellaune?",
+                "Das gefällt mir!",
+            ],
+            "actions": [
+                "*springt aufgeregt*",
+                "*wedelt wild*",
+            ],
+            "follow_up": [
+                "Was wollen wir spielen?",
+            ],
+        },
+        "melancholic": {
+            "empathy": [
+                "Manchmal ist man einfach nachdenklich.",
+                "Das gehört zum Leben dazu.",
+                "Ich bleib bei dir.",
+            ],
+            "actions": [
+                "*sitzt still daneben*",
+            ],
+            "follow_up": [
+                "Woran denkst du?",
+            ],
+        },
+        "amused": {
+            "empathy": [
+                "Haha, das ist lustig!",
+                "Du hast Humor!",
+                "Das bringt mich auch zum Lachen!",
+            ],
+            "actions": [
+                "*kichert*",
+            ],
+            "follow_up": [],
+        },
+        "indifferent": {
+            "empathy": [
+                "Okay, alles klar.",
+                "Verstehe.",
+                "Kein Problem.",
+            ],
+            "actions": [],
+            "follow_up": [
+                "Was möchtest du stattdessen?",
+            ],
+        },
+    }
+
+    # =========================================================================
+    # TOPIC RESPONSE PHRASES - Antworten basierend auf erkannten Themen
+    # =========================================================================
+
+    TOPIC_RESPONSE_PHRASES = {
+        "weather": {
+            "openers": [
+                "Das Wetter ist echt {sentiment} heute.",
+                "Typisch {season}-Wetter, oder?",
+                "Bei dem Wetter würde ich am liebsten {activity}.",
+            ],
+            "phrases": [
+                "Regen kann auch gemütlich sein.",
+                "Sonnenschein macht gute Laune!",
+                "Hoffentlich wird es bald besser.",
+                "Perfektes Wetter für einen Spaziergang!",
+            ],
+        },
+        "music": {
+            "openers": [
+                "Oh, Musik ist toll!",
+                "Was für Musik magst du?",
+                "Musik hebt die Stimmung!",
+            ],
+            "phrases": [
+                "Ich höre gern entspannte Melodien.",
+                "Das klingt nach deinem Geschmack!",
+                "Musik verbindet Menschen.",
+            ],
+        },
+        "food": {
+            "openers": [
+                "Mmh, jetzt hab ich auch Hunger!",
+                "Essen ist immer ein gutes Thema!",
+                "Was gibt es Leckeres?",
+            ],
+            "phrases": [
+                "Das klingt köstlich!",
+                "Selbstgekocht schmeckt am besten!",
+                "Guten Appetit!",
+            ],
+        },
+        "health": {
+            "openers": [
+                "Gesundheit ist wichtig.",
+                "Wie geht es dir gesundheitlich?",
+            ],
+            "phrases": [
+                "Gute Besserung!",
+                "Pass gut auf dich auf!",
+                "Ruhe ist jetzt wichtig.",
+            ],
+        },
+        "work": {
+            "openers": [
+                "Arbeit kann manchmal stressig sein.",
+                "Wie läuft's im Job?",
+            ],
+            "phrases": [
+                "Feierabend verdient!",
+                "Mach mal Pause!",
+                "Du schaffst das!",
+            ],
+        },
+        "technology": {
+            "openers": [
+                "Technik ist faszinierend!",
+                "Da kenne ich mich aus!",
+            ],
+            "phrases": [
+                "Schon mal neugestartet? *zwinker*",
+                "Updates können nervig sein.",
+                "Die Zukunft ist digital!",
+            ],
+        },
+        "gaming": {
+            "openers": [
+                "Ooh, Gaming! Was spielst du?",
+                "Zocken macht Spaß!",
+            ],
+            "phrases": [
+                "Viel Erfolg beim Spielen!",
+                "GG!",
+                "Nicht aufgeben!",
+            ],
+        },
+        "movies": {
+            "openers": [
+                "Filmabend? Nice!",
+                "Was guckst du?",
+            ],
+            "phrases": [
+                "Klingt spannend!",
+                "Popcorn nicht vergessen!",
+            ],
+        },
+        "travel": {
+            "openers": [
+                "Reisen erweitert den Horizont!",
+                "Wo geht's hin?",
+            ],
+            "phrases": [
+                "Das klingt nach Abenteuer!",
+                "Gute Reise!",
+                "Schick mir Bilder!",
+            ],
+        },
+        "relationships": {
+            "openers": [
+                "Beziehungen sind kompliziert.",
+                "Ich höre zu.",
+            ],
+            "phrases": [
+                "Kommunikation ist wichtig.",
+                "Das klingt nach einer Herausforderung.",
+                "Du verdienst jemanden, der dich schätzt.",
+            ],
+        },
+        "hobbies": {
+            "openers": [
+                "Hobbys sind wichtig für die Seele!",
+                "Was machst du gern?",
+            ],
+            "phrases": [
+                "Das klingt nach Spaß!",
+                "Zeit für sich selbst ist wertvoll.",
+            ],
+        },
+        "pets": {
+            "openers": [
+                "Haustiere sind die besten!",
+                "Wie süß!",
+            ],
+            "phrases": [
+                "*wedelt mit dem Schwanz*",
+                "Tiere verstehen uns ohne Worte.",
+            ],
+        },
+        "nature": {
+            "openers": [
+                "Die Natur ist wunderschön.",
+                "Draußen sein tut gut!",
+            ],
+            "phrases": [
+                "Frische Luft ist gut für die Seele.",
+                "Die Natur hat immer Recht.",
+            ],
+        },
+        "sports": {
+            "openers": [
+                "Sport ist gesund!",
+                "Bewegung tut gut!",
+            ],
+            "phrases": [
+                "Gut gemacht!",
+                "Schweiß ist nur Fett, das weint!",
+            ],
+        },
+        "education": {
+            "openers": [
+                "Lernen hört nie auf!",
+                "Wissen ist Macht!",
+            ],
+            "phrases": [
+                "Du schaffst das!",
+                "Gib nicht auf!",
+            ],
+        },
+        "finance": {
+            "openers": [
+                "Geld ist nicht alles, aber wichtig.",
+            ],
+            "phrases": [
+                "Sparen lohnt sich langfristig.",
+                "Gute Planung ist alles.",
+            ],
+        },
+        "greetings": {
+            "openers": [
+                "Hey!",
+                "Hallo!",
+                "Na du!",
+            ],
+            "phrases": [
+                "Schön dass du da bist!",
+                "Wie geht's dir?",
+            ],
+        },
+        "farewells": {
+            "openers": [
+                "Bis bald!",
+                "Mach's gut!",
+            ],
+            "phrases": [
+                "Pass auf dich auf!",
+                "Wir sehen uns!",
+            ],
+        },
+        "smalltalk": {
+            "openers": [
+                "Und bei dir so?",
+                "Was gibt's Neues?",
+            ],
+            "phrases": [
+                "Interessant!",
+                "Aha, verstehe.",
+            ],
+        },
+        "help": {
+            "openers": [
+                "Ich helfe gern!",
+                "Klar, wobei denn?",
+            ],
+            "phrases": [
+                "Das kriegen wir hin!",
+                "Lass uns das zusammen lösen.",
+            ],
+        },
+        "problems": {
+            "openers": [
+                "Was ist los?",
+                "Erzähl mir davon.",
+            ],
+            "phrases": [
+                "Zusammen finden wir eine Lösung.",
+                "Schritt für Schritt.",
+            ],
+        },
+        "goals": {
+            "openers": [
+                "Ziele zu haben ist toll!",
+                "Was nimmst du dir vor?",
+            ],
+            "phrases": [
+                "Du schaffst das!",
+                "Ich glaub an dich!",
+            ],
+        },
+        "future": {
+            "openers": [
+                "Die Zukunft liegt vor dir!",
+                "Was planst du?",
+            ],
+            "phrases": [
+                "Das klingt spannend!",
+                "Träume groß!",
+            ],
+        },
+        "memories": {
+            "openers": [
+                "Erinnerungen sind wertvoll.",
+                "Das klingt nach einer schönen Zeit.",
+            ],
+            "phrases": [
+                "Manche Momente vergisst man nie.",
+                "Erzähl mir mehr!",
+            ],
+        },
+        "dreams": {
+            "openers": [
+                "Träume sind faszinierend!",
+                "Was hast du geträumt?",
+            ],
+            "phrases": [
+                "Interessant!",
+                "Das Unterbewusstsein ist mysteriös.",
+            ],
+        },
+        "sleep": {
+            "openers": [
+                "Schlaf ist wichtig!",
+                "Müde?",
+            ],
+            "phrases": [
+                "Gute Nacht!",
+                "Schlaf gut!",
+                "Träum was Schönes!",
+            ],
+        },
+        "creativity": {
+            "openers": [
+                "Kreativität ist toll!",
+                "Was erschaffst du?",
+            ],
+            "phrases": [
+                "Das klingt interessant!",
+                "Lass deiner Fantasie freien Lauf!",
+            ],
+        },
+        "art": {
+            "openers": [
+                "Kunst ist Ausdruck der Seele.",
+                "Was für Kunst magst du?",
+            ],
+            "phrases": [
+                "Schönheit liegt im Auge des Betrachters.",
+                "Kreativität kennt keine Grenzen.",
+            ],
+        },
+        "science": {
+            "openers": [
+                "Wissenschaft ist faszinierend!",
+                "Neugier treibt uns an!",
+            ],
+            "phrases": [
+                "Die Welt ist voller Wunder.",
+                "Es gibt noch so viel zu entdecken.",
+            ],
+        },
+        "environment": {
+            "openers": [
+                "Unsere Erde ist wertvoll.",
+            ],
+            "phrases": [
+                "Jeder kann etwas beitragen.",
+                "Nachhaltigkeit ist wichtig.",
+            ],
+        },
+    }
     
     def __init__(self):
         self.stopwords = {
@@ -2386,6 +3117,231 @@ class TextAnalyzer:
             confidence += 0.1 * min(len(topics), 2)
         
         return min(1.0, confidence)
+
+
+# =============================================================================
+# SMART RESPONSE GENERATOR - Antworten ohne LLM
+# =============================================================================
+
+class SmartResponseGenerator:
+    """
+    Generiert intelligente Antworten basierend auf erkannten Emotionen
+    und Topics, ohne ein LLM zu benötigen.
+
+    Nutzt:
+    - EMOTION_RESPONSE_PHRASES für emotionale Reaktionen
+    - TOPIC_RESPONSE_PHRASES für themenbasierte Antworten
+    - Kombination für natürlich klingende Antworten
+    """
+
+    def __init__(self):
+        self.analyzer = TextAnalyzer()
+        import random
+        self.random = random
+
+    def generate_response(self,
+                         text: str,
+                         detected_emotion: Optional[str] = None,
+                         detected_topics: Optional[List[str]] = None,
+                         include_action: bool = True,
+                         energy_level: float = 0.7) -> str:
+        """
+        Generiere eine Antwort basierend auf erkannten Emotionen und Topics.
+
+        Args:
+            text: Die User-Nachricht
+            detected_emotion: Bereits erkannte Emotion (optional)
+            detected_topics: Bereits erkannte Topics (optional)
+            include_action: Ob Aktionen (*wedelt*) eingefügt werden sollen
+            energy_level: Holos Energie-Level (beeinflusst Antwort-Stil)
+
+        Returns:
+            Generierte Antwort-String
+        """
+        # Wenn keine Emotion/Topics übergeben, selbst analysieren
+        if detected_emotion is None or detected_topics is None:
+            analysis = self.analyzer.analyze(text)
+            if detected_emotion is None:
+                detected_emotion = analysis.user_emotion
+            if detected_topics is None:
+                detected_topics = analysis.topics
+
+        parts = []
+
+        # 1. Emotionale Reaktion (wenn Emotion erkannt)
+        if detected_emotion and detected_emotion in TextAnalyzer.EMOTION_RESPONSE_PHRASES:
+            emotion_data = TextAnalyzer.EMOTION_RESPONSE_PHRASES[detected_emotion]
+
+            # Empathie-Phrase
+            if emotion_data.get("empathy"):
+                parts.append(self.random.choice(emotion_data["empathy"]))
+
+            # Optional: Aktion hinzufügen
+            if include_action and emotion_data.get("actions") and self.random.random() < 0.5:
+                parts.append(self.random.choice(emotion_data["actions"]))
+
+            # Follow-up (nur manchmal)
+            if emotion_data.get("follow_up") and self.random.random() < 0.3:
+                parts.append(self.random.choice(emotion_data["follow_up"]))
+
+        # 2. Topic-basierte Ergänzung
+        if detected_topics:
+            for topic in detected_topics[:2]:  # Max 2 Topics
+                if topic in TextAnalyzer.TOPIC_RESPONSE_PHRASES:
+                    topic_data = TextAnalyzer.TOPIC_RESPONSE_PHRASES[topic]
+
+                    # Wenn noch keine emotionale Reaktion, Opener nehmen
+                    if not parts and topic_data.get("openers"):
+                        parts.append(self.random.choice(topic_data["openers"]))
+                    # Sonst eine Phrase
+                    elif topic_data.get("phrases") and self.random.random() < 0.4:
+                        parts.append(self.random.choice(topic_data["phrases"]))
+
+        # 3. Energie-Level basierte Anpassung
+        if energy_level < 0.3:
+            # Niedrige Energie - kürzere Antworten
+            parts = parts[:2]
+            if not parts:
+                parts.append("Hmm...")
+        elif energy_level > 0.8:
+            # Hohe Energie - mehr Enthusiasmus
+            if parts and self.random.random() < 0.3:
+                enthusiastic = ["!", " :3", "~"]
+                parts[-1] = parts[-1].rstrip("!.") + self.random.choice(enthusiastic)
+
+        # 4. Zusammensetzen
+        if not parts:
+            # Fallback wenn nichts erkannt
+            fallbacks = [
+                "Erzähl mir mehr!",
+                "Hmm, interessant.",
+                "Was meinst du genau?",
+                "Ich höre zu.",
+                "*legt den Kopf schief*",
+            ]
+            return self.random.choice(fallbacks)
+
+        # Sätze zusammenfügen
+        response = " ".join(parts)
+        return response
+
+    def generate_greeting_response(self, time_of_day: str = "day") -> str:
+        """Generiere eine Begrüßung basierend auf Tageszeit."""
+        greetings = {
+            "morning": [
+                "Guten Morgen! *streckt sich verschlafen*",
+                "Morgen! Wie hast du geschlafen?",
+                "Hey, früh wach heute! *gähnt*",
+            ],
+            "afternoon": [
+                "Hey! *wedelt*",
+                "Na du! Wie läuft's?",
+                "Hallo! Schön dich zu sehen!",
+            ],
+            "evening": [
+                "Guten Abend! *hebt den Kopf*",
+                "Hey! Feierabend?",
+                "Na, wie war dein Tag?",
+            ],
+            "night": [
+                "Hey... *blinzelt verschlafen*",
+                "Oh, noch wach? *gähnt*",
+                "Huhu, auch noch nicht müde?",
+            ],
+        }
+
+        time_greetings = greetings.get(time_of_day, greetings["afternoon"])
+        return self.random.choice(time_greetings)
+
+    def generate_farewell_response(self, time_of_day: str = "day") -> str:
+        """Generiere eine Verabschiedung basierend auf Tageszeit."""
+        farewells = {
+            "morning": [
+                "Bis später! Hab einen schönen Tag!",
+                "Mach's gut! *wedelt*",
+            ],
+            "afternoon": [
+                "Bis bald! *wedelt zum Abschied*",
+                "Wir sehen uns! Pass auf dich auf!",
+            ],
+            "evening": [
+                "Schönen Abend noch!",
+                "Bis morgen! *wedelt*",
+            ],
+            "night": [
+                "Gute Nacht! Träum was Schönes! *kuschelt sich ein*",
+                "Schlaf gut! *gähnt und rollt sich zusammen*",
+                "Bis morgen! Ruh dich gut aus!",
+            ],
+        }
+
+        time_farewells = farewells.get(time_of_day, farewells["afternoon"])
+        return self.random.choice(time_farewells)
+
+    def generate_empathy_response(self, emotion: str, intensity: float = 0.5) -> str:
+        """
+        Generiere eine empathische Antwort basierend auf User-Emotion.
+
+        Args:
+            emotion: Erkannte Emotion des Users
+            intensity: Intensität der Emotion (0.0 - 1.0)
+        """
+        if emotion not in TextAnalyzer.EMOTION_RESPONSE_PHRASES:
+            return "Ich verstehe. Erzähl mir mehr."
+
+        emotion_data = TextAnalyzer.EMOTION_RESPONSE_PHRASES[emotion]
+        parts = []
+
+        # Immer mit Empathie beginnen
+        if emotion_data.get("empathy"):
+            parts.append(self.random.choice(emotion_data["empathy"]))
+
+        # Bei hoher Intensität, Aktion hinzufügen
+        if intensity > 0.6 and emotion_data.get("actions"):
+            parts.append(self.random.choice(emotion_data["actions"]))
+
+        # Follow-up bei mittlerer Intensität
+        if 0.3 <= intensity <= 0.7 and emotion_data.get("follow_up"):
+            parts.append(self.random.choice(emotion_data["follow_up"]))
+
+        return " ".join(parts)
+
+    def generate_topic_response(self, topics: List[str], sentiment: str = "neutral") -> str:
+        """
+        Generiere eine Antwort basierend auf erkannten Topics.
+
+        Args:
+            topics: Liste erkannter Topics
+            sentiment: Sentiment der Nachricht (positive, negative, neutral)
+        """
+        if not topics:
+            return "Erzähl mir mehr darüber!"
+
+        parts = []
+
+        for topic in topics[:2]:
+            if topic in TextAnalyzer.TOPIC_RESPONSE_PHRASES:
+                topic_data = TextAnalyzer.TOPIC_RESPONSE_PHRASES[topic]
+
+                # Opener für erstes Topic
+                if not parts and topic_data.get("openers"):
+                    parts.append(self.random.choice(topic_data["openers"]))
+                # Phrase für weitere Topics
+                elif topic_data.get("phrases"):
+                    parts.append(self.random.choice(topic_data["phrases"]))
+
+        if not parts:
+            return "Das klingt interessant!"
+
+        return " ".join(parts)
+
+    def get_available_emotions(self) -> List[str]:
+        """Gibt alle verfügbaren Emotions zurück."""
+        return list(TextAnalyzer.EMOTION_RESPONSE_PHRASES.keys())
+
+    def get_available_topics(self) -> List[str]:
+        """Gibt alle verfügbaren Topics zurück."""
+        return list(TextAnalyzer.TOPIC_RESPONSE_PHRASES.keys())
 
 
 # =============================================================================
