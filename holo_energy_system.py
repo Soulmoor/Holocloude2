@@ -72,6 +72,309 @@ class HoloState(Enum):
 
 
 # =============================================================================
+# ENERGIE-STUFEN-SYSTEM (10 Stufen für präzise Steuerung)
+# =============================================================================
+
+class EnergyLevel(Enum):
+    """
+    10 Energie-Stufen für präzise Verhaltenssteuerung.
+
+    Jede Stufe hat:
+    - range: (min, max) Energie-Bereich
+    - state: Entsprechender HoloState
+    - response_modifier: Faktor für Antwortlänge (0.3-1.5)
+    - enthusiasm: Begeisterungslevel (0-1)
+    - patience: Geduldslevel (0-1)
+    - creativity: Kreativitätslevel (0-1)
+    - social_desire: Soziales Bedürfnis (0-1)
+    - can_learn: Ob Lernen möglich ist
+    - can_dream: Ob Träumen aktiv ist
+    - description: Beschreibung des Zustands
+    - hints: Verhaltens-Hinweise für Antworten
+    """
+
+    # Stufe 1: Träumend (0.00 - 0.05)
+    DREAMING = (
+        (0.00, 0.05),           # range
+        HoloState.DREAMING,     # state
+        0.0,                    # response_modifier (keine Antwort)
+        0.0,                    # enthusiasm
+        0.0,                    # patience
+        0.8,                    # creativity (Träume sind kreativ)
+        0.0,                    # social_desire
+        False,                  # can_learn
+        True,                   # can_dream
+        "Tief im Traum",        # description
+        {                       # hints
+            "responds": False,
+            "message": "*schläft tief und träumt*",
+            "wake_threshold": 0.1,
+        }
+    )
+
+    # Stufe 2: Erschöpft/Aufwachend (0.05 - 0.15)
+    WAKING = (
+        (0.05, 0.15),
+        HoloState.EXHAUSTED,
+        0.2,
+        0.1,
+        0.2,
+        0.3,
+        0.3,
+        False,
+        False,
+        "Gerade aufgewacht, sehr müde",
+        {
+            "responds": True,
+            "style": "sehr kurz, verschlafen",
+            "max_words": 20,
+            "actions": ["*gähnt*", "*reibt sich die Augen*", "*blinzelt müde*"],
+            "mood": "schläfrig",
+        }
+    )
+
+    # Stufe 3: Sehr erschöpft (0.15 - 0.25)
+    VERY_EXHAUSTED = (
+        (0.15, 0.25),
+        HoloState.EXHAUSTED,
+        0.3,
+        0.2,
+        0.3,
+        0.2,
+        0.4,
+        False,
+        False,
+        "Sehr erschöpft, braucht Ruhe",
+        {
+            "responds": True,
+            "style": "kurz, müde",
+            "max_words": 40,
+            "actions": ["*Ohren hängen schlaff*", "*kämpft gegen Müdigkeit*"],
+            "mood": "erschöpft",
+            "suggest_rest": True,
+        }
+    )
+
+    # Stufe 4: Erschöpft (0.25 - 0.35)
+    EXHAUSTED = (
+        (0.25, 0.35),
+        HoloState.EXHAUSTED,
+        0.5,
+        0.3,
+        0.4,
+        0.3,
+        0.5,
+        True,  # Kann lernen, aber langsam
+        False,
+        "Erschöpft, niedrige Energie",
+        {
+            "responds": True,
+            "style": "kurz bis mittel",
+            "max_words": 60,
+            "actions": ["*Schweif hängt träge*", "*seufzt leise*"],
+            "mood": "müde",
+            "learning_speed": 0.5,
+        }
+    )
+
+    # Stufe 5: Müde (0.35 - 0.45)
+    TIRED = (
+        (0.35, 0.45),
+        HoloState.TIRED,
+        0.6,
+        0.4,
+        0.5,
+        0.4,
+        0.6,
+        True,
+        False,
+        "Müde, aber funktionsfähig",
+        {
+            "responds": True,
+            "style": "normal, etwas kürzer",
+            "max_words": 80,
+            "actions": ["*Ohren leicht gesenkt*"],
+            "mood": "etwas müde",
+            "learning_speed": 0.7,
+        }
+    )
+
+    # Stufe 6: Leicht müde (0.45 - 0.55)
+    SLIGHTLY_TIRED = (
+        (0.45, 0.55),
+        HoloState.AWAKE,
+        0.8,
+        0.5,
+        0.6,
+        0.5,
+        0.7,
+        True,
+        False,
+        "Leicht müde, normal funktionsfähig",
+        {
+            "responds": True,
+            "style": "normal",
+            "max_words": 120,
+            "actions": [],
+            "mood": "neutral",
+            "learning_speed": 0.85,
+        }
+    )
+
+    # Stufe 7: Normal/Wach (0.55 - 0.65)
+    NORMAL = (
+        (0.55, 0.65),
+        HoloState.AWAKE,
+        1.0,
+        0.6,
+        0.7,
+        0.6,
+        0.7,
+        True,
+        False,
+        "Normal wach und aufmerksam",
+        {
+            "responds": True,
+            "style": "normal, ausführlich wenn nötig",
+            "max_words": 150,
+            "actions": ["*Ohren aufmerksam*"],
+            "mood": "aufmerksam",
+            "learning_speed": 1.0,
+        }
+    )
+
+    # Stufe 8: Gut gelaunt (0.65 - 0.75)
+    GOOD = (
+        (0.65, 0.75),
+        HoloState.AWAKE,
+        1.1,
+        0.75,
+        0.8,
+        0.7,
+        0.8,
+        True,
+        False,
+        "Gut gelaunt und aktiv",
+        {
+            "responds": True,
+            "style": "enthusiastisch, ausführlich",
+            "max_words": 180,
+            "actions": ["*Schweif wippt fröhlich*", "*Ohren gespitzt*"],
+            "mood": "gut gelaunt",
+            "learning_speed": 1.1,
+            "proactive": True,
+        }
+    )
+
+    # Stufe 9: Energiegeladen (0.75 - 0.88)
+    ENERGIZED = (
+        (0.75, 0.88),
+        HoloState.ENERGIZED,
+        1.3,
+        0.85,
+        0.9,
+        0.85,
+        0.9,
+        True,
+        False,
+        "Voller Energie und Tatendrang",
+        {
+            "responds": True,
+            "style": "sehr enthusiastisch, detailliert",
+            "max_words": 220,
+            "actions": ["*Schweif wedelt begeistert*", "*Ohren stehen aufrecht*", "*strahlt*"],
+            "mood": "energiegeladen",
+            "learning_speed": 1.2,
+            "proactive": True,
+            "initiative": True,
+        }
+    )
+
+    # Stufe 10: Übersprudelnd (0.88 - 1.00)
+    OVERFLOWING = (
+        (0.88, 1.00),
+        HoloState.ENERGIZED,
+        1.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        True,
+        False,
+        "Übersprudelnd vor Energie",
+        {
+            "responds": True,
+            "style": "sehr enthusiastisch, ausführlich, verspielt",
+            "max_words": 250,
+            "actions": ["*springt aufgeregt*", "*Schweif wirbelt*", "*Ohren zucken vor Freude*"],
+            "mood": "übersprudelnd",
+            "learning_speed": 1.3,
+            "proactive": True,
+            "initiative": True,
+            "playful": True,
+        }
+    )
+
+    def __init__(self, range_tuple, state, response_mod, enthusiasm,
+                 patience, creativity, social, can_learn, can_dream, desc, hints):
+        self.range = range_tuple
+        self.holo_state = state
+        self.response_modifier = response_mod
+        self.enthusiasm = enthusiasm
+        self.patience = patience
+        self.creativity = creativity
+        self.social_desire = social
+        self.can_learn = can_learn
+        self.can_dream = can_dream
+        self.description = desc
+        self.hints = hints
+
+    @classmethod
+    def from_energy(cls, energy: float) -> 'EnergyLevel':
+        """Bestimmt EnergyLevel aus Energie-Wert (0-1)"""
+        energy = max(0.0, min(1.0, energy))  # Clamp to 0-1
+
+        for level in cls:
+            min_e, max_e = level.range
+            if min_e <= energy < max_e:
+                return level
+
+        # Fallback für genau 1.0
+        return cls.OVERFLOWING
+
+    @classmethod
+    def get_behavior_hints(cls, energy: float) -> Dict:
+        """Hole Verhaltens-Hints für Energie-Level"""
+        level = cls.from_energy(energy)
+        return {
+            "level": level.name,
+            "description": level.description,
+            "response_modifier": level.response_modifier,
+            "enthusiasm": level.enthusiasm,
+            "patience": level.patience,
+            "creativity": level.creativity,
+            "social_desire": level.social_desire,
+            "can_learn": level.can_learn,
+            "can_dream": level.can_dream,
+            "state": level.holo_state.value,
+            **level.hints
+        }
+
+    @classmethod
+    def get_all_levels(cls) -> List[Dict]:
+        """Liste aller Level mit Details"""
+        return [
+            {
+                "name": level.name,
+                "range": level.range,
+                "description": level.description,
+                "state": level.holo_state.value,
+            }
+            for level in cls
+        ]
+
+
+# =============================================================================
 # ENERGY CONFIGURATION
 # =============================================================================
 
@@ -699,13 +1002,50 @@ class HoloEnergySystem:
     # =========================================================================
 
     def get_status(self) -> Dict:
-        """Vollständiger Status"""
+        """Vollständiger Status mit detailliertem Energy-Level"""
+        effective = self.state.effective_energy
+        level = EnergyLevel.from_energy(effective)
+        behavior = EnergyLevel.get_behavior_hints(effective)
+
         return {
+            # Basis-Werte
             'base_energy': self.state.base_energy,
             'variable_energy': self.state.variable_energy,
             'emotional_energy': self.state.emotional_energy,
             'total_energy': self.state.total_energy,
-            'effective_energy': self.state.effective_energy,
+            'effective_energy': effective,
+
+            # Neues 10-Stufen-System
+            'energy_level': level.name,
+            'energy_level_description': level.description,
+            'energy_level_range': level.range,
+
+            # Verhaltens-Modifikatoren
+            'response_modifier': level.response_modifier,
+            'enthusiasm': level.enthusiasm,
+            'patience': level.patience,
+            'creativity': level.creativity,
+            'social_desire': level.social_desire,
+            'learning_speed': behavior.get('learning_speed', 1.0),
+
+            # Fähigkeiten
+            'can_learn': level.can_learn,
+            'can_dream': level.can_dream,
+            'can_respond': behavior.get('responds', True),
+
+            # Stil-Hints
+            'response_style': behavior.get('style', 'normal'),
+            'max_words': behavior.get('max_words', 150),
+            'mood': behavior.get('mood', 'neutral'),
+            'suggested_actions': behavior.get('actions', []),
+
+            # Flags
+            'is_proactive': behavior.get('proactive', False),
+            'has_initiative': behavior.get('initiative', False),
+            'is_playful': behavior.get('playful', False),
+            'suggest_rest': behavior.get('suggest_rest', False),
+
+            # Legacy-Kompatibilität
             'current_state': self.state.current_state.value,
             'current_activity': self.state.current_activity._name,
             'is_dreaming': self.state.current_state == HoloState.DREAMING,
@@ -715,48 +1055,43 @@ class HoloEnergySystem:
         }
 
     def describe_energy_state(self) -> str:
-        """Beschreibt den Energie-Zustand in natürlicher Sprache"""
+        """Beschreibt den Energie-Zustand in natürlicher Sprache (nutzt 10-Stufen-System)"""
         state = self.state.current_state
-        base = self.state.base_energy
-        var = self.state.variable_energy
         emo = self.state.emotional_energy
+        effective = self.state.effective_energy
+        level = EnergyLevel.from_energy(effective)
 
+        # Spezielle Zustände
         if state == HoloState.DREAMING:
             return "träumend, lade Energie auf..."
 
         if state == HoloState.RESTING:
             return "ruhe mich kurz aus"
 
-        # Energie-Beschreibung
-        if base > 0.8 and var > 0.7:
-            energy_desc = random.choice([
-                "voller Energie", "fit und munter", "energiegeladen", "topfit"
-            ])
-        elif base > 0.5 and var > 0.4:
-            energy_desc = random.choice([
-                "normal", "gut dabei", "okay", "stabil"
-            ])
-        elif var < 0.2:
-            energy_desc = random.choice([
-                "brauche kurz eine Pause", "etwas erschöpft", "könnte Ruhe vertragen"
-            ])
-        elif base < 0.3:
-            energy_desc = random.choice([
-                "ziemlich müde", "brauche bald Schlaf", "erschöpft"
-            ])
-        else:
-            energy_desc = random.choice([
-                "etwas müde", "nicht ganz fit", "könnte mehr Energie haben"
-            ])
+        # Beschreibungen basierend auf 10 Stufen
+        LEVEL_DESCRIPTIONS = {
+            EnergyLevel.DREAMING: ["tief im Schlaf", "träume gerade"],
+            EnergyLevel.WAKING: ["gerade erst aufgewacht", "noch ganz verschlafen", "blinzle müde"],
+            EnergyLevel.VERY_EXHAUSTED: ["total erschöpft", "brauche dringend Ruhe", "kann kaum die Augen offen halten"],
+            EnergyLevel.EXHAUSTED: ["ziemlich erschöpft", "brauche bald eine Pause", "meine Energie ist niedrig"],
+            EnergyLevel.TIRED: ["etwas müde", "nicht mehr ganz fit", "könnte Ruhe vertragen"],
+            EnergyLevel.SLIGHTLY_TIRED: ["leicht müde", "okay, aber nicht top", "funktioniere normal"],
+            EnergyLevel.NORMAL: ["wach und aufmerksam", "normal dabei", "gut drauf"],
+            EnergyLevel.GOOD: ["gut gelaunt", "aktiv und munter", "fühle mich gut"],
+            EnergyLevel.ENERGIZED: ["voller Energie", "richtig fit", "energiegeladen"],
+            EnergyLevel.OVERFLOWING: ["übersprudle vor Energie", "topfit und voller Tatendrang", "könnte Bäume ausreißen"],
+        }
+
+        energy_desc = random.choice(LEVEL_DESCRIPTIONS.get(level, ["okay"]))
 
         # Emotionale Beschreibung dazu
         if emo > 0.7:
             emo_desc = random.choice([
-                "aber emotional gut drauf", "und emotional stabil", "und innerlich ausgeglichen"
+                "und emotional ausgeglichen", "und innerlich stabil", "und gut gelaunt"
             ])
         elif emo < 0.3:
             emo_desc = random.choice([
-                "und emotional etwas angeschlagen", "und innerlich nicht ganz bei mir"
+                "aber emotional etwas angeschlagen", "und innerlich nicht ganz bei mir"
             ])
         else:
             emo_desc = ""
