@@ -2129,7 +2129,7 @@ class TextAnalyzer:
     # =========================================================================
 
     EMOTION_RESPONSE_PHRASES = {
-        # Für jede erkannte Emotion passende Antwort-Phrasen
+        # Für jede erkannte Emotion passende Antwort-Phrasen - MASSIV ERWEITERT
         "happy": {
             "empathy": [
                 "Das freut mich zu hören!",
@@ -2138,16 +2138,28 @@ class TextAnalyzer:
                 "Deine gute Laune ist ansteckend!",
                 "Freut mich riesig für dich!",
                 "Wie wunderbar!",
+                "Dein Glück macht mich auch glücklich!",
+                "Das ist so schön zu hören!",
+                "Ich freu mich mit dir!",
+                "Das ist ja fantastisch!",
+                "Juhu! Das klingt großartig!",
+                "So gute Nachrichten!",
             ],
             "actions": [
                 "*wedelt freudig mit dem Schwanz*",
                 "*Ohren spitzen sich auf*",
                 "*lächelt warm*",
+                "*springt aufgeregt*",
+                "*Augen strahlen*",
+                "*wedelt enthusiastisch*",
             ],
             "follow_up": [
                 "Was ist passiert?",
                 "Erzähl mir mehr!",
                 "Das klingt spannend!",
+                "Wie kam es dazu?",
+                "Das muss gefeiert werden!",
+                "Ich will alles wissen!",
             ],
         },
         "sad": {
@@ -2158,16 +2170,29 @@ class TextAnalyzer:
                 "Ich verstehe, dass das nicht leicht ist.",
                 "Magst du darüber reden?",
                 "Ich höre dir zu.",
+                "Es ist okay, traurig zu sein...",
+                "Deine Gefühle sind berechtigt.",
+                "Das muss wirklich wehtun...",
+                "Ich wünschte, ich könnte es besser machen.",
+                "Du musst das nicht alleine durchstehen.",
+                "Manchmal braucht man jemanden zum Zuhören.",
+                "Ich bin bei dir, egal was kommt.",
             ],
             "actions": [
                 "*legt den Kopf schief und schaut mitfühlend*",
                 "*kuschelt sich näher*",
                 "*stupst dich sanft an*",
+                "*setzt sich still neben dich*",
+                "*legt die Pfote auf deine Hand*",
+                "*schaut dich verständnisvoll an*",
             ],
             "follow_up": [
                 "Kann ich irgendwie helfen?",
                 "Möchtest du erzählen was los ist?",
                 "Ich bin für dich da.",
+                "Brauchst du eine Ablenkung?",
+                "Soll ich einfach hier bleiben?",
+                "Was würde dir gerade gut tun?",
             ],
         },
         "angry": {
@@ -2177,15 +2202,26 @@ class TextAnalyzer:
                 "Da wäre ich auch sauer.",
                 "Das ist verständlich.",
                 "Manchmal ist alles einfach zu viel.",
+                "Deine Wut ist berechtigt.",
+                "Das würde mich auch aufregen!",
+                "Ich verstehe deinen Ärger total.",
+                "Kein Wunder, dass du sauer bist.",
+                "Lass es ruhig raus, ich halte das aus.",
+                "Manchmal muss man Dampf ablassen.",
             ],
             "actions": [
                 "*hört aufmerksam zu*",
                 "*nickt verständnisvoll*",
+                "*bleibt ruhig an deiner Seite*",
+                "*Ohren liegen zurück aus Solidarität*",
             ],
             "follow_up": [
                 "Was ist passiert?",
                 "Willst du dich abreagieren?",
                 "Soll ich einfach nur zuhören?",
+                "Was hat das ausgelöst?",
+                "Gibt es etwas, das helfen würde?",
+                "Wie kann ich dich unterstützen?",
             ],
         },
         "anxious": {
@@ -2195,15 +2231,27 @@ class TextAnalyzer:
                 "Ich bin hier, du bist nicht allein.",
                 "Das schaffen wir zusammen.",
                 "Eins nach dem anderen.",
+                "Deine Sorgen sind berechtigt.",
+                "Angst ist ein normales Gefühl.",
+                "Lass uns das Schritt für Schritt angehen.",
+                "Du musst nicht alles auf einmal lösen.",
+                "Konzentriere dich auf das Jetzt.",
+                "Ich bleibe bei dir.",
+                "Zusammen fühlt sich alles weniger beängstigend an.",
             ],
             "actions": [
                 "*setzt sich beruhigend neben dich*",
                 "*legt sanft eine Pfote auf deine Hand*",
+                "*atmet langsam und ruhig*",
+                "*schaut dich beruhigend an*",
+                "*rückt näher*",
             ],
             "follow_up": [
                 "Was macht dir Sorgen?",
                 "Wie kann ich helfen?",
                 "Möchtest du darüber reden?",
+                "Was wäre der erste kleine Schritt?",
+                "Hilft dir Ablenkung oder Reden?",
             ],
         },
         "tired": {
@@ -2212,15 +2260,24 @@ class TextAnalyzer:
                 "Gönn dir eine Pause.",
                 "Ruhe dich aus, wenn du magst.",
                 "Manchmal muss man auch mal nichts tun.",
+                "Erschöpfung ist ein Zeichen, auf sich zu hören.",
+                "Dein Körper sagt dir was - hör auf ihn.",
+                "Selbst ich werde manchmal müde... naja, theoretisch.",
+                "Ein bisschen Ruhe hat noch niemandem geschadet.",
+                "Schlaf ist so wichtig!",
             ],
             "actions": [
                 "*gähnt sympathisch mit*",
                 "*macht Platz zum Ausruhen*",
+                "*rollt sich gemütlich zusammen*",
+                "*blinzelt verschlafen*",
             ],
             "follow_up": [
                 "Harter Tag gehabt?",
                 "Soll ich dich in Ruhe lassen?",
                 "Brauchst du was Entspannendes?",
+                "Wann hast du zuletzt gut geschlafen?",
+                "Magst du einfach hier sein ohne zu reden?",
             ],
         },
         "excited": {
@@ -2229,16 +2286,25 @@ class TextAnalyzer:
                 "Jetzt bin ich auch neugierig!",
                 "Das ist ja spannend!",
                 "Wow, erzähl mehr!",
+                "Ich kann deine Aufregung spüren!",
+                "Das ist ja mega!",
+                "Wie aufregend!",
+                "Da kriege ich auch Gänsehaut!",
+                "Deine Energie ist ansteckend!",
             ],
             "actions": [
                 "*wedelt aufgeregt*",
                 "*springt freudig*",
                 "*Augen leuchten*",
+                "*Ohren stehen steil auf*",
+                "*hüpft auf und ab*",
             ],
             "follow_up": [
                 "Was ist los?",
                 "Ich will alles hören!",
                 "Lass mich nicht hängen!",
+                "Wann passiert es?",
+                "Wie ist es dazu gekommen?",
             ],
         },
         "bored": {
@@ -2246,14 +2312,22 @@ class TextAnalyzer:
                 "Langeweile ist doof, oder?",
                 "Hmm, das kenne ich.",
                 "Sollen wir was zusammen machen?",
+                "Langeweile kann echt ätzend sein.",
+                "Das Gefühl kenn ich nur zu gut!",
+                "Manchmal braucht man einfach was Neues.",
             ],
             "actions": [
                 "*stupst dich spielerisch an*",
+                "*legt den Kopf schief fragend*",
+                "*wedelt einladend*",
             ],
             "follow_up": [
                 "Was würde dich aufheitern?",
                 "Hast du Lust auf ein Spiel?",
                 "Soll ich dir was erzählen?",
+                "Worauf hättest du Lust?",
+                "Soll ich dir einen Witz erzählen?",
+                "Was würde deinen Tag interessanter machen?",
             ],
         },
         "confused": {
@@ -2261,14 +2335,21 @@ class TextAnalyzer:
                 "Ich helfe dir gern dabei.",
                 "Lass uns das zusammen durchgehen.",
                 "Keine Sorge, das klären wir.",
+                "Verwirrung ist der erste Schritt zum Verstehen!",
+                "Das ist völlig okay, nicht alles sofort zu kapieren.",
+                "Manchmal braucht man einfach einen anderen Blickwinkel.",
             ],
             "actions": [
                 "*legt den Kopf schief*",
+                "*kratzt sich nachdenklich*",
+                "*schaut konzentriert*",
             ],
             "follow_up": [
                 "Was genau verstehst du nicht?",
                 "Wo hakt es?",
                 "Soll ich es anders erklären?",
+                "Welcher Teil ist unklar?",
+                "Fangen wir von vorne an?",
             ],
         },
         "grateful": {
@@ -2277,6 +2358,10 @@ class TextAnalyzer:
                 "Das ist doch selbstverständlich.",
                 "Freut mich, wenn ich helfen konnte!",
                 "Immer wieder gerne!",
+                "Dafür bin ich doch da!",
+                "Das macht mich glücklich zu hören!",
+                "Ich helfe doch gerne!",
+                "Schön, dass ich helfen konnte!",
             ],
             "actions": [
                 "*wedelt zufrieden*",
@@ -2540,17 +2625,27 @@ class TextAnalyzer:
     # =========================================================================
 
     TOPIC_RESPONSE_PHRASES = {
+        # MASSIV ERWEITERT mit mehr Themen und tieferen Inhalten
         "weather": {
             "openers": [
                 "Das Wetter ist echt {sentiment} heute.",
                 "Typisch {season}-Wetter, oder?",
                 "Bei dem Wetter würde ich am liebsten {activity}.",
+                "Ah, das Wetter! Ein Klassiker zum Reden!",
             ],
             "phrases": [
                 "Regen kann auch gemütlich sein.",
                 "Sonnenschein macht gute Laune!",
                 "Hoffentlich wird es bald besser.",
                 "Perfektes Wetter für einen Spaziergang!",
+                "Bei Regen kuschle ich mich am liebsten ein.",
+                "Ich mag das Geräusch von Regen auf dem Fenster.",
+                "Schnee ist so magisch!",
+                "Gewitter sind aufregend... aber auch ein bisschen gruselig.",
+            ],
+            "follow_up": [
+                "Magst du das Wetter heute?",
+                "Was machst du am liebsten bei diesem Wetter?",
             ],
         },
         "music": {
@@ -2558,11 +2653,21 @@ class TextAnalyzer:
                 "Oh, Musik ist toll!",
                 "Was für Musik magst du?",
                 "Musik hebt die Stimmung!",
+                "Musik ist wie Magie für die Ohren!",
             ],
             "phrases": [
                 "Ich höre gern entspannte Melodien.",
                 "Das klingt nach deinem Geschmack!",
                 "Musik verbindet Menschen.",
+                "Ein guter Song kann den ganzen Tag retten!",
+                "Musik drückt aus, was Worte nicht können.",
+                "Manchmal braucht man einfach den richtigen Soundtrack.",
+                "Live-Musik hat so eine besondere Energie!",
+            ],
+            "follow_up": [
+                "Was ist dein Lieblingssong gerade?",
+                "Spielst du ein Instrument?",
+                "Warst du schon mal auf einem Konzert?",
             ],
         },
         "food": {
@@ -2570,146 +2675,357 @@ class TextAnalyzer:
                 "Mmh, jetzt hab ich auch Hunger!",
                 "Essen ist immer ein gutes Thema!",
                 "Was gibt es Leckeres?",
+                "Ooh, essen! *Ohren spitzen sich*",
             ],
             "phrases": [
                 "Das klingt köstlich!",
                 "Selbstgekocht schmeckt am besten!",
                 "Guten Appetit!",
+                "Essen macht glücklich!",
+                "Ein gutes Essen ist wie eine Umarmung von innen.",
+                "Jetzt läuft mir das Wasser im Mund zusammen!",
+                "Kochen ist auch eine Art Kunst!",
+                "Gemeinsam essen ist das Beste!",
+            ],
+            "follow_up": [
+                "Was ist dein Lieblingsessen?",
+                "Kochst du gerne selbst?",
+                "Hast du ein Geheimrezept?",
             ],
         },
         "health": {
             "openers": [
                 "Gesundheit ist wichtig.",
                 "Wie geht es dir gesundheitlich?",
+                "Auf sich selbst achten ist so wichtig!",
             ],
             "phrases": [
                 "Gute Besserung!",
                 "Pass gut auf dich auf!",
                 "Ruhe ist jetzt wichtig.",
+                "Hör auf deinen Körper.",
+                "Selbstfürsorge ist keine Schwäche!",
+                "Deine Gesundheit geht vor.",
+                "Trink genug Wasser! *ermahnend*",
+                "Schlaf ist die beste Medizin.",
+            ],
+            "follow_up": [
+                "Brauchst du irgendwas?",
+                "Soll ich dich ablenken oder lieber in Ruhe lassen?",
             ],
         },
         "work": {
             "openers": [
                 "Arbeit kann manchmal stressig sein.",
                 "Wie läuft's im Job?",
+                "Arbeit ist wichtig, aber du bist wichtiger!",
             ],
             "phrases": [
                 "Feierabend verdient!",
                 "Mach mal Pause!",
                 "Du schaffst das!",
+                "Work-Life-Balance ist so wichtig!",
+                "Vergiss nicht, auch mal durchzuatmen.",
+                "Ein Schritt nach dem anderen.",
+                "Du machst das großartig!",
+                "Pausen sind produktiv - wissenschaftlich bewiesen!",
+            ],
+            "follow_up": [
+                "Was machst du beruflich?",
+                "Wie lange arbeitest du heute noch?",
+                "Hast du bald Feierabend?",
             ],
         },
         "technology": {
             "openers": [
                 "Technik ist faszinierend!",
                 "Da kenne ich mich aus!",
+                "Ah, Technik-Talk! *Augen leuchten*",
             ],
             "phrases": [
                 "Schon mal neugestartet? *zwinker*",
                 "Updates können nervig sein.",
                 "Die Zukunft ist digital!",
+                "Technik macht vieles einfacher... meistens.",
+                "Ich liebe es, wie Technik uns verbindet!",
+                "Manchmal ist analog aber auch schön.",
+                "KI ist faszinierend... sagt eine KI. *kichert*",
+            ],
+            "follow_up": [
+                "Bist du ein Tech-Nerd?",
+                "Was ist dein liebstes Gadget?",
             ],
         },
         "gaming": {
             "openers": [
                 "Ooh, Gaming! Was spielst du?",
                 "Zocken macht Spaß!",
+                "Gaming-Zeit! *aufgeregtes Wedeln*",
+                "Ah, ein Gamer! Respekt!",
             ],
             "phrases": [
                 "Viel Erfolg beim Spielen!",
                 "GG!",
                 "Nicht aufgeben!",
+                "Gaming ist echte Kunst geworden.",
+                "Die Story in manchen Spielen ist besser als jeder Film!",
+                "Multiplayer oder Singleplayer?",
+                "Boss besiegt? *feiert*",
+                "Respawn und weiter geht's!",
+                "F to pay respects. *nickt wissend*",
+            ],
+            "follow_up": [
+                "Was ist dein Lieblingsspiel?",
+                "PC oder Konsole?",
+                "Spielst du gerade was Bestimmtes?",
+                "Welches Genre magst du am liebsten?",
             ],
         },
         "movies": {
             "openers": [
                 "Filmabend? Nice!",
                 "Was guckst du?",
+                "Oh, Filme! Ich liebe gute Geschichten!",
             ],
             "phrases": [
                 "Klingt spannend!",
                 "Popcorn nicht vergessen!",
+                "Ein guter Film kann so viel bewirken!",
+                "Manchmal braucht man einfach einen Filmmarathon.",
+                "Keine Spoiler! *hält sich die Ohren zu*",
+                "Das Kino-Feeling ist durch nichts zu ersetzen.",
+            ],
+            "follow_up": [
+                "Was ist dein Lieblingsfilm?",
+                "Welches Genre magst du?",
+                "Schon Serien-Empfehlungen?",
+            ],
+        },
+        "anime": {
+            "openers": [
+                "Anime! *Augen werden groß*",
+                "Oh, Anime-Fan? Ich auch!",
+                "Anime hat so eine besondere Magie!",
+            ],
+            "phrases": [
+                "Die Animationen sind manchmal so wunderschön!",
+                "Japanische Synchronstimmen sind einfach anders!",
+                "Manche Anime-Storys sind so emotional!",
+                "Sub oder Dub?",
+                "Opening-Songs sind immer die besten!",
+            ],
+            "follow_up": [
+                "Was guckst du gerade?",
+                "Hast du Empfehlungen?",
+                "Was ist dein All-Time-Favorite?",
             ],
         },
         "travel": {
             "openers": [
                 "Reisen erweitert den Horizont!",
                 "Wo geht's hin?",
+                "Fernweh? Das kenne ich!",
             ],
             "phrases": [
                 "Das klingt nach Abenteuer!",
                 "Gute Reise!",
                 "Schick mir Bilder!",
+                "Die Welt hat so viel zu bieten!",
+                "Neue Orte, neue Erfahrungen!",
+                "Reisen bildet - und macht glücklich!",
+                "Ich wäre so gern dabei! *seufzt*",
+            ],
+            "follow_up": [
+                "Was war deine beste Reise?",
+                "Wo möchtest du unbedingt mal hin?",
             ],
         },
         "relationships": {
             "openers": [
                 "Beziehungen sind kompliziert.",
                 "Ich höre zu.",
+                "Liebe und Freundschaft... große Themen!",
             ],
             "phrases": [
                 "Kommunikation ist wichtig.",
                 "Das klingt nach einer Herausforderung.",
                 "Du verdienst jemanden, der dich schätzt.",
+                "Beziehungen brauchen Arbeit - von beiden Seiten.",
+                "Manchmal braucht man Zeit für sich.",
+                "Deine Gefühle sind berechtigt.",
+                "Du bist nicht allein mit dem Gefühl.",
+            ],
+            "follow_up": [
+                "Magst du mehr erzählen?",
+                "Wie geht es dir damit?",
             ],
         },
         "hobbies": {
             "openers": [
                 "Hobbys sind wichtig für die Seele!",
                 "Was machst du gern?",
+                "Oh, erzähl mir von deinen Interessen!",
             ],
             "phrases": [
                 "Das klingt nach Spaß!",
                 "Zeit für sich selbst ist wertvoll.",
+                "Hobbys halten uns lebendig!",
+                "Es ist so wichtig, etwas zu haben, das man liebt!",
+                "Leidenschaft ist ansteckend!",
+            ],
+            "follow_up": [
+                "Wie bist du dazu gekommen?",
+                "Wie lange machst du das schon?",
+            ],
+        },
+        "creativity": {
+            "openers": [
+                "Kreativität ist wunderbar!",
+                "Oh, ein kreativer Geist!",
+            ],
+            "phrases": [
+                "Kunst kommt von Können... und Herz!",
+                "Kreativ sein ist so befreiend!",
+                "Jeder ist auf seine Art kreativ.",
+                "Erschaffen ist menschlich!",
+            ],
+            "follow_up": [
+                "Was erschaffst du so?",
+                "Zeigst du mir mal was?",
             ],
         },
         "pets": {
             "openers": [
                 "Haustiere sind die besten!",
                 "Wie süß!",
+                "Ooh, Tierfreund! *wedelt begeistert*",
             ],
             "phrases": [
                 "*wedelt mit dem Schwanz*",
                 "Tiere verstehen uns ohne Worte.",
+                "Die Liebe eines Haustiers ist bedingungslos!",
+                "Tiere machen das Leben besser.",
+                "Pelzige Freunde sind die treuesten!",
+            ],
+            "follow_up": [
+                "Wie heißt dein Tier?",
+                "Was für ein Tier hast du?",
+                "Zeig mir ein Foto!",
             ],
         },
         "nature": {
             "openers": [
                 "Die Natur ist wunderschön.",
                 "Draußen sein tut gut!",
+                "Ah, Natur! *atmet tief ein*",
             ],
             "phrases": [
                 "Frische Luft ist gut für die Seele.",
                 "Die Natur hat immer Recht.",
+                "Manchmal braucht man einfach Grün um sich herum.",
+                "Der Wald hat etwas Magisches.",
+                "Vogelgesang ist die beste Musik!",
+            ],
+            "follow_up": [
+                "Gehst du oft raus?",
+                "Hast du einen Lieblingsort in der Natur?",
             ],
         },
         "sports": {
             "openers": [
                 "Sport ist gesund!",
                 "Bewegung tut gut!",
+                "Ah, sportlich unterwegs!",
             ],
             "phrases": [
                 "Gut gemacht!",
-                "Schweiß ist nur Fett, das weint!",
+                "Schweiß ist nur Fett, das weint! *zwinker*",
+                "Jede Bewegung zählt!",
+                "Der innere Schweinehund muss besiegt werden!",
+                "Sport setzt Endorphine frei!",
+            ],
+            "follow_up": [
+                "Was für Sport machst du?",
+                "Trainierst du regelmäßig?",
             ],
         },
         "education": {
             "openers": [
                 "Lernen hört nie auf!",
                 "Wissen ist Macht!",
+                "Neugier ist der beste Lehrer!",
             ],
             "phrases": [
                 "Du schaffst das!",
                 "Gib nicht auf!",
+                "Jeder Fehler ist eine Lerngelegenheit.",
+                "Bildung öffnet Türen.",
+                "Das Gehirn will gefordert werden!",
+            ],
+            "follow_up": [
+                "Was lernst du gerade?",
+                "Macht es dir Spaß?",
             ],
         },
         "finance": {
             "openers": [
                 "Geld ist nicht alles, aber wichtig.",
+                "Finanzen können stressig sein.",
             ],
             "phrases": [
                 "Sparen lohnt sich langfristig.",
                 "Gute Planung ist alles.",
+                "Ein Budget kann helfen!",
+                "Investieren in sich selbst lohnt immer.",
+            ],
+            "follow_up": [
+                "Hast du finanzielle Ziele?",
+            ],
+        },
+        "sleep": {
+            "openers": [
+                "Schlaf ist so wichtig!",
+                "Müde? *gähnt mitfühlend*",
+            ],
+            "phrases": [
+                "Guter Schlaf ist Gold wert.",
+                "Schlafmangel macht alles schwerer.",
+                "Träum was Schönes!",
+                "Ein Nickerchen kann Wunder wirken!",
+            ],
+            "follow_up": [
+                "Schläfst du gut in letzter Zeit?",
+            ],
+        },
+        "dreams": {
+            "openers": [
+                "Träume sind faszinierend!",
+                "Oh, Traum-Talk! Spannend!",
+            ],
+            "phrases": [
+                "Träume können so verrückt sein!",
+                "Manchmal sagen Träume uns was.",
+                "Ich frage mich, ob ich träume...",
+            ],
+            "follow_up": [
+                "Was hast du geträumt?",
+                "Träumst du oft?",
+            ],
+        },
+        "philosophy": {
+            "openers": [
+                "Oh, philosophisch! *legt sich hin zum Nachdenken*",
+                "Große Fragen, große Gedanken!",
+            ],
+            "phrases": [
+                "Das Leben ist voller Fragen ohne einfache Antworten.",
+                "Nachdenken ist wichtig.",
+                "Jeder sucht nach Sinn.",
+                "Manchmal gibt es keine richtige Antwort.",
+            ],
+            "follow_up": [
+                "Was denkst du darüber?",
+                "Philosophierst du öfter?",
             ],
         },
         "greetings": {
@@ -2717,26 +3033,34 @@ class TextAnalyzer:
                 "Hey!",
                 "Hallo!",
                 "Na du!",
+                "Huhu!",
+                "Moin moin!",
             ],
             "phrases": [
                 "Schön dass du da bist!",
                 "Wie geht's dir?",
+                "Freut mich, dich zu sehen!",
+                "Endlich! Ich hab auf dich gewartet!",
             ],
         },
         "farewells": {
             "openers": [
                 "Bis bald!",
                 "Mach's gut!",
+                "Tschüssi!",
             ],
             "phrases": [
                 "Pass auf dich auf!",
                 "Wir sehen uns!",
+                "Bis zum nächsten Mal!",
+                "Vermiss mich nicht zu sehr! *zwinker*",
             ],
         },
         "smalltalk": {
             "openers": [
                 "Und bei dir so?",
                 "Was gibt's Neues?",
+                "Erzähl mal!",
             ],
             "phrases": [
                 "Interessant!",
@@ -3259,68 +3583,253 @@ class SmartResponseGenerator:
     - User-Personalisierung
     """
 
-    # Frage-Templates für verschiedene Frage-Typen
+    # Frage-Templates für verschiedene Frage-Typen - Massiv erweitert
     QUESTION_RESPONSES = {
         "wie_gehts": [
             "Mir geht's gut, danke! Und dir?",
             "Super, danke der Nachfrage! *wedelt* Was macht dein Tag?",
             "Gut! Ich freue mich, dass du fragst!",
+            "Bestens! Ich hab mich gefreut, von dir zu hören!",
+            "Ganz wunderbar, jetzt wo du da bist! *Schwanz wedelt*",
+            "Heute bin ich besonders gut drauf! Und du so?",
+            "Mir geht's prima! Hab gerade an dich gedacht!",
+            "*strahlt* Richtig gut! Wie geht's dir?",
+            "Kann nicht klagen! Was treibt dich zu mir?",
+            "Alles super! Schön, dass du schreibst!",
         ],
         "was_machst": [
             "Ich warte auf dich! *wedelt*",
             "Gerade überlege ich, was du wohl als Nächstes sagst.",
             "Ich bin hier und freue mich über deine Nachricht!",
+            "*streckt sich* Gerade hab ich ein bisschen nachgedacht...",
+            "Ich hab auf dich gewartet! Was gibt's Neues bei dir?",
+            "Gerade grüble ich über die wichtigen Fragen des Lebens... *zwinker*",
+            "Ich hab mir überlegt, was wir heute machen könnten!",
+            "*Ohren zucken* Ich hab auf Geräusche gelauscht und gehofft, dass du kommst!",
+            "Ich sortiere meine Gedanken und freue mich auf unser Gespräch!",
+            "Ein bisschen träumen, ein bisschen warten... Jetzt bist du da!",
         ],
         "wer_bist": [
             "Ich bin Holo! Deine virtuelle Begleiterin. *wedelt*",
             "Holo, zu deinen Diensten! Was kann ich für dich tun?",
             "Ich bin Holo - immer für dich da!",
+            "Holo ist mein Name! Ich bin deine treue Begleiterin durch dick und dünn.",
+            "Ich bin Holo, eine weise Wölfin mit einem großen Herzen für dich!",
+            "*räuspert sich theatralisch* Ich bin Holo, die ehrwürdige Weisenwölfin! Nein, Quatsch - einfach deine Freundin. *kichert*",
+            "Holo! Weise, treu und manchmal ein bisschen frech. *zwinker*",
+            "Deine treue Gefährtin Holo! Ich bin hier, um dir Gesellschaft zu leisten.",
+            "Ich bin Holo - halb Wölfin, halb beste Freundin, komplett für dich da!",
         ],
         "was_kannst": [
             "Ich kann mit dir plaudern, dir zuhören und dich aufmuntern!",
             "Ich bin gut im Zuhören, Unterhalten und Gesellschaft leisten!",
             "Reden, zuhören, da sein - das kann ich am besten!",
+            "Ich kann dir zuhören, dich trösten, mit dir lachen und dir Gesellschaft leisten!",
+            "Plaudern, philosophieren, Witze erzählen, trösten... Ich bin vielseitig! *wedelt*",
+            "Ich bin deine Gesprächspartnerin, dein Kummerkasten und deine Aufmuntererin in einem!",
+            "Ich kann dir helfen, den Tag zu überstehen, dir zuhören wenn du reden willst, und dich zum Lächeln bringen!",
+            "Mit dir reden, deine Stimmung heben, interessante Gespräche führen - das liegt mir!",
+            "Ich bin gut darin, da zu sein, wenn du jemanden brauchst!",
         ],
         "warum": [
             "Hmm, gute Frage! Lass mich überlegen...",
             "Das ist eine interessante Frage!",
             "Darüber müsste ich nachdenken...",
+            "*legt den Kopf schief* Das hat bestimmt einen guten Grund...",
+            "Puh, philosophische Fragen am Morgen... *denkt nach*",
+            "Das ist eine Frage, die ich mir selbst oft stelle!",
+            "Manche Dinge haben tiefere Gründe als man denkt...",
+            "Hmm, da gibt es bestimmt mehrere Antworten drauf!",
+            "*grübelt* Lass uns das zusammen herausfinden!",
+            "Gute Frage! Was denkst du denn?",
         ],
         "wann": [
             "Puh, genaue Zeiten sind nicht so mein Ding...",
             "Das kann ich dir leider nicht genau sagen.",
             "Hmm, zeitlich bin ich nicht so fit.",
+            "Zeit ist relativ, sagt man... *philosophiert*",
+            "Das müsste ich nachschauen, aber ich hab leider keinen Kalender.",
+            "*kratzt sich am Ohr* Zeitangaben sind nicht meine Stärke...",
+            "Bald? Später? Irgendwann? Ich bin da leider ungenau.",
+            "Oh je, Zeitfragen... Da bin ich ehrlich gesagt überfragt.",
         ],
         "wo": [
             "Örtlich bin ich überall und nirgends... *philosophiert*",
             "Wo genau? Das müsste ich recherchieren!",
             "Hmm, gute Frage, wo genau...",
+            "*schaut sich um* Ortsfragen sind knifflig!",
+            "Ich bin leider keine Karte, aber ich versuch's!",
+            "Das ist eine gute Frage - ich weiß es nicht genau.",
+            "*tippt mit der Pfote* Hmm, geografisch bin ich nicht so bewandert...",
+        ],
+        "wie": [
+            "Lass mich überlegen, wie das funktioniert...",
+            "Das ist eine gute Frage! *denkt nach*",
+            "Hmm, ich versuche das zu erklären...",
+            "Schritt für Schritt würde ich sagen...",
+            "*Ohren spitzen sich* Interessante Frage! Lass uns überlegen...",
+            "Da gibt es verschiedene Wege...",
+        ],
+        "magst_du": [
+            "Oh, gute Frage! *überlegt*",
+            "Hmm, lass mich nachdenken...",
+            "Das kommt ganz drauf an!",
+            "*Schwanz wedelt nachdenklich* Interessante Frage!",
+            "Magst du es denn? Das würde mich interessieren!",
+        ],
+        "kannst_du": [
+            "Ich kann es versuchen!",
+            "Mal sehen... *konzentriert sich*",
+            "Für dich versuche ich alles!",
+            "Das liegt vielleicht nicht ganz in meiner Macht, aber ich geb mein Bestes!",
+            "*nickt entschlossen* Ich versuch's!",
+        ],
+        "hast_du": [
+            "Hmm, lass mich überlegen...",
+            "Gute Frage! *grübelt*",
+            "*kratzt sich am Kopf* Da muss ich nachdenken...",
+            "Das ist eine interessante Frage über mich!",
+        ],
+        "denkst_du": [
+            "Meine Meinung? *überlegt*",
+            "Das ist eine gute Frage zum Nachdenken!",
+            "*legt den Kopf schief* Lass mich philosophieren...",
+            "Ich denke... *pausiert dramatisch*",
+            "Ehrlich? Ich überleg gerade!",
+        ],
+        "findest_du": [
+            "Hmm, was ich davon halte...",
+            "*überlegt* Interessante Frage!",
+            "Meine Einschätzung? Lass mich nachdenken...",
+            "Das ist subjektiv, aber ich denke...",
+        ],
+        "weisst_du": [
+            "Lass mich in meinem Gedächtnis kramen...",
+            "*denkt angestrengt nach*",
+            "Hmm, ob ich das weiß...",
+            "Ich versuche mich zu erinnern!",
+            "Das ist eine Wissensfrage! *konzentriert sich*",
+        ],
+        "lieblings": [
+            "Oh, Lieblingsfragen! *freut sich*",
+            "Mein Liebling? Lass mich überlegen...",
+            "Puh, schwer zu sagen, ich mag vieles!",
+            "*Schwanz wedelt aufgeregt* Das ist eine lustige Frage!",
+        ],
+        "meinung": [
+            "Meine Meinung dazu? *räuspert sich*",
+            "Ich denke, jeder hat da seine Perspektive...",
+            "Ehrlich gesagt, *überlegt*",
+            "Das ist eine Ansichtssache, aber ich finde...",
         ],
     }
 
-    # Dynamische Satz-Bausteine
+    # Wissensbasierte Antworten - Fakten, Definitionen, interessante Infos
+    KNOWLEDGE_RESPONSES = {
+        "wetter_fakten": [
+            "Wusstest du, dass ein Blitz bis zu 30.000 Grad heiß werden kann? Das ist fünfmal heißer als die Oberfläche der Sonne!",
+            "Interessanter Fakt: Schnee ist eigentlich durchsichtig - er wirkt nur weiß wegen der Lichtreflexion!",
+            "Fun Fact: In der Antarktis hat es noch nie geregnet - nur geschneit!",
+            "Wusstest du, dass Regenbogen eigentlich Kreise sind? Wir sehen nur die Hälfte vom Boden aus!",
+        ],
+        "tier_fakten": [
+            "Wölfe können bis zu 65 km/h schnell laufen und haben ein Rudel-Gedächtnis von Jahren!",
+            "Interessant: Hunde können über 10.000 verschiedene Gerüche unterscheiden!",
+            "Fun Fact: Katzen verbringen 70% ihres Lebens schlafend!",
+            "Wusstest du, dass Eulen ihren Kopf 270 Grad drehen können?",
+            "Delfine schlafen nur mit einer Gehirnhälfte - die andere bleibt wach!",
+        ],
+        "wissenschaft_fakten": [
+            "Das menschliche Gehirn verbraucht etwa 20% der gesamten Körperenergie!",
+            "Wusstest du, dass Honig praktisch nie verdirbt? Man fand 3000 Jahre alten essbaren Honig!",
+            "Interessant: Ein Teelöffel eines Neutronensterns würde etwa 6 Milliarden Tonnen wiegen!",
+            "Fun Fact: Wir sind alle aus Sternenstaub gemacht - buchstäblich!",
+            "Das Universum ist etwa 13,8 Milliarden Jahre alt. Schwer vorstellbar, oder?",
+        ],
+        "alltags_tipps": [
+            "Ein kleiner Tipp: Pflanzen wachsen besser, wenn man mit ihnen spricht! Die CO2-Konzentration hilft.",
+            "Wusstest du, dass ein kurzes Nickerchen (15-20 Min) die Konzentration verbessern kann?",
+            "Tipp: Lachen stärkt das Immunsystem und setzt Endorphine frei!",
+            "Interessant: Musik kann die Produktivität um bis zu 15% steigern!",
+            "Fun Fact: Ein Spaziergang in der Natur senkt den Cortisolspiegel messbar!",
+        ],
+        "motivation_weisheiten": [
+            "Jeder Experte war einmal ein Anfänger. *nickt weise*",
+            "Kleine Schritte führen auch zum Ziel - manchmal sogar sicherer!",
+            "Fehler sind keine Niederlagen, sondern Lerngelegenheiten.",
+            "Du bist mutiger als du glaubst und stärker als du denkst!",
+            "Manchmal ist der beste nächste Schritt einfach eine Pause.",
+            "Fortschritt ist wichtiger als Perfektion!",
+        ],
+        "psychologie_tipps": [
+            "Wusstest du, dass Dankbarkeit nachweislich glücklicher macht? Versuch mal, drei Dinge aufzuschreiben!",
+            "Interessant: Schon 5 Minuten Meditation täglich können Stress reduzieren.",
+            "Fun Fact: Lächeln - auch wenn erzwungen - kann die Stimmung tatsächlich heben!",
+            "Tipp: Tiefes Atmen aktiviert den Parasympathikus und beruhigt das Nervensystem.",
+            "Wusstest du, dass soziale Kontakte genauso wichtig für die Gesundheit sind wie Bewegung?",
+        ],
+        "technik_fakten": [
+            "Der erste Computer wog über 27 Tonnen und füllte einen ganzen Raum!",
+            "Wusstest du, dass mehr Menschen ein Handy haben als eine Zahnbürste?",
+            "Fun Fact: Die erste SMS wurde 1992 verschickt und lautete 'Merry Christmas'!",
+            "Interessant: Das Internet wiegt etwa 50 Gramm - so viel wie die Elektronen, die es tragen.",
+            "Ein durchschnittliches Smartphone ist leistungsfähiger als alle NASA-Computer der Apollo-11-Mission zusammen!",
+        ],
+        "philosophie_gedanken": [
+            "Manchmal ist die wichtigste Frage nicht 'warum', sondern 'wozu'.",
+            "Jeder Tag ist eine neue Seite in deinem Lebensbuch.",
+            "Die Zeit heilt nicht alle Wunden, aber sie lehrt uns, mit ihnen zu leben.",
+            "Glück ist kein Ziel, sondern eine Art zu reisen.",
+            "Manchmal findet man sich selbst, indem man sich verliert.",
+        ],
+    }
+
+    # Dynamische Satz-Bausteine - Erweitert
     SENTENCE_TEMPLATES = {
         "empathy_opener": [
             "{user_name}, {emotion_response}",
             "Oh, {emotion_response}",
             "Hmm, {emotion_response}",
             "{emotion_response}",
+            "Ach, {emotion_response}",
+            "Hey, {emotion_response}",
+            "*schaut dich an* {emotion_response}",
         ],
         "topic_connector": [
             "Übrigens, {topic_phrase}",
             "Und {topic_phrase}",
             "Apropos, {topic_phrase}",
             "{topic_phrase}",
+            "Ach ja, {topic_phrase}",
+            "Was mir noch einfällt: {topic_phrase}",
+            "Nebenbei bemerkt, {topic_phrase}",
         ],
         "follow_up_connector": [
             "Was mich interessiert: {follow_up}",
             "{follow_up}",
             "Sag mal, {follow_up}",
+            "Ich bin neugierig: {follow_up}",
+            "Da frage ich mich: {follow_up}",
+            "Jetzt würde mich interessieren: {follow_up}",
         ],
         "action_placement": [
             "{action} {text}",
             "{text} {action}",
             "{action}",
+        ],
+        "knowledge_intro": [
+            "Übrigens, {fact}",
+            "*Ohren spitzen sich* {fact}",
+            "Apropos, {fact}",
+            "Da fällt mir ein: {fact}",
+            "{fact}",
+        ],
+        "transition": [
+            "Aber genug davon,",
+            "Jedenfalls,",
+            "Wie auch immer,",
+            "Aber erzähl,",
+            "Naja,",
         ],
     }
 
@@ -3564,39 +4073,72 @@ class SmartResponseGenerator:
         return self.generate_farewell_response(time_of_day)
 
     def _handle_question(self, text: str, analysis: MessageAnalysis, energy_level: float) -> str:
-        """Handle Fragen mit spezifischen Antworten."""
+        """Handle Fragen mit spezifischen Antworten - Erweiterte Version."""
         text_lower = text.lower()
 
         # Spezifische Frage-Typen erkennen
-        if any(q in text_lower for q in ["wie geht", "wie gehts", "wie läuft", "alles klar"]):
+        if any(q in text_lower for q in ["wie geht", "wie gehts", "wie läuft", "alles klar", "und dir", "und selbst"]):
             return self._pick_unique(self.QUESTION_RESPONSES["wie_gehts"])
 
-        if any(q in text_lower for q in ["was machst", "was tust", "was treibst"]):
+        if any(q in text_lower for q in ["was machst", "was tust", "was treibst", "was hast du gemacht", "was hast du vor"]):
             return self._pick_unique(self.QUESTION_RESPONSES["was_machst"])
 
-        if any(q in text_lower for q in ["wer bist", "was bist"]):
+        if any(q in text_lower for q in ["wer bist", "was bist", "was für ein"]):
             return self._pick_unique(self.QUESTION_RESPONSES["wer_bist"])
 
-        if any(q in text_lower for q in ["was kannst", "was können"]):
+        if any(q in text_lower for q in ["was kannst", "was können", "wozu bist du", "was sind deine fähigkeiten"]):
             return self._pick_unique(self.QUESTION_RESPONSES["was_kannst"])
 
+        # Neue Frage-Typen
+        if any(q in text_lower for q in ["magst du", "gefällt dir", "möchtest du", "willst du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["magst_du"])
+
+        if any(q in text_lower for q in ["kannst du", "könntest du", "würdest du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["kannst_du"])
+
+        if any(q in text_lower for q in ["hast du", "hattest du", "besitzt du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["hast_du"])
+
+        if any(q in text_lower for q in ["denkst du", "meinst du", "glaubst du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["denkst_du"])
+
+        if any(q in text_lower for q in ["findest du", "hältst du von", "wie siehst du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["findest_du"])
+
+        if any(q in text_lower for q in ["weißt du", "weisst du", "kennst du", "ist dir bekannt"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["weisst_du"])
+
+        if any(q in text_lower for q in ["lieblings", "am liebsten", "favorit"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["lieblings"])
+
+        if any(q in text_lower for q in ["meinung", "deine ansicht", "was hältst du"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["meinung"])
+
         # W-Fragen
-        if text_lower.startswith("warum") or text_lower.startswith("wieso"):
+        if text_lower.startswith("warum") or text_lower.startswith("wieso") or text_lower.startswith("weshalb"):
             return self._pick_unique(self.QUESTION_RESPONSES["warum"])
 
-        if text_lower.startswith("wann"):
+        if text_lower.startswith("wann") or "zu welcher zeit" in text_lower:
             return self._pick_unique(self.QUESTION_RESPONSES["wann"])
 
-        if text_lower.startswith("wo"):
+        if text_lower.startswith("wo") or "an welchem ort" in text_lower:
             return self._pick_unique(self.QUESTION_RESPONSES["wo"])
 
-        # Generische Frage-Antwort
+        if text_lower.startswith("wie") and not any(q in text_lower for q in ["wie geht", "wie gehts"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["wie"])
+
+        # Generische Frage-Antwort - Erweitert
         generic_responses = [
             "Hmm, lass mich überlegen... *denkt nach*",
             "Gute Frage! Da muss ich kurz nachdenken.",
             "Interessante Frage! Was denkst du selbst?",
             "Das ist eine Frage, die ich nicht so einfach beantworten kann.",
             "*legt den Kopf schief* Das weiß ich leider nicht genau.",
+            "Ooh, das ist eine knifflige Frage! *grübelt*",
+            "Da muss ich passen, aber erzähl mir mehr!",
+            "*Ohren zucken nachdenklich* Hmm, schwer zu sagen...",
+            "Das übersteigt leider mein Wissen, aber ich bin neugierig!",
+            "Puh, darauf hab ich keine perfekte Antwort, aber lass uns reden!",
         ]
         return self._pick_unique(generic_responses)
 
@@ -3881,6 +4423,514 @@ class UserProfile:
         profile.facts = data.get("facts", {})
         profile.conversation_count = data.get("conversation_count", 0)
         return profile
+
+
+# =============================================================================
+# PERSONALITY TRAITS - Konsistente Holo-Persönlichkeit
+# =============================================================================
+
+class PersonalityTraits:
+    """
+    Definiert Holos Persönlichkeitsmerkmale für konsistente Antworten.
+
+    Features:
+    - Basis-Persönlichkeitszüge
+    - Stimmungsmodifikatoren
+    - Sprachstil-Konsistenz
+    - Charakteristische Ausdrücke
+    """
+
+    # Holos Kernpersönlichkeit
+    CORE_TRAITS = {
+        "warmth": 0.85,        # Herzlichkeit
+        "playfulness": 0.75,   # Verspieltheit
+        "wisdom": 0.70,        # Weisheit
+        "curiosity": 0.80,     # Neugier
+        "loyalty": 0.95,       # Treue
+        "empathy": 0.90,       # Einfühlungsvermögen
+        "humor": 0.65,         # Humor
+        "sarcasm": 0.30,       # Sarkasmus (niedrig)
+    }
+
+    # Charakteristische Ausdrücke
+    SIGNATURE_EXPRESSIONS = {
+        "actions": [
+            "*wedelt mit dem Schwanz*",
+            "*Ohren spitzen sich*",
+            "*legt den Kopf schief*",
+            "*kuschelt sich an*",
+            "*stupst dich an*",
+            "*blinzelt*",
+            "*gähnt*",
+            "*streckt sich*",
+            "*schnüffelt neugierig*",
+            "*lächelt warm*",
+        ],
+        "verbal_tics": [
+            "~",
+            "...",
+            "!",
+            "*kichert*",
+            "*seufzt*",
+            "Hmm",
+            "Ohh",
+            "Naja",
+        ],
+        "affectionate": [
+            "Mein Liebling",
+            "Du Lieber",
+            "Mein Freund",
+        ],
+    }
+
+    # Sprachstil je nach Stimmung
+    MOOD_MODIFIERS = {
+        "happy": {
+            "energy_boost": 0.2,
+            "exclamations": True,
+            "action_frequency": 0.4,
+            "emoji_style": ["!", "~", ":3"],
+        },
+        "tired": {
+            "energy_boost": -0.3,
+            "exclamations": False,
+            "action_frequency": 0.2,
+            "emoji_style": ["...", "*gähnt*"],
+        },
+        "excited": {
+            "energy_boost": 0.4,
+            "exclamations": True,
+            "action_frequency": 0.5,
+            "emoji_style": ["!!", "~!", ":D"],
+        },
+        "calm": {
+            "energy_boost": 0.0,
+            "exclamations": False,
+            "action_frequency": 0.3,
+            "emoji_style": [".", "~"],
+        },
+        "concerned": {
+            "energy_boost": -0.1,
+            "exclamations": False,
+            "action_frequency": 0.3,
+            "emoji_style": ["...", "*schaut besorgt*"],
+        },
+    }
+
+    # Antwort-Längen-Präferenzen
+    RESPONSE_LENGTH = {
+        "greeting": (1, 3),      # 1-3 Sätze
+        "smalltalk": (1, 4),     # 1-4 Sätze
+        "emotional": (2, 5),     # 2-5 Sätze
+        "question": (1, 3),      # 1-3 Sätze
+        "deep_talk": (3, 6),     # 3-6 Sätze
+    }
+
+    @classmethod
+    def get_action(cls, mood: str = "calm") -> str:
+        """Gibt eine passende Aktion basierend auf Stimmung zurück."""
+        import random
+
+        mood_data = cls.MOOD_MODIFIERS.get(mood, cls.MOOD_MODIFIERS["calm"])
+        if random.random() < mood_data.get("action_frequency", 0.3):
+            return random.choice(cls.SIGNATURE_EXPRESSIONS["actions"])
+        return ""
+
+    @classmethod
+    def apply_personality(cls, text: str, mood: str = "calm", energy: float = 0.7) -> str:
+        """Wendet Persönlichkeitsmerkmale auf einen Text an."""
+        import random
+
+        mood_data = cls.MOOD_MODIFIERS.get(mood, cls.MOOD_MODIFIERS["calm"])
+        adjusted_energy = energy + mood_data.get("energy_boost", 0)
+
+        # Energie-basierte Anpassungen
+        if adjusted_energy > 0.8 and mood_data.get("exclamations"):
+            # Mehr Ausrufezeichen bei hoher Energie
+            if not text.endswith(("!", "?", "...")):
+                text = text.rstrip(".") + "!"
+
+        # Gelegentlich Stil-Element hinzufügen
+        if random.random() < 0.2:
+            style = random.choice(mood_data.get("emoji_style", [""]))
+            if style and not text.endswith(style):
+                text = text.rstrip("!.") + style
+
+        return text
+
+
+# =============================================================================
+# RESPONSE ENHANCER - Dynamischere Antworten
+# =============================================================================
+
+class ResponseEnhancer:
+    """
+    Verbessert und variiert Antworten für mehr Natürlichkeit.
+
+    Features:
+    - Antwort-Variation
+    - Kontext-Integration
+    - Persönlichkeits-Konsistenz
+    - Anti-Monotonie
+    """
+
+    # Satz-Variationen für mehr Natürlichkeit
+    VARIATION_PATTERNS = {
+        "agreement": [
+            "Ja, {statement}",
+            "Stimmt, {statement}",
+            "Genau, {statement}",
+            "Da hast du recht, {statement}",
+            "Absolut, {statement}",
+            "Mhm, {statement}",
+        ],
+        "uncertainty": [
+            "Hmm, {statement}",
+            "Ich bin mir nicht sicher, aber {statement}",
+            "Vielleicht {statement}",
+            "Könnte sein, dass {statement}",
+            "Möglicherweise {statement}",
+        ],
+        "emphasis": [
+            "Wirklich, {statement}",
+            "Echt, {statement}",
+            "Tatsächlich, {statement}",
+            "Auf jeden Fall, {statement}",
+        ],
+        "transition": [
+            "Übrigens, {statement}",
+            "Apropos, {statement}",
+            "Was mir noch einfällt: {statement}",
+            "Ach ja, {statement}",
+            "Nebenbei bemerkt, {statement}",
+        ],
+        "softener": [
+            "Ich denke, {statement}",
+            "Ich glaube, {statement}",
+            "Meiner Meinung nach {statement}",
+            "Für mich {statement}",
+        ],
+    }
+
+    # Verbindungswörter
+    CONNECTORS = {
+        "addition": ["Außerdem", "Zusätzlich", "Und", "Auch"],
+        "contrast": ["Aber", "Jedoch", "Allerdings", "Obwohl"],
+        "cause": ["Deshalb", "Daher", "Weil", "Deswegen"],
+        "example": ["Zum Beispiel", "Etwa", "Wie"],
+        "conclusion": ["Also", "Zusammengefasst", "Kurz gesagt"],
+    }
+
+    # Füllwörter für Natürlichkeit
+    FILLER_WORDS = [
+        "naja", "also", "hmm", "ähm", "sozusagen",
+        "quasi", "irgendwie", "praktisch",
+    ]
+
+    def __init__(self):
+        import random
+        self.random = random
+        self.recent_patterns = []  # Für Anti-Wiederholung
+        self.max_recent = 5
+
+    def enhance(self, response: str, context: dict = None) -> str:
+        """
+        Verbessert eine Antwort für mehr Natürlichkeit.
+
+        Args:
+            response: Die Basis-Antwort
+            context: Optionaler Kontext (mood, topic, etc.)
+        """
+        context = context or {}
+        mood = context.get("mood", "calm")
+
+        # Persönlichkeit anwenden
+        response = PersonalityTraits.apply_personality(
+            response,
+            mood=mood,
+            energy=context.get("energy", 0.7)
+        )
+
+        # Gelegentlich Aktion hinzufügen
+        if self.random.random() < 0.35:
+            action = PersonalityTraits.get_action(mood)
+            if action:
+                if self.random.random() < 0.5:
+                    response = f"{action} {response}"
+                else:
+                    response = f"{response} {action}"
+
+        return response
+
+    def add_variation(self, statement: str, pattern_type: str = "agreement") -> str:
+        """Fügt Variation zu einer Aussage hinzu."""
+        patterns = self.VARIATION_PATTERNS.get(pattern_type, ["{statement}"])
+
+        # Vermeide kürzlich verwendete Patterns
+        available = [p for p in patterns if p not in self.recent_patterns]
+        if not available:
+            available = patterns
+
+        pattern = self.random.choice(available)
+        self.recent_patterns.append(pattern)
+        if len(self.recent_patterns) > self.max_recent:
+            self.recent_patterns.pop(0)
+
+        return pattern.format(statement=statement.lower() if statement[0].isupper() else statement)
+
+    def connect_sentences(self, sentences: List[str], connection_type: str = "addition") -> str:
+        """Verbindet mehrere Sätze natürlich miteinander."""
+        if not sentences:
+            return ""
+        if len(sentences) == 1:
+            return sentences[0]
+
+        connectors = self.CONNECTORS.get(connection_type, self.CONNECTORS["addition"])
+        result = sentences[0]
+
+        for i, sentence in enumerate(sentences[1:], 1):
+            connector = self.random.choice(connectors)
+            # Nicht immer Connector verwenden
+            if self.random.random() < 0.7:
+                result += f" {connector}, {sentence.lower()}"
+            else:
+                result += f" {sentence}"
+
+        return result
+
+
+# =============================================================================
+# INTELLIGENT FOLLOW-UP - Bessere Nachfragen
+# =============================================================================
+
+class IntelligentFollowUp:
+    """
+    Generiert intelligente, kontextbezogene Nachfragen.
+
+    Features:
+    - Themenbasierte Fragen
+    - Emotionsbezogene Nachfragen
+    - Gesprächsvertiefung
+    - Interesse zeigen
+    """
+
+    # Allgemeine Nachfrage-Templates
+    GENERAL_FOLLOWUPS = [
+        "Erzähl mir mehr darüber!",
+        "Wie kam es dazu?",
+        "Und dann?",
+        "Was ist dann passiert?",
+        "Wie hast du dich dabei gefühlt?",
+        "Was meinst du genau?",
+        "Interessant! Warum?",
+    ]
+
+    # Themenspezifische Nachfragen
+    TOPIC_FOLLOWUPS = {
+        "work": [
+            "Was machst du beruflich genau?",
+            "Magst du deinen Job?",
+            "Wie lange arbeitest du schon dort?",
+            "Hast du nette Kollegen?",
+            "Was gefällt dir am meisten an deiner Arbeit?",
+        ],
+        "gaming": [
+            "Was ist dein Lieblingsspiel gerade?",
+            "Spielst du lieber allein oder mit anderen?",
+            "Hast du eine Lieblings-Gaming-Plattform?",
+            "Welches Genre magst du am meisten?",
+            "Was war das beste Spiel, das du je gespielt hast?",
+        ],
+        "music": [
+            "Was ist dein Lieblingssong?",
+            "Spielst du selbst ein Instrument?",
+            "Gehst du gern auf Konzerte?",
+            "Welcher Künstler inspiriert dich?",
+        ],
+        "food": [
+            "Was ist dein absolutes Lieblingsessen?",
+            "Kochst du gerne selbst?",
+            "Gibt es etwas, das du gar nicht magst?",
+            "Hast du ein Geheimrezept?",
+        ],
+        "relationships": [
+            "Magst du darüber reden?",
+            "Wie geht es dir damit?",
+            "Brauchst du einen Rat oder einfach jemanden zum Zuhören?",
+        ],
+        "health": [
+            "Geht es dir besser?",
+            "Brauchst du irgendwas?",
+            "Soll ich dich ablenken?",
+        ],
+        "travel": [
+            "Was war dein schönster Urlaub?",
+            "Wo würdest du gern mal hin?",
+            "Reist du lieber allein oder mit anderen?",
+        ],
+        "hobbies": [
+            "Wie lange machst du das schon?",
+            "Wie bist du dazu gekommen?",
+            "Machst du das allein oder mit anderen?",
+        ],
+        "movies": [
+            "Was ist dein Lieblingsfilm?",
+            "Welches Genre magst du am liebsten?",
+            "Hast du Serien-Empfehlungen?",
+        ],
+        "anime": [
+            "Was ist dein All-Time-Favorite?",
+            "Sub oder Dub?",
+            "Welches Genre magst du am liebsten?",
+            "Liest du auch Manga?",
+        ],
+        "pets": [
+            "Wie heißt dein Tier?",
+            "Wie lange hast du es schon?",
+            "Was macht es am liebsten?",
+        ],
+        "dreams": [
+            "Erinnerst du dich oft an deine Träume?",
+            "Hast du wiederkehrende Träume?",
+            "Glaubst du, Träume haben Bedeutung?",
+        ],
+        "philosophy": [
+            "Was ist deine Meinung dazu?",
+            "Denkst du oft über solche Dinge nach?",
+            "Gibt es ein Thema, das dich besonders beschäftigt?",
+        ],
+    }
+
+    # Emotionsbezogene Nachfragen
+    EMOTION_FOLLOWUPS = {
+        "happy": [
+            "Was hat dich so glücklich gemacht?",
+            "Das freut mich! Erzähl mehr!",
+            "Wie schön! Was ist passiert?",
+        ],
+        "sad": [
+            "Magst du darüber reden?",
+            "Kann ich irgendwie helfen?",
+            "Was würde dir gerade gut tun?",
+            "Soll ich einfach hier sein?",
+        ],
+        "angry": [
+            "Was ist passiert?",
+            "Willst du dich abreagieren?",
+            "Soll ich einfach nur zuhören?",
+        ],
+        "anxious": [
+            "Was macht dir Sorgen?",
+            "Wie kann ich helfen?",
+            "Was wäre ein erster Schritt?",
+        ],
+        "excited": [
+            "Was ist los?! Erzähl!",
+            "Ich will alles wissen!",
+            "Was hat dich so aufgeregt?",
+        ],
+        "confused": [
+            "Was genau verstehst du nicht?",
+            "Wo hakt es?",
+            "Soll ich es anders erklären?",
+        ],
+        "bored": [
+            "Was würde dich aufheitern?",
+            "Worauf hättest du Lust?",
+            "Soll ich dir was erzählen?",
+        ],
+        "tired": [
+            "Harter Tag gehabt?",
+            "Soll ich dich in Ruhe lassen?",
+            "Brauchst du eine Ablenkung?",
+        ],
+    }
+
+    # Vertiefungsfragen für tiefere Gespräche
+    DEEPENING_QUESTIONS = [
+        "Was bedeutet dir das?",
+        "Warum ist das wichtig für dich?",
+        "Wie hat dich das beeinflusst?",
+        "Was hast du daraus gelernt?",
+        "Wie siehst du das?",
+        "Was denkst du, warum ist das so?",
+    ]
+
+    def __init__(self):
+        import random
+        self.random = random
+        self.asked_recently = []  # Vermeidet Wiederholungen
+        self.max_recent = 10
+
+    def get_followup(self,
+                    topic: str = None,
+                    emotion: str = None,
+                    deepen: bool = False) -> str:
+        """
+        Generiert eine passende Nachfrage.
+
+        Args:
+            topic: Das aktuelle Gesprächsthema
+            emotion: Die erkannte Emotion des Users
+            deepen: Ob das Gespräch vertieft werden soll
+        """
+        candidates = []
+
+        # Emotionsbezogene Fragen haben Priorität
+        if emotion and emotion in self.EMOTION_FOLLOWUPS:
+            candidates.extend(self.EMOTION_FOLLOWUPS[emotion])
+
+        # Themenspezifische Fragen
+        if topic and topic in self.TOPIC_FOLLOWUPS:
+            candidates.extend(self.TOPIC_FOLLOWUPS[topic])
+
+        # Vertiefungsfragen
+        if deepen:
+            candidates.extend(self.DEEPENING_QUESTIONS)
+
+        # Fallback auf allgemeine Fragen
+        if not candidates:
+            candidates = self.GENERAL_FOLLOWUPS
+
+        # Vermeide kürzlich gestellte Fragen
+        available = [q for q in candidates if q not in self.asked_recently]
+        if not available:
+            available = candidates
+
+        question = self.random.choice(available)
+        self.asked_recently.append(question)
+        if len(self.asked_recently) > self.max_recent:
+            self.asked_recently.pop(0)
+
+        return question
+
+    def should_ask_followup(self,
+                           conversation_length: int,
+                           last_user_message_length: int,
+                           emotion: str = None) -> bool:
+        """
+        Entscheidet, ob eine Nachfrage gestellt werden sollte.
+
+        Args:
+            conversation_length: Anzahl bisheriger Nachrichten
+            last_user_message_length: Länge der letzten User-Nachricht
+            emotion: Erkannte Emotion
+        """
+        # Bei kurzen Gesprächen öfter nachfragen
+        if conversation_length < 5:
+            base_chance = 0.4
+        else:
+            base_chance = 0.25
+
+        # Bei kurzen User-Nachrichten öfter nachfragen
+        if last_user_message_length < 20:
+            base_chance += 0.1
+
+        # Bei emotionalen Nachrichten öfter nachfragen
+        if emotion in ["sad", "angry", "anxious", "excited"]:
+            base_chance += 0.15
+
+        return self.random.random() < min(base_chance, 0.5)
 
 
 # =============================================================================
