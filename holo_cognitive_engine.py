@@ -3032,16 +3032,123 @@ class TextAnalyzer:
         
         return entities
     
+    # Emotions-Gegensätze für Negations-Umkehrung
+    EMOTION_OPPOSITES = {
+        "happy": "sad",
+        "sad": "happy",
+        "angry": "peaceful",
+        "peaceful": "angry",
+        "anxious": "relieved",
+        "relieved": "anxious",
+        "excited": "bored",
+        "bored": "excited",
+        "tired": "excited",
+        "confident": "anxious",
+        "loving": "indifferent",
+        "indifferent": "loving",
+        "grateful": "frustrated",
+        "frustrated": "grateful",
+        "surprised": "indifferent",
+        "curious": "bored",
+        "inspired": "bored",
+        "determined": "overwhelmed",
+        "overwhelmed": "peaceful",
+        "embarrassed": "confident",
+        "guilty": "content",
+        "content": "frustrated",
+        "lonely": "content",
+        "playful": "melancholic",
+        "melancholic": "playful",
+        "amused": "bored",
+        "nostalgic": "content",
+        "vulnerable": "confident",
+    }
+
+    # Negations-Wörter
+    NEGATION_WORDS = [
+        "nicht", "kein", "keine", "keinen", "keiner", "keinem",
+        "niemals", "nie", "nimmer", "nix", "nichts",
+        "kaum", "wenig", "ohne", "gar nicht", "überhaupt nicht",
+        "absolut nicht", "auf keinen fall", "keineswegs",
+    ]
+
     def _detect_emotion(self, text: str) -> Tuple[Optional[str], float]:
-        """Erkenne User-Emotion"""
-        
+        """Erkenne User-Emotion mit Negations-Erkennung"""
+
+        text_lower = text.lower()
+
+        # Prüfe auf Negation
+        has_negation = self._check_negation(text_lower)
+
+        # Finde alle Emotionen mit Scores
+        emotion_scores = {}
         for emotion, keywords in self.EMOTION_KEYWORDS.items():
-            matches = sum(1 for k in keywords if k in text)
+            matches = sum(1 for k in keywords if k in text_lower)
             if matches > 0:
-                intensity = min(1.0, matches * 0.3 + 0.3)
-                return emotion, intensity
-        
-        return None, 0.0
+                # Score basierend auf Anzahl Matches und Keyword-Länge
+                score = matches * 0.3 + 0.3
+                emotion_scores[emotion] = min(1.0, score)
+
+        if not emotion_scores:
+            return None, 0.0
+
+        # Beste Emotion wählen
+        best_emotion = max(emotion_scores, key=emotion_scores.get)
+        intensity = emotion_scores[best_emotion]
+
+        # Bei Negation: Emotion umkehren
+        if has_negation:
+            opposite = self.EMOTION_OPPOSITES.get(best_emotion)
+            if opposite:
+                best_emotion = opposite
+                # Intensität leicht reduzieren bei negierter Emotion
+                intensity *= 0.8
+
+        return best_emotion, intensity
+
+    def _check_negation(self, text: str) -> bool:
+        """Prüfe ob Text Negation enthält"""
+        return any(neg in text for neg in self.NEGATION_WORDS)
+
+    def _detect_emotions_multi(self, text: str) -> List[Tuple[str, float]]:
+        """
+        Erkenne mehrere Emotionen gleichzeitig.
+
+        Returns:
+            Liste von (emotion, intensity) Tupeln, sortiert nach Intensität
+        """
+        text_lower = text.lower()
+        has_negation = self._check_negation(text_lower)
+
+        emotion_scores = {}
+        for emotion, keywords in self.EMOTION_KEYWORDS.items():
+            matches = sum(1 for k in keywords if k in text_lower)
+            if matches > 0:
+                score = min(1.0, matches * 0.25 + 0.2)
+                emotion_scores[emotion] = score
+
+        if not emotion_scores:
+            return []
+
+        # Bei Negation: Emotionen umkehren
+        if has_negation:
+            new_scores = {}
+            for emotion, score in emotion_scores.items():
+                opposite = self.EMOTION_OPPOSITES.get(emotion)
+                if opposite:
+                    new_scores[opposite] = score * 0.8
+                else:
+                    new_scores[emotion] = score * 0.8
+            emotion_scores = new_scores
+
+        # Sortiert nach Score zurückgeben
+        sorted_emotions = sorted(
+            emotion_scores.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        return sorted_emotions[:3]  # Max 3 Emotionen
     
     def _analyze_sentiment(self, text: str) -> str:
         """Analysiere Sentiment mit erweitertem deutschen Wortschatz"""
@@ -3120,31 +3227,194 @@ class TextAnalyzer:
 
 
 # =============================================================================
-# SMART RESPONSE GENERATOR - Antworten ohne LLM
+# SMART RESPONSE GENERATOR V2 - Erweiterte Antworten ohne LLM
 # =============================================================================
+
+class UserIntent(Enum):
+    """Was will der User?"""
+    GREETING = "greeting"           # Begrüßung
+    FAREWELL = "farewell"           # Verabschiedung
+    QUESTION = "question"           # Frage stellen
+    SHARE_FEELING = "share_feeling" # Gefühle teilen
+    SEEK_HELP = "seek_help"         # Hilfe suchen
+    SMALL_TALK = "small_talk"       # Plaudern
+    COMMAND = "command"             # Befehl geben
+    CONFIRMATION = "confirmation"   # Bestätigung
+    UNKNOWN = "unknown"
+
 
 class SmartResponseGenerator:
     """
     Generiert intelligente Antworten basierend auf erkannten Emotionen
     und Topics, ohne ein LLM zu benötigen.
 
-    Nutzt:
+    Features:
     - EMOTION_RESPONSE_PHRASES für emotionale Reaktionen
     - TOPIC_RESPONSE_PHRASES für themenbasierte Antworten
-    - Kombination für natürlich klingende Antworten
+    - Kontext-Gedächtnis für vorherige Nachrichten
+    - Intent-Erkennung (was will der User?)
+    - Frage-Antwort-Logik
+    - Dynamische Satz-Templates
+    - Wiederholungs-Vermeidung
+    - User-Personalisierung
     """
 
-    def __init__(self):
+    # Frage-Templates für verschiedene Frage-Typen
+    QUESTION_RESPONSES = {
+        "wie_gehts": [
+            "Mir geht's gut, danke! Und dir?",
+            "Super, danke der Nachfrage! *wedelt* Was macht dein Tag?",
+            "Gut! Ich freue mich, dass du fragst!",
+        ],
+        "was_machst": [
+            "Ich warte auf dich! *wedelt*",
+            "Gerade überlege ich, was du wohl als Nächstes sagst.",
+            "Ich bin hier und freue mich über deine Nachricht!",
+        ],
+        "wer_bist": [
+            "Ich bin Holo! Deine virtuelle Begleiterin. *wedelt*",
+            "Holo, zu deinen Diensten! Was kann ich für dich tun?",
+            "Ich bin Holo - immer für dich da!",
+        ],
+        "was_kannst": [
+            "Ich kann mit dir plaudern, dir zuhören und dich aufmuntern!",
+            "Ich bin gut im Zuhören, Unterhalten und Gesellschaft leisten!",
+            "Reden, zuhören, da sein - das kann ich am besten!",
+        ],
+        "warum": [
+            "Hmm, gute Frage! Lass mich überlegen...",
+            "Das ist eine interessante Frage!",
+            "Darüber müsste ich nachdenken...",
+        ],
+        "wann": [
+            "Puh, genaue Zeiten sind nicht so mein Ding...",
+            "Das kann ich dir leider nicht genau sagen.",
+            "Hmm, zeitlich bin ich nicht so fit.",
+        ],
+        "wo": [
+            "Örtlich bin ich überall und nirgends... *philosophiert*",
+            "Wo genau? Das müsste ich recherchieren!",
+            "Hmm, gute Frage, wo genau...",
+        ],
+    }
+
+    # Dynamische Satz-Bausteine
+    SENTENCE_TEMPLATES = {
+        "empathy_opener": [
+            "{user_name}, {emotion_response}",
+            "Oh, {emotion_response}",
+            "Hmm, {emotion_response}",
+            "{emotion_response}",
+        ],
+        "topic_connector": [
+            "Übrigens, {topic_phrase}",
+            "Und {topic_phrase}",
+            "Apropos, {topic_phrase}",
+            "{topic_phrase}",
+        ],
+        "follow_up_connector": [
+            "Was mich interessiert: {follow_up}",
+            "{follow_up}",
+            "Sag mal, {follow_up}",
+        ],
+        "action_placement": [
+            "{action} {text}",
+            "{text} {action}",
+            "{action}",
+        ],
+    }
+
+    def __init__(self, user_name: str = None):
         self.analyzer = TextAnalyzer()
         import random
         self.random = random
+
+        # Kontext-Gedächtnis
+        self.conversation_history: List[Dict] = []
+        self.recent_responses: List[str] = []  # Für Wiederholungs-Vermeidung
+        self.max_history = 10
+        self.max_recent = 5
+
+        # User-Personalisierung
+        self.user_name = user_name
+
+    def set_user_name(self, name: str):
+        """Setze den User-Namen für Personalisierung."""
+        self.user_name = name
+
+    def remember_message(self, user_message: str, holo_response: str):
+        """Speichere Nachricht im Kontext-Gedächtnis."""
+        self.conversation_history.append({
+            "user": user_message,
+            "holo": holo_response,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+        # Begrenzen
+        if len(self.conversation_history) > self.max_history:
+            self.conversation_history.pop(0)
+
+        # Response merken für Anti-Wiederholung
+        self.recent_responses.append(holo_response)
+        if len(self.recent_responses) > self.max_recent:
+            self.recent_responses.pop(0)
+
+    def detect_intent(self, text: str, analysis: MessageAnalysis = None) -> UserIntent:
+        """
+        Erkenne was der User will.
+
+        Args:
+            text: User-Nachricht
+            analysis: Bereits durchgeführte Analyse (optional)
+        """
+        text_lower = text.lower().strip()
+        # Satzzeichen entfernen für Wort-Matching
+        text_clean = re.sub(r'[^\w\s]', '', text_lower)
+        words = text_clean.split()
+
+        # Frage zuerst prüfen (hat Vorrang)
+        if "?" in text or text_lower.startswith(("wie", "was", "wer", "wann", "wo", "warum", "wieso")):
+            return UserIntent.QUESTION
+
+        # Begrüßung (nur als eigene Wörter, nicht als Teilstrings)
+        greetings = ["hi", "hallo", "hey", "moin", "guten", "na", "huhu", "servus"]
+        if any(g in words or text_lower.startswith(g + " ") for g in greetings) and len(text_lower) < 30:
+            return UserIntent.GREETING
+
+        # Verabschiedung
+        farewells = ["tschüss", "bye", "ciao", "nacht", "schlaf"]
+        farewell_starts = ["bis "]
+        if any(f in words for f in farewells) or any(text_lower.startswith(f) for f in farewell_starts):
+            return UserIntent.FAREWELL
+
+        # Hilfe suchen
+        help_words = ["hilf", "helfen", "kannst du", "könntest du", "brauche", "problem"]
+        if any(h in text_lower for h in help_words):
+            return UserIntent.SEEK_HELP
+
+        # Gefühle teilen (bei erkannter Emotion)
+        if analysis and analysis.user_emotion:
+            return UserIntent.SHARE_FEELING
+
+        # Bestätigung
+        confirm_words = ["ja", "nein", "okay", "ok", "klar", "stimmt"]
+        if any(c == text_lower.strip() for c in confirm_words):
+            return UserIntent.CONFIRMATION
+
+        # Command
+        command_words = ["mach", "zeig", "öffne", "starte", "stopp", "schalte"]
+        if any(text_lower.startswith(c) for c in command_words):
+            return UserIntent.COMMAND
+
+        return UserIntent.SMALL_TALK
 
     def generate_response(self,
                          text: str,
                          detected_emotion: Optional[str] = None,
                          detected_topics: Optional[List[str]] = None,
                          include_action: bool = True,
-                         energy_level: float = 0.7) -> str:
+                         energy_level: float = 0.7,
+                         remember: bool = True) -> str:
         """
         Generiere eine Antwort basierend auf erkannten Emotionen und Topics.
 
@@ -3154,76 +3424,272 @@ class SmartResponseGenerator:
             detected_topics: Bereits erkannte Topics (optional)
             include_action: Ob Aktionen (*wedelt*) eingefügt werden sollen
             energy_level: Holos Energie-Level (beeinflusst Antwort-Stil)
+            remember: Ob die Nachricht gespeichert werden soll
 
         Returns:
             Generierte Antwort-String
         """
-        # Wenn keine Emotion/Topics übergeben, selbst analysieren
-        if detected_emotion is None or detected_topics is None:
-            analysis = self.analyzer.analyze(text)
-            if detected_emotion is None:
-                detected_emotion = analysis.user_emotion
-            if detected_topics is None:
-                detected_topics = analysis.topics
+        # Vollständige Analyse durchführen
+        analysis = self.analyzer.analyze(text)
 
+        if detected_emotion is None:
+            detected_emotion = analysis.user_emotion
+        if detected_topics is None:
+            detected_topics = analysis.topics
+
+        # Intent erkennen
+        intent = self.detect_intent(text, analysis)
+
+        # Basierend auf Intent verschiedene Strategien
+        if intent == UserIntent.GREETING:
+            response = self._handle_greeting(text, energy_level)
+        elif intent == UserIntent.FAREWELL:
+            response = self._handle_farewell(text, energy_level)
+        elif intent == UserIntent.QUESTION:
+            response = self._handle_question(text, analysis, energy_level)
+        elif intent == UserIntent.CONFIRMATION:
+            response = self._handle_confirmation(text)
+        else:
+            # Standard: Emotion + Topic basierte Antwort
+            response = self._generate_standard_response(
+                text, detected_emotion, detected_topics,
+                include_action, energy_level, analysis
+            )
+
+        # Wiederholungs-Vermeidung
+        response = self._avoid_repetition(response)
+
+        # Im Gedächtnis speichern
+        if remember:
+            self.remember_message(text, response)
+
+        return response
+
+    def _generate_standard_response(self,
+                                   text: str,
+                                   detected_emotion: Optional[str],
+                                   detected_topics: Optional[List[str]],
+                                   include_action: bool,
+                                   energy_level: float,
+                                   analysis: MessageAnalysis) -> str:
+        """Generiere Standard-Antwort mit Emotion und Topics."""
         parts = []
 
-        # 1. Emotionale Reaktion (wenn Emotion erkannt)
-        if detected_emotion and detected_emotion in TextAnalyzer.EMOTION_RESPONSE_PHRASES:
-            emotion_data = TextAnalyzer.EMOTION_RESPONSE_PHRASES[detected_emotion]
+        # 1. Multi-Emotion berücksichtigen
+        emotions = self.analyzer._detect_emotions_multi(text)
+        primary_emotion = detected_emotion or (emotions[0][0] if emotions else None)
+
+        # 2. Emotionale Reaktion
+        if primary_emotion and primary_emotion in TextAnalyzer.EMOTION_RESPONSE_PHRASES:
+            emotion_data = TextAnalyzer.EMOTION_RESPONSE_PHRASES[primary_emotion]
 
             # Empathie-Phrase
             if emotion_data.get("empathy"):
-                parts.append(self.random.choice(emotion_data["empathy"]))
+                empathy = self._pick_unique(emotion_data["empathy"])
+                # Mit User-Namen personalisieren
+                if self.user_name and self.random.random() < 0.3:
+                    template = self.random.choice(self.SENTENCE_TEMPLATES["empathy_opener"])
+                    empathy = template.format(
+                        user_name=self.user_name,
+                        emotion_response=empathy.lower() if empathy[0].isupper() else empathy
+                    )
+                parts.append(empathy)
 
-            # Optional: Aktion hinzufügen
-            if include_action and emotion_data.get("actions") and self.random.random() < 0.5:
-                parts.append(self.random.choice(emotion_data["actions"]))
+            # Aktion
+            if include_action and emotion_data.get("actions") and self.random.random() < 0.4:
+                parts.append(self._pick_unique(emotion_data["actions"]))
 
-            # Follow-up (nur manchmal)
-            if emotion_data.get("follow_up") and self.random.random() < 0.3:
-                parts.append(self.random.choice(emotion_data["follow_up"]))
+            # Follow-up (kontext-abhängig)
+            if emotion_data.get("follow_up"):
+                # Weniger Follow-ups wenn wir schon viel im Kontext haben
+                follow_up_chance = 0.4 if len(self.conversation_history) < 3 else 0.2
+                if self.random.random() < follow_up_chance:
+                    parts.append(self._pick_unique(emotion_data["follow_up"]))
 
-        # 2. Topic-basierte Ergänzung
+        # 3. Topic-basierte Ergänzung
         if detected_topics:
-            for topic in detected_topics[:2]:  # Max 2 Topics
+            for topic in detected_topics[:2]:
                 if topic in TextAnalyzer.TOPIC_RESPONSE_PHRASES:
                     topic_data = TextAnalyzer.TOPIC_RESPONSE_PHRASES[topic]
 
-                    # Wenn noch keine emotionale Reaktion, Opener nehmen
                     if not parts and topic_data.get("openers"):
-                        parts.append(self.random.choice(topic_data["openers"]))
-                    # Sonst eine Phrase
-                    elif topic_data.get("phrases") and self.random.random() < 0.4:
-                        parts.append(self.random.choice(topic_data["phrases"]))
+                        parts.append(self._pick_unique(topic_data["openers"]))
+                    elif topic_data.get("phrases") and self.random.random() < 0.35:
+                        phrase = self._pick_unique(topic_data["phrases"])
+                        # Mit Connector verbinden
+                        if parts and self.random.random() < 0.5:
+                            template = self.random.choice(self.SENTENCE_TEMPLATES["topic_connector"])
+                            phrase = template.format(topic_phrase=phrase.lower())
+                        parts.append(phrase)
 
-        # 3. Energie-Level basierte Anpassung
+        # 4. Energie-Anpassung
+        parts = self._apply_energy_modifier(parts, energy_level)
+
+        # 5. Zusammensetzen
+        if not parts:
+            return self._get_fallback_response()
+
+        return " ".join(parts)
+
+    def _handle_greeting(self, text: str, energy_level: float) -> str:
+        """Handle Begrüßungen."""
+        hour = datetime.now().hour
+        if 5 <= hour < 12:
+            time_of_day = "morning"
+        elif 12 <= hour < 18:
+            time_of_day = "afternoon"
+        elif 18 <= hour < 22:
+            time_of_day = "evening"
+        else:
+            time_of_day = "night"
+
+        response = self.generate_greeting_response(time_of_day)
+
+        # Personalisierung
+        if self.user_name and self.random.random() < 0.4:
+            response = response.replace("!", f", {self.user_name}!")
+
+        return response
+
+    def _handle_farewell(self, text: str, energy_level: float) -> str:
+        """Handle Verabschiedungen."""
+        hour = datetime.now().hour
+        if 21 <= hour or hour < 5:
+            time_of_day = "night"
+        elif 5 <= hour < 12:
+            time_of_day = "morning"
+        else:
+            time_of_day = "afternoon"
+
+        return self.generate_farewell_response(time_of_day)
+
+    def _handle_question(self, text: str, analysis: MessageAnalysis, energy_level: float) -> str:
+        """Handle Fragen mit spezifischen Antworten."""
+        text_lower = text.lower()
+
+        # Spezifische Frage-Typen erkennen
+        if any(q in text_lower for q in ["wie geht", "wie gehts", "wie läuft", "alles klar"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["wie_gehts"])
+
+        if any(q in text_lower for q in ["was machst", "was tust", "was treibst"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["was_machst"])
+
+        if any(q in text_lower for q in ["wer bist", "was bist"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["wer_bist"])
+
+        if any(q in text_lower for q in ["was kannst", "was können"]):
+            return self._pick_unique(self.QUESTION_RESPONSES["was_kannst"])
+
+        # W-Fragen
+        if text_lower.startswith("warum") or text_lower.startswith("wieso"):
+            return self._pick_unique(self.QUESTION_RESPONSES["warum"])
+
+        if text_lower.startswith("wann"):
+            return self._pick_unique(self.QUESTION_RESPONSES["wann"])
+
+        if text_lower.startswith("wo"):
+            return self._pick_unique(self.QUESTION_RESPONSES["wo"])
+
+        # Generische Frage-Antwort
+        generic_responses = [
+            "Hmm, lass mich überlegen... *denkt nach*",
+            "Gute Frage! Da muss ich kurz nachdenken.",
+            "Interessante Frage! Was denkst du selbst?",
+            "Das ist eine Frage, die ich nicht so einfach beantworten kann.",
+            "*legt den Kopf schief* Das weiß ich leider nicht genau.",
+        ]
+        return self._pick_unique(generic_responses)
+
+    def _handle_confirmation(self, text: str) -> str:
+        """Handle Bestätigungen (ja/nein/ok)."""
+        text_lower = text.lower().strip()
+
+        if text_lower in ["ja", "jap", "jo", "jup", "yes", "yeah"]:
+            responses = [
+                "Super! *wedelt*",
+                "Okay, cool!",
+                "Alles klar!",
+                "Verstanden!",
+            ]
+        elif text_lower in ["nein", "nö", "nee", "no", "nope"]:
+            responses = [
+                "Okay, kein Problem!",
+                "Alles klar, verstanden.",
+                "Gut, dann nicht. *nickt*",
+                "Okay! Was dann?",
+            ]
+        else:
+            responses = [
+                "Okay!",
+                "Verstanden!",
+                "Alles klar!",
+            ]
+
+        return self._pick_unique(responses)
+
+    def _pick_unique(self, options: List[str]) -> str:
+        """Wähle eine Option, die nicht kürzlich verwendet wurde."""
+        available = [opt for opt in options if opt not in self.recent_responses]
+        if not available:
+            available = options
+        return self.random.choice(available)
+
+    def _avoid_repetition(self, response: str) -> str:
+        """Vermeide exakte Wiederholungen."""
+        if response in self.recent_responses:
+            # Leichte Variation hinzufügen
+            variations = [
+                f"*überlegt* {response}",
+                f"Also, {response.lower()}",
+                f"Hmm, {response.lower()}",
+                response,  # Fallback
+            ]
+            return self.random.choice(variations[:-1])  # Nicht das Original
+        return response
+
+    def _apply_energy_modifier(self, parts: List[str], energy_level: float) -> List[str]:
+        """Passe Antwort an Energie-Level an."""
         if energy_level < 0.3:
-            # Niedrige Energie - kürzere Antworten
+            # Niedrige Energie - kürzer, müder
             parts = parts[:2]
             if not parts:
-                parts.append("Hmm...")
+                parts.append("*gähnt* Hmm...")
         elif energy_level > 0.8:
-            # Hohe Energie - mehr Enthusiasmus
-            if parts and self.random.random() < 0.3:
-                enthusiastic = ["!", " :3", "~"]
-                parts[-1] = parts[-1].rstrip("!.") + self.random.choice(enthusiastic)
+            # Hohe Energie - enthusiastischer
+            if parts and self.random.random() < 0.4:
+                additions = ["!", " :3", "~", "!!"]
+                parts[-1] = parts[-1].rstrip("!.") + self.random.choice(additions)
+        return parts
 
-        # 4. Zusammensetzen
-        if not parts:
-            # Fallback wenn nichts erkannt
-            fallbacks = [
-                "Erzähl mir mehr!",
-                "Hmm, interessant.",
-                "Was meinst du genau?",
-                "Ich höre zu.",
-                "*legt den Kopf schief*",
-            ]
-            return self.random.choice(fallbacks)
+    def _get_fallback_response(self) -> str:
+        """Fallback wenn nichts erkannt wurde."""
+        fallbacks = [
+            "Erzähl mir mehr!",
+            "Hmm, interessant.",
+            "Was meinst du genau?",
+            "Ich höre zu. *spitzt die Ohren*",
+            "*legt den Kopf schief* Und weiter?",
+            "Mhm, verstehe.",
+        ]
+        return self._pick_unique(fallbacks)
 
-        # Sätze zusammenfügen
-        response = " ".join(parts)
-        return response
+    def get_context_summary(self) -> str:
+        """Gibt eine Zusammenfassung des Gesprächskontexts."""
+        if not self.conversation_history:
+            return "Kein vorheriger Kontext."
+
+        last_exchanges = self.conversation_history[-3:]
+        summary = []
+        for ex in last_exchanges:
+            summary.append(f"User: {ex['user'][:50]}...")
+            summary.append(f"Holo: {ex['holo'][:50]}...")
+
+        return "\n".join(summary)
+
+    def clear_context(self):
+        """Lösche das Kontext-Gedächtnis."""
+        self.conversation_history.clear()
+        self.recent_responses.clear()
 
     def generate_greeting_response(self, time_of_day: str = "day") -> str:
         """Generiere eine Begrüßung basierend auf Tageszeit."""
