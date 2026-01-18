@@ -911,6 +911,21 @@ class DriveState:
             'understanding': self.understanding,
         }
 
+    def regenerate_all(self, amount: float = 0.1):
+        """Regeneriert alle Antriebe (z.B. bei Nickerchen)"""
+        self.curiosity = clamp(self.curiosity + amount)
+        self.entertainment = clamp(self.entertainment + amount)
+        self.creativity = clamp(self.creativity + amount)
+        self.social = clamp(self.social + amount)
+        self.mastery = clamp(self.mastery + amount)
+        self.novelty = clamp(self.novelty + amount)
+        self.expression = clamp(self.expression + amount)
+        self.understanding = clamp(self.understanding + amount)
+
+    def items(self):
+        """Ermoeglicht dict-aehnlichen Zugriff: for key, value in drives.items()"""
+        return self.to_dict().items()
+
 
 @dataclass
 class NeedState:

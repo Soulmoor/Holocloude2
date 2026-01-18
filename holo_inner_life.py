@@ -1135,6 +1135,65 @@ class EmotionTracker:
             self.mood_intensity = max(0.3, self.mood_intensity - decay)
             self.last_decay = now
 
+    def detect_emotion_from_text(self, text: str) -> Tuple[str, float]:
+        """Erkennt Emotion aus Text."""
+        text_lower = text.lower()
+
+        emotion_words = {
+            'freude': ('happy', 0.8), 'glücklich': ('happy', 0.9), 'super': ('happy', 0.7),
+            'toll': ('happy', 0.6), 'schön': ('happy', 0.5), 'liebe': ('love', 0.8),
+            'traurig': ('sad', -0.7), 'schlecht': ('sad', -0.5), 'mies': ('sad', -0.4),
+            'wütend': ('angry', -0.8), 'sauer': ('angry', -0.6), 'ärgerlich': ('angry', -0.5),
+            'ängstlich': ('fear', -0.6), 'angst': ('fear', -0.7), 'nervös': ('anxious', -0.4),
+            'überrascht': ('surprised', 0.3), 'wow': ('surprised', 0.4),
+            'gelangweilt': ('bored', -0.2), 'müde': ('tired', -0.3),
+        }
+
+        for word, (emotion, valence) in emotion_words.items():
+            if word in text_lower:
+                return emotion, valence
+
+        return 'neutral', 0.0
+
+    def add_emotion(self, emotion: str, valence: float, is_user: bool = True,
+                    confidence: float = 0.5) -> None:
+        """Fügt eine erkannte Emotion hinzu."""
+        self.update_mood(emotion, abs(valence),
+                        reason=f"{'User' if is_user else 'Holo'} emotion detected")
+
+    def get_current_mood(self) -> Tuple[str, float]:
+        """Gibt aktuelle Stimmung zurück."""
+        return self.current_mood, self.mood_intensity
+
+    def get_trend(self) -> str:
+        """Gibt den emotionalen Trend zurück."""
+        if len(self.mood_history) < 2:
+            return "stable"
+
+        recent = self.mood_history[-5:]
+        if len(recent) < 2:
+            return "stable"
+
+        intensities = [e.get('intensity', 0.5) for e in recent]
+        first_avg = sum(intensities[:len(intensities)//2]) / max(1, len(intensities)//2)
+        second_avg = sum(intensities[len(intensities)//2:]) / max(1, len(intensities) - len(intensities)//2)
+
+        diff = second_avg - first_avg
+        if diff > 0.1:
+            return "improving"
+        elif diff < -0.1:
+            return "declining"
+        return "stable"
+
+    def needs_support(self) -> bool:
+        """Prüft ob der User emotionale Unterstützung braucht."""
+        negative_moods = ['sad', 'angry', 'fear', 'anxious', 'stressed', 'frustrated']
+        if self.current_mood in negative_moods and self.mood_intensity > 0.6:
+            return True
+        if self.get_trend() == "declining":
+            return True
+        return False
+
 
 # =============================================================================
 # CURIOSITY SYSTEM
