@@ -2659,6 +2659,23 @@ class DialogueActClassifier:
         results = self.classify(text)
         return results[0] if results else (DialogueActType.STATEMENT, 0.3)
 
+    def get_expected_response_acts(self, act) -> List:
+        """Gibt erwartete Response-Acts für einen Dialogue Act zurück."""
+        response_map = {
+            DialogueActType.GREETING: [DialogueActType.GREETING, DialogueActType.STATEMENT],
+            DialogueActType.FAREWELL: [DialogueActType.FAREWELL],
+            DialogueActType.YES_NO_QUESTION: [DialogueActType.ACCEPT, DialogueActType.REJECT, DialogueActType.STATEMENT],
+            DialogueActType.WH_QUESTION: [DialogueActType.STATEMENT],
+            DialogueActType.COMMAND: [DialogueActType.ACKNOWLEDGE, DialogueActType.REJECT],
+            DialogueActType.REQUEST: [DialogueActType.ACCEPT, DialogueActType.REJECT, DialogueActType.STATEMENT],
+            DialogueActType.ACKNOWLEDGE: [DialogueActType.STATEMENT],
+            DialogueActType.THANKING: [DialogueActType.ACKNOWLEDGE],
+            DialogueActType.ACCEPT: [DialogueActType.STATEMENT, DialogueActType.THANKING],
+            DialogueActType.REJECT: [DialogueActType.STATEMENT],
+            DialogueActType.STATEMENT: [DialogueActType.STATEMENT, DialogueActType.ACKNOWLEDGE],
+        }
+        return response_map.get(act, [DialogueActType.STATEMENT])
+
 
 # =============================================================================
 # COHERENCE SCORING
