@@ -26,7 +26,7 @@ Verwendung:
 import logging
 import traceback
 import functools
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, Callable, Optional, TypeVar, Union, List
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)

@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
 from pathlib import Path
+from collections import defaultdict
 import logging
 
 logger = logging.getLogger("HoloEnergy")
