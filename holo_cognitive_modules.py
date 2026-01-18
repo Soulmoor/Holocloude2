@@ -3260,6 +3260,52 @@ class ConsciousnessEngine:
 """
         return expression
 
+    def process_interaction(self, user_message: str, context: Dict = None) -> Dict:
+        """
+        Verarbeitet eine User-Interaktion bewusstseinsmäßig.
+
+        Args:
+            user_message: Nachricht des Users
+            context: Optionaler Kontext
+
+        Returns:
+            Dict mit Bewusstseins-Reaktion
+        """
+        # Gedanke über die Nachricht
+        thought = self.think(trigger=f"User sagt: {user_message[:100]}")
+
+        # Emotionale Reaktion
+        emotional_response = {}
+        if hasattr(self, 'emotions'):
+            # Analysiere emotionalen Inhalt
+            positive_words = ["danke", "lieb", "toll", "super", "freue"]
+            negative_words = ["schlecht", "traurig", "nervig", "ärger"]
+
+            msg_lower = user_message.lower()
+            valence = 0.0
+            for word in positive_words:
+                if word in msg_lower:
+                    valence += 0.2
+            for word in negative_words:
+                if word in msg_lower:
+                    valence -= 0.2
+
+            emotional_response = {
+                "detected_valence": max(-1, min(1, valence)),
+                "response_emotion": "warm" if valence > 0 else "concerned" if valence < 0 else "attentive"
+            }
+
+        # Self-Model Update
+        if hasattr(self, 'self_model'):
+            self.self_model.interaction_count = getattr(self.self_model, 'interaction_count', 0) + 1
+
+        return {
+            "thought": thought.content if thought else None,
+            "thought_type": thought.thought_type if thought else None,
+            "emotional_response": emotional_response,
+            "consciousness_level": self.consciousness_level.name if hasattr(self, 'consciousness_level') else "unknown",
+            "attention_shift": user_message[:50] if user_message else None
+        }
 
 
 # =============================================================================

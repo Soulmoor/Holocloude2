@@ -698,6 +698,14 @@ class HoloBrainController:
         self._log_event("shutdown", None, "Controller heruntergefahren", "info")
         logger.info("🔌 HoloBrainController heruntergefahren")
 
+    def is_busy(self) -> bool:
+        """Prüft ob der Controller gerade beschäftigt ist"""
+        return self._healing_in_progress or self._status == SystemStatus.BOOTING
+
+    def stop(self):
+        """Stoppt den Controller (Alias für shutdown)"""
+        self.shutdown()
+
 
 # ============================================================================
 # GLOBAL INSTANCE

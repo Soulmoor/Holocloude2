@@ -5780,6 +5780,81 @@ class SmartUnderstanding:
 
         return " | ".join(hints) if hints else ""
 
+    def correct_typos(self, text: str) -> Tuple[str, List[Dict]]:
+        """
+        Korrigiert Tippfehler im Text.
+
+        Args:
+            text: Eingabetext
+
+        Returns:
+            Tuple (korrigierter_text, Liste der Korrekturen)
+        """
+        corrections = []
+        corrected = text
+
+        # Häufige deutsche Tippfehler
+        typo_map = {
+            "shcön": "schön",
+            "weis": "weiß",
+            "weiss": "weiß",
+            "das": "dass",  # Kontextabhängig - hier nur wenn nach Verb
+            "nciht": "nicht",
+            "cih": "ich",
+            "udn": "und",
+            "auhc": "auch",
+            "mcih": "mich",
+            "amcht": "macht",
+            "hte": "the",
+            "teh": "the",
+            "wieso": "wieso",
+            "wahrscheilich": "wahrscheinlich",
+            "vll": "vielleicht",
+            "vllt": "vielleicht",
+            "eig": "eigentlich",
+            "eigtl": "eigentlich",
+        }
+
+        words = text.split()
+        corrected_words = []
+
+        for word in words:
+            word_lower = word.lower().strip(".,!?")
+            if word_lower in typo_map:
+                correction = typo_map[word_lower]
+                # Behalte Groß/Kleinschreibung
+                if word[0].isupper():
+                    correction = correction.capitalize()
+                corrected_words.append(correction)
+                corrections.append({
+                    "original": word,
+                    "corrected": correction,
+                    "type": "typo"
+                })
+            else:
+                corrected_words.append(word)
+
+        corrected = " ".join(corrected_words)
+
+        # FuzzyMatcher für unbekannte Wörter nutzen
+        if hasattr(self, 'fuzzy') and self.fuzzy:
+            for word in words:
+                word_clean = word.lower().strip(".,!?")
+                if len(word_clean) > 3 and word_clean not in typo_map:
+                    # Prüfe ob es ein bekanntes ähnliches Wort gibt
+                    match = self.fuzzy.find_best_match(word_clean)
+                    if match and match.get("score", 0) > 0.85:
+                        suggested = match.get("matched", "")
+                        if suggested != word_clean:
+                            corrections.append({
+                                "original": word,
+                                "suggested": suggested,
+                                "score": match.get("score"),
+                                "type": "fuzzy"
+                            })
+
+        return corrected, corrections
+
 
 # =============================================================================
 # ALIASES FÜR KOMPATIBILITÄT

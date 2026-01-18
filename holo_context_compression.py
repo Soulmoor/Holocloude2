@@ -469,13 +469,22 @@ class ContextCompressor:
         if len(self.messages) % 20 == 0:
             self._save_cache()
     
+    def compress(self) -> CompressedContext:
+        """
+        Komprimiert den aktuellen Kontext.
+
+        Returns:
+            CompressedContext mit allen komprimierten Teilen
+        """
+        return self._compress()
+
     def get_compressed_context(self, force_recompress: bool = False) -> CompressedContext:
         """
         Gibt den komprimierten Kontext zurück.
-        
+
         Args:
             force_recompress: Erzwingt Neu-Komprimierung
-            
+
         Returns:
             CompressedContext mit allen Teilen
         """

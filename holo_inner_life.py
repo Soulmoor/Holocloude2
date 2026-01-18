@@ -489,6 +489,11 @@ class BoredomState:
     def wants_contact(self) -> bool:
         return self.level >= AutonomousConfig.BOREDOM_CONTACT_THRESHOLD
 
+    def improve(self, amount: float = 0.1):
+        """Verbessert die Langeweile (reduziert Level)"""
+        self.level = max(0.0, self.level - amount)
+        self.last_activity = time.time()
+
 
 @dataclass
 class AutonomousActivity:
@@ -508,6 +513,25 @@ class AutonomousActivity:
             return True
         elapsed = (time.time() - self.last_executed) / 60
         return elapsed >= self.cooldown_minutes
+
+    def on_user_interaction(self):
+        """Wird bei User-Interaktion aufgerufen"""
+        # User-Interaktion beendet die Aktivität
+        self.last_executed = time.time()
+
+    def get_current_activity(self) -> Optional[str]:
+        """Gibt die aktuelle Aktivität zurück"""
+        if self.last_executed == 0:
+            return None
+        elapsed = (time.time() - self.last_executed) / 60
+        if elapsed < self.duration_minutes:
+            return self.name
+        return None
+
+    def update(self, elapsed_minutes: float = 1.0):
+        """Update der Aktivität"""
+        # Aktivität läuft ab nach duration_minutes
+        pass
 
 
 @dataclass
@@ -3487,6 +3511,14 @@ class DriveSystem:
 
         return motivations.get(highest.drive_type, "Etwas treibt mich an...")
 
+    def values(self):
+        """Gibt die Drive-Werte zurück (dict-like Interface)"""
+        return self.drives.values()
+
+    def items(self):
+        """Gibt die Drive-Items zurück (dict-like Interface)"""
+        return self.drives.items()
+
 
 # =============================================================================
 # BOREDOM SYSTEM (aus autonomous_life.py)
@@ -3728,6 +3760,157 @@ class EmotionalContextTracker:
             "holo_recent": self.holo_emotions[-3:] if self.holo_emotions else [],
             "user_recent": self.user_emotions[-3:] if self.user_emotions else [],
         }
+
+    def detect_emotion_from_text(self, text: str) -> Tuple[str, float]:
+        """
+        Erkennt Emotion aus Text.
+
+        Returns:
+            Tuple (emotion_name, valence -1 bis 1)
+        """
+        text_lower = text.lower()
+
+        # Positive Indikatoren
+        positive_words = {
+            "freue": 0.8, "glücklich": 0.9, "super": 0.7, "toll": 0.7,
+            "danke": 0.6, "liebe": 0.8, "schön": 0.6, "gut": 0.5,
+            "prima": 0.6, "wunderbar": 0.8, "fantastisch": 0.9
+        }
+
+        # Negative Indikatoren
+        negative_words = {
+            "traurig": -0.8, "schlecht": -0.6, "müde": -0.4, "stress": -0.6,
+            "wütend": -0.7, "ärger": -0.6, "problem": -0.4, "mist": -0.5,
+            "scheiße": -0.7, "nervig": -0.5, "frustriert": -0.6
+        }
+
+        valence = 0.0
+        emotion = "neutral"
+
+        for word, val in positive_words.items():
+            if word in text_lower:
+                valence += val
+                if val > 0.7:
+                    emotion = "happy"
+
+        for word, val in negative_words.items():
+            if word in text_lower:
+                valence += val
+                if val < -0.6:
+                    emotion = "sad"
+
+        # Normalisiere
+        valence = max(-1.0, min(1.0, valence))
+
+        if valence > 0.3:
+            emotion = "happy"
+        elif valence < -0.3:
+            emotion = "sad"
+
+        return emotion, valence
+
+    def add_emotion(self, emotion: str, valence: float,
+                   is_user: bool = True, confidence: float = 0.5):
+        """
+        Fügt eine erkannte Emotion hinzu.
+
+        Args:
+            emotion: Name der Emotion
+            valence: Wert von -1 (negativ) bis 1 (positiv)
+            is_user: True wenn User-Emotion, False wenn Holo-Emotion
+            confidence: Konfidenz der Erkennung
+        """
+        entry = {
+            "emotion": emotion,
+            "intensity": abs(valence),
+            "valence": valence,
+            "confidence": confidence,
+            "timestamp": time.time()
+        }
+
+        if is_user:
+            self.user_emotions.append(entry)
+            if len(self.user_emotions) > 50:
+                self.user_emotions = self.user_emotions[-50:]
+        else:
+            self.holo_emotions.append(entry)
+            if len(self.holo_emotions) > 50:
+                self.holo_emotions = self.holo_emotions[-50:]
+
+    def get_current_mood(self) -> Tuple[str, float]:
+        """
+        Gibt aktuelle Stimmung zurück.
+
+        Returns:
+            Tuple (mood_name, valence)
+        """
+        if not self.user_emotions:
+            return "neutral", 0.0
+
+        # Letzte 5 Emotionen mitteln
+        recent = self.user_emotions[-5:]
+        avg_valence = sum(e.get("valence", 0) for e in recent) / len(recent)
+
+        if avg_valence > 0.3:
+            mood = "positive"
+        elif avg_valence < -0.3:
+            mood = "negative"
+        else:
+            mood = "neutral"
+
+        return mood, avg_valence
+
+    def get_trend(self) -> str:
+        """
+        Gibt den emotionalen Trend zurück.
+
+        Returns:
+            "improving", "declining", oder "stable"
+        """
+        if len(self.user_emotions) < 4:
+            return "stable"
+
+        # Vergleiche erste und letzte Hälfte
+        mid = len(self.user_emotions) // 2
+        first_half = self.user_emotions[:mid]
+        second_half = self.user_emotions[mid:]
+
+        first_avg = sum(e.get("valence", 0) for e in first_half) / len(first_half)
+        second_avg = sum(e.get("valence", 0) for e in second_half) / len(second_half)
+
+        diff = second_avg - first_avg
+
+        if diff > 0.2:
+            return "improving"
+        elif diff < -0.2:
+            return "declining"
+        return "stable"
+
+    def needs_support(self) -> bool:
+        """
+        Prüft ob der User emotionale Unterstützung braucht.
+
+        Returns:
+            True wenn Unterstützung angebracht
+        """
+        if not self.user_emotions:
+            return False
+
+        # Prüfe letzte Emotionen
+        recent = self.user_emotions[-3:]
+        negative_count = sum(1 for e in recent if e.get("valence", 0) < -0.3)
+
+        # Wenn 2+ der letzten 3 negativ
+        if negative_count >= 2:
+            return True
+
+        # Oder wenn starker Decline
+        if self.get_trend() == "declining":
+            mood, valence = self.get_current_mood()
+            if valence < -0.2:
+                return True
+
+        return False
 
 
 # =============================================================================
@@ -4115,6 +4298,23 @@ class SoloActivities:
 
         action = random.choice(activity["actions"])
         return f"*{activity_name}* {action}"
+
+    def execute_activity(self, activity_type: str = None) -> Dict:
+        """Führt eine Aktivität aus und gibt das Ergebnis zurück"""
+        result = self.do_activity(activity_type)
+        return {
+            "type": activity_type or self.current_activity,
+            "result": result,
+            "timestamp": time.time()
+        }
+
+    def values(self):
+        """Gibt die Aktivitäten-Werte zurück (dict-like Interface)"""
+        return self.ACTIVITIES.values()
+
+    def choose_activity(self, energy: float = 0.5, mood: str = "calm") -> Tuple[str, str]:
+        """Wählt eine passende Aktivität (Alias für get_activity)"""
+        return self.get_activity(energy, mood)
 
 
 # =============================================================================
@@ -10816,6 +11016,10 @@ class HoloAgentLoop:
                 for g in self.active_goals
             ],
         }
+
+    def is_busy(self) -> bool:
+        """Prüft ob der Agent gerade beschäftigt ist"""
+        return self.is_running and len(self.active_goals) > 0
 
 
 # =============================================================================

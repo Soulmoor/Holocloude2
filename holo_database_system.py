@@ -7559,6 +7559,11 @@ class MigrationHelper:
 
         return results
 
+    def is_busy(self) -> bool:
+        """Prüft ob die Datenbank gerade beschäftigt ist"""
+        # Keine langen Operationen laufen
+        return False
+
 
 # =============================================================================
 # TEST
