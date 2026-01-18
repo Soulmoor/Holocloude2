@@ -5621,6 +5621,45 @@ class AutonomousActivityEngine:
 
         return result
 
+    # =========================================================================
+    # USER INTERACTION TRACKING
+    # =========================================================================
+
+    def on_user_message(self, message: str, sentiment: str = "neutral"):
+        """
+        Verarbeite User-Nachricht für autonomes Lernen.
+
+        - Trackt Interaktionen für bessere Entscheidungen
+        - Merkt sich Themen die den User interessieren
+        """
+        # Thema extrahieren (vereinfacht)
+        keywords = [w for w in message.lower().split() if len(w) > 4][:3]
+
+        # Log für spätere Entscheidungen
+        self.activity_log.append({
+            "type": "user_message",
+            "keywords": keywords,
+            "sentiment": sentiment,
+            "timestamp": time.time()
+        })
+
+        # DecisionMaker über User-Interaktion informieren
+        if self.decision_maker:
+            self.decision_maker.last_user_interaction = time.time()
+
+    def on_holo_response(self, response: str):
+        """
+        Verarbeite Holos eigene Antwort.
+
+        Kann für Kontext-Tracking genutzt werden.
+        """
+        # Kurzer Log für Kontext
+        self.activity_log.append({
+            "type": "holo_response",
+            "length": len(response),
+            "timestamp": time.time()
+        })
+
 
 # =============================================================================
 # NACHRICHTEN-QUEUE FÜR PROAKTIVE KONTAKTAUFNAHME

@@ -518,6 +518,14 @@ class FallbackEnergySystem:
         """Speichert Zustand"""
         pass
 
+    def process_emotional_event(self, event: str, intensity: float = 0.5):
+        """Verarbeitet emotionales Event"""
+        # Positive Events geben Energie
+        if intensity > 0:
+            self._energy = min(1.0, self._energy + intensity * 0.05)
+        else:
+            self._energy = max(0, self._energy + intensity * 0.05)
+
 
 class FallbackPersonalityEngine:
     """Fallback wenn holo_personality.py nicht existiert"""
@@ -608,6 +616,22 @@ class FallbackCognitiveCore:
     def connect_systems(self, **kwargs):
         pass
 
+    def connect_extended_systems(self, **kwargs):
+        """Verbindet erweiterte Systeme"""
+        pass
+
+    def get_integration_stats(self) -> dict:
+        """Gibt Integrations-Statistiken zurück"""
+        return {"status": "fallback", "systems_connected": 0}
+
+    def introspect(self, topic: str = None) -> str:
+        """Introspektive Analyse"""
+        return "Ich denke nach..."
+
+    def reinforce_preference_from_conversation(self, topic: str, positive: bool = True):
+        """Verstärkt Präferenz aus Gespräch"""
+        pass
+
 
 class FallbackIntegratedContext:
     """Fallback für IntegratedContext"""
@@ -629,6 +653,10 @@ class FallbackSafetyCore:
     def check_action(self, action: str, context: dict = None) -> dict:
         """Prüft ob Aktion erlaubt ist"""
         return {"allowed": True, "reason": "fallback_mode"}
+
+    def _log_compliance(self, action: str, result: dict):
+        """Loggt Compliance-Entscheidung"""
+        pass
 
 
 class FallbackConsciousness:
@@ -740,6 +768,17 @@ class FallbackContextManager:
 
     def get_stats(self):
         return {"messages": len(self.messages)}
+
+    def get_context_for_prompt(self) -> str:
+        """Gibt Kontext für Prompt zurück"""
+        if not self.messages:
+            return ""
+        recent = self.messages[-6:]
+        return "\n".join([f"{m['role']}: {m['content'][:100]}" for m in recent])
+
+    def get_known_facts(self) -> list:
+        """Gibt bekannte Fakten zurück"""
+        return []
 
 
 class FallbackPreferences:

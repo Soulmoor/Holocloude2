@@ -5239,6 +5239,117 @@ class ReasoningEngine:
             "skepticism_level": self.skepticism_level,
         }
 
+    # =========================================================================
+    # PUBLIC API für holo_brain.py
+    # =========================================================================
+
+    def structure_problem(self, question: str, context: Dict = None) -> 'Problem':
+        """
+        Strukturiert ein Problem für die weitere Verarbeitung.
+
+        Args:
+            question: Die Frage/das Problem
+            context: Optionaler Kontext
+
+        Returns:
+            Problem-Objekt mit strukturierten Informationen
+        """
+        understanding = self._understand_problem(question, context)
+        decomposition = self._decompose_problem(question, understanding)
+
+        return Problem(
+            id=f"prob_{int(time.time())}",
+            description=question,
+            problem_type=understanding["type"],
+            key_terms=understanding["key_terms"],
+            sub_problems=decomposition["sub_problems"],
+            constraints=[],
+            attempted_solutions=[],
+            current_status="structured",
+            created_at=datetime.now().isoformat()
+        )
+
+    def generate_hypotheses(self, problem: 'Problem', context: Dict = None) -> List['Hypothesis']:
+        """
+        Generiert Hypothesen für ein strukturiertes Problem.
+
+        Args:
+            problem: Das strukturierte Problem
+            context: Optionaler Kontext
+
+        Returns:
+            Liste von Hypothesen
+        """
+        understanding = {
+            "type": problem.problem_type,
+            "key_terms": problem.key_terms,
+            "summary": problem.description
+        }
+
+        knowledge_activation = self._activate_relevant_knowledge(problem.description, context)
+        hyp_result = self._generate_hypotheses(problem.description, understanding, knowledge_activation)
+
+        hypotheses = []
+        for h in hyp_result.get("hypotheses", []):
+            hypotheses.append(Hypothesis(
+                id=f"hyp_{int(time.time())}_{random.randint(1000,9999)}",
+                statement=h.get("statement", ""),
+                prior_probability=h.get("prior", 0.5),
+                current_probability=h.get("prior", 0.5),
+                evidence_for=[],
+                evidence_against=[],
+                assumptions=h.get("assumptions", []),
+                testable_predictions=[],
+                related_hypotheses=[],
+                status="active",
+                created_at=datetime.now().isoformat()
+            ))
+
+        return hypotheses
+
+    def solve(self, problem: 'Problem', hypotheses: List['Hypothesis'],
+              context: Dict = None) -> Dict:
+        """
+        Löst ein Problem basierend auf den generierten Hypothesen.
+
+        Args:
+            problem: Das strukturierte Problem
+            hypotheses: Liste der Hypothesen
+            context: Optionaler Kontext
+
+        Returns:
+            Dict mit Lösung und Metadaten
+        """
+        # Evaluiere Hypothesen
+        hyp_dicts = [{"statement": h.statement, "prior": h.prior_probability,
+                      "assumptions": h.assumptions} for h in hypotheses]
+        evaluation = self._evaluate_hypotheses(hyp_dicts, context)
+
+        # Finde beste Hypothese
+        best_hypothesis = None
+        best_prob = 0.0
+        for i, ev in enumerate(evaluation.get("evaluations", [])):
+            if ev.get("updated_probability", 0) > best_prob:
+                best_prob = ev["updated_probability"]
+                if i < len(hypotheses):
+                    best_hypothesis = hypotheses[i]
+
+        # Synthese
+        conclusion = ""
+        if best_hypothesis:
+            conclusion = best_hypothesis.statement
+            if best_prob < 0.5:
+                conclusion = f"Unsicher: {conclusion}"
+
+        return {
+            "problem_id": problem.id,
+            "solution": conclusion,
+            "confidence": best_prob,
+            "best_hypothesis": best_hypothesis.statement if best_hypothesis else None,
+            "all_evaluations": evaluation.get("evaluations", []),
+            "reasoning_chain": [step.description for step in self.current_reasoning_chain],
+            "solved_at": datetime.now().isoformat()
+        }
 
 
 # =============================================================================
@@ -7700,6 +7811,33 @@ class PerceptionEngine:
 
         return summary
 
+    # =========================================================================
+    # FEHLENDE METHODEN (für Cross-Module Kompatibilität)
+    # =========================================================================
+
+    def detect_patterns(self, data: dict = None) -> List['Pattern']:
+        """Erkennt Muster in den Daten"""
+        return list(self.patterns.values())[:5]
+
+    def check_for_anomalies(self, data: dict = None) -> List['Anomaly']:
+        """Prüft auf Anomalien"""
+        return [a for a in self.anomalies if not a.resolved][:5]
+
+    def perceive_text(self, text: str) -> 'Percept':
+        """Nimmt Text wahr"""
+        return self._perceive_external("text", {"content": text[:200]})
+
+    def update_patterns(self):
+        """Aktualisiert erkannte Muster"""
+        # Entferne veraltete Patterns
+        now = datetime.now()
+        stale_patterns = [
+            pid for pid, p in self.patterns.items()
+            if hasattr(p, 'last_occurrence') and
+            (now - datetime.fromisoformat(p.last_occurrence)).total_seconds() > 86400
+        ]
+        for pid in stale_patterns[:5]:  # Max 5 auf einmal entfernen
+            self.patterns.pop(pid, None)
 
 
 # =============================================================================
