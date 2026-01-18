@@ -546,6 +546,35 @@ class FactExtractor:
         facts.sort(key=lambda f: f.confidence, reverse=True)
         return facts
 
+    def _extract_entities(self, text: str) -> List[str]:
+        """Extrahiert Entitäten aus Text (vereinfacht)"""
+        entities = []
+        # Finde Wörter die groß geschrieben sind (Namen, Orte, etc.)
+        words = text.split()
+        for word in words:
+            clean = word.strip(".,!?:;\"'()")
+            if clean and clean[0].isupper() and len(clean) > 2:
+                if clean.lower() not in {"ich", "der", "die", "das", "ein", "eine", "und", "oder"}:
+                    entities.append(clean)
+        return list(set(entities))[:10]
+
+    def _extract_keywords(self, text: str) -> List[str]:
+        """Extrahiert Keywords aus Text"""
+        if self.keywords:
+            return self.keywords.extract(text)
+        # Fallback: einfache Wort-Extraktion
+        words = text.lower().split()
+        stopwords = {"der", "die", "das", "ein", "eine", "und", "oder", "ist", "sind", "hat", "haben"}
+        keywords = [w.strip(".,!?") for w in words if len(w) > 3 and w not in stopwords]
+        return list(set(keywords))[:10]
+
+    def _detect_topic(self, text: str) -> str:
+        """Erkennt das Hauptthema des Textes"""
+        keywords = self._extract_keywords(text)
+        if keywords:
+            return keywords[0]
+        return "allgemein"
+
 
 # =============================================================================
 # TOPIC DETECTOR v2.0

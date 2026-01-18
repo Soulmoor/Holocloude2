@@ -5132,6 +5132,25 @@ class EmotionalCore:
         else:
             return "freundlich-warmherzig"
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Holt einen Wert aus den Dimensionen oder Emotionen.
+
+        Args:
+            key: Name der Dimension oder Emotion
+            default: Fallback-Wert
+
+        Returns:
+            Wert oder default
+        """
+        if key in self.dimensions:
+            return self.dimensions[key]
+        if key in self.emotions:
+            return self.emotions[key]
+        if key in self.needs:
+            return self.needs[key]
+        return default
+
     def trigger_emotion(self, emotion: str, intensity: float = 0.5):
         """
         Löst eine spezifische Emotion aus.

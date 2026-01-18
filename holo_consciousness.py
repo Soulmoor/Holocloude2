@@ -4630,6 +4630,71 @@ class SpontaneousThoughtSystem:
         """Hole letzte Gedanken"""
         return self.thought_history[-n:]
 
+    def should_generate_thought(self, context: Dict = None) -> bool:
+        """
+        Prüft ob ein spontaner Gedanke generiert werden sollte.
+
+        Args:
+            context: Optionaler Kontext
+
+        Returns:
+            True wenn Gedanke generiert werden sollte
+        """
+        context = context or {}
+
+        # Cooldown prüfen
+        elapsed = time.time() - self.last_thought_time
+        if elapsed < self.config.min_thought_interval:
+            return False
+
+        # Basis-Chance
+        base_chance = self.config.spontaneous_thought_chance
+
+        # Langeweile erhöht Chance
+        if context.get("bored") or context.get("boredom", 0) > 0.5:
+            base_chance *= 1.5
+
+        return random.random() < base_chance
+
+    def generate_thought(self, context: Dict = None) -> Optional[OrganicSpontaneousThought]:
+        """
+        Generiert einen spontanen Gedanken.
+
+        Args:
+            context: Kontext für die Generierung
+
+        Returns:
+            OrganicSpontaneousThought oder None
+        """
+        context = context or {}
+
+        if not self.should_generate_thought(context):
+            return None
+
+        # Typ auswählen
+        thought_type = self._choose_type(context)
+
+        # Inhalt generieren
+        content = self._generate_content(thought_type, context)
+
+        # Gedanke erstellen
+        thought = OrganicSpontaneousThought(
+            content=content,
+            thought_type=thought_type,
+            triggered_by=context.get("trigger", "spontaneous"),
+            mood=context.get("mood", "neutral"),
+            intensity=random.uniform(0.3, 1.0)
+        )
+
+        self.thought_history.append(thought)
+        self.last_thought_time = time.time()
+
+        # Limit
+        if len(self.thought_history) > self.max_history:
+            self.thought_history = self.thought_history[-self.max_history:]
+
+        return thought
+
 
 # =============================================================================
 # DREAM SYSTEM (aus holo_organic_presence.py)
@@ -4781,6 +4846,43 @@ class DreamSystem:
         ]
 
         return f"{random.choice(intros)} {dream.content}"
+
+    def should_generate_dream(self) -> bool:
+        """
+        Prüft ob ein Traum generiert werden sollte.
+
+        Returns:
+            True wenn Traum generiert werden sollte
+        """
+        # Nachts mehr Träume
+        hour = datetime.now().hour
+        is_night = hour < 6 or hour >= 22
+
+        # Limit pro Nacht
+        if self.current_night_dreams >= self.config.max_dreams_per_night:
+            return False
+
+        # Basis-Chance + Nacht-Boost
+        base_chance = 0.1
+        if is_night:
+            base_chance = 0.3
+
+        return random.random() < base_chance
+
+    def get_recent_dream(self) -> Optional[OrganicDream]:
+        """
+        Gibt den letzten Traum zurück.
+
+        Returns:
+            OrganicDream oder None
+        """
+        if not self.dreams:
+            return None
+        return self.dreams[-1]
+
+    def reset_tonight(self):
+        """Setzt den Zähler für die heutige Nacht zurück"""
+        self.current_night_dreams = 0
 
 
 # =============================================================================

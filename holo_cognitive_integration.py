@@ -637,6 +637,35 @@ class SelfUnderstandingEngine:
 
         return reflections
 
+    def to_prompt_section(self) -> str:
+        """
+        Generiert einen Prompt-Abschnitt für das LLM.
+
+        Returns:
+            String mit Selbstverständnis-Kontext
+        """
+        lines = ["[SELBSTVERSTÄNDNIS]"]
+
+        # Identitäts-Aspekte
+        if self.understanding.current_identity_aspects:
+            lines.append(f"Ich bin: {', '.join(self.understanding.current_identity_aspects[:5])}")
+
+        # Aktueller Zustand
+        if self.understanding.current_state:
+            state_items = [f"{k}: {v[0]:.1f}" for k, v in self.understanding.current_state.items()][:3]
+            if state_items:
+                lines.append(f"Zustand: {', '.join(state_items)}")
+
+        # Letzte Einsichten
+        if self.understanding.recent_insights:
+            lines.append(f"Letzte Einsicht: {self.understanding.recent_insights[-1]}")
+
+        # Offene Fragen
+        if self.understanding.open_questions:
+            lines.append(f"Mich beschäftigt: {self.understanding.open_questions[-1]}")
+
+        return "\n".join(lines)
+
 
 # =============================================================================
 # INTEGRATION SYNTHESIZER - Bringt alles zusammen
@@ -874,6 +903,22 @@ class CognitiveResources:
         current = self.get(resource_type)
         setattr(self, resource_type.value, min(1.0, current + amount))
 
+    def total_load(self) -> float:
+        """
+        Berechnet die gesamte kognitive Last (0-1).
+
+        Returns:
+            Float - je höher, desto mehr Ressourcen sind verbraucht
+        """
+        used = (
+            (1.0 - self.attention) +
+            (1.0 - self.working_memory) +
+            (1.0 - self.processing) +
+            (1.0 - self.creativity) +
+            (1.0 - self.emotional_bandwidth)
+        ) / 5.0
+        return used
+
 
 @dataclass
 class HomeostaticState:
@@ -886,6 +931,46 @@ class HomeostaticState:
     purpose_alignment: float = 0.6
     stress_level: float = 0.2
     boredom_level: float = 0.1
+
+    def get_most_urgent_need(self) -> Tuple[str, float]:
+        """
+        Gibt das dringendste Bedürfnis zurück.
+
+        Returns:
+            Tuple (need_name, urgency_score)
+        """
+        needs = {
+            "energy": 1.0 - self.energy_balance,
+            "rest": self.cognitive_load,
+            "stability": 1.0 - self.emotional_stability,
+            "social": 1.0 - self.social_satisfaction,
+            "curiosity": 1.0 - self.curiosity_satisfaction,
+            "purpose": 1.0 - self.purpose_alignment,
+            "calm": self.stress_level,
+            "stimulation": self.boredom_level,
+        }
+
+        most_urgent = max(needs.items(), key=lambda x: x[1])
+        return most_urgent
+
+    def overall_wellbeing(self) -> float:
+        """
+        Berechnet das Gesamtwohlbefinden (0-1).
+
+        Returns:
+            Float zwischen 0 (schlecht) und 1 (gut)
+        """
+        positive = (
+            self.energy_balance +
+            self.emotional_stability +
+            self.social_satisfaction +
+            self.curiosity_satisfaction +
+            self.purpose_alignment
+        ) / 5.0
+
+        negative = (self.cognitive_load + self.stress_level + self.boredom_level) / 3.0
+
+        return max(0.0, min(1.0, positive - (negative * 0.5)))
 
 
 # =============================================================================
