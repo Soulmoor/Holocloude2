@@ -227,6 +227,10 @@ class HoloLiveMonitor:
         self._on_issue_callbacks: List[Callable] = []
         self._on_recovery_callbacks: List[Callable] = []
 
+        # Self-Repair Integration
+        self.self_repair = None
+        self._auto_repair_enabled = True
+
         # Config - Module die ignoriert werden
         self._ignore_modules: Set[str] = {
             "holo_tester",      # Der Tester selbst
@@ -1531,6 +1535,246 @@ class HoloLiveMonitor:
 
         return "\n".join(lines)
 
+    # =========================================================================
+    # SELF-REPAIR INTEGRATION
+    # =========================================================================
+
+    def integrate_with_self_repair(self, self_repair):
+        """
+        Integriert den Monitor mit dem Self-Repair System.
+
+        Args:
+            self_repair: HoloSelfRepair Instanz
+        """
+        self.self_repair = self_repair
+
+        # Callback für automatische Reparaturen
+        def on_issue_auto_repair(issue: MonitorIssue):
+            if self._auto_repair_enabled and self.self_repair:
+                self._try_auto_repair(issue)
+
+        self.on_issue(on_issue_auto_repair)
+
+        logger.info("LiveMonitor mit Self-Repair System integriert")
+
+    def _try_auto_repair(self, issue: MonitorIssue):
+        """
+        Versucht ein Issue automatisch zu reparieren.
+
+        Args:
+            issue: Das zu reparierende Issue
+        """
+        if not self.self_repair:
+            return
+
+        # Nur kritische und Error-Issues automatisch reparieren
+        if issue.severity not in [IssueSeverity.CRITICAL, IssueSeverity.ERROR]:
+            return
+
+        try:
+            # Erstelle einen simulierten Exception-Kontext
+            if issue.category == IssueCategory.IMPORT:
+                error = ImportError(issue.message)
+            elif issue.category == IssueCategory.SYNTAX:
+                error = SyntaxError(issue.message)
+            elif issue.category == IssueCategory.CONFIG:
+                error = ValueError(f"Config: {issue.message}")
+            else:
+                error = RuntimeError(issue.message)
+
+            context = {
+                "module": issue.module,
+                "category": issue.category.value,
+                "original_code": "",
+            }
+
+            # Prüfe ob reparierbar
+            can_repair, description = self.self_repair.can_self_repair(error, context)
+
+            if can_repair:
+                logger.info(f"Auto-Repair versucht für {issue.module}: {description}")
+
+                # Async Repair in separatem Thread starten
+                import asyncio
+
+                async def do_repair():
+                    success, result = await self.self_repair.auto_heal(error, context)
+                    if success:
+                        logger.info(f"Auto-Repair erfolgreich: {result}")
+                        # Modul neu prüfen
+                        self._check_module(issue.module)
+                    else:
+                        logger.warning(f"Auto-Repair fehlgeschlagen: {result}")
+
+                # In neuem Thread ausführen
+                def run_async_repair():
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(do_repair())
+                        loop.close()
+                    except Exception as e:
+                        logger.error(f"Auto-Repair Thread Fehler: {e}")
+
+                repair_thread = threading.Thread(
+                    target=run_async_repair,
+                    daemon=True
+                )
+                repair_thread.start()
+
+        except Exception as e:
+            logger.error(f"Auto-Repair Fehler: {e}")
+
+    def enable_auto_repair(self, enabled: bool = True):
+        """
+        Aktiviert/Deaktiviert automatische Reparaturen.
+
+        Args:
+            enabled: True für aktivieren, False für deaktivieren
+        """
+        self._auto_repair_enabled = enabled
+        logger.info(f"Auto-Repair {'aktiviert' if enabled else 'deaktiviert'}")
+
+    def trigger_repair(self, module_name: str) -> Dict:
+        """
+        Löst manuell eine Reparatur für ein Modul aus.
+
+        Args:
+            module_name: Name des zu reparierenden Moduls
+
+        Returns:
+            Dict mit Reparatur-Ergebnis
+        """
+        if not self.self_repair:
+            return {"success": False, "error": "Self-Repair System nicht verfügbar"}
+
+        if module_name not in self.modules:
+            return {"success": False, "error": f"Modul {module_name} nicht gefunden"}
+
+        health = self.modules[module_name]
+
+        if health.is_healthy:
+            return {"success": True, "message": f"{module_name} ist bereits gesund"}
+
+        try:
+            # Scan für dieses spezifische Modul
+            issues = self.self_repair.scan_all()
+
+            # Filtere auf dieses Modul
+            module_issues = [
+                i for i in issues
+                if module_name in i.target or module_name in i.description
+            ]
+
+            if not module_issues:
+                return {"success": False, "error": "Keine reparierbaren Issues gefunden"}
+
+            # Repariere
+            fixed = 0
+            for issue in module_issues:
+                result = self.self_repair.repair(issue)
+                if result.status.value == "success":
+                    fixed += 1
+
+            # Modul neu prüfen
+            self._check_module(module_name)
+
+            return {
+                "success": fixed > 0,
+                "fixed": fixed,
+                "total": len(module_issues),
+                "is_healthy": self.modules[module_name].is_healthy
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_repair_status(self) -> Dict:
+        """
+        Gibt den Status des Self-Repair Systems zurück.
+
+        Returns:
+            Dict mit Repair-Status
+        """
+        if not self.self_repair:
+            return {"available": False}
+
+        status = self.self_repair.get_status()
+        status["available"] = True
+        status["auto_repair_enabled"] = self._auto_repair_enabled
+        return status
+
+    def get_repair_suggestions(self) -> List[Dict]:
+        """
+        Gibt Reparatur-Vorschläge für alle Probleme.
+
+        Holo kann sagen: "Ich könnte folgende Probleme automatisch beheben..."
+
+        Returns:
+            Liste von Repair-Vorschlägen
+        """
+        if not self.self_repair:
+            return []
+
+        suggestions = []
+
+        for name, health in self.modules.items():
+            if not health.is_healthy:
+                for issue in health.issues:
+                    # Prüfe ob reparierbar
+                    if issue.category == IssueCategory.IMPORT:
+                        error = ImportError(issue.message)
+                    elif issue.category == IssueCategory.SYNTAX:
+                        error = SyntaxError(issue.message)
+                    else:
+                        error = RuntimeError(issue.message)
+
+                    can_repair, description = self.self_repair.can_self_repair(
+                        error, {"module": name}
+                    )
+
+                    suggestions.append({
+                        "module": name,
+                        "issue": issue.message,
+                        "category": issue.category.value,
+                        "can_auto_repair": can_repair,
+                        "repair_method": description if can_repair else None,
+                        "severity": issue.severity.value,
+                    })
+
+        return suggestions
+
+    def run_full_repair_cycle(self) -> Dict:
+        """
+        Führt einen vollständigen Scan und Repair-Zyklus durch.
+
+        Returns:
+            Dict mit Ergebnissen
+        """
+        if not self.self_repair:
+            return {"success": False, "error": "Self-Repair nicht verfügbar"}
+
+        # Vor-Status
+        pre_unhealthy = len(self.get_unhealthy_modules())
+
+        # Repair durchführen
+        report = self.self_repair.scan_and_repair()
+
+        # Alle Module neu scannen
+        self._full_scan()
+
+        # Nach-Status
+        post_unhealthy = len(self.get_unhealthy_modules())
+
+        return {
+            "success": True,
+            "pre_unhealthy": pre_unhealthy,
+            "post_unhealthy": post_unhealthy,
+            "modules_fixed": pre_unhealthy - post_unhealthy,
+            "repair_report": report.to_dict(),
+            "health_summary": self.get_health_summary(),
+        }
+
 
 # =============================================================================
 # FACTORY FUNKTION
@@ -1539,6 +1783,7 @@ class HoloLiveMonitor:
 def create_live_monitor(project_dir: Path = None,
                        holo_brain=None,
                        control_center=None,
+                       self_repair=None,
                        auto_start: bool = True) -> HoloLiveMonitor:
     """
     Erstellt einen HoloLiveMonitor.
@@ -1547,6 +1792,7 @@ def create_live_monitor(project_dir: Path = None,
         project_dir: Projekt-Verzeichnis
         holo_brain: HoloPersona Instanz
         control_center: HoloControlCenter Instanz
+        self_repair: HoloSelfRepair Instanz
         auto_start: Automatisch starten
 
     Returns:
@@ -1563,6 +1809,9 @@ def create_live_monitor(project_dir: Path = None,
 
     if control_center:
         monitor.integrate_with_control_center(control_center)
+
+    if self_repair:
+        monitor.integrate_with_self_repair(self_repair)
 
     if auto_start:
         monitor.start()

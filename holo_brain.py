@@ -658,6 +658,28 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloLiveMonitor nicht verfügbar: {e}")
 
 # =============================================================================
+# === HOLO SELF-REPAIR SYSTEM - Automatische Fehlerbehebung ===
+# =============================================================================
+try:
+    from holo_self_repair import (
+        HoloSelfRepair,
+        create_self_repair,
+        RepairType,
+        RepairStatus,
+        Severity,
+    )
+    SELF_REPAIR_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloSelfRepair (Auto-Reparatur) geladen")
+except ImportError as e:
+    SELF_REPAIR_AVAILABLE = False
+    HoloSelfRepair = None
+    create_self_repair = None
+    RepairType = None
+    RepairStatus = None
+    Severity = None
+    logger.warning(f"[Brain] HoloSelfRepair nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -4754,6 +4776,208 @@ class PiCommunicator:
             return "Live Monitor nicht verfügbar"
 
         return self.live_monitor.get_dependency_summary_for_holo()
+
+    # =========================================================================
+    # 🔧 SELF-REPAIR METHODEN - Automatische Fehlerbehebung
+    # =========================================================================
+
+    def can_self_repair(self, error: Exception, context: Dict = None) -> Tuple[bool, str]:
+        """
+        Prüft ob Holo einen Fehler selbst reparieren kann.
+
+        Holo kann sagen: "Ich kann diesen Fehler beheben weil..."
+
+        Args:
+            error: Der aufgetretene Fehler
+            context: Optionaler Kontext
+
+        Returns:
+            (kann_reparieren, beschreibung)
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return False, "Self-Repair nicht verfügbar"
+
+        return self.self_repair.can_self_repair(error, context)
+
+    async def auto_heal(self, error: Exception, context: Dict = None) -> Tuple[bool, str]:
+        """
+        Versucht einen Fehler automatisch zu heilen.
+
+        Holo kann sagen: "Ich habe das Problem selbst behoben!"
+
+        Args:
+            error: Der aufgetretene Fehler
+            context: Optionaler Kontext
+
+        Returns:
+            (erfolg, beschreibung)
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return False, "Self-Repair nicht verfügbar"
+
+        return await self.self_repair.auto_heal(error, context)
+
+    def repair_database(self, db_name: str) -> Dict:
+        """
+        Repariert eine spezifische Datenbank.
+
+        Holo kann sagen: "Ich repariere die Datenbank..."
+
+        Args:
+            db_name: Name der Datenbank
+
+        Returns:
+            Repair-Ergebnis
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return {"success": False, "error": "Self-Repair nicht verfügbar"}
+
+        result = self.self_repair.repair_database(db_name)
+        return {
+            "success": result.status.value == "success",
+            "status": result.status.value,
+            "result": result.result
+        }
+
+    def repair_config(self, config_name: str) -> Dict:
+        """
+        Repariert eine spezifische Konfigurationsdatei.
+
+        Args:
+            config_name: Name der Config
+
+        Returns:
+            Repair-Ergebnis
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return {"success": False, "error": "Self-Repair nicht verfügbar"}
+
+        result = self.self_repair.repair_config(config_name)
+        return {
+            "success": result.status.value == "success",
+            "status": result.status.value,
+            "result": result.result
+        }
+
+    def restart_module(self, module_name: str) -> bool:
+        """
+        Startet ein Modul neu.
+
+        Holo kann sagen: "Ich starte das Modul neu..."
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Erfolg
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return False
+
+        return self.self_repair.restart_module(module_name)
+
+    def scan_and_repair(self, max_repairs: int = 10) -> Dict:
+        """
+        Scannt auf Probleme und repariert automatisch.
+
+        Holo kann sagen: "Ich scanne und repariere alle Probleme..."
+
+        Args:
+            max_repairs: Maximale Anzahl Reparaturen
+
+        Returns:
+            Repair-Report
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return {"success": False, "error": "Self-Repair nicht verfügbar"}
+
+        report = self.self_repair.scan_and_repair(max_repairs)
+        return report.to_dict()
+
+    def get_repair_status(self) -> Dict:
+        """
+        Gibt den Status des Self-Repair Systems zurück.
+
+        Returns:
+            Status-Dict
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return {"available": False}
+
+        return self.self_repair.get_status()
+
+    def get_pending_issues(self) -> List[Dict]:
+        """
+        Gibt alle bekannten Probleme zurück.
+
+        Holo kann sagen: "Ich habe diese Probleme erkannt..."
+
+        Returns:
+            Liste von Issues
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return []
+
+        return self.self_repair.get_pending_issues()
+
+    def generate_health_report(self) -> str:
+        """
+        Generiert einen vollständigen Gesundheitsbericht.
+
+        Holo kann sagen: "Hier ist mein vollständiger Statusbericht..."
+
+        Returns:
+            Report als String
+        """
+        if not hasattr(self, 'self_repair') or not self.self_repair:
+            return "Self-Repair nicht verfügbar"
+
+        return self.self_repair.generate_health_report()
+
+    def trigger_repair(self, module_name: str) -> Dict:
+        """
+        Löst manuell eine Reparatur für ein Modul aus.
+
+        Holo kann sagen: "Ich versuche das Modul zu reparieren..."
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Repair-Ergebnis
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {"success": False, "error": "Live Monitor nicht verfügbar"}
+
+        return self.live_monitor.trigger_repair(module_name)
+
+    def run_full_repair_cycle(self) -> Dict:
+        """
+        Führt einen vollständigen Scan und Repair-Zyklus durch.
+
+        Holo kann sagen: "Ich führe einen vollständigen Reparatur-Zyklus durch..."
+
+        Returns:
+            Zyklus-Ergebnis
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {"success": False, "error": "Live Monitor nicht verfügbar"}
+
+        return self.live_monitor.run_full_repair_cycle()
+
+    def get_repair_suggestions(self) -> List[Dict]:
+        """
+        Gibt Reparatur-Vorschläge zurück.
+
+        Holo kann sagen: "Ich könnte folgende Probleme beheben..."
+
+        Returns:
+            Liste von Vorschlägen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_repair_suggestions()
 
     # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
@@ -14934,6 +15158,25 @@ class HoloPersona:
             logger.debug("🎛️ Control Center nicht verfügbar")
 
         # ================================================================
+        # 🔧 SELF-REPAIR SYSTEM - Automatische Fehlerbehebung
+        # ================================================================
+        self.self_repair = None
+        if SELF_REPAIR_AVAILABLE:
+            try:
+                self.self_repair = create_self_repair(
+                    project_dir=Path(__file__).parent,
+                    holo_brain=self,
+                    auto_start=True,
+                    auto_repair=True
+                )
+                logger.info("🔧 Self-Repair System aktiviert (Auto-Reparatur)")
+            except Exception as e:
+                logger.warning(f"⚠️ Self-Repair Fehler: {e}")
+                self.self_repair = None
+        else:
+            logger.debug("🔧 Self-Repair nicht verfügbar")
+
+        # ================================================================
         # 📊 LIVE MONITOR - Echtzeit-Systemüberwachung
         # ================================================================
         self.live_monitor = None
@@ -14943,6 +15186,7 @@ class HoloPersona:
                     project_dir=Path(__file__).parent,
                     holo_brain=self,
                     control_center=self.control_center,
+                    self_repair=self.self_repair,  # Self-Repair Integration
                     auto_start=True
                 )
                 logger.info("📊 Live Monitor aktiviert (Echtzeit-Überwachung)")
