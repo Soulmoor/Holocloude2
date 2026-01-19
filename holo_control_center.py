@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║  HOLO CONTROL CENTER v1.0 - Holos Meta-Bewusstsein über ihre Systeme         ║
+║  HOLO CONTROL CENTER v2.0 - Holos Meta-Bewusstsein über ihre Systeme         ║
 ║                                                                              ║
 ║  Gibt Holo die Kontrolle über ALLE ihre Subsysteme:                          ║
 ║  • Aktivieren/Deaktivieren von Modulen                                       ║
@@ -22,14 +22,493 @@ import logging
 import time
 import threading
 import json
+import importlib
+import importlib.util
+import inspect
+import sys
+import os
+import glob
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set, Tuple
+from typing import Dict, List, Optional, Any, Callable, Set, Tuple, Type
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from collections import defaultdict, deque
 from pathlib import Path
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger("HoloControlCenter")
+
+
+# =============================================================================
+# SKILL/MODULE BASE CLASS - Für dynamische Module
+# =============================================================================
+
+class HoloSkill(ABC):
+    """
+    Basisklasse für alle Holo-Skills/Module.
+    Skills die diese Klasse erben werden automatisch erkannt.
+    """
+
+    # Skill-Metadaten (überschreiben in Subklassen)
+    SKILL_NAME: str = "unnamed_skill"
+    SKILL_DISPLAY_NAME: str = "Unnamed Skill"
+    SKILL_DESCRIPTION: str = "No description"
+    SKILL_VERSION: str = "1.0.0"
+    SKILL_PRIORITY: int = 3  # 1-5, 5=critical
+    SKILL_ENERGY_COST: float = 0.1
+    SKILL_CAN_PAUSE: bool = True
+    SKILL_CAN_DISABLE: bool = True
+    SKILL_DEPENDS_ON: List[str] = []
+
+    def __init__(self):
+        self._is_active = False
+        self._is_paused = False
+        self._last_activity = time.time()
+        self._error_count = 0
+
+    @abstractmethod
+    def activate(self) -> bool:
+        """Aktiviert den Skill"""
+        pass
+
+    @abstractmethod
+    def deactivate(self) -> bool:
+        """Deaktiviert den Skill"""
+        pass
+
+    def pause(self) -> bool:
+        """Pausiert den Skill"""
+        self._is_paused = True
+        return True
+
+    def resume(self) -> bool:
+        """Setzt den Skill fort"""
+        self._is_paused = False
+        return True
+
+    def health_check(self) -> Tuple[bool, Optional[str]]:
+        """Prüft die Gesundheit des Skills"""
+        return True, None
+
+    def get_status(self) -> Dict:
+        """Gibt Status-Informationen zurück"""
+        return {
+            "name": self.SKILL_NAME,
+            "active": self._is_active,
+            "paused": self._is_paused,
+            "last_activity": self._last_activity,
+            "error_count": self._error_count,
+        }
+
+    def update_activity(self):
+        """Aktualisiert den Aktivitäts-Timestamp"""
+        self._last_activity = time.time()
+
+
+# =============================================================================
+# DYNAMISCHER MODULE SCANNER
+# =============================================================================
+
+@dataclass
+class DiscoveredModule:
+    """Ein entdecktes Modul"""
+    name: str
+    file_path: str
+    module_object: Optional[Any] = None
+    classes: List[str] = field(default_factory=list)
+    functions: List[str] = field(default_factory=list)
+    skills: List[str] = field(default_factory=list)  # HoloSkill-Subklassen
+    is_loaded: bool = False
+    load_error: Optional[str] = None
+    size_bytes: int = 0
+    line_count: int = 0
+    docstring: str = ""
+
+    # Analysierte Capabilities
+    has_init: bool = False
+    has_main: bool = False
+    provides_api: bool = False
+
+    def to_dict(self) -> Dict:
+        return {
+            "name": self.name,
+            "file_path": self.file_path,
+            "classes": self.classes,
+            "functions": self.functions,
+            "skills": self.skills,
+            "is_loaded": self.is_loaded,
+            "load_error": self.load_error,
+            "size_bytes": self.size_bytes,
+            "line_count": self.line_count,
+        }
+
+
+class DynamicModuleScanner:
+    """
+    Scannt das Verzeichnis nach allen holo_*.py Modulen und analysiert sie.
+    """
+
+    def __init__(self, base_path: str = None):
+        self.base_path = Path(base_path) if base_path else Path(__file__).parent
+        self.discovered_modules: Dict[str, DiscoveredModule] = {}
+        self._scan_thread: Optional[threading.Thread] = None
+        self._last_scan = 0.0
+
+    def scan(self, pattern: str = "holo_*.py") -> Dict[str, DiscoveredModule]:
+        """
+        Scannt nach allen passenden Modulen.
+
+        Args:
+            pattern: Glob-Pattern für Module (default: holo_*.py)
+
+        Returns:
+            Dict von Modul-Name zu DiscoveredModule
+        """
+        self.discovered_modules.clear()
+
+        # Alle passenden Dateien finden
+        module_files = list(self.base_path.glob(pattern))
+
+        for file_path in module_files:
+            try:
+                module_info = self._analyze_module_file(file_path)
+                if module_info:
+                    self.discovered_modules[module_info.name] = module_info
+            except Exception as e:
+                logger.debug(f"Fehler beim Analysieren von {file_path}: {e}")
+
+        self._last_scan = time.time()
+        logger.info(f"🔍 {len(self.discovered_modules)} Module gefunden")
+        return self.discovered_modules
+
+    def _analyze_module_file(self, file_path: Path) -> Optional[DiscoveredModule]:
+        """Analysiert eine einzelne Modul-Datei"""
+        module_name = file_path.stem  # Ohne .py
+
+        # Basis-Info
+        info = DiscoveredModule(
+            name=module_name,
+            file_path=str(file_path),
+            size_bytes=file_path.stat().st_size,
+        )
+
+        # Datei lesen und analysieren
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                info.line_count = content.count('\n') + 1
+
+            # Docstring extrahieren
+            import ast
+            try:
+                tree = ast.parse(content)
+                info.docstring = ast.get_docstring(tree) or ""
+
+                # Klassen und Funktionen finden
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.ClassDef):
+                        info.classes.append(node.name)
+                        # Prüfen ob HoloSkill-Subklasse
+                        for base in node.bases:
+                            if isinstance(base, ast.Name) and 'Skill' in base.id:
+                                info.skills.append(node.name)
+                    elif isinstance(node, ast.FunctionDef):
+                        if not node.name.startswith('_'):
+                            info.functions.append(node.name)
+                        if node.name == '__init__':
+                            info.has_init = True
+                        if node.name == 'main':
+                            info.has_main = True
+
+            except SyntaxError:
+                pass  # Datei hat Syntax-Fehler, überspringen
+
+        except Exception as e:
+            info.load_error = str(e)
+
+        return info
+
+    def scan_async(self, callback: Callable = None):
+        """Startet Scan in Hintergrund-Thread"""
+        def do_scan():
+            results = self.scan()
+            if callback:
+                callback(results)
+
+        self._scan_thread = threading.Thread(target=do_scan, daemon=True)
+        self._scan_thread.start()
+
+    def get_module_summary(self) -> str:
+        """Erstellt eine lesbare Zusammenfassung"""
+        if not self.discovered_modules:
+            self.scan()
+
+        lines = [f"📦 {len(self.discovered_modules)} Module gefunden:\n"]
+
+        # Nach Größe sortieren
+        sorted_modules = sorted(
+            self.discovered_modules.values(),
+            key=lambda m: m.line_count,
+            reverse=True
+        )
+
+        for mod in sorted_modules[:20]:  # Top 20
+            skill_marker = "⭐" if mod.skills else ""
+            lines.append(f"  {skill_marker}{mod.name}: {mod.line_count} Zeilen, {len(mod.classes)} Klassen")
+
+        return "\n".join(lines)
+
+
+# =============================================================================
+# SKILL LOADER - Dynamisches Laden von Modulen
+# =============================================================================
+
+class SkillLoader:
+    """
+    Lädt Module dynamisch zur Laufzeit.
+    Kann neue Skills hinzufügen ohne Neustart.
+    """
+
+    def __init__(self, scanner: DynamicModuleScanner = None):
+        self.scanner = scanner or DynamicModuleScanner()
+        self.loaded_modules: Dict[str, Any] = {}
+        self.loaded_skills: Dict[str, HoloSkill] = {}
+        self._load_errors: Dict[str, str] = {}
+
+    def load_module(self, module_name: str, force_reload: bool = False) -> Optional[Any]:
+        """
+        Lädt ein Modul dynamisch.
+
+        Args:
+            module_name: Name des Moduls (ohne .py)
+            force_reload: Erzwingt Neuladen auch wenn schon geladen
+
+        Returns:
+            Das geladene Modul oder None
+        """
+        # Schon geladen?
+        if module_name in self.loaded_modules and not force_reload:
+            return self.loaded_modules[module_name]
+
+        # Modul-Info holen
+        if module_name not in self.scanner.discovered_modules:
+            self.scanner.scan()
+
+        module_info = self.scanner.discovered_modules.get(module_name)
+        if not module_info:
+            logger.warning(f"Modul {module_name} nicht gefunden")
+            return None
+
+        try:
+            # Modul laden
+            if module_name in sys.modules and force_reload:
+                # Reload
+                module = importlib.reload(sys.modules[module_name])
+            else:
+                # Neues Laden
+                spec = importlib.util.spec_from_file_location(
+                    module_name,
+                    module_info.file_path
+                )
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
+
+            self.loaded_modules[module_name] = module
+            module_info.is_loaded = True
+            module_info.module_object = module
+
+            # Skills extrahieren
+            self._extract_skills(module, module_info)
+
+            logger.info(f"📦 Modul geladen: {module_name}")
+            return module
+
+        except Exception as e:
+            error_msg = str(e)
+            self._load_errors[module_name] = error_msg
+            module_info.load_error = error_msg
+            logger.error(f"Fehler beim Laden von {module_name}: {e}")
+            return None
+
+    def _extract_skills(self, module: Any, module_info: DiscoveredModule):
+        """Extrahiert HoloSkill-Instanzen aus einem Modul"""
+        for class_name in module_info.skills:
+            try:
+                cls = getattr(module, class_name, None)
+                if cls and inspect.isclass(cls) and issubclass(cls, HoloSkill):
+                    # Instanz erstellen
+                    skill_instance = cls()
+                    skill_name = skill_instance.SKILL_NAME
+                    self.loaded_skills[skill_name] = skill_instance
+                    logger.info(f"⭐ Skill geladen: {skill_name}")
+            except Exception as e:
+                logger.debug(f"Skill {class_name} konnte nicht instanziiert werden: {e}")
+
+    def load_all_modules(self, pattern: str = "holo_*.py") -> int:
+        """
+        Lädt alle gefundenen Module.
+
+        Returns:
+            Anzahl erfolgreich geladener Module
+        """
+        self.scanner.scan(pattern)
+        loaded = 0
+
+        for module_name in self.scanner.discovered_modules:
+            if self.load_module(module_name):
+                loaded += 1
+
+        logger.info(f"📦 {loaded}/{len(self.scanner.discovered_modules)} Module geladen")
+        return loaded
+
+    def unload_module(self, module_name: str) -> bool:
+        """Entlädt ein Modul aus dem Speicher"""
+        if module_name in self.loaded_modules:
+            del self.loaded_modules[module_name]
+
+        if module_name in sys.modules:
+            del sys.modules[module_name]
+
+        # Skills entfernen
+        skills_to_remove = [
+            name for name, skill in self.loaded_skills.items()
+            if module_name in str(type(skill).__module__)
+        ]
+        for skill_name in skills_to_remove:
+            del self.loaded_skills[skill_name]
+
+        logger.info(f"📦 Modul entladen: {module_name}")
+        return True
+
+    def reload_module(self, module_name: str) -> Optional[Any]:
+        """Lädt ein Modul neu (Hot-Reload)"""
+        self.unload_module(module_name)
+        return self.load_module(module_name, force_reload=True)
+
+    def get_skill(self, skill_name: str) -> Optional[HoloSkill]:
+        """Holt einen geladenen Skill"""
+        return self.loaded_skills.get(skill_name)
+
+    def get_all_skills(self) -> Dict[str, HoloSkill]:
+        """Holt alle geladenen Skills"""
+        return self.loaded_skills.copy()
+
+    def get_module_function(self, module_name: str, function_name: str) -> Optional[Callable]:
+        """Holt eine Funktion aus einem geladenen Modul"""
+        module = self.loaded_modules.get(module_name)
+        if module:
+            return getattr(module, function_name, None)
+        return None
+
+    def get_module_class(self, module_name: str, class_name: str) -> Optional[Type]:
+        """Holt eine Klasse aus einem geladenen Modul"""
+        module = self.loaded_modules.get(module_name)
+        if module:
+            cls = getattr(module, class_name, None)
+            if inspect.isclass(cls):
+                return cls
+        return None
+
+
+# =============================================================================
+# MODULE INTROSPECTOR - Tiefe Analyse von Modulen
+# =============================================================================
+
+class ModuleIntrospector:
+    """
+    Analysiert Module im Detail um ihre Fähigkeiten zu verstehen.
+    """
+
+    @staticmethod
+    def get_module_capabilities(module: Any) -> Dict:
+        """
+        Analysiert was ein Modul kann.
+
+        Returns:
+            Dict mit Capabilities
+        """
+        caps = {
+            "classes": [],
+            "functions": [],
+            "constants": [],
+            "has_main": False,
+            "has_init": False,
+            "is_async": False,
+            "dependencies": [],
+            "provides": [],
+        }
+
+        for name, obj in inspect.getmembers(module):
+            if name.startswith('_'):
+                continue
+
+            if inspect.isclass(obj):
+                class_info = {
+                    "name": name,
+                    "methods": [m for m in dir(obj) if not m.startswith('_')],
+                    "is_skill": issubclass(obj, HoloSkill) if inspect.isclass(obj) else False,
+                }
+                caps["classes"].append(class_info)
+
+            elif inspect.isfunction(obj):
+                func_info = {
+                    "name": name,
+                    "is_async": inspect.iscoroutinefunction(obj),
+                    "params": list(inspect.signature(obj).parameters.keys()),
+                }
+                caps["functions"].append(func_info)
+                if inspect.iscoroutinefunction(obj):
+                    caps["is_async"] = True
+
+            elif not callable(obj):
+                caps["constants"].append(name)
+
+        # Main-Funktion?
+        if hasattr(module, 'main'):
+            caps["has_main"] = True
+
+        return caps
+
+    @staticmethod
+    def get_class_interface(cls: Type) -> Dict:
+        """Analysiert das Interface einer Klasse"""
+        interface = {
+            "name": cls.__name__,
+            "docstring": inspect.getdoc(cls) or "",
+            "methods": {},
+            "properties": [],
+            "class_attributes": [],
+        }
+
+        for name, method in inspect.getmembers(cls):
+            if name.startswith('_') and not name.startswith('__'):
+                continue
+
+            if inspect.isfunction(method) or inspect.ismethod(method):
+                try:
+                    sig = inspect.signature(method)
+                    interface["methods"][name] = {
+                        "params": list(sig.parameters.keys()),
+                        "docstring": inspect.getdoc(method) or "",
+                    }
+                except (ValueError, TypeError):
+                    pass
+
+            elif isinstance(inspect.getattr_static(cls, name), property):
+                interface["properties"].append(name)
+
+        return interface
+
+    @staticmethod
+    def find_factory_functions(module: Any) -> List[str]:
+        """Findet Factory-Funktionen wie create_*, make_*, build_*"""
+        factories = []
+        for name, obj in inspect.getmembers(module):
+            if inspect.isfunction(obj):
+                if name.startswith(('create_', 'make_', 'build_', 'get_')):
+                    factories.append(name)
+        return factories
 
 
 # =============================================================================
@@ -616,10 +1095,23 @@ class HoloControlCenter:
         self.watchdog_manager = WatchdogManager(self)
         self.decision_engine = AutonomousDecisionEngine(self)
 
+        # === NEU: Dynamische Modul-Erkennung ===
+        self.module_scanner = DynamicModuleScanner(
+            base_path=str(Path(__file__).parent)
+        )
+        self.skill_loader = SkillLoader(self.module_scanner)
+        self.introspector = ModuleIntrospector()
+
+        # Dynamische Module und Skills
+        self.dynamic_modules: Dict[str, DiscoveredModule] = {}
+        self.active_skills: Dict[str, HoloSkill] = {}
+
         # State
         self._running = False
         self._decision_thread: Optional[threading.Thread] = None
         self._decision_interval = 60.0  # Sekunden
+        self._auto_discovery_enabled = True
+        self._discovery_interval = 300.0  # 5 Minuten
 
         # Event Log
         self.event_log: deque = deque(maxlen=500)
@@ -627,12 +1119,214 @@ class HoloControlCenter:
         # Human Attention Queue
         self._attention_queue: List[Dict] = []
 
-        logger.info("🎛️ Holo Control Center initialisiert")
+        # Initial-Scan durchführen
+        self._scan_for_modules()
+
+        logger.info("🎛️ Holo Control Center v2.0 initialisiert (mit dynamischer Erkennung)")
 
     def _init_default_modules(self):
         """Initialisiert die Standard-Module"""
         for name, info in DEFAULT_MODULES.items():
             self.modules[name] = info
+
+    # =========================================================================
+    # DYNAMISCHE MODUL-ERKENNUNG
+    # =========================================================================
+
+    def _scan_for_modules(self):
+        """Scannt nach allen verfügbaren Modulen"""
+        try:
+            self.dynamic_modules = self.module_scanner.scan()
+            self._register_discovered_modules()
+            logger.info(f"🔍 {len(self.dynamic_modules)} Module entdeckt")
+        except Exception as e:
+            logger.error(f"Modul-Scan Fehler: {e}")
+
+    def _register_discovered_modules(self):
+        """Registriert entdeckte Module automatisch"""
+        for name, discovered in self.dynamic_modules.items():
+            # Nur registrieren wenn nicht schon vorhanden
+            if name not in self.modules:
+                # ModuleInfo aus DiscoveredModule erstellen
+                info = ModuleInfo(
+                    name=name,
+                    display_name=name.replace('holo_', '').replace('_', ' ').title(),
+                    description=discovered.docstring[:100] if discovered.docstring else f"Modul {name}",
+                    priority=ModulePriority.NORMAL,
+                    status=ModuleStatus.UNKNOWN,
+                )
+                self.modules[name] = info
+
+    def discover_modules(self, pattern: str = "holo_*.py") -> Dict[str, DiscoveredModule]:
+        """
+        Findet alle Module die dem Pattern entsprechen.
+
+        Args:
+            pattern: Glob-Pattern (default: holo_*.py)
+
+        Returns:
+            Dict von entdeckten Modulen
+        """
+        self.dynamic_modules = self.module_scanner.scan(pattern)
+        self._register_discovered_modules()
+        return self.dynamic_modules
+
+    def load_skill(self, module_name: str) -> Optional[Any]:
+        """
+        Lädt ein Modul/Skill dynamisch.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Das geladene Modul oder None
+        """
+        module = self.skill_loader.load_module(module_name)
+        if module:
+            # Modul-Status aktualisieren
+            if module_name in self.modules:
+                self.modules[module_name].status = ModuleStatus.ACTIVE
+            self.log_event("module_loaded", {"module": module_name})
+        return module
+
+    def unload_skill(self, module_name: str) -> bool:
+        """
+        Entlädt ein dynamisch geladenes Modul.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            True wenn erfolgreich
+        """
+        success = self.skill_loader.unload_module(module_name)
+        if success:
+            if module_name in self.modules:
+                self.modules[module_name].status = ModuleStatus.DISABLED
+            self.log_event("module_unloaded", {"module": module_name})
+        return success
+
+    def reload_skill(self, module_name: str) -> Optional[Any]:
+        """
+        Hot-Reload eines Moduls.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Das neu geladene Modul oder None
+        """
+        self.log_event("module_reloading", {"module": module_name})
+        module = self.skill_loader.reload_module(module_name)
+        if module:
+            self.log_event("module_reloaded", {"module": module_name})
+        return module
+
+    def get_module_capabilities(self, module_name: str) -> Optional[Dict]:
+        """
+        Analysiert was ein Modul kann.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Dict mit Capabilities oder None
+        """
+        module = self.skill_loader.loaded_modules.get(module_name)
+        if module:
+            return self.introspector.get_module_capabilities(module)
+
+        # Modul erst laden
+        module = self.load_skill(module_name)
+        if module:
+            return self.introspector.get_module_capabilities(module)
+
+        return None
+
+    def get_function_from_module(self, module_name: str, function_name: str) -> Optional[Callable]:
+        """
+        Holt eine Funktion aus einem Modul.
+
+        Args:
+            module_name: Name des Moduls
+            function_name: Name der Funktion
+
+        Returns:
+            Die Funktion oder None
+        """
+        return self.skill_loader.get_module_function(module_name, function_name)
+
+    def get_class_from_module(self, module_name: str, class_name: str) -> Optional[Type]:
+        """
+        Holt eine Klasse aus einem Modul.
+
+        Args:
+            module_name: Name des Moduls
+            class_name: Name der Klasse
+
+        Returns:
+            Die Klasse oder None
+        """
+        return self.skill_loader.get_module_class(module_name, class_name)
+
+    def execute_module_function(self, module_name: str, function_name: str,
+                                *args, **kwargs) -> Any:
+        """
+        Führt eine Funktion aus einem Modul aus.
+
+        Args:
+            module_name: Name des Moduls
+            function_name: Name der Funktion
+            *args, **kwargs: Argumente für die Funktion
+
+        Returns:
+            Rückgabewert der Funktion
+        """
+        func = self.get_function_from_module(module_name, function_name)
+        if func:
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Funktion {module_name}.{function_name} Fehler: {e}")
+                return None
+        return None
+
+    def get_discovered_module_summary(self) -> str:
+        """
+        Erstellt eine lesbare Zusammenfassung aller Module.
+
+        Returns:
+            Formatierter String
+        """
+        return self.module_scanner.get_module_summary()
+
+    def start_auto_discovery(self, interval: float = 300.0):
+        """
+        Startet automatische Modul-Erkennung im Hintergrund.
+
+        Args:
+            interval: Sekunden zwischen Scans
+        """
+        self._auto_discovery_enabled = True
+        self._discovery_interval = interval
+
+        def discovery_loop():
+            while self._auto_discovery_enabled and self._running:
+                time.sleep(self._discovery_interval)
+                if self._auto_discovery_enabled:
+                    self._scan_for_modules()
+
+        discovery_thread = threading.Thread(
+            target=discovery_loop,
+            name="ModuleAutoDiscovery",
+            daemon=True
+        )
+        discovery_thread.start()
+        logger.info(f"🔍 Auto-Discovery gestartet (alle {interval}s)")
+
+    def stop_auto_discovery(self):
+        """Stoppt die automatische Modul-Erkennung"""
+        self._auto_discovery_enabled = False
 
     # =========================================================================
     # MODUL-VERWALTUNG

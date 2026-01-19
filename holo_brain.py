@@ -4403,6 +4403,114 @@ class PiCommunicator:
 
         return self.control_center.can_i_do(action)
 
+    # =========================================================================
+    # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
+    # =========================================================================
+
+    def discover_all_modules(self) -> Dict:
+        """
+        Entdeckt alle verfügbaren Module dynamisch.
+
+        Returns:
+            Dict mit allen entdeckten Modulen
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return {}
+
+        return self.control_center.discover_modules()
+
+    def load_module(self, module_name: str) -> bool:
+        """
+        Lädt ein Modul dynamisch.
+
+        Args:
+            module_name: Name des Moduls (z.B. "holo_creative_mind")
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return False
+
+        return self.control_center.load_skill(module_name) is not None
+
+    def unload_module(self, module_name: str) -> bool:
+        """
+        Entlädt ein Modul.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return False
+
+        return self.control_center.unload_skill(module_name)
+
+    def reload_module(self, module_name: str) -> bool:
+        """
+        Hot-Reload eines Moduls ohne Neustart.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return False
+
+        return self.control_center.reload_skill(module_name) is not None
+
+    def get_module_info(self, module_name: str) -> Optional[Dict]:
+        """
+        Holt detaillierte Informationen über ein Modul.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            Dict mit Modul-Capabilities
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return None
+
+        return self.control_center.get_module_capabilities(module_name)
+
+    def call_module_function(self, module_name: str, function_name: str,
+                            *args, **kwargs) -> Any:
+        """
+        Ruft eine Funktion aus einem anderen Modul auf.
+
+        Args:
+            module_name: Name des Moduls
+            function_name: Name der Funktion
+            *args, **kwargs: Argumente
+
+        Returns:
+            Rückgabewert der Funktion
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return None
+
+        return self.control_center.execute_module_function(
+            module_name, function_name, *args, **kwargs
+        )
+
+    def get_all_discovered_modules(self) -> str:
+        """
+        Gibt eine lesbare Liste aller entdeckten Module zurück.
+
+        Returns:
+            Formatierter String
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return "Control Center nicht verfügbar"
+
+        return self.control_center.get_discovered_module_summary()
+
     def request_nas_wake(self, reason: str = "Holo") -> dict:
         """NAS aufwecken - Pi-Control entscheidet!"""
         return self.pi.wake_nas(reason)
