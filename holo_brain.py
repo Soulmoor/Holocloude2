@@ -680,6 +680,30 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloSelfRepair nicht verfügbar: {e}")
 
 # =============================================================================
+# === HOLO PROBLEM SOLVER - Universelles Analytisches Denken ===
+# =============================================================================
+try:
+    from holo_problem_solver import (
+        HoloProblemSolver,
+        create_problem_solver,
+        ProblemType,
+        ProblemComplexity,
+        StrategyType,
+        ThinkingPhase,
+    )
+    PROBLEM_SOLVER_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloProblemSolver (Universelles Denken) geladen")
+except ImportError as e:
+    PROBLEM_SOLVER_AVAILABLE = False
+    HoloProblemSolver = None
+    create_problem_solver = None
+    ProblemType = None
+    ProblemComplexity = None
+    StrategyType = None
+    ThinkingPhase = None
+    logger.warning(f"[Brain] HoloProblemSolver nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -4978,6 +5002,124 @@ class PiCommunicator:
             return []
 
         return self.live_monitor.get_repair_suggestions()
+
+    # =========================================================================
+    # 🧠 PROBLEM SOLVER METHODEN - Universelles Analytisches Denken
+    # =========================================================================
+
+    def think_about(self, question: str) -> str:
+        """
+        Holo denkt analytisch über eine Frage/Problem nach.
+
+        Nutzt den universellen Problem Solver für strukturiertes Denken.
+
+        Args:
+            question: Die Frage oder das Problem
+
+        Returns:
+            Erklärung/Lösung
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return "Problem Solver nicht verfügbar"
+
+        return self.problem_solver.think_about(question)
+
+    def solve_problem(self, problem: str, context: Dict = None,
+                     goals: List[str] = None, constraints: List[str] = None) -> Dict:
+        """
+        Löst ein Problem analytisch mit dem universellen Denk-Framework.
+
+        Holo analysiert, plant, führt aus und lernt.
+
+        Args:
+            problem: Problembeschreibung
+            context: Zusätzlicher Kontext
+            goals: Was soll erreicht werden?
+            constraints: Einschränkungen
+
+        Returns:
+            Solution-Dict mit Ergebnis und Denkprotokoll
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return {"success": False, "error": "Problem Solver nicht verfügbar"}
+
+        solution = self.problem_solver.solve(problem, context, goals, constraints)
+        return solution.to_dict()
+
+    def how_would_i_solve(self, problem: str) -> List[str]:
+        """
+        Holo erklärt wie sie ein Problem lösen würde.
+
+        Gibt die geplanten Denkschritte zurück ohne auszuführen.
+
+        Args:
+            problem: Das Problem
+
+        Returns:
+            Liste der geplanten Schritte
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return ["Problem Solver nicht verfügbar"]
+
+        return self.problem_solver.how_would_i_solve(problem)
+
+    def can_i_solve(self, problem: str) -> Tuple[bool, str, float]:
+        """
+        Holo prüft ob sie ein Problem lösen kann.
+
+        Args:
+            problem: Das Problem
+
+        Returns:
+            (kann_lösen, grund, confidence)
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return False, "Problem Solver nicht verfügbar", 0.0
+
+        return self.problem_solver.can_i_solve(problem)
+
+    def what_do_i_know_about(self, topic: str) -> Dict:
+        """
+        Holo sucht in ihrem Wissen nach einem Thema.
+
+        Args:
+            topic: Das Thema
+
+        Returns:
+            Dict mit gefundenem Wissen
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return {}
+
+        return self.problem_solver.what_do_i_know_about(topic)
+
+    def get_thinking_summary(self) -> str:
+        """
+        Gibt eine Zusammenfassung des letzten Denkprozesses.
+
+        Holo kann sagen: "So habe ich gedacht..."
+
+        Returns:
+            Denkprotokoll als String
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return "Problem Solver nicht verfügbar"
+
+        return self.problem_solver.get_thinking_summary()
+
+    def get_problem_solver_stats(self) -> Dict:
+        """
+        Gibt Statistiken des Problem Solvers zurück.
+
+        Returns:
+            Stats-Dict
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return {"available": False}
+
+        stats = self.problem_solver.get_stats()
+        stats["available"] = True
+        return stats
 
     # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
@@ -15195,6 +15337,24 @@ class HoloPersona:
                 self.live_monitor = None
         else:
             logger.debug("📊 Live Monitor nicht verfügbar")
+
+        # ================================================================
+        # 🧠 PROBLEM SOLVER - Universelles Analytisches Denken
+        # ================================================================
+        self.problem_solver = None
+        if PROBLEM_SOLVER_AVAILABLE:
+            try:
+                self.problem_solver = create_problem_solver(
+                    project_dir=Path(__file__).parent,
+                    holo_brain=self,
+                    persist_path=self.data_path / "problem_knowledge.json" if hasattr(self, 'data_path') else None
+                )
+                logger.info("🧠 Problem Solver aktiviert (Universelles Denken)")
+            except Exception as e:
+                logger.warning(f"⚠️ Problem Solver Fehler: {e}")
+                self.problem_solver = None
+        else:
+            logger.debug("🧠 Problem Solver nicht verfügbar")
 
         # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
