@@ -4659,6 +4659,103 @@ class PiCommunicator:
         return self.live_monitor.get_full_report_for_holo()
 
     # =========================================================================
+    # 🔗 DYNAMISCHE KETTEN-ANALYSE - Was hängt von was ab?
+    # =========================================================================
+
+    def get_impact_analysis(self, module_name: str) -> Dict:
+        """
+        Analysiert die Auswirkungen wenn ein Modul ausfällt.
+
+        Holo kann sagen: "Wenn holo_database ausfällt, sind 15 andere
+        Module direkt oder indirekt betroffen."
+
+        Args:
+            module_name: Das zu analysierende Modul
+
+        Returns:
+            Dict mit direct, indirect, total_affected, critical
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {}
+
+        return self.live_monitor.get_impact_analysis(module_name)
+
+    def get_circular_dependencies(self) -> List[List[str]]:
+        """
+        Findet zirkuläre Abhängigkeiten.
+
+        Holo kann sagen: "Achtung! holo_a -> holo_b -> holo_a ist ein Zyklus."
+
+        Returns:
+            Liste von Zyklen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_circular_dependencies()
+
+    def get_broken_chains(self) -> List[Dict]:
+        """
+        Findet unterbrochene Import-Ketten.
+
+        Holo kann sagen: "holo_brain kann nicht laden weil holo_config kaputt ist."
+
+        Returns:
+            Liste von unterbrochenen Ketten
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_broken_chains()
+
+    def predict_failures(self) -> List[Dict]:
+        """
+        Sagt potentielle Fehler voraus.
+
+        Holo kann sagen: "Ich sehe potentielle Probleme:
+        1. holo_database ist ein Single-Point-of-Failure"
+
+        Returns:
+            Liste von Vorhersagen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.predict_failures()
+
+    def explain_failure(self, module_name: str) -> str:
+        """
+        Erklärt warum ein Modul fehlschlägt.
+
+        Holo kann sagen: "holo_brain funktioniert nicht weil..."
+
+        Args:
+            module_name: Das fehlerhafte Modul
+
+        Returns:
+            Erklärung als String
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return "Live Monitor nicht verfügbar"
+
+        return self.live_monitor.explain_failure(module_name)
+
+    def get_dependency_summary(self) -> str:
+        """
+        Erstellt eine Zusammenfassung der Abhängigkeiten.
+
+        Holo kann sagen: "Ich habe 94 Module mit durchschnittlich 3 Abhängigkeiten.
+        5 Module sind kritische Knotenpunkte."
+
+        Returns:
+            Zusammenfassung als String
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return "Live Monitor nicht verfügbar"
+
+        return self.live_monitor.get_dependency_summary_for_holo()
+
+    # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
     # =========================================================================
 

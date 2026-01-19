@@ -1098,6 +1098,400 @@ class HoloLiveMonitor:
 
         return "\n".join(lines)
 
+    # =========================================================================
+    # DYNAMISCHE KETTEN-ANALYSE - Was hängt von was ab?
+    # =========================================================================
+
+    def get_dependency_graph(self) -> Dict[str, List[str]]:
+        """
+        Gibt den Abhängigkeits-Graphen zurück.
+
+        Zeigt: Modul X hängt von [Y, Z] ab.
+
+        Returns:
+            Dict: Modul -> Liste der Abhängigkeiten
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return {
+                name: list(deps)
+                for name, deps in analysis.dependency_graph.items()
+            }
+        except ImportError:
+            # Fallback: Eigene einfache Analyse
+            graph = {}
+            for name, health in self.modules.items():
+                graph[name] = [
+                    dep for dep in health.dependencies
+                    if dep in self.modules
+                ]
+            return graph
+
+    def get_reverse_dependencies(self) -> Dict[str, List[str]]:
+        """
+        Gibt die umgekehrten Abhängigkeiten zurück.
+
+        Zeigt: Wenn Modul X kaputt ist, sind [Y, Z] betroffen.
+
+        Holo kann sagen: "Wenn holo_database nicht funktioniert,
+        dann sind auch holo_brain und holo_memory betroffen."
+
+        Returns:
+            Dict: Modul -> Liste der abhängigen Module
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return {
+                name: list(deps)
+                for name, deps in analysis.reverse_deps.items()
+            }
+        except ImportError:
+            # Fallback: Berechne aus Abhängigkeits-Graph
+            graph = self.get_dependency_graph()
+            reverse = {}
+            for name, deps in graph.items():
+                for dep in deps:
+                    if dep not in reverse:
+                        reverse[dep] = []
+                    reverse[dep].append(name)
+            return reverse
+
+    def get_impact_analysis(self, module_name: str) -> Dict:
+        """
+        Analysiert die Auswirkungen wenn ein Modul ausfällt.
+
+        Holo kann sagen: "Wenn holo_database ausfällt, sind 15 andere
+        Module direkt oder indirekt betroffen."
+
+        Args:
+            module_name: Das potenziell defekte Modul
+
+        Returns:
+            Dict mit:
+            - direct: Direkt betroffene Module
+            - indirect: Indirekt betroffene (Kaskade)
+            - total_affected: Gesamtzahl
+            - critical: Ist es ein kritisches Modul?
+        """
+        reverse = self.get_reverse_dependencies()
+
+        # Direkt betroffene
+        direct = set(reverse.get(module_name, []))
+
+        # Indirekt betroffene (rekursiv)
+        indirect = set()
+        to_check = list(direct)
+        checked = {module_name}
+
+        while to_check:
+            current = to_check.pop(0)
+            if current in checked:
+                continue
+            checked.add(current)
+
+            affected = reverse.get(current, [])
+            for mod in affected:
+                if mod not in direct and mod not in indirect:
+                    indirect.add(mod)
+                    to_check.append(mod)
+
+        return {
+            "module": module_name,
+            "direct": list(direct),
+            "indirect": list(indirect),
+            "total_affected": len(direct) + len(indirect),
+            "critical": len(direct) + len(indirect) > 10,
+        }
+
+    def get_circular_dependencies(self) -> List[List[str]]:
+        """
+        Findet zirkuläre Abhängigkeiten.
+
+        Holo kann sagen: "Achtung! holo_a -> holo_b -> holo_c -> holo_a
+        ist ein Zyklus der Probleme verursachen kann."
+
+        Returns:
+            Liste von Zyklen (jeweils Liste der Module im Zyklus)
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return analysis.circular_deps
+        except ImportError:
+            # Fallback: Eigene Zyklus-Erkennung
+            graph = self.get_dependency_graph()
+            cycles = []
+
+            def find_cycle(start: str, path: List[str], visited: set):
+                if start in path:
+                    cycle_start = path.index(start)
+                    cycles.append(path[cycle_start:] + [start])
+                    return
+                if start in visited:
+                    return
+                visited.add(start)
+                path.append(start)
+                for neighbor in graph.get(start, []):
+                    find_cycle(neighbor, path.copy(), visited)
+
+            for node in graph:
+                find_cycle(node, [], set())
+
+            # Deduplizieren
+            unique_cycles = []
+            seen = set()
+            for cycle in cycles:
+                key = tuple(sorted(cycle[:-1]))
+                if key not in seen:
+                    seen.add(key)
+                    unique_cycles.append(cycle)
+
+            return unique_cycles
+
+    def get_broken_chains(self) -> List[Dict]:
+        """
+        Findet unterbrochene Import-Ketten.
+
+        Holo kann sagen: "holo_brain kann holo_personality nicht laden,
+        weil holo_emotions einen Fehler hat."
+
+        Returns:
+            Liste von unterbrochenen Ketten mit Details
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return [
+                {
+                    "module": mod,
+                    "depends_on": dep,
+                    "error": error,
+                    "chain": self._trace_chain(mod, dep, analysis)
+                }
+                for mod, dep, error in analysis.broken_import_chains
+            ]
+        except ImportError:
+            # Fallback: Eigene Analyse
+            broken = []
+            for name, health in self.modules.items():
+                if not health.is_healthy:
+                    for dep in health.dependencies:
+                        if dep in self.modules:
+                            dep_health = self.modules[dep]
+                            if not dep_health.is_healthy:
+                                broken.append({
+                                    "module": name,
+                                    "depends_on": dep,
+                                    "error": dep_health.import_error or "Import fehlgeschlagen",
+                                    "chain": [name, dep]
+                                })
+            return broken
+
+    def _trace_chain(self, start: str, target: str, analysis) -> List[str]:
+        """Verfolgt die Import-Kette von start zu target"""
+        chain = [start]
+        current = start
+
+        while current != target and len(chain) < 10:
+            if current not in analysis.modules:
+                break
+            module = analysis.modules[current]
+            deps = list(module.uses_modules)
+
+            if target in deps:
+                chain.append(target)
+                break
+
+            # Finde nächsten Schritt Richtung target
+            for dep in deps:
+                if dep in analysis.modules:
+                    chain.append(dep)
+                    current = dep
+                    break
+            else:
+                break
+
+        return chain
+
+    def get_import_tree(self) -> Dict[str, List[str]]:
+        """
+        Gibt den Import-Baum zurück.
+
+        Zeigt: Modul X wird importiert von [Y, Z].
+
+        Returns:
+            Dict: Modul -> Liste der importierenden Module
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return analysis.import_tree
+        except ImportError:
+            return self.get_reverse_dependencies()
+
+    def predict_failures(self) -> List[Dict]:
+        """
+        Sagt potentielle Fehler voraus basierend auf der Kettenanalyse.
+
+        Holo kann sagen: "Ich sehe potentielle Probleme:
+        1. holo_database ist ein Single-Point-of-Failure (23 Module abhängig)
+        2. Es gibt 2 zirkuläre Abhängigkeiten die Probleme verursachen können"
+
+        Returns:
+            Liste von Vorhersagen mit Risiko-Level
+        """
+        predictions = []
+
+        # 1. Finde Single-Points-of-Failure
+        reverse = self.get_reverse_dependencies()
+        for mod, dependents in reverse.items():
+            if len(dependents) > 10:
+                predictions.append({
+                    "type": "single_point_of_failure",
+                    "module": mod,
+                    "risk": "high",
+                    "message": f"{mod} ist kritisch - {len(dependents)} Module hängen davon ab",
+                    "affected_count": len(dependents),
+                })
+
+        # 2. Finde zirkuläre Abhängigkeiten
+        cycles = self.get_circular_dependencies()
+        for cycle in cycles:
+            predictions.append({
+                "type": "circular_dependency",
+                "modules": cycle,
+                "risk": "medium",
+                "message": f"Zyklus erkannt: {' -> '.join(cycle)}",
+            })
+
+        # 3. Finde unterbrochene Ketten
+        broken = self.get_broken_chains()
+        for chain in broken:
+            predictions.append({
+                "type": "broken_chain",
+                "module": chain["module"],
+                "risk": "high",
+                "message": f"{chain['module']} hat unterbrochene Abhängigkeit zu {chain['depends_on']}",
+                "error": chain["error"],
+            })
+
+        # 4. Finde sehr komplexe Module (potentielle Fehlerquellen)
+        try:
+            quality = self.get_code_quality()
+            if quality.get("avg_complexity", 0) > 10:
+                predictions.append({
+                    "type": "high_complexity",
+                    "risk": "medium",
+                    "message": f"Hohe durchschnittliche Komplexität ({quality['avg_complexity']:.1f})",
+                })
+        except Exception:
+            pass
+
+        return predictions
+
+    def explain_failure(self, module_name: str) -> str:
+        """
+        Erklärt warum ein Modul fehlschlägt und was die Ursache sein könnte.
+
+        Holo kann sagen: "holo_brain funktioniert nicht, weil:
+        1. holo_database (Import-Fehler) nicht lädt
+        2. Das wiederum braucht holo_config
+        3. Lösung: Prüfe zuerst holo_config"
+
+        Args:
+            module_name: Das fehlerhafte Modul
+
+        Returns:
+            Erklärung als String
+        """
+        if module_name not in self.modules:
+            return f"Modul {module_name} nicht gefunden."
+
+        health = self.modules[module_name]
+        lines = [f"=== Fehler-Analyse für {module_name} ===", ""]
+
+        if health.is_healthy:
+            return f"{module_name} ist gesund und funktioniert."
+
+        # Direkter Fehler
+        if not health.syntax_ok:
+            lines.append(f"SYNTAX-FEHLER: Das Modul hat einen Syntax-Fehler.")
+            for issue in health.issues:
+                if issue.category == IssueCategory.SYNTAX:
+                    lines.append(f"  Zeile {issue.line}: {issue.message}")
+            lines.append("\nLösung: Behebe den Syntax-Fehler im Modul.")
+            return "\n".join(lines)
+
+        if not health.import_ok:
+            lines.append(f"IMPORT-FEHLER: {health.import_error}")
+
+            # Prüfe Abhängigkeiten
+            broken_deps = []
+            for dep in health.dependencies:
+                if dep in self.modules:
+                    dep_health = self.modules[dep]
+                    if not dep_health.is_healthy:
+                        broken_deps.append((dep, dep_health.import_error or "Fehler"))
+
+            if broken_deps:
+                lines.append("\nUrsachen-Kette:")
+                for i, (dep, error) in enumerate(broken_deps, 1):
+                    lines.append(f"  {i}. {dep}: {error[:60]}")
+
+                lines.append("\nLösung: Behebe die Abhängigkeiten in dieser Reihenfolge:")
+                for i, (dep, _) in enumerate(reversed(broken_deps), 1):
+                    lines.append(f"  {i}. {dep}")
+                lines.append(f"  {len(broken_deps)+1}. {module_name}")
+            else:
+                lines.append("\nDas Modul hat einen direkten Import-Fehler.")
+                lines.append("Lösung: Prüfe fehlende externe Abhängigkeiten (pip install ...)")
+
+        return "\n".join(lines)
+
+    def get_dependency_summary_for_holo(self) -> str:
+        """
+        Erstellt eine Zusammenfassung der Abhängigkeiten für Holo.
+
+        Holo kann sagen: "Ich habe 94 Module mit durchschnittlich 3 Abhängigkeiten.
+        5 Module sind kritische Knotenpunkte. Keine zirkulären Abhängigkeiten gefunden."
+        """
+        graph = self.get_dependency_graph()
+        reverse = self.get_reverse_dependencies()
+        cycles = self.get_circular_dependencies()
+
+        total_modules = len(graph)
+        total_deps = sum(len(deps) for deps in graph.values())
+        avg_deps = total_deps / max(1, total_modules)
+
+        # Kritische Module (> 5 abhängige Module)
+        critical = [mod for mod, deps in reverse.items() if len(deps) > 5]
+
+        lines = []
+        lines.append(f"Module: {total_modules}")
+        lines.append(f"Abhängigkeiten: {total_deps} (durchschnittlich {avg_deps:.1f} pro Modul)")
+
+        if critical:
+            lines.append(f"Kritische Knotenpunkte: {len(critical)} ({', '.join(critical[:3])}...)")
+
+        if cycles:
+            lines.append(f"Zirkuläre Abhängigkeiten: {len(cycles)} gefunden!")
+        else:
+            lines.append("Keine zirkulären Abhängigkeiten.")
+
+        return "\n".join(lines)
+
 
 # =============================================================================
 # FACTORY FUNKTION
