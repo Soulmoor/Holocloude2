@@ -843,6 +843,39 @@ MEDIA_APIS = {
 }
 ```
 
+### 14.5 Discord Bot
+
+**Discord Integration für DMs & Proaktive Nachrichten:**
+```python
+DISCORD = {
+    "modul": "holo_discord.py",
+    "features": [
+        "DM-Kommunikation mit Holo",
+        "Server-Channel Support",
+        "Proaktive Nachrichten per DM",
+        "Typing-Indikator",
+        "Commands (!status, !energie, !stimmung)"
+    ],
+    "config": {
+        "token": "DEIN_BOT_TOKEN",
+        "allowed_user_ids": [123456789],
+        "proactive_dm_user_id": 123456789,
+        "proactive_enabled": True
+    }
+}
+```
+
+**Verwendung:**
+```python
+# Discord Bot starten (in separatem Thread/Prozess)
+from holo_discord import create_discord_bot
+bot = create_discord_bot(holo_brain=persona, config_dict=discord_config)
+bot.run()  # Blocking
+
+# Proaktive Nachricht senden
+persona.send_proactive_discord("Hey, ich hab was Interessantes gefunden! 🌟")
+```
+
 ---
 
 ## 15. Konfiguration

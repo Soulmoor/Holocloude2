@@ -162,7 +162,24 @@
         "enable_media_discovery": true,
         "enable_proactive_messages": true,
         "enable_autonomous_activity": true,
-        "enable_web_curiosity": true
+        "enable_web_curiosity": true,
+        "enable_discord": true
+    },
+
+    "discord": {
+        "_comment": "Discord Bot Konfiguration - Token NICHT committen!",
+        "token": "",
+        "allowed_user_ids": [],
+        "allowed_channel_ids": [],
+        "command_prefix": "!",
+        "proactive_enabled": true,
+        "proactive_dm_user_id": 0,
+        "proactive_check_interval": 60,
+        "typing_enabled": true,
+        "typing_delay_per_char": 0.03,
+        "typing_max_delay": 5.0,
+        "min_response_interval": 1.0,
+        "status_message": "Holo ist da! 💕"
     },
 
     "presence_rules": [

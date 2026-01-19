@@ -48,6 +48,11 @@ pytest-asyncio>=0.21.0
 # websockets>=10.0
 
 # ===================
+# DISCORD BOT (Optional - uncomment if needed)
+# ===================
+# discord.py>=2.0.0
+
+# ===================
 # EXTERNAL TOOLS (Not Python packages - install separately)
 # ===================
 # yt-dlp - YouTube downloader (install via: pip install yt-dlp OR system package)

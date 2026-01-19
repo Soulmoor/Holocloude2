@@ -599,6 +599,29 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloVoiceInterface nicht verfügbar: {e}")
 
 # =============================================================================
+# === HOLO DISCORD - Discord Bot Integration ===
+# =============================================================================
+try:
+    from holo_discord import (
+        HoloDiscordBot,
+        HoloDiscordBridge,
+        DiscordConfig,
+        create_discord_bot,
+        load_discord_config,
+        DISCORD_AVAILABLE,
+    )
+    DISCORD_BOT_AVAILABLE = DISCORD_AVAILABLE
+    logger.info("[Brain] ✓ HoloDiscord (Discord Bot) geladen")
+except ImportError as e:
+    DISCORD_BOT_AVAILABLE = False
+    HoloDiscordBot = None
+    HoloDiscordBridge = None
+    DiscordConfig = None
+    create_discord_bot = None
+    load_discord_config = None
+    logger.warning(f"[Brain] HoloDiscord nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -4177,6 +4200,57 @@ class PiCommunicator:
             priority
         )
         return self.send_command(cmd)
+
+    def send_discord_message(self, message: str, user_id: int = None) -> bool:
+        """
+        Sendet eine Nachricht über Discord DM.
+
+        Args:
+            message: Die zu sendende Nachricht
+            user_id: Optional - spezifische Discord User ID
+
+        Returns:
+            True wenn erfolgreich, False sonst
+        """
+        if not hasattr(self, 'discord_bridge') or not self.discord_bridge:
+            logger.debug("Discord Bridge nicht verfügbar")
+            return False
+
+        try:
+            # Async in sync context - queue message
+            self.discord_bridge.queue_message(message, user_id, priority="normal")
+            logger.info(f"📨 Discord Nachricht gequeued: {message[:50]}...")
+            return True
+        except Exception as e:
+            logger.error(f"Discord Nachricht Fehler: {e}")
+            return False
+
+    def send_proactive_discord(self, message: str, reason: str = "proactive") -> bool:
+        """
+        Sendet eine proaktive Nachricht über Discord.
+
+        Args:
+            message: Die proaktive Nachricht
+            reason: Grund für die Nachricht (für Logging)
+
+        Returns:
+            True wenn gequeued
+        """
+        if not hasattr(self, 'discord_bridge') or not self.discord_bridge:
+            return False
+
+        try:
+            self.discord_bridge.queue_message(message, priority="normal")
+
+            # Logging
+            if hasattr(self, 'memory') and self.memory:
+                self.memory.log_proactive_action(f"discord_{reason}", message)
+
+            logger.info(f"💬 Proaktive Discord-Nachricht: {message[:50]}...")
+            return True
+        except Exception as e:
+            logger.error(f"Proaktive Discord Fehler: {e}")
+            return False
 
     def request_nas_wake(self, reason: str = "Holo") -> dict:
         """NAS aufwecken - Pi-Control entscheidet!"""
@@ -14199,6 +14273,31 @@ class HoloPersona:
         except Exception as e:
             logger.warning(f"⚠️ Conversation Engine nicht verfügbar: {e}")
             self.conversation_engine = None
+
+        # ================================================================
+        # 🤖 DISCORD BOT - Discord Integration für DMs & Proaktive Nachrichten
+        # ================================================================
+        self.discord_bot = None
+        self.discord_bridge = None
+        if DISCORD_BOT_AVAILABLE:
+            try:
+                # Config laden
+                discord_config = load_discord_config() if load_discord_config else {}
+                if discord_config and discord_config.get('token'):
+                    self.discord_bot = create_discord_bot(
+                        holo_brain=self,
+                        config_dict=discord_config
+                    )
+                    self.discord_bridge = HoloDiscordBridge(self.discord_bot)
+                    logger.info("🤖 Discord Bot initialisiert (Token vorhanden)")
+                else:
+                    logger.info("🤖 Discord Bot verfügbar aber kein Token konfiguriert")
+            except Exception as e:
+                logger.warning(f"⚠️ Discord Bot Fehler: {e}")
+                self.discord_bot = None
+                self.discord_bridge = None
+        else:
+            logger.debug("🤖 Discord Bot nicht verfügbar (discord.py nicht installiert)")
 
         # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
