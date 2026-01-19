@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Holo Live Monitor v1.0 - Echtzeit-Systemuberwachung fur Holo
+Holo Live Monitor v2.0 - Echtzeit-Systemuberwachung fur Holo
 
-Basierend auf holo_tester.py, aber als Hintergrund-Dienst konzipiert.
+Basierend auf holo_tester.py, nutzt den IntelligentAnalyzer direkt.
 Holo kann damit live sehen, wenn etwas nicht stimmt und darauf reagieren.
 
 Features:
 - Kontinuierliche Hintergrund-Uberwachung
+- ALLE Tester-Funktionen verfugbar:
+  * Security-Audit (SQL Injection, Secrets, etc.)
+  * Code-Komplexitat (McCabe, Wartbarkeits-Index)
+  * Code-Qualitat (bare excepts, TODOs, FIXMEs)
+  * Config-Validierung
+  * Runtime-Tests (Klassen, Funktionen)
+  * Integration-Tests (Cross-Module)
+  * Unused-Code-Detection
+  * Cross-Module Methoden-Check
 - Echtzeit-Benachrichtigungen bei Problemen
 - Integration mit Control Center
 - Proaktive Warnungen an Holo
 - Automatische Recovery-Vorschlage
 
 Author: Kira & Claude
-Version: 1.0
+Version: 2.0
 """
 
 import ast
@@ -783,6 +792,311 @@ class HoloLiveMonitor:
             control_center.register_module(info)
 
         logger.info("LiveMonitor mit Control Center integriert")
+
+    # =========================================================================
+    # ERWEITERTE ANALYSE - Nutzt den holo_tester.py Analyzer
+    # =========================================================================
+
+    def run_deep_analysis(self, quick_mode: bool = True) -> Dict:
+        """
+        Fuhrt eine tiefe Analyse mit dem IntelligentAnalyzer durch.
+
+        Nutzt alle Funktionen aus holo_tester.py:
+        - Security-Audit
+        - Code-Komplexitat
+        - Code-Qualitat
+        - Config-Validierung
+        - Runtime-Tests
+        - Integration-Tests
+        - Unused-Code-Detection
+
+        Args:
+            quick_mode: True fur schnelle Analyse, False fur volle Analyse
+
+        Returns:
+            Dict mit Analyse-Ergebnissen
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+        except ImportError:
+            return {"error": "holo_tester nicht verfugbar"}
+
+        analyzer = IntelligentAnalyzer(self.project_dir)
+        analysis = analyzer.analyze(quick_mode=quick_mode)
+
+        # Extrahiere wichtige Ergebnisse
+        results = {
+            "modules": {
+                "total": len(analysis.modules),
+                "import_ok": len(analysis.import_successes),
+                "import_failed": len(analysis.import_failures),
+            },
+            "security": {
+                "issues_count": len(analysis.all_security_issues),
+                "issues": [
+                    {
+                        "severity": i.severity,
+                        "module": i.module,
+                        "message": i.message,
+                        "line": i.line,
+                    }
+                    for i in analysis.all_security_issues[:10]
+                ],
+            },
+            "quality": {
+                "issues_count": len(analysis.all_quality_issues),
+                "bare_excepts": analysis.bare_excepts_count,
+                "mutable_defaults": analysis.mutable_defaults_count,
+                "todos": analysis.todos_count,
+                "fixmes": analysis.fixmes_count,
+                "long_functions": analysis.long_functions_count,
+            },
+            "complexity": {
+                "total": analysis.total_complexity,
+                "average": analysis.avg_complexity,
+                "complex_functions": analysis.complex_functions[:5],
+            },
+            "integration": {
+                "passed": analysis.integration_tests_passed,
+                "failed": analysis.integration_tests_failed,
+            },
+            "runtime": {
+                "passed": analysis.runtime_tests_passed,
+                "failed": analysis.runtime_tests_failed,
+            },
+            "unused": {
+                "imports": len(analysis.unused_imports),
+                "functions": len(analysis.unused_functions),
+                "classes": len(analysis.unused_classes),
+            },
+            "config": {
+                "issues": analysis.config_issues[:5],
+            },
+            "database": {
+                "tables": len(analysis.db_tables),
+                "issues": analysis.db_issues[:5],
+            },
+        }
+
+        # Erstelle Issues aus den Ergebnissen
+        self._create_issues_from_analysis(analysis)
+
+        return results
+
+    def _create_issues_from_analysis(self, analysis):
+        """Erstellt MonitorIssues aus der Analyse"""
+        # Security Issues
+        for si in analysis.all_security_issues:
+            if si.severity in ["critical", "high"]:
+                issue = MonitorIssue(
+                    severity=IssueSeverity.WARNING,
+                    category=IssueCategory.SECURITY,
+                    module=si.module,
+                    message=f"Sicherheit: {si.message}",
+                    line=si.line,
+                    suggestion=si.recommendation,
+                )
+                self._report_issue(issue)
+
+        # Import Failures (als Fehler)
+        for mod_name, error in analysis.import_failures:
+            if mod_name in self.modules:
+                continue  # Bereits erfasst
+            issue = MonitorIssue(
+                severity=IssueSeverity.ERROR,
+                category=IssueCategory.IMPORT,
+                module=mod_name,
+                message=f"Import: {error[:80]}",
+            )
+            self._report_issue(issue)
+
+        # Sehr komplexe Funktionen
+        for mod_name, func_name, complexity in analysis.complex_functions:
+            if complexity > 15:
+                issue = MonitorIssue(
+                    severity=IssueSeverity.INFO,
+                    category=IssueCategory.PERFORMANCE,
+                    module=mod_name,
+                    message=f"Hohe Komplexitat: {func_name} (CC={complexity})",
+                    suggestion="Refactoring empfohlen"
+                )
+                self._report_issue(issue)
+
+    def get_security_issues(self) -> List[Dict]:
+        """
+        Gibt alle Sicherheitsprobleme zuruck.
+
+        Holo kann sagen: "Ich habe Sicherheitsbedenken bei..."
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            # Nur Security-Audit machen
+            analyzer._security_audit()
+
+            return [
+                {
+                    "severity": i.severity,
+                    "module": i.module,
+                    "message": i.message,
+                    "line": i.line,
+                    "code": i.code,
+                    "recommendation": i.recommendation,
+                }
+                for i in analysis.all_security_issues
+            ]
+        except ImportError:
+            return []
+
+    def get_code_quality(self) -> Dict:
+        """
+        Gibt Code-Qualitatsmetriken zuruck.
+
+        Holo kann sagen: "Meine Code-Qualitat ist bei X%..."
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            return {
+                "total_lines": analysis.total_lines,
+                "total_functions": analysis.total_functions,
+                "total_classes": analysis.total_classes,
+                "avg_complexity": analysis.avg_complexity,
+                "avg_docstring_coverage": analysis.avg_docstring_coverage,
+                "avg_type_coverage": analysis.avg_type_coverage,
+                "quality_issues": len(analysis.all_quality_issues),
+                "bare_excepts": analysis.bare_excepts_count,
+                "todos": analysis.todos_count,
+                "fixmes": analysis.fixmes_count,
+            }
+        except ImportError:
+            return {}
+
+    def get_complexity_report(self) -> Dict:
+        """
+        Gibt Komplexitats-Report zuruck.
+
+        Holo kann sagen: "Diese Funktionen sind sehr komplex..."
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            # Top komplexe Module
+            module_complexity = {}
+            for mod_name, module in analysis.modules.items():
+                if module.complexity_info:
+                    module_complexity[mod_name] = {
+                        "avg": module.complexity_info.avg_complexity,
+                        "max": module.complexity_info.max_complexity,
+                        "maintainability": module.complexity_info.maintainability_index,
+                        "most_complex": module.complexity_info.max_complex_function,
+                    }
+
+            return {
+                "total_complexity": analysis.total_complexity,
+                "avg_complexity": analysis.avg_complexity,
+                "complex_functions": [
+                    {"module": m, "function": f, "complexity": c}
+                    for m, f, c in analysis.complex_functions[:10]
+                ],
+                "modules": module_complexity,
+            }
+        except ImportError:
+            return {}
+
+    def get_unused_code(self) -> Dict:
+        """
+        Gibt unbenutzten Code zuruck.
+
+        Holo kann sagen: "Diese Funktionen werden nicht benutzt..."
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=False)  # Volle Analyse nötig
+
+            return {
+                "unused_imports": analysis.unused_imports[:20],
+                "unused_functions": analysis.unused_functions[:20],
+                "unused_classes": analysis.unused_classes[:10],
+            }
+        except ImportError:
+            return {}
+
+    def get_integration_status(self) -> Dict:
+        """
+        Gibt Integration-Status zuruck.
+
+        Holo kann sagen: "Alle Module kommunizieren korrekt..."
+        """
+        try:
+            from holo_tester import IntelligentAnalyzer
+            analyzer = IntelligentAnalyzer(self.project_dir)
+            analysis = analyzer.analyze(quick_mode=True)
+
+            failed = [
+                {"from": f, "to": t, "error": e}
+                for f, t, ok, e in analysis.integration_results
+                if not ok
+            ]
+
+            return {
+                "passed": analysis.integration_tests_passed,
+                "failed": analysis.integration_tests_failed,
+                "failures": failed[:10],
+                "circular_deps": analysis.circular_deps,
+            }
+        except ImportError:
+            return {}
+
+    def get_full_report_for_holo(self) -> str:
+        """
+        Erstellt einen vollstandigen Report fur Holo.
+
+        Holo kann sagen: "Hier ist mein Systemstatus..."
+        """
+        lines = ["=== HOLO SYSTEMSTATUS ===", ""]
+
+        # Basis-Gesundheit
+        lines.append(f"Gesundheit: {self.get_health_summary()}")
+        lines.append("")
+
+        # Erweiterte Analyse
+        try:
+            results = self.run_deep_analysis(quick_mode=True)
+
+            # Module
+            lines.append(f"Module: {results['modules']['import_ok']}/{results['modules']['total']} OK")
+
+            # Sicherheit
+            if results['security']['issues_count'] > 0:
+                lines.append(f"Sicherheit: {results['security']['issues_count']} Hinweise")
+
+            # Qualitat
+            lines.append(f"Qualitat: {results['quality']['bare_excepts']} bare excepts, "
+                        f"{results['quality']['todos']} TODOs")
+
+            # Komplexitat
+            lines.append(f"Komplexitat: durchschnittlich {results['complexity']['average']:.1f}")
+
+            # Integration
+            lines.append(f"Integration: {results['integration']['passed']} OK, "
+                        f"{results['integration']['failed']} Fehler")
+
+            # Ungenutzter Code
+            lines.append(f"Ungenutzter Code: {results['unused']['functions']} Funktionen, "
+                        f"{results['unused']['imports']} Imports")
+
+        except Exception as e:
+            lines.append(f"Erweiterte Analyse nicht verfugbar: {e}")
+
+        return "\n".join(lines)
 
 
 # =============================================================================

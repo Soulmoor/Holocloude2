@@ -4549,6 +4549,116 @@ class PiCommunicator:
             logger.warning(f"⚠️ FEHLER: {module} - {message}")
 
     # =========================================================================
+    # 📊 ERWEITERTE LIVE MONITOR FUNKTIONEN (nutzt holo_tester.py)
+    # =========================================================================
+
+    def run_deep_analysis(self, quick_mode: bool = True) -> Dict:
+        """
+        Führt eine tiefe Analyse aller Module durch.
+
+        Nutzt ALLE Funktionen aus holo_tester.py:
+        - Security-Audit
+        - Code-Komplexität
+        - Code-Qualität
+        - Integration-Tests
+        - Unused-Code
+
+        Args:
+            quick_mode: True für schnelle Analyse
+
+        Returns:
+            Dict mit Analyse-Ergebnissen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {"error": "Live Monitor nicht verfügbar"}
+
+        return self.live_monitor.run_deep_analysis(quick_mode)
+
+    def get_security_issues(self) -> List[Dict]:
+        """
+        Gibt alle Sicherheitsprobleme zurück.
+
+        Holo kann sagen: "Ich habe Sicherheitsbedenken bei..."
+
+        Returns:
+            Liste von Sicherheitsproblemen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_security_issues()
+
+    def get_code_quality(self) -> Dict:
+        """
+        Gibt Code-Qualitätsmetriken zurück.
+
+        Holo kann sagen: "Meine Code-Qualität..."
+
+        Returns:
+            Dict mit Qualitätsmetriken
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {}
+
+        return self.live_monitor.get_code_quality()
+
+    def get_complexity_report(self) -> Dict:
+        """
+        Gibt Komplexitäts-Report zurück.
+
+        Holo kann sagen: "Diese Funktionen sind sehr komplex..."
+
+        Returns:
+            Dict mit Komplexitätsdaten
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {}
+
+        return self.live_monitor.get_complexity_report()
+
+    def get_unused_code(self) -> Dict:
+        """
+        Gibt ungenutzten Code zurück.
+
+        Holo kann sagen: "Diese Funktionen werden nicht benutzt..."
+
+        Returns:
+            Dict mit ungenutztem Code
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {}
+
+        return self.live_monitor.get_unused_code()
+
+    def get_integration_status(self) -> Dict:
+        """
+        Gibt Integration-Status zurück.
+
+        Holo kann sagen: "Alle Module kommunizieren korrekt..."
+
+        Returns:
+            Dict mit Integration-Status
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return {}
+
+        return self.live_monitor.get_integration_status()
+
+    def get_full_system_report(self) -> str:
+        """
+        Erstellt einen vollständigen System-Report.
+
+        Holo kann sagen: "Hier ist mein kompletter Systemstatus..."
+
+        Returns:
+            Formatierter Report-String
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return "Live Monitor nicht verfügbar"
+
+        return self.live_monitor.get_full_report_for_holo()
+
+    # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
     # =========================================================================
 
