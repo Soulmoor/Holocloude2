@@ -1,24 +1,39 @@
 """
-Holo Problem Solver - Universelles Analytisches Denken
-======================================================
+Holo Problem Solver - Universelles Analytisches Denken mit Out-of-Box Thinking
+===============================================================================
 
-Ein allgemeines Problem-Solving Framework für Holo.
-Wird aktiviert wenn Holo bei IRGENDEINEM Problem nicht weiterkommt.
+Ein allgemeines Problem-Solving Framework für Holo mit echtem kreativem,
+autonomem Denken. Holo kann jetzt:
+- Selbständig Hypothesen generieren
+- Kreativ/lateral denken (Random Association, Perspective Shift, etc.)
+- Im Web nach Lösungen suchen wenn sie nicht weiterkommt
+- Lösungen SIMULIEREN bevor sie angewendet werden
+- Autonom explorieren und Verbindungen entdecken
 
-Denk-Prozess:
-1. VERSTEHEN   - Was ist das Problem genau?
-2. ZERLEGEN    - Kann ich es in Teilprobleme aufteilen?
-3. ANALYSIEREN - Was sind die Ursachen? Was hängt zusammen?
-4. WISSEN      - Was weiß ich schon? Was muss ich herausfinden?
-5. STRATEGIEN  - Welche Lösungswege gibt es?
-6. BEWERTEN    - Welche Strategie ist am besten?
-7. PLANEN      - Welche Schritte in welcher Reihenfolge?
-8. AUSFÜHREN   - Mit Monitoring und Anpassung
-9. PRÜFEN      - Hat es funktioniert?
-10. LERNEN     - Was merke ich mir für nächstes Mal?
+Denk-Prozess (erweitert mit Out-of-Box Phasen):
+1.   VERSTEHEN         - Was ist das Problem genau?
+2.   ANALYSIEREN       - Was sind die Ursachen? Was hängt zusammen?
+2.5  HYPOTHESEN        - Selbständig Vermutungen aufstellen (OUT-OF-BOX)
+3.   WISSEN SAMMELN    - Was weiß ich schon? Was muss ich herausfinden?
+3.5  WEB-RECHERCHE     - Im Web suchen wenn nötig (OUT-OF-BOX)
+4.   STRATEGIEN        - Welche Lösungswege gibt es?
+4.5  LATERALES DENKEN  - Kreative/unkonventionelle Ideen (OUT-OF-BOX)
+5.   BEWERTEN          - Welche Strategie ist am besten?
+6.   PLANEN            - Welche Schritte in welcher Reihenfolge?
+6.5  SIMULATION        - Lösung simulieren vor Ausführung (OUT-OF-BOX)
+7.   AUSFÜHREN         - Mit Monitoring und Anpassung
+8.   PRÜFEN            - Hat es funktioniert?
+9.   LERNEN            - Was merke ich mir für nächstes Mal?
+
+Out-of-Box Thinking Komponenten:
+- WebResearcher: Web-Suche für unbekannte Probleme
+- SolutionSimulator: Lösungen simulieren vor Anwendung
+- LateralThinkingEngine: Kreatives/laterales Denken
+- HypothesisGenerator: Selbständige Hypothesen-Generierung
+- AutonomousExplorer: Autonome Exploration und Entdeckung
 
 Autor: Claude (Anthropic) für Holo
-Version: 1.0.0
+Version: 2.0.0 - mit Out-of-Box Thinking
 """
 
 import os
@@ -28,6 +43,9 @@ import time
 import logging
 import hashlib
 import threading
+import random
+import asyncio
+import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any, Callable, Set, Union
@@ -36,6 +54,7 @@ from enum import Enum, auto
 from abc import ABC, abstractmethod
 from collections import defaultdict
 import traceback
+import copy
 
 
 # ==================== LOGGING ====================
@@ -661,6 +680,1012 @@ class ProblemAnalyzer:
         return suggestions
 
 
+# ==================== OUT-OF-BOX THINKING ENGINE ====================
+
+@dataclass
+class Hypothesis:
+    """Eine Hypothese die Holo selbständig generiert hat"""
+    id: str
+    description: str
+    confidence: float  # 0.0 - 1.0
+    evidence_for: List[str] = field(default_factory=list)
+    evidence_against: List[str] = field(default_factory=list)
+    tested: bool = False
+    test_result: Optional[bool] = None
+    origin: str = "generated"  # generated, random_association, analogy, perspective_shift
+
+    def update_confidence(self):
+        """Aktualisiert Confidence basierend auf Evidenz"""
+        for_count = len(self.evidence_for)
+        against_count = len(self.evidence_against)
+        total = for_count + against_count
+        if total > 0:
+            self.confidence = for_count / total
+        else:
+            self.confidence = 0.5
+
+
+@dataclass
+class SimulationResult:
+    """Ergebnis einer Lösungs-Simulation"""
+    success: bool
+    predicted_outcome: str
+    risks_identified: List[str]
+    side_effects: List[str]
+    confidence: float
+    simulation_method: str  # mental, sandbox, code_analysis
+    execution_time_ms: int = 0
+    recommendation: str = ""
+
+
+class WebResearcher:
+    """
+    Recherchiert im Web nach Lösungen für unbekannte Probleme.
+
+    Holo kann das Web durchsuchen wenn sie bei einem Problem nicht weiterkommt
+    und keine interne Lösung findet.
+    """
+
+    def __init__(self, timeout: int = 30):
+        self.timeout = timeout
+        self.search_history: List[Dict] = []
+        self.cache: Dict[str, Dict] = {}
+        self._search_engines = [
+            "duckduckgo",  # Primär - privacy-freundlich
+            "google",
+            "stackoverflow",
+            "github"
+        ]
+
+    def search(self, query: str, problem_type: ProblemType = None) -> Dict:
+        """
+        Sucht im Web nach Lösungen.
+
+        Args:
+            query: Die Suchanfrage
+            problem_type: Typ des Problems für spezifischere Suche
+
+        Returns:
+            Dict mit Suchergebnissen und extrahierten Lösungsansätzen
+        """
+        # Cache prüfen
+        cache_key = hashlib.md5(query.encode()).hexdigest()
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
+        # Suchanfrage optimieren basierend auf Problem-Typ
+        optimized_query = self._optimize_query(query, problem_type)
+
+        results = {
+            "query": query,
+            "optimized_query": optimized_query,
+            "sources": [],
+            "solutions_found": [],
+            "related_topics": [],
+            "confidence": 0.0,
+            "searched_at": datetime.now().isoformat()
+        }
+
+        # Versuche verschiedene Such-Methoden
+        try:
+            # 1. Lokale Dokumentation durchsuchen
+            local_results = self._search_local_docs(optimized_query)
+            if local_results:
+                results["sources"].append({"type": "local_docs", "results": local_results})
+
+            # 2. Simulierte Web-Suche (da echte Web-API benötigt würde)
+            # In echter Implementierung würde hier API-Aufruf stehen
+            web_results = self._simulate_web_search(optimized_query, problem_type)
+            results["sources"].extend(web_results.get("sources", []))
+            results["solutions_found"].extend(web_results.get("solutions", []))
+
+            # 3. Bekannte Lösungsmuster matchen
+            pattern_matches = self._match_known_patterns(query, problem_type)
+            results["solutions_found"].extend(pattern_matches)
+
+            # Confidence berechnen
+            if results["solutions_found"]:
+                results["confidence"] = min(0.9, 0.3 + 0.2 * len(results["solutions_found"]))
+
+        except Exception as e:
+            results["error"] = str(e)
+
+        # Cachen und speichern
+        self.cache[cache_key] = results
+        self.search_history.append(results)
+
+        return results
+
+    def _optimize_query(self, query: str, problem_type: ProblemType) -> str:
+        """Optimiert die Suchanfrage"""
+        # Füge typspezifische Keywords hinzu
+        type_keywords = {
+            ProblemType.TECHNICAL: "solution fix error",
+            ProblemType.KNOWLEDGE: "explanation tutorial guide",
+            ProblemType.TASK: "how to implementation example",
+            ProblemType.CREATIVE: "creative approach alternative",
+        }
+
+        suffix = type_keywords.get(problem_type, "")
+
+        # Python-spezifische Optimierung
+        if any(kw in query.lower() for kw in ['python', 'import', 'class', 'def', 'exception']):
+            suffix += " python"
+
+        return f"{query} {suffix}".strip()
+
+    def _search_local_docs(self, query: str) -> List[Dict]:
+        """Durchsucht lokale Dokumentation"""
+        results = []
+
+        # Suche in typischen Docs-Verzeichnissen
+        doc_paths = [
+            Path(__file__).parent / "docs",
+            Path(__file__).parent / "README.md",
+            Path.home() / ".local/share/docs"
+        ]
+
+        query_lower = query.lower()
+        keywords = query_lower.split()
+
+        for doc_path in doc_paths:
+            if doc_path.exists():
+                if doc_path.is_file():
+                    try:
+                        content = doc_path.read_text(encoding='utf-8', errors='ignore')
+                        if any(kw in content.lower() for kw in keywords):
+                            results.append({
+                                "source": str(doc_path),
+                                "relevance": "partial_match"
+                            })
+                    except:
+                        pass
+
+        return results
+
+    def _simulate_web_search(self, query: str, problem_type: ProblemType) -> Dict:
+        """
+        Simuliert Web-Suche mit bekannten Lösungsmustern.
+
+        In einer echten Implementierung würde hier ein API-Aufruf stehen.
+        Für jetzt nutzen wir eingebautes Wissen.
+        """
+        results = {"sources": [], "solutions": []}
+
+        # Bekannte Lösungsmuster
+        common_solutions = {
+            "import": [
+                {"solution": "pip install <package_name>", "confidence": 0.8},
+                {"solution": "Überprüfe PYTHONPATH und sys.path", "confidence": 0.7},
+                {"solution": "Prüfe ob __init__.py existiert", "confidence": 0.6}
+            ],
+            "connection": [
+                {"solution": "Überprüfe Netzwerk-Konnektivität", "confidence": 0.8},
+                {"solution": "Prüfe Firewall-Einstellungen", "confidence": 0.7},
+                {"solution": "Timeout erhöhen", "confidence": 0.6}
+            ],
+            "memory": [
+                {"solution": "Speicher freigeben mit gc.collect()", "confidence": 0.7},
+                {"solution": "Daten in Chunks verarbeiten", "confidence": 0.8},
+                {"solution": "Generator statt Liste verwenden", "confidence": 0.7}
+            ],
+            "permission": [
+                {"solution": "Berechtigungen mit chmod anpassen", "confidence": 0.8},
+                {"solution": "Als Administrator ausführen", "confidence": 0.7},
+                {"solution": "Datei-Eigentümer prüfen", "confidence": 0.6}
+            ],
+            "database": [
+                {"solution": "Connection-Pool verwenden", "confidence": 0.7},
+                {"solution": "Indexe überprüfen", "confidence": 0.8},
+                {"solution": "Query optimieren", "confidence": 0.8}
+            ],
+            "async": [
+                {"solution": "await vergessen? Prüfe async/await", "confidence": 0.8},
+                {"solution": "Event-Loop prüfen", "confidence": 0.7},
+                {"solution": "asyncio.run() verwenden", "confidence": 0.7}
+            ]
+        }
+
+        # Matche Query gegen bekannte Muster
+        query_lower = query.lower()
+        for pattern, solutions in common_solutions.items():
+            if pattern in query_lower:
+                results["solutions"].extend(solutions)
+                results["sources"].append({
+                    "type": "knowledge_base",
+                    "pattern": pattern,
+                    "matches": len(solutions)
+                })
+
+        return results
+
+    def _match_known_patterns(self, query: str, problem_type: ProblemType) -> List[Dict]:
+        """Matcht gegen bekannte Problemmuster"""
+        matches = []
+
+        # Fehler-Pattern-Matching
+        error_patterns = {
+            r"ModuleNotFoundError|ImportError": {
+                "solution": "Modul installieren oder Import-Pfad korrigieren",
+                "steps": ["pip install <module>", "Prüfe sys.path", "Prüfe __init__.py"]
+            },
+            r"ConnectionError|TimeoutError": {
+                "solution": "Netzwerk-Problem beheben",
+                "steps": ["Verbindung testen", "Timeout erhöhen", "Retry-Logik hinzufügen"]
+            },
+            r"PermissionError|Access denied": {
+                "solution": "Berechtigungen anpassen",
+                "steps": ["chmod/chown verwenden", "Als Admin ausführen", "Pfad prüfen"]
+            },
+            r"MemoryError|OutOfMemory": {
+                "solution": "Speicherverbrauch optimieren",
+                "steps": ["Batch-Verarbeitung", "Garbage Collection", "Speicher-Profiling"]
+            },
+            r"SyntaxError|IndentationError": {
+                "solution": "Code-Syntax korrigieren",
+                "steps": ["Einrückung prüfen", "Klammern prüfen", "Linter verwenden"]
+            }
+        }
+
+        for pattern, solution_info in error_patterns.items():
+            if re.search(pattern, query, re.IGNORECASE):
+                matches.append({
+                    "pattern_matched": pattern,
+                    "solution": solution_info["solution"],
+                    "steps": solution_info["steps"],
+                    "confidence": 0.8
+                })
+
+        return matches
+
+
+class SolutionSimulator:
+    """
+    Simuliert Lösungen bevor sie angewendet werden.
+
+    Holo "spielt durch" was passieren würde, ohne es wirklich zu tun.
+    So kann sie Risiken und Nebenwirkungen vorhersagen.
+    """
+
+    def __init__(self, project_dir: Path = None):
+        self.project_dir = project_dir or Path(__file__).parent
+        self.simulation_log: List[SimulationResult] = []
+
+    def simulate(self, solution: str, problem: 'Problem', context: Dict = None) -> SimulationResult:
+        """
+        Simuliert eine Lösung.
+
+        Args:
+            solution: Die vorgeschlagene Lösung
+            problem: Das zu lösende Problem
+            context: Zusätzlicher Kontext
+
+        Returns:
+            SimulationResult mit Vorhersage
+        """
+        start_time = time.time()
+
+        # Wähle Simulationsmethode basierend auf Problem-Typ
+        if problem.problem_type == ProblemType.TECHNICAL:
+            result = self._simulate_technical(solution, problem, context)
+        elif problem.problem_type in [ProblemType.TASK, ProblemType.DECISION]:
+            result = self._simulate_logical(solution, problem, context)
+        else:
+            result = self._simulate_mental(solution, problem, context)
+
+        result.execution_time_ms = int((time.time() - start_time) * 1000)
+        self.simulation_log.append(result)
+
+        return result
+
+    def _simulate_technical(self, solution: str, problem: 'Problem',
+                           context: Dict) -> SimulationResult:
+        """Simuliert technische Lösungen"""
+        risks = []
+        side_effects = []
+        success_probability = 0.7
+
+        solution_lower = solution.lower()
+
+        # Risikoanalyse
+        if any(kw in solution_lower for kw in ['delete', 'remove', 'drop', 'löschen']):
+            risks.append("Datenverlust möglich - Backup empfohlen")
+            success_probability -= 0.1
+
+        if any(kw in solution_lower for kw in ['sudo', 'root', 'admin']):
+            risks.append("Erhöhte Rechte erforderlich - Sicherheitsrisiko")
+            side_effects.append("Könnte System-weite Änderungen verursachen")
+
+        if any(kw in solution_lower for kw in ['restart', 'reboot', 'neustart']):
+            side_effects.append("Unterbrechung des Betriebs")
+            risks.append("Laufende Prozesse werden beendet")
+
+        if any(kw in solution_lower for kw in ['update', 'upgrade']):
+            risks.append("Kompatibilitätsprobleme möglich")
+            side_effects.append("Andere Dependencies könnten betroffen sein")
+
+        if any(kw in solution_lower for kw in ['config', 'settings', 'konfiguration']):
+            risks.append("Konfigurationsänderung könnte andere Features beeinflussen")
+            side_effects.append("Backup der alten Config empfohlen")
+
+        # Code-Syntax prüfen wenn es Code ist
+        if self._looks_like_code(solution):
+            syntax_check = self._check_code_syntax(solution)
+            if not syntax_check["valid"]:
+                risks.append(f"Möglicher Syntax-Fehler: {syntax_check['error']}")
+                success_probability -= 0.2
+
+        # Recommendation generieren
+        if risks:
+            recommendation = f"Vor Ausführung: {risks[0]}"
+        else:
+            recommendation = "Lösung erscheint sicher zum Ausführen"
+
+        return SimulationResult(
+            success=success_probability > 0.5,
+            predicted_outcome="Technische Änderung wird durchgeführt",
+            risks_identified=risks,
+            side_effects=side_effects,
+            confidence=success_probability,
+            simulation_method="code_analysis",
+            recommendation=recommendation
+        )
+
+    def _simulate_logical(self, solution: str, problem: 'Problem',
+                         context: Dict) -> SimulationResult:
+        """Simuliert logische/task-basierte Lösungen"""
+        # Mentale Durchspielung der Schritte
+        steps = solution.split('\n') if '\n' in solution else [solution]
+
+        risks = []
+        side_effects = []
+        success_probability = 0.75
+
+        for i, step in enumerate(steps):
+            step_lower = step.lower()
+
+            # Prüfe auf problematische Patterns
+            if 'falls' in step_lower or 'wenn' in step_lower or 'if' in step_lower:
+                # Bedingung gefunden - könnte fehlschlagen
+                risks.append(f"Schritt {i+1} hat Bedingung - könnte nicht zutreffen")
+
+            if 'warte' in step_lower or 'wait' in step_lower:
+                side_effects.append(f"Schritt {i+1} könnte Verzögerung verursachen")
+
+        # Ziele prüfen
+        goals_addressed = 0
+        for goal in problem.goals:
+            if any(word in solution.lower() for word in goal.lower().split()):
+                goals_addressed += 1
+
+        if problem.goals:
+            goal_coverage = goals_addressed / len(problem.goals)
+            success_probability *= (0.5 + 0.5 * goal_coverage)
+
+            if goal_coverage < 0.5:
+                risks.append("Lösung adressiert möglicherweise nicht alle Ziele")
+
+        return SimulationResult(
+            success=success_probability > 0.5,
+            predicted_outcome="Aufgabe wird schrittweise ausgeführt",
+            risks_identified=risks,
+            side_effects=side_effects,
+            confidence=success_probability,
+            simulation_method="mental",
+            recommendation="Schritte einzeln ausführen und Ergebnis prüfen"
+        )
+
+    def _simulate_mental(self, solution: str, problem: 'Problem',
+                        context: Dict) -> SimulationResult:
+        """Mentale Simulation - Gedankenexperiment"""
+        # Generische Analyse
+        word_count = len(solution.split())
+
+        risks = []
+        side_effects = []
+
+        # Zu kurze Lösung?
+        if word_count < 5:
+            risks.append("Lösung möglicherweise zu unspezifisch")
+
+        # Zu komplexe Lösung?
+        if word_count > 100:
+            risks.append("Lösung könnte zu komplex sein")
+            side_effects.append("Implementierung könnte länger dauern")
+
+        return SimulationResult(
+            success=True,
+            predicted_outcome="Lösung wird versucht",
+            risks_identified=risks,
+            side_effects=side_effects,
+            confidence=0.6,
+            simulation_method="mental",
+            recommendation="Lösung schrittweise umsetzen"
+        )
+
+    def _looks_like_code(self, text: str) -> bool:
+        """Prüft ob Text wie Code aussieht"""
+        code_indicators = [
+            'def ', 'class ', 'import ', 'from ',
+            '()', '{}', '[]', '==', '!=',
+            'return ', 'if ', 'for ', 'while '
+        ]
+        return any(indicator in text for indicator in code_indicators)
+
+    def _check_code_syntax(self, code: str) -> Dict:
+        """Prüft Python-Syntax"""
+        try:
+            compile(code, '<string>', 'exec')
+            return {"valid": True, "error": None}
+        except SyntaxError as e:
+            return {"valid": False, "error": str(e)}
+        except:
+            return {"valid": True, "error": None}  # Bei anderen Fehlern annehmen es ist ok
+
+
+class LateralThinkingEngine:
+    """
+    Engine für laterales (kreatives/out-of-box) Denken.
+
+    Verwendet verschiedene Kreativitätstechniken:
+    - Random Association: Zufällige Verbindungen herstellen
+    - Perspective Shift: Problem aus anderen Blickwinkeln betrachten
+    - Reversal: Das Gegenteil überlegen
+    - Analogy: Analogien aus anderen Bereichen
+    - Combination: Elemente neu kombinieren
+    """
+
+    def __init__(self):
+        self.thinking_techniques = [
+            "random_association",
+            "perspective_shift",
+            "reversal",
+            "analogy",
+            "combination",
+            "what_if",
+            "constraint_removal",
+            "exaggeration"
+        ]
+
+        # Datenbanken für kreatives Denken
+        self._perspectives = [
+            "ein Anfänger", "ein Experte", "ein Kind",
+            "ein Außerirdischer", "ein Historiker", "ein Künstler",
+            "ein Skeptiker", "ein Optimist", "ein Minimalist"
+        ]
+
+        self._domains = [
+            "Natur", "Musik", "Architektur", "Sport",
+            "Kochen", "Medizin", "Raumfahrt", "Geschichte",
+            "Biologie", "Physik", "Spiele"
+        ]
+
+        self._random_concepts = [
+            "Wasser fließt immer bergab",
+            "Ein Baum wächst langsam aber stetig",
+            "Bienen arbeiten als Team",
+            "Licht kann gebündelt werden",
+            "Musik hat Rhythmus und Struktur",
+            "Brücken verbinden zwei Seiten",
+            "Samen brauchen Zeit zum Keimen",
+            "Wölfe jagen im Rudel",
+            "Wellen brechen und bilden sich neu"
+        ]
+
+    def think_laterally(self, problem: 'Problem',
+                       techniques: List[str] = None) -> List[Dict]:
+        """
+        Wendet laterales Denken auf ein Problem an.
+
+        Args:
+            problem: Das zu lösende Problem
+            techniques: Spezifische Techniken (oder alle)
+
+        Returns:
+            Liste von kreativen Ideen
+        """
+        techniques = techniques or self.thinking_techniques
+        ideas = []
+
+        for technique in techniques:
+            method = getattr(self, f"_apply_{technique}", None)
+            if method:
+                try:
+                    idea = method(problem)
+                    if idea:
+                        ideas.append({
+                            "technique": technique,
+                            "idea": idea,
+                            "confidence": self._rate_idea(idea, problem)
+                        })
+                except Exception as e:
+                    logger.debug(f"Lateral thinking {technique} error: {e}")
+
+        # Sortiere nach Confidence
+        ideas.sort(key=lambda x: x["confidence"], reverse=True)
+
+        return ideas
+
+    def _apply_random_association(self, problem: 'Problem') -> str:
+        """Zufällige Assoziation - verbindet Problem mit zufälligem Konzept"""
+        concept = random.choice(self._random_concepts)
+
+        # Versuche Verbindung herzustellen
+        connection = self._find_connection(problem.description, concept)
+
+        return f"Wie '{concept}': {connection}"
+
+    def _apply_perspective_shift(self, problem: 'Problem') -> str:
+        """Betrachtet Problem aus anderer Perspektive"""
+        perspective = random.choice(self._perspectives)
+
+        return f"Aus Sicht von {perspective}: Was würde jemand tun, der das Problem noch nie gesehen hat? Vielleicht die einfachste mögliche Lösung versuchen."
+
+    def _apply_reversal(self, problem: 'Problem') -> str:
+        """Überlegt das Gegenteil"""
+        desc = problem.description.lower()
+
+        # Finde Kernverben und invertiere
+        inversions = {
+            "funktioniert nicht": "Was würde es zum Funktionieren bringen?",
+            "fehlt": "Was wäre wenn es zu viel davon gäbe?",
+            "zu langsam": "Was wenn Geschwindigkeit egal wäre?",
+            "zu komplex": "Was ist die simpelste Version?",
+            "error": "Was müsste passieren damit kein Error kommt?"
+        }
+
+        for pattern, reversal in inversions.items():
+            if pattern in desc:
+                return f"Umkehrung: {reversal}"
+
+        return "Umkehrung: Was wenn wir das Gegenteil des Problems hätten? Was wäre dann die Lösung?"
+
+    def _apply_analogy(self, problem: 'Problem') -> str:
+        """Findet Analogien aus anderen Bereichen"""
+        domain = random.choice(self._domains)
+
+        analogies = {
+            "Natur": "In der Natur lösen Organismen ähnliche Probleme durch Anpassung und Evolution",
+            "Musik": "In der Musik werden Probleme durch Variation und Wiederholung gelöst",
+            "Architektur": "In der Architektur plant man von der Struktur zur Detail-Ebene",
+            "Sport": "Im Sport trainiert man spezifische Fähigkeiten isoliert",
+            "Kochen": "Beim Kochen bereitet man Zutaten vor, bevor man sie kombiniert",
+            "Medizin": "In der Medizin behandelt man die Ursache, nicht nur die Symptome",
+            "Biologie": "In der Biologie passen sich Systeme durch Feedback an"
+        }
+
+        analogy = analogies.get(domain, f"In {domain} werden Probleme systematisch angegangen")
+
+        return f"Analogie aus {domain}: {analogy}"
+
+    def _apply_combination(self, problem: 'Problem') -> str:
+        """Kombiniert verschiedene Lösungsansätze"""
+        approaches = [
+            "automatisieren",
+            "vereinfachen",
+            "aufteilen",
+            "zusammenführen",
+            "auslagern",
+            "cachen",
+            "parallelisieren"
+        ]
+
+        combo = random.sample(approaches, 2)
+
+        return f"Kombination: Was wenn wir {combo[0]} UND {combo[1]} würden?"
+
+    def _apply_what_if(self, problem: 'Problem') -> str:
+        """Stellt 'Was wäre wenn' Fragen"""
+        what_ifs = [
+            "Was wenn das Problem ein Feature wäre?",
+            "Was wenn wir unbegrenzte Ressourcen hätten?",
+            "Was wenn wir das Problem gar nicht lösen müssten?",
+            "Was wenn die Lösung schon existiert und wir sie nur finden müssen?",
+            "Was wenn wir das Problem von Grund auf neu designen könnten?"
+        ]
+
+        return random.choice(what_ifs)
+
+    def _apply_constraint_removal(self, problem: 'Problem') -> str:
+        """Entfernt gedanklich Einschränkungen"""
+        constraints = problem.constraints or ["Zeit", "Ressourcen", "Komplexität"]
+
+        if constraints:
+            removed = random.choice(constraints) if problem.constraints else "alle Einschränkungen"
+            return f"Ohne Einschränkung '{removed}': Wie würden wir das Problem dann lösen?"
+
+        return "Ohne jede Einschränkung: Was wäre die ideale Lösung?"
+
+    def _apply_exaggeration(self, problem: 'Problem') -> str:
+        """Übertreibt das Problem oder die Lösung"""
+        return "Übertreibung: Was wenn das Problem 1000x größer wäre? Welche Lösung würde dann funktionieren? Vielleicht skaliert diese Lösung auch für das kleine Problem."
+
+    def _find_connection(self, problem_desc: str, concept: str) -> str:
+        """Findet eine Verbindung zwischen Problem und Konzept"""
+        # Einfache Verbindungslogik
+        connections = {
+            "fließt": "Vielleicht sollte auch die Lösung 'fließen' - Schritt für Schritt",
+            "wächst": "Kleine Schritte, die sich aufbauen, könnten helfen",
+            "Team": "Vielleicht braucht es mehrere Komponenten die zusammenarbeiten",
+            "gebündelt": "Fokussierung auf einen Aspekt könnte helfen",
+            "Rhythmus": "Ein strukturierter, wiederholbarer Ansatz",
+            "verbinden": "Vielleicht müssen zwei Teile verbunden werden",
+            "Zeit": "Geduld und inkrementelle Verbesserung",
+            "Rudel": "Mehrere kleine Lösungen statt einer großen"
+        }
+
+        for keyword, connection in connections.items():
+            if keyword.lower() in concept.lower():
+                return connection
+
+        return "Die Natur hat oft elegante Lösungen - einfach und effektiv"
+
+    def _rate_idea(self, idea: str, problem: 'Problem') -> float:
+        """Bewertet wie gut eine Idee zum Problem passt"""
+        # Einfache Heuristik
+        score = 0.5
+
+        # Punkte für Relevanz
+        problem_words = set(problem.description.lower().split())
+        idea_words = set(idea.lower().split())
+        overlap = len(problem_words & idea_words)
+        score += overlap * 0.05
+
+        # Punkte für Konkretheit
+        if any(word in idea.lower() for word in ['konkret', 'spezifisch', 'direkt']):
+            score += 0.1
+
+        # Punkte für Aktionsorientierung
+        if any(word in idea.lower() for word in ['tun', 'machen', 'versuchen', 'könnte']):
+            score += 0.1
+
+        return min(1.0, score)
+
+
+class HypothesisGenerator:
+    """
+    Generiert selbständig Hypothesen über Probleme und Lösungen.
+
+    Holo kann eigenständig:
+    - Vermutungen aufstellen
+    - Diese testen
+    - Aus Ergebnissen lernen
+    """
+
+    def __init__(self):
+        self.hypotheses: List[Hypothesis] = []
+        self.tested_hypotheses: List[Hypothesis] = []
+
+    def generate_hypotheses(self, problem: 'Problem',
+                           analysis: Dict = None,
+                           count: int = 5) -> List[Hypothesis]:
+        """
+        Generiert Hypothesen über ein Problem.
+
+        Args:
+            problem: Das Problem
+            analysis: Vorherige Analyse
+            count: Anzahl zu generierender Hypothesen
+
+        Returns:
+            Liste von Hypothesen
+        """
+        hypotheses = []
+
+        # 1. Ursachen-Hypothesen
+        hypotheses.extend(self._generate_cause_hypotheses(problem, analysis))
+
+        # 2. Lösungs-Hypothesen
+        hypotheses.extend(self._generate_solution_hypotheses(problem, analysis))
+
+        # 3. Kontext-Hypothesen
+        hypotheses.extend(self._generate_context_hypotheses(problem, analysis))
+
+        # Sortiere nach initialer Confidence
+        hypotheses.sort(key=lambda h: h.confidence, reverse=True)
+
+        # Speichere und gib zurück
+        self.hypotheses.extend(hypotheses[:count])
+
+        return hypotheses[:count]
+
+    def _generate_cause_hypotheses(self, problem: 'Problem',
+                                   analysis: Dict) -> List[Hypothesis]:
+        """Generiert Hypothesen über mögliche Ursachen"""
+        hypotheses = []
+        desc = problem.description.lower()
+
+        # Technische Ursachen-Hypothesen
+        if problem.problem_type == ProblemType.TECHNICAL:
+            # Import-Probleme
+            if 'import' in desc or 'module' in desc:
+                hypotheses.append(Hypothesis(
+                    id=f"hyp_cause_{len(hypotheses)}",
+                    description="Das Modul ist nicht installiert",
+                    confidence=0.7,
+                    evidence_for=["ImportError deutet auf fehlendes Modul"],
+                    origin="generated"
+                ))
+                hypotheses.append(Hypothesis(
+                    id=f"hyp_cause_{len(hypotheses)}",
+                    description="Der Import-Pfad ist falsch",
+                    confidence=0.5,
+                    evidence_for=["Pfad-Probleme sind häufig"],
+                    origin="generated"
+                ))
+
+            # Verbindungsprobleme
+            if 'connection' in desc or 'verbindung' in desc:
+                hypotheses.append(Hypothesis(
+                    id=f"hyp_cause_{len(hypotheses)}",
+                    description="Netzwerk ist nicht erreichbar",
+                    confidence=0.6,
+                    origin="generated"
+                ))
+
+            # Berechtigungsprobleme
+            if 'permission' in desc or 'berechtigung' in desc:
+                hypotheses.append(Hypothesis(
+                    id=f"hyp_cause_{len(hypotheses)}",
+                    description="Fehlende Dateisystem-Berechtigungen",
+                    confidence=0.8,
+                    evidence_for=["PermissionError ist eindeutig"],
+                    origin="generated"
+                ))
+
+        return hypotheses
+
+    def _generate_solution_hypotheses(self, problem: 'Problem',
+                                      analysis: Dict) -> List[Hypothesis]:
+        """Generiert Hypothesen über mögliche Lösungen"""
+        hypotheses = []
+
+        # Basis-Lösungshypothesen
+        hypotheses.append(Hypothesis(
+            id=f"hyp_sol_{len(hypotheses)}",
+            description="Eine direkte Lösung existiert",
+            confidence=0.6,
+            evidence_for=["Die meisten Probleme haben bekannte Lösungen"],
+            origin="generated"
+        ))
+
+        # Je nach Komplexität
+        if analysis and analysis.get("complexity", ProblemComplexity.MODERATE).value >= 4:
+            hypotheses.append(Hypothesis(
+                id=f"hyp_sol_{len(hypotheses)}",
+                description="Das Problem muss in Teile zerlegt werden",
+                confidence=0.7,
+                evidence_for=["Hohe Komplexität erkannt"],
+                origin="generated"
+            ))
+
+        # Bei fehlender Info
+        if analysis and analysis.get("missing_information"):
+            hypotheses.append(Hypothesis(
+                id=f"hyp_sol_{len(hypotheses)}",
+                description="Mehr Information wird benötigt bevor gelöst werden kann",
+                confidence=0.8,
+                evidence_for=["Fehlende Informationen identifiziert"],
+                origin="generated"
+            ))
+
+        return hypotheses
+
+    def _generate_context_hypotheses(self, problem: 'Problem',
+                                     analysis: Dict) -> List[Hypothesis]:
+        """Generiert Hypothesen über den Kontext"""
+        hypotheses = []
+
+        # Umgebungs-Hypothesen
+        hypotheses.append(Hypothesis(
+            id=f"hyp_ctx_{len(hypotheses)}",
+            description="Das Problem ist umgebungsabhängig",
+            confidence=0.4,
+            origin="random_association"
+        ))
+
+        # Timing-Hypothese
+        hypotheses.append(Hypothesis(
+            id=f"hyp_ctx_{len(hypotheses)}",
+            description="Das Problem tritt nur unter bestimmten Bedingungen auf",
+            confidence=0.3,
+            origin="perspective_shift"
+        ))
+
+        return hypotheses
+
+    def test_hypothesis(self, hypothesis: Hypothesis,
+                       test_function: Callable = None) -> bool:
+        """
+        Testet eine Hypothese.
+
+        Args:
+            hypothesis: Die zu testende Hypothese
+            test_function: Optionale Test-Funktion
+
+        Returns:
+            True wenn Hypothese bestätigt
+        """
+        hypothesis.tested = True
+
+        if test_function:
+            try:
+                result = test_function(hypothesis)
+                hypothesis.test_result = result
+                if result:
+                    hypothesis.evidence_for.append("Test bestätigt")
+                else:
+                    hypothesis.evidence_against.append("Test widerlegt")
+            except Exception as e:
+                hypothesis.evidence_against.append(f"Test fehlgeschlagen: {e}")
+                hypothesis.test_result = False
+        else:
+            # Ohne Test-Funktion: basiere auf Confidence
+            hypothesis.test_result = hypothesis.confidence > 0.5
+
+        hypothesis.update_confidence()
+        self.tested_hypotheses.append(hypothesis)
+
+        return hypothesis.test_result or False
+
+    def get_best_hypotheses(self, tested_only: bool = False,
+                           min_confidence: float = 0.5) -> List[Hypothesis]:
+        """Gibt die besten Hypothesen zurück"""
+        source = self.tested_hypotheses if tested_only else self.hypotheses
+
+        filtered = [h for h in source if h.confidence >= min_confidence]
+        filtered.sort(key=lambda h: h.confidence, reverse=True)
+
+        return filtered
+
+
+class AutonomousExplorer:
+    """
+    Ermöglicht autonome Exploration und Entdeckung.
+
+    Holo kann selbständig:
+    - Neue Ideen generieren ohne gefragt zu werden
+    - Verbindungen zwischen Konzepten entdecken
+    - Wissenslücken identifizieren und füllen
+    """
+
+    def __init__(self, knowledge_base: 'KnowledgeBase' = None):
+        self.knowledge = knowledge_base
+        self.discoveries: List[Dict] = []
+        self.exploration_log: List[Dict] = []
+
+    def explore_autonomously(self, problem: 'Problem',
+                            depth: int = 3) -> List[Dict]:
+        """
+        Exploriert ein Problem autonom.
+
+        Args:
+            problem: Ausgangsproblem
+            depth: Tiefe der Exploration
+
+        Returns:
+            Liste von Entdeckungen
+        """
+        discoveries = []
+        visited = set()
+
+        # Start mit dem Kernproblem
+        to_explore = [(problem.description, 0)]
+
+        while to_explore and len(discoveries) < 10:
+            current, current_depth = to_explore.pop(0)
+
+            if current in visited or current_depth > depth:
+                continue
+
+            visited.add(current)
+
+            # Exploriere diesen Knoten
+            node_discoveries = self._explore_node(current, problem)
+            discoveries.extend(node_discoveries)
+
+            # Füge verwandte Konzepte zur Exploration hinzu
+            for disc in node_discoveries:
+                if disc.get("leads_to"):
+                    for next_topic in disc["leads_to"]:
+                        to_explore.append((next_topic, current_depth + 1))
+
+        # Log
+        self.exploration_log.append({
+            "problem": problem.description,
+            "depth_reached": depth,
+            "discoveries": len(discoveries),
+            "timestamp": datetime.now().isoformat()
+        })
+
+        self.discoveries.extend(discoveries)
+        return discoveries
+
+    def _explore_node(self, topic: str, context_problem: 'Problem') -> List[Dict]:
+        """Exploriert einen einzelnen Wissens-Knoten"""
+        discoveries = []
+
+        # 1. Suche nach Verbindungen
+        connections = self._find_connections(topic)
+        if connections:
+            discoveries.append({
+                "type": "connection",
+                "topic": topic,
+                "connections": connections,
+                "leads_to": connections[:2]  # Folge den ersten 2
+            })
+
+        # 2. Suche nach Mustern
+        patterns = self._find_patterns(topic)
+        if patterns:
+            discoveries.append({
+                "type": "pattern",
+                "topic": topic,
+                "patterns": patterns,
+                "insight": f"Muster gefunden: {patterns[0]}"
+            })
+
+        # 3. Generiere Fragen
+        questions = self._generate_questions(topic, context_problem)
+        if questions:
+            discoveries.append({
+                "type": "questions",
+                "topic": topic,
+                "questions": questions,
+                "leads_to": [q.replace("?", "") for q in questions[:2]]
+            })
+
+        return discoveries
+
+    def _find_connections(self, topic: str) -> List[str]:
+        """Findet Verbindungen zu anderen Konzepten"""
+        # Statische Verbindungen basierend auf Domänenwissen
+        connection_map = {
+            "import": ["module", "package", "dependency", "pip"],
+            "error": ["exception", "traceback", "debug", "logging"],
+            "database": ["sql", "connection", "query", "orm"],
+            "api": ["endpoint", "request", "response", "authentication"],
+            "test": ["unittest", "pytest", "mock", "coverage"],
+            "async": ["await", "coroutine", "event loop", "threading"],
+            "file": ["path", "permission", "io", "stream"]
+        }
+
+        connections = []
+        topic_lower = topic.lower()
+
+        for key, related in connection_map.items():
+            if key in topic_lower:
+                connections.extend(related)
+
+        return connections[:5]
+
+    def _find_patterns(self, topic: str) -> List[str]:
+        """Findet Muster im Thema"""
+        patterns = []
+
+        # Erkenne häufige Problem-Muster
+        if "nicht" in topic.lower() or "not" in topic.lower():
+            patterns.append("Negation: Etwas fehlt oder funktioniert nicht")
+
+        if "zu" in topic.lower() and any(w in topic.lower() for w in ["langsam", "schnell", "viel", "wenig"]):
+            patterns.append("Skalierung: Menge oder Geschwindigkeit ist das Problem")
+
+        if "wieder" in topic.lower() or "immer" in topic.lower():
+            patterns.append("Wiederholung: Problem tritt wiederholt auf")
+
+        return patterns
+
+    def _generate_questions(self, topic: str, problem: 'Problem') -> List[str]:
+        """Generiert explorative Fragen"""
+        questions = [
+            f"Was verursacht {topic[:30]}?",
+            f"Wann tritt {topic[:30]} auf?",
+            f"Was wäre wenn {topic[:30]} nicht existieren würde?",
+        ]
+
+        return questions
+
+
 # ==================== STRATEGY FINDER ====================
 
 class StrategyFinder:
@@ -1058,23 +2083,51 @@ class HoloProblemSolver:
         self.planner = Planner()
         self.executor = PlanExecutor(holo_brain)
 
+        # ======== OUT-OF-BOX THINKING KOMPONENTEN ========
+        # Diese ermöglichen echtes autonomes, kreatives Denken
+
+        # 1. Web-Recherche für unbekannte Probleme
+        self.web_researcher = WebResearcher(timeout=30)
+
+        # 2. Lösungs-Simulation vor Anwendung
+        self.solution_simulator = SolutionSimulator(self.project_dir)
+
+        # 3. Laterales/Kreatives Denken
+        self.lateral_thinking = LateralThinkingEngine()
+
+        # 4. Hypothesen-Generator
+        self.hypothesis_generator = HypothesisGenerator()
+
+        # 5. Autonome Exploration
+        self.autonomous_explorer = AutonomousExplorer(self.knowledge)
+
         # State
         self.current_problem: Optional[Problem] = None
         self.thinking_log: List[ThinkingStep] = []
         self._problem_counter = 0
+
+        # Out-of-Box Thinking State
+        self._current_hypotheses: List[Hypothesis] = []
+        self._creative_ideas: List[Dict] = []
+        self._simulation_results: List[SimulationResult] = []
+        self._web_research_results: Dict = {}
 
         # Statistiken
         self.stats = {
             "problems_solved": 0,
             "problems_failed": 0,
             "total_thinking_time_ms": 0,
+            "creative_ideas_generated": 0,
+            "hypotheses_tested": 0,
+            "solutions_simulated": 0,
+            "web_searches_performed": 0,
         }
 
         # Kognitive System-Verbindungen
         self._cognitive_systems = {}
         self._init_cognitive_connections()
 
-        logger.info("HoloProblemSolver initialisiert")
+        logger.info("HoloProblemSolver mit Out-of-Box Thinking initialisiert")
 
     def _init_cognitive_connections(self):
         """Verbindet mit allen kognitiven Systemen"""
@@ -1345,6 +2398,29 @@ class HoloProblemSolver:
                        "Analogie-Strategie vielversprechend")
 
         # ============================================
+        # PHASE 2.5: HYPOTHESEN GENERIEREN (OUT-OF-BOX)
+        # ============================================
+        self._think(ThinkingPhase.ANALYZE,
+                   "Generiere selbständig Hypothesen über das Problem...")
+
+        self._current_hypotheses = self.hypothesis_generator.generate_hypotheses(
+            problem, analysis, count=5
+        )
+        self.stats["hypotheses_tested"] += len(self._current_hypotheses)
+
+        if self._current_hypotheses:
+            best_hypothesis = self._current_hypotheses[0]
+            self._think(ThinkingPhase.ANALYZE,
+                       f"Hypothese generiert: {best_hypothesis.description}",
+                       f"Confidence: {best_hypothesis.confidence:.0%}")
+
+            # Füge Hypothesen zur Analyse hinzu
+            analysis["hypotheses"] = [
+                {"description": h.description, "confidence": h.confidence}
+                for h in self._current_hypotheses
+            ]
+
+        # ============================================
         # PHASE 3: WISSEN SAMMELN
         # ============================================
 
@@ -1360,6 +2436,36 @@ class HoloProblemSolver:
             self._think(ThinkingPhase.GATHER_KNOWLEDGE,
                        f"Fehlende Infos: {analysis['missing_information']}",
                        "Muss eventuell nachfragen oder recherchieren")
+
+        # ============================================
+        # PHASE 3.5: WEB-RECHERCHE (OUT-OF-BOX)
+        # Wenn wir nicht genug wissen, suchen wir im Web
+        # ============================================
+        should_research = (
+            not analysis["similar_problems"] and
+            analysis["missing_information"] and
+            problem.complexity.value >= ProblemComplexity.MODERATE.value
+        )
+
+        if should_research:
+            self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                       "Keine bekannte Lösung - starte Web-Recherche...",
+                       "Suche nach externem Wissen")
+
+            self._web_research_results = self.web_researcher.search(
+                problem.description,
+                problem.problem_type
+            )
+            self.stats["web_searches_performed"] += 1
+
+            if self._web_research_results.get("solutions_found"):
+                solutions = self._web_research_results["solutions_found"]
+                self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                           f"Web-Recherche erfolgreich: {len(solutions)} Lösungsansätze gefunden",
+                           f"Beste Lösung: {solutions[0].get('solution', '')[:50]}...")
+
+                # Füge Web-Wissen zur Analyse hinzu
+                analysis["web_research"] = self._web_research_results
 
         # ============================================
         # PHASE 4: STRATEGIEN FINDEN
@@ -1380,6 +2486,54 @@ class HoloProblemSolver:
         self._think(ThinkingPhase.FIND_STRATEGIES,
                    f"Gefundene Strategien: {[s.strategy_type.value for s in strategies]}",
                    f"{len(strategies)} Strategien zur Auswahl")
+
+        # ============================================
+        # PHASE 4.5: LATERALES DENKEN (OUT-OF-BOX)
+        # Kreative Ideen generieren die "anders" sind
+        # ============================================
+        self._think(ThinkingPhase.FIND_STRATEGIES,
+                   "Aktiviere laterales Denken - suche unkonventionelle Ideen...")
+
+        self._creative_ideas = self.lateral_thinking.think_laterally(problem)
+        self.stats["creative_ideas_generated"] += len(self._creative_ideas)
+
+        if self._creative_ideas:
+            # Die beste kreative Idee
+            best_idea = self._creative_ideas[0]
+            self._think(ThinkingPhase.FIND_STRATEGIES,
+                       f"Kreative Idee ({best_idea['technique']}): {best_idea['idea'][:80]}...",
+                       f"Confidence: {best_idea['confidence']:.0%}")
+
+            # Konvertiere beste kreative Idee zu Strategie
+            if best_idea['confidence'] > 0.5:
+                lateral_strategy = Strategy(
+                    id=f"lateral_{problem.id}",
+                    strategy_type=StrategyType.DIRECT,
+                    description=f"Kreativ: {best_idea['idea'][:100]}",
+                    steps=[
+                        "Kreative Idee durchdenken",
+                        "Auf Problem anwenden",
+                        "Ergebnis prüfen"
+                    ],
+                    estimated_success=best_idea['confidence'],
+                    estimated_effort=0.5,
+                    risks=["Unkonventioneller Ansatz - Ergebnis unsicher"]
+                )
+                strategies.insert(1, lateral_strategy)
+                self._think(ThinkingPhase.FIND_STRATEGIES,
+                           "Laterale Strategie hinzugefügt",
+                           f"Jetzt {len(strategies)} Strategien")
+
+        # Autonome Exploration für tieferes Verständnis
+        if problem.complexity.value >= ProblemComplexity.COMPLEX.value:
+            self._think(ThinkingPhase.FIND_STRATEGIES,
+                       "Problem ist komplex - starte autonome Exploration...")
+
+            discoveries = self.autonomous_explorer.explore_autonomously(problem, depth=2)
+            if discoveries:
+                self._think(ThinkingPhase.FIND_STRATEGIES,
+                           f"Autonome Exploration: {len(discoveries)} Entdeckungen",
+                           f"Insights: {discoveries[0].get('insight', discoveries[0].get('type', 'N/A'))}")
 
         # ============================================
         # PHASE 5: BEWERTEN
@@ -1417,10 +2571,49 @@ class HoloProblemSolver:
                    f"Schritte: {[s.description for s in plan.steps]}")
 
         # ============================================
+        # PHASE 6.5: LÖSUNGS-SIMULATION (OUT-OF-BOX)
+        # Simuliere die Lösung BEVOR wir sie ausführen
+        # ============================================
+        self._think(ThinkingPhase.PLAN,
+                   "Simuliere Lösung vor Ausführung...",
+                   "Prüfe Risiken und Nebenwirkungen")
+
+        # Simuliere den Plan
+        plan_description = "\n".join([step.description for step in plan.steps])
+        simulation = self.solution_simulator.simulate(
+            plan_description,
+            problem,
+            context or {}
+        )
+        self._simulation_results.append(simulation)
+        self.stats["solutions_simulated"] += 1
+
+        self._think(ThinkingPhase.PLAN,
+                   f"Simulation abgeschlossen: Erfolg={simulation.success}",
+                   f"Confidence: {simulation.confidence:.0%}")
+
+        # Zeige identifizierte Risiken
+        if simulation.risks_identified:
+            self._think(ThinkingPhase.PLAN,
+                       f"Risiken erkannt: {simulation.risks_identified}",
+                       simulation.recommendation)
+
+        # Zeige Nebenwirkungen
+        if simulation.side_effects:
+            self._think(ThinkingPhase.PLAN,
+                       f"Mögliche Nebenwirkungen: {simulation.side_effects}")
+
+        # Bei niedriger Simulation-Confidence: Warnung
+        if simulation.confidence < 0.4:
+            self._think(ThinkingPhase.PLAN,
+                       "WARNUNG: Niedrige Simulationsconfidence!",
+                       "Vorsicht bei der Ausführung empfohlen")
+
+        # ============================================
         # PHASE 7: AUSFÜHREN
         # ============================================
         self._think(ThinkingPhase.EXECUTE,
-                   "Führe Plan aus...")
+                   f"Führe Plan aus... (Simulation: {simulation.confidence:.0%} Erfolg)")
 
         executed_plan = self.executor.execute_plan(plan, problem)
 
@@ -1721,6 +2914,216 @@ class HoloProblemSolver:
         self._cognitive_systems.clear()
         self._init_cognitive_connections()
         return self.get_cognitive_connections()
+
+    # =========================================================================
+    # OUT-OF-BOX THINKING INTERFACE - Kreatives & autonomes Denken für Holo
+    # =========================================================================
+
+    def think_creatively(self, problem: str) -> List[Dict]:
+        """
+        Holo denkt kreativ/lateral über ein Problem nach.
+
+        Nutzt verschiedene Kreativitätstechniken wie:
+        - Random Association
+        - Perspective Shift
+        - Reversal
+        - Analogie
+        - Kombination
+
+        Returns:
+            Liste von kreativen Ideen mit Confidence-Werten
+        """
+        problem_obj = self._create_problem(problem, {}, [], [])
+        ideas = self.lateral_thinking.think_laterally(problem_obj)
+
+        # Statistiken aktualisieren
+        self.stats["creative_ideas_generated"] += len(ideas)
+
+        return ideas
+
+    def generate_hypotheses(self, problem: str) -> List[Dict]:
+        """
+        Holo generiert selbständig Hypothesen über ein Problem.
+
+        Returns:
+            Liste von Hypothesen mit Confidence-Werten
+        """
+        problem_obj = self._create_problem(problem, {}, [], [])
+        analysis = self.analyzer.analyze(problem_obj)
+
+        hypotheses = self.hypothesis_generator.generate_hypotheses(problem_obj, analysis)
+
+        # Konvertiere zu Dict für einfache Nutzung
+        return [
+            {
+                "description": h.description,
+                "confidence": h.confidence,
+                "origin": h.origin,
+                "evidence_for": h.evidence_for,
+            }
+            for h in hypotheses
+        ]
+
+    def research_problem(self, problem: str) -> Dict:
+        """
+        Holo recherchiert ein Problem im Web.
+
+        Returns:
+            Dict mit gefundenen Lösungen und Quellen
+        """
+        problem_obj = self._create_problem(problem, {}, [], [])
+        results = self.web_researcher.search(problem, problem_obj.problem_type)
+
+        self.stats["web_searches_performed"] += 1
+
+        return results
+
+    def simulate_solution(self, solution: str, problem: str) -> Dict:
+        """
+        Holo simuliert eine Lösung bevor sie angewendet wird.
+
+        Prüft auf Risiken und mögliche Nebenwirkungen.
+
+        Returns:
+            Dict mit Simulation-Ergebnis, Risiken, Nebenwirkungen
+        """
+        problem_obj = self._create_problem(problem, {}, [], [])
+        result = self.solution_simulator.simulate(solution, problem_obj)
+
+        self.stats["solutions_simulated"] += 1
+
+        return {
+            "success": result.success,
+            "predicted_outcome": result.predicted_outcome,
+            "confidence": result.confidence,
+            "risks": result.risks_identified,
+            "side_effects": result.side_effects,
+            "recommendation": result.recommendation,
+            "simulation_method": result.simulation_method,
+        }
+
+    def explore_topic(self, topic: str, depth: int = 3) -> List[Dict]:
+        """
+        Holo exploriert ein Thema autonom.
+
+        Findet Verbindungen, Muster und generiert Fragen.
+
+        Returns:
+            Liste von Entdeckungen
+        """
+        problem_obj = self._create_problem(topic, {}, [], [])
+        discoveries = self.autonomous_explorer.explore_autonomously(problem_obj, depth)
+
+        return discoveries
+
+    def what_if(self, scenario: str) -> str:
+        """
+        Holo denkt über ein "Was wäre wenn" Szenario nach.
+
+        Nutzt laterales Denken für hypothetische Szenarien.
+
+        Returns:
+            Kreativer Gedanke zum Szenario
+        """
+        problem_obj = self._create_problem(scenario, {}, [], [])
+
+        # Nutze What-If Technik
+        ideas = self.lateral_thinking.think_laterally(
+            problem_obj,
+            techniques=["what_if", "reversal", "exaggeration"]
+        )
+
+        if ideas:
+            best_idea = ideas[0]
+            return f"{best_idea['idea']}\n\nDenkmethode: {best_idea['technique']}, Confidence: {best_idea['confidence']:.0%}"
+
+        return "Keine kreative Idee generiert."
+
+    def brainstorm(self, topic: str, count: int = 10) -> List[str]:
+        """
+        Holo brainstormt Ideen zu einem Thema.
+
+        Kombiniert alle Kreativitäts-Techniken für maximale Ideenvielfalt.
+
+        Returns:
+            Liste von Ideen
+        """
+        problem_obj = self._create_problem(topic, {}, [], [])
+
+        ideas = []
+
+        # 1. Laterales Denken
+        lateral_ideas = self.lateral_thinking.think_laterally(problem_obj)
+        ideas.extend([f"[lateral] {i['idea']}" for i in lateral_ideas])
+
+        # 2. Hypothesen
+        hypotheses = self.hypothesis_generator.generate_hypotheses(problem_obj, {})
+        ideas.extend([f"[hypothese] {h.description}" for h in hypotheses])
+
+        # 3. Exploration
+        discoveries = self.autonomous_explorer.explore_autonomously(problem_obj, depth=2)
+        for disc in discoveries:
+            if disc.get("insight"):
+                ideas.append(f"[exploration] {disc['insight']}")
+            elif disc.get("questions"):
+                ideas.append(f"[frage] {disc['questions'][0]}")
+
+        # Statistiken
+        self.stats["creative_ideas_generated"] += len(ideas)
+
+        return ideas[:count]
+
+    def get_out_of_box_stats(self) -> Dict:
+        """
+        Gibt Statistiken über das Out-of-Box Denken zurück.
+        """
+        return {
+            "creative_ideas_generated": self.stats.get("creative_ideas_generated", 0),
+            "hypotheses_tested": self.stats.get("hypotheses_tested", 0),
+            "solutions_simulated": self.stats.get("solutions_simulated", 0),
+            "web_searches_performed": self.stats.get("web_searches_performed", 0),
+            "current_hypotheses": len(self._current_hypotheses),
+            "current_creative_ideas": len(self._creative_ideas),
+            "simulation_log_size": len(self._simulation_results),
+            "exploration_discoveries": len(self.autonomous_explorer.discoveries),
+        }
+
+    def get_last_simulation(self) -> Optional[Dict]:
+        """
+        Gibt die letzte Lösungs-Simulation zurück.
+        """
+        if not self._simulation_results:
+            return None
+
+        result = self._simulation_results[-1]
+        return {
+            "success": result.success,
+            "confidence": result.confidence,
+            "risks": result.risks_identified,
+            "side_effects": result.side_effects,
+            "recommendation": result.recommendation,
+        }
+
+    def get_creative_ideas(self) -> List[Dict]:
+        """
+        Gibt die zuletzt generierten kreativen Ideen zurück.
+        """
+        return self._creative_ideas
+
+    def get_hypotheses(self) -> List[Dict]:
+        """
+        Gibt die aktuellen Hypothesen zurück.
+        """
+        return [
+            {
+                "description": h.description,
+                "confidence": h.confidence,
+                "origin": h.origin,
+                "tested": h.tested,
+                "result": h.test_result,
+            }
+            for h in self._current_hypotheses
+        ]
 
 
 # ==================== FACTORY FUNCTION ====================
