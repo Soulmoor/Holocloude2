@@ -25,6 +25,32 @@ from dataclasses import dataclass, field
 from enum import Enum
 from collections import Counter
 
+# Emotionale Engines importieren
+try:
+    from holo_emotional_engines import (
+        EmotionalResponseSystem,
+        EmotionalMirroring,
+        HumorEngine,
+        AnecdoteGenerator,
+        MetaphorGenerator,
+        ComfortProvider,
+        TimeAwareResponder,
+        ActiveListeningEngine,
+        CuriosityExpression,
+        SharedExperienceGenerator,
+        RelationshipDepthTracker,
+        GratitudeEngine,
+        SurpriseGenerator,
+        SeasonalAwareness,
+        ConversationMemoryRecaller,
+        EmpatheticReframing,
+        EmotionCategory,
+        HumorType,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -5130,6 +5156,33 @@ class ConversationEngine:
         self.messages_on_topic: int = 0
         self.last_question_asked: Optional[str] = None
 
+        # === EMOTIONALE ENGINES INTEGRATION ===
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            # Vollständiges emotionales System
+            self.emotional_system = EmotionalResponseSystem()
+
+            # Individuelle Engines für direkten Zugriff
+            self.emotional_mirroring = EmotionalMirroring()
+            self.humor_engine = HumorEngine()
+            self.anecdote_generator = AnecdoteGenerator()
+            self.metaphor_generator = MetaphorGenerator()
+            self.comfort_provider = ComfortProvider()
+            self.time_aware = TimeAwareResponder()
+            self.active_listening = ActiveListeningEngine()
+            self.curiosity_engine = CuriosityExpression()
+            self.shared_experience = SharedExperienceGenerator()
+            self.relationship_tracker = RelationshipDepthTracker()
+            self.gratitude_engine = GratitudeEngine()
+            self.surprise_generator = SurpriseGenerator()
+            self.seasonal_awareness = SeasonalAwareness()
+            self.memory_recaller = ConversationMemoryRecaller()
+            self.empathetic_reframing = EmpatheticReframing()
+
+            logger.info("ConversationEngine: 15 emotionale Engines geladen")
+        else:
+            self.emotional_system = None
+            logger.warning("ConversationEngine: Emotionale Engines nicht verfügbar")
+
     def chat(self, user_message: str, energy_level: float = 0.7) -> str:
         """
         Hauptmethode für Gespräche.
@@ -5247,7 +5300,136 @@ class ConversationEngine:
                 parts.append(followup)
                 self.last_question_asked = followup
 
+        # 5. === EMOTIONALE ENGINE ENHANCEMENTS ===
+        emotional_addition = self._add_emotional_enhancement(user_message, analysis, energy_level)
+        if emotional_addition:
+            parts.append(emotional_addition)
+
         return " ".join(parts)
+
+    # ==========================================================================
+    # EMOTIONALE ENGINES - Integration Methoden
+    # ==========================================================================
+
+    def _add_emotional_enhancement(self, user_message: str, analysis: MessageAnalysis,
+                                   energy_level: float) -> Optional[str]:
+        """
+        Fügt emotionale Verbesserungen basierend auf den 15 Engines hinzu.
+        """
+        if not EMOTIONAL_ENGINES_AVAILABLE or not self.emotional_system:
+            return None
+
+        # Nicht zu oft - nur bei 40% der Antworten
+        if self.random.random() > 0.4:
+            return None
+
+        enhancements = []
+
+        # 1. Emotionales Mirroring bei erkannter Emotion
+        if analysis.user_emotion:
+            mirror_response, emotion_state = self.emotional_mirroring.mirror(user_message)
+            if emotion_state.intensity > 0.5:
+                enhancements.append(mirror_response)
+
+        # 2. Trost bei negativen Emotionen
+        if analysis.sentiment == "negative" or (analysis.user_emotion and
+            analysis.user_emotion in ["sad", "angry", "anxious", "frustrated", "lonely"]):
+            if self.random.random() < 0.6:
+                comfort = self.comfort_provider.provide_comfort(user_message)
+                enhancements.append(comfort)
+            # Manchmal auch Reframing
+            if self.random.random() < 0.3:
+                reframe = self.empathetic_reframing.reframe(user_message)
+                enhancements.append(reframe)
+
+        # 3. Humor bei positiver Stimmung und hoher Energie
+        if analysis.sentiment == "positive" and energy_level > 0.6:
+            if self.random.random() < 0.25:
+                humor = self.humor_engine.generate_humor(context=user_message)
+                enhancements.append(humor)
+
+        # 4. Aktives Zuhören demonstrieren
+        if len(user_message) > 50 and self.random.random() < 0.3:
+            listening = self.active_listening.demonstrate_listening(user_message)
+            enhancements.append(listening)
+
+        # 5. Neugier zeigen bei interessanten Themen
+        if analysis.topics and self.random.random() < 0.2:
+            curiosity = self.curiosity_engine.express_curiosity(user_message)
+            enhancements.append(curiosity)
+
+        # 6. Beziehung tracken
+        self.relationship_tracker.record_interaction(analysis.topics if analysis.topics else None)
+        milestone = self.relationship_tracker.check_milestone()
+        if milestone:
+            enhancements.append(milestone)
+
+        # 7. Dankbarkeit bei bestimmten Trigger-Wörtern
+        gratitude_triggers = ["danke", "hilfe", "toll", "super", "lieb"]
+        if any(trigger in user_message.lower() for trigger in gratitude_triggers):
+            if self.random.random() < 0.4:
+                gratitude = self.gratitude_engine.express_gratitude()
+                enhancements.append(gratitude)
+
+        # 8. Überraschung (selten)
+        if self.random.random() < 0.05:
+            surprise = self.surprise_generator.generate_surprise()
+            enhancements.append(surprise)
+
+        # 9. Themen im Memory speichern
+        if analysis.topics:
+            for topic in analysis.topics[:2]:
+                self.memory_recaller.store_topic(topic, user_message[:50])
+
+        # Maximal 2 Enhancements zurückgeben
+        if enhancements:
+            return " ".join(enhancements[:2])
+
+        return None
+
+    def get_time_aware_greeting(self) -> str:
+        """Gibt einen tageszeit-abhängigen Gruß zurück."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.time_aware.get_greeting()
+        return "*wedelt* Hey!"
+
+    def get_seasonal_comment(self) -> str:
+        """Gibt einen jahreszeitbezogenen Kommentar zurück."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.seasonal_awareness.get_seasonal_comment()
+        return ""
+
+    def tell_anecdote(self, category: str = None) -> str:
+        """Erzählt eine Anekdote von Holo."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.anecdote_generator.get_anecdote(category)
+        return "*denkt nach* Hmm, da fällt mir gerade nichts ein..."
+
+    def tell_joke(self, humor_type: HumorType = None) -> str:
+        """Erzählt einen Witz."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.humor_engine.generate_humor(humor_type)
+        return "*kichert* Ich bin heute nicht so witzig..."
+
+    def get_metaphor(self, theme: str = None) -> str:
+        """Gibt eine Metapher zurück."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.metaphor_generator.get_metaphor(theme)
+        return ""
+
+    def express_gratitude(self, reason: str = "allgemein") -> str:
+        """Drückt Dankbarkeit aus."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            return self.gratitude_engine.express_gratitude(reason)
+        return "*lächelt* Danke!"
+
+    def recall_memory(self, topic: str = None) -> Optional[str]:
+        """Erinnert an ein früheres Gespräch."""
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            if topic:
+                return self.memory_recaller.recall_topic(topic)
+            return self.memory_recaller.ask_follow_up()
+        return None
 
     def _handle_greeting_with_context(self) -> str:
         """Begrüßung mit Kontext (kennt User schon?)."""
