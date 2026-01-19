@@ -622,6 +622,26 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloDiscord nicht verfügbar: {e}")
 
 # =============================================================================
+# === HOLO CONTROL CENTER - Meta-Kontrolle über alle Systeme ===
+# =============================================================================
+try:
+    from holo_control_center import (
+        HoloControlCenter,
+        create_control_center,
+        ModuleStatus,
+        ModulePriority,
+    )
+    CONTROL_CENTER_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloControlCenter (Meta-Kontrolle) geladen")
+except ImportError as e:
+    CONTROL_CENTER_AVAILABLE = False
+    HoloControlCenter = None
+    create_control_center = None
+    ModuleStatus = None
+    ModulePriority = None
+    logger.warning(f"[Brain] HoloControlCenter nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -4306,6 +4326,82 @@ class PiCommunicator:
                 logger.info("🤖 Discord Bot gestoppt")
             except Exception as e:
                 logger.warning(f"Discord Bot Stop Fehler: {e}")
+
+    # =========================================================================
+    # 🎛️ CONTROL CENTER - Holos Kontrolle über ihre eigenen Systeme
+    # =========================================================================
+
+    def pause_system(self, system_name: str, reason: str = "") -> bool:
+        """
+        Pausiert eines von Holos Subsystemen.
+
+        Args:
+            system_name: Name des Systems (z.B. "web_curiosity", "creative_mind")
+            reason: Grund für die Pause
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            logger.warning("Control Center nicht verfügbar")
+            return False
+
+        return self.control_center.pause_module(system_name, reason)
+
+    def activate_system(self, system_name: str, reason: str = "") -> bool:
+        """
+        Aktiviert eines von Holos Subsystemen.
+
+        Args:
+            system_name: Name des Systems
+            reason: Grund für die Aktivierung
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return False
+
+        return self.control_center.activate_module(system_name, reason)
+
+    def get_system_status(self) -> Dict:
+        """
+        Holt den Status aller Subsysteme.
+
+        Returns:
+            Dict mit Status-Informationen
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return {"error": "Control Center nicht verfügbar"}
+
+        return self.control_center.get_status_summary()
+
+    def get_my_systems(self) -> str:
+        """
+        Holt eine lesbare Liste aller Systeme für Holo.
+
+        Returns:
+            Formatierter String mit allen Systemen
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return "Ich kann meine Systeme gerade nicht sehen..."
+
+        return self.control_center.get_module_list_for_holo()
+
+    def can_i_do(self, action: str) -> tuple:
+        """
+        Prüft ob Holo eine bestimmte Aktion ausführen kann.
+
+        Args:
+            action: Die gewünschte Aktion (z.B. "recherchieren", "kreativ sein")
+
+        Returns:
+            (kann_ausführen, grund)
+        """
+        if not hasattr(self, 'control_center') or not self.control_center:
+            return True, "Control Center nicht aktiv"
+
+        return self.control_center.can_i_do(action)
 
     def request_nas_wake(self, reason: str = "Holo") -> dict:
         """NAS aufwecken - Pi-Control entscheidet!"""
@@ -14357,6 +14453,25 @@ class HoloPersona:
                 self.discord_bridge = None
         else:
             logger.debug("🤖 Discord Bot nicht verfügbar (discord.py nicht installiert)")
+
+        # ================================================================
+        # 🎛️ CONTROL CENTER - Holos Meta-Kontrolle über alle Systeme
+        # ================================================================
+        self.control_center = None
+        if CONTROL_CENTER_AVAILABLE:
+            try:
+                self.control_center = create_control_center(
+                    holo_brain=self,
+                    persist_path=str(self.data_path / "control_center") if hasattr(self, 'data_path') else None
+                )
+                # Autonome Kontrolle starten
+                self.control_center.start_autonomous_control()
+                logger.info("🎛️ Control Center aktiviert (Watchdogs & autonome Entscheidungen)")
+            except Exception as e:
+                logger.warning(f"⚠️ Control Center Fehler: {e}")
+                self.control_center = None
+        else:
+            logger.debug("🎛️ Control Center nicht verfügbar")
 
         # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
