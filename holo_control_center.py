@@ -1797,6 +1797,277 @@ class HoloControlCenter:
 
 
 # =============================================================================
+# INTEGRATION MIT BESTEHENDEM SKILL-SYSTEM
+# =============================================================================
+
+class SkillSystemIntegration:
+    """
+    Integration des bestehenden holo_skill_system.py in das Control Center.
+
+    Verbindet:
+    - HoloSkillBridge (Skill-Ausführung)
+    - SkillWatcher (Ordner-Überwachung)
+    - HoloSkillSelector (Intent-Erkennung)
+    - SkillComposer (Skill-Ketten)
+
+    Mit dem Control Center für einheitliche Kontrolle.
+    """
+
+    def __init__(self, control_center: 'HoloControlCenter'):
+        self.control_center = control_center
+        self.skill_bridge = None
+        self.skill_selector = None
+        self.skill_composer = None
+        self._initialized = False
+
+    def initialize(self, skill_manager=None, database_manager=None):
+        """
+        Initialisiert das Skill-System.
+
+        Args:
+            skill_manager: Optional - pi_control SkillManager
+            database_manager: Optional - HoloDatabaseManager
+        """
+        try:
+            from holo_skill_system import (
+                HoloSkillBridge,
+                HoloSkillSelector,
+                SkillComposer,
+                create_holo_skill_system
+            )
+
+            # Skill-System erstellen
+            self.skill_bridge, self.skill_selector, self.skill_composer = \
+                create_holo_skill_system(
+                    skill_manager=skill_manager,
+                    database_manager=database_manager,
+                    auto_watch=True,
+                    watch_interval=30.0
+                )
+
+            self._initialized = True
+            logger.info("🔧 Skill-System Integration initialisiert")
+
+            # Skills als Module im Control Center registrieren
+            self._register_skills_as_modules()
+
+            return True
+
+        except ImportError as e:
+            logger.warning(f"Skill-System nicht verfügbar: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Skill-System Initialisierung Fehler: {e}")
+            return False
+
+    def _register_skills_as_modules(self):
+        """Registriert gefundene Skills als Module im Control Center"""
+        if not self.skill_bridge:
+            return
+
+        # Entdecke Skills
+        skills = self.skill_bridge.discover_skills()
+
+        for skill in skills:
+            if skill.name not in self.control_center.modules:
+                # Skill als Modul registrieren
+                info = ModuleInfo(
+                    name=f"skill_{skill.name}",
+                    display_name=f"Skill: {skill.name}",
+                    description=skill.description[:100] if skill.description else f"Skill {skill.name}",
+                    priority=ModulePriority.NORMAL,
+                    status=ModuleStatus.ACTIVE if skill.enabled else ModuleStatus.DISABLED,
+                    can_pause=True,
+                    can_disable=True,
+                    energy_cost=0.1,
+                )
+                self.control_center.modules[info.name] = info
+
+        logger.info(f"📦 {len(skills)} Skills als Module registriert")
+
+    async def execute_skill(self, skill_name: str, intent: str,
+                           params: Dict = None) -> Optional[Dict]:
+        """
+        Führt einen Skill aus (über das bestehende System).
+
+        Args:
+            skill_name: Name des Skills
+            intent: User-Intent
+            params: Parameter
+
+        Returns:
+            Skill-Ergebnis oder None
+        """
+        if not self._initialized or not self.skill_bridge:
+            return None
+
+        # Prüfe ob Skill im Control Center aktiv ist
+        module_name = f"skill_{skill_name}"
+        if module_name in self.control_center.modules:
+            module = self.control_center.modules[module_name]
+            if module.status != ModuleStatus.ACTIVE:
+                logger.warning(f"Skill {skill_name} ist pausiert")
+                return {"success": False, "error": "Skill ist pausiert"}
+
+        try:
+            result = await self.skill_bridge.execute_skill(skill_name, intent, params)
+
+            # Update Aktivität
+            self.control_center.update_module_activity(module_name)
+
+            return result.to_dict() if result else None
+
+        except Exception as e:
+            logger.error(f"Skill-Ausführung Fehler: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def find_and_execute(self, request: str,
+                               params: Dict = None) -> Optional[Dict]:
+        """
+        Findet den besten Skill für eine Anfrage und führt ihn aus.
+
+        Args:
+            request: User-Anfrage
+            params: Optionale Parameter
+
+        Returns:
+            Ergebnis oder None
+        """
+        if not self._initialized or not self.skill_selector:
+            return None
+
+        try:
+            result = await self.skill_selector.select_and_execute(request)
+            return result.to_dict() if result else None
+        except Exception as e:
+            logger.error(f"Skill-Suche Fehler: {e}")
+            return None
+
+    def can_do(self, request: str) -> Tuple[bool, str, float]:
+        """
+        Prüft ob Holo eine Anfrage mit einem Skill erfüllen kann.
+
+        Returns:
+            (kann_ich, skill_name, confidence)
+        """
+        if not self._initialized or not self.skill_bridge:
+            return (False, "", 0.0)
+
+        return self.skill_bridge.can_i_do(request)
+
+    def get_skill_summary(self) -> str:
+        """Gibt eine Zusammenfassung aller Skills für Holo"""
+        if not self._initialized or not self.skill_bridge:
+            return "Skill-System nicht initialisiert."
+
+        return self.skill_bridge.get_skill_summary_for_holo()
+
+    def pause_skill(self, skill_name: str, reason: str = "") -> bool:
+        """Pausiert einen Skill über das Control Center"""
+        module_name = f"skill_{skill_name}"
+        if module_name in self.control_center.modules:
+            return self.control_center.pause_module(module_name, reason)
+        return False
+
+    def activate_skill(self, skill_name: str, reason: str = "") -> bool:
+        """Aktiviert einen Skill über das Control Center"""
+        module_name = f"skill_{skill_name}"
+        if module_name in self.control_center.modules:
+            return self.control_center.activate_module(module_name, reason)
+        return False
+
+    def get_skills_status(self) -> Dict[str, Dict]:
+        """Gibt Status aller Skills zurück"""
+        status = {}
+        for name, module in self.control_center.modules.items():
+            if name.startswith("skill_"):
+                skill_name = name.replace("skill_", "")
+                status[skill_name] = {
+                    "active": module.status == ModuleStatus.ACTIVE,
+                    "paused": module.status == ModuleStatus.PAUSED,
+                    "energy_cost": module.energy_cost,
+                    "last_activity": module.last_activity,
+                }
+        return status
+
+    def learn_pattern(self, skill_name: str, pattern: str):
+        """Fügt ein neues Pattern für einen Skill hinzu"""
+        if self.skill_bridge:
+            self.skill_bridge.learn_pattern(skill_name, pattern)
+
+    def compose_skill_chain(self, request: str, max_skills: int = 3) -> List[str]:
+        """Erstellt eine optimale Skill-Kette"""
+        if self.skill_composer:
+            return self.skill_composer.compose_chain(request, max_skills)
+        return []
+
+
+# =============================================================================
+# ERWEITERTE CONTROL CENTER METHODEN
+# =============================================================================
+
+# Patch HoloControlCenter um Skill-Integration hinzuzufügen
+_original_init = HoloControlCenter.__init__
+
+def _patched_init(self, holo_brain=None, persist_path: str = None):
+    """Erweiterte __init__ mit Skill-Integration"""
+    _original_init(self, holo_brain, persist_path)
+
+    # Skill-System Integration hinzufügen
+    self.skill_system = SkillSystemIntegration(self)
+
+    # Automatisch initialisieren wenn brain verfügbar
+    if holo_brain:
+        db = getattr(holo_brain, 'db', None)
+        skill_manager = getattr(holo_brain, 'skill_manager', None)
+        self.skill_system.initialize(
+            skill_manager=skill_manager,
+            database_manager=db
+        )
+
+HoloControlCenter.__init__ = _patched_init
+
+
+# Neue Methoden für HoloControlCenter
+def execute_skill(self, skill_name: str, intent: str, params: Dict = None):
+    """Führt einen Skill aus"""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        future = asyncio.ensure_future(
+            self.skill_system.execute_skill(skill_name, intent, params)
+        )
+        return future
+    else:
+        return asyncio.run(
+            self.skill_system.execute_skill(skill_name, intent, params)
+        )
+
+def can_do_skill(self, request: str) -> Tuple[bool, str, float]:
+    """Prüft ob ein Skill für die Anfrage existiert"""
+    return self.skill_system.can_do(request)
+
+def get_skill_summary(self) -> str:
+    """Gibt Skill-Zusammenfassung zurück"""
+    return self.skill_system.get_skill_summary()
+
+def pause_skill(self, skill_name: str, reason: str = "") -> bool:
+    """Pausiert einen Skill"""
+    return self.skill_system.pause_skill(skill_name, reason)
+
+def activate_skill(self, skill_name: str, reason: str = "") -> bool:
+    """Aktiviert einen Skill"""
+    return self.skill_system.activate_skill(skill_name, reason)
+
+# Methoden zu HoloControlCenter hinzufügen
+HoloControlCenter.execute_skill = execute_skill
+HoloControlCenter.can_do_skill = can_do_skill
+HoloControlCenter.get_skill_summary = get_skill_summary
+HoloControlCenter.pause_skill = pause_skill
+HoloControlCenter.activate_skill = activate_skill
+
+
+# =============================================================================
 # FACTORY & HILFSFUNKTIONEN
 # =============================================================================
 

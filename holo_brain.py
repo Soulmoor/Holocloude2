@@ -642,6 +642,22 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloControlCenter nicht verfügbar: {e}")
 
 # =============================================================================
+# === HOLO LIVE MONITOR - Echtzeit-Systemüberwachung ===
+# =============================================================================
+try:
+    from holo_live_monitor import (
+        HoloLiveMonitor,
+        create_live_monitor,
+    )
+    LIVE_MONITOR_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloLiveMonitor (Echtzeit-Überwachung) geladen")
+except ImportError as e:
+    LIVE_MONITOR_AVAILABLE = False
+    HoloLiveMonitor = None
+    create_live_monitor = None
+    logger.warning(f"[Brain] HoloLiveMonitor nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -4402,6 +4418,135 @@ class PiCommunicator:
             return True, "Control Center nicht aktiv"
 
         return self.control_center.can_i_do(action)
+
+    # =========================================================================
+    # 📊 LIVE MONITOR - Echtzeit-Systemüberwachung
+    # =========================================================================
+
+    def get_health_summary(self) -> str:
+        """
+        Gibt eine Zusammenfassung der System-Gesundheit.
+
+        Holo kann sagen: "Mir geht es gut, alle Module funktionieren!"
+        Oder: "Ich habe 2 Probleme erkannt..."
+
+        Returns:
+            Lesbare Zusammenfassung
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return "Ich kann meine Gesundheit gerade nicht prüfen..."
+
+        return self.live_monitor.get_health_summary()
+
+    def get_system_problems(self) -> List[str]:
+        """
+        Gibt alle aktuellen System-Probleme zurück.
+
+        Holo kann sagen: "Ich habe folgende Probleme erkannt: ..."
+
+        Returns:
+            Liste von Problem-Beschreibungen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_problems()
+
+    def get_unhealthy_modules(self) -> List[str]:
+        """
+        Gibt alle Module zurück, die Probleme haben.
+
+        Returns:
+            Liste von Modul-Namen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_unhealthy_modules()
+
+    def can_i_use_module(self, module_name: str) -> Tuple[bool, str]:
+        """
+        Prüft ob Holo ein bestimmtes Modul nutzen kann.
+
+        Args:
+            module_name: Name des Moduls
+
+        Returns:
+            (kann_nutzen, grund)
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return True, "Live Monitor nicht aktiv"
+
+        return self.live_monitor.can_i_use(module_name)
+
+    def has_critical_issues(self) -> bool:
+        """
+        Prüft ob kritische System-Probleme vorliegen.
+
+        Returns:
+            True wenn kritische Probleme existieren
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return False
+
+        return self.live_monitor.has_critical_issues()
+
+    def acknowledge_system_issues(self, module_name: str = None):
+        """
+        Bestätigt dass Holo die Probleme zur Kenntnis genommen hat.
+
+        Args:
+            module_name: Optional - nur Issues dieses Moduls bestätigen
+        """
+        if hasattr(self, 'live_monitor') and self.live_monitor:
+            self.live_monitor.acknowledge_issue(module_name)
+
+    def get_fix_suggestions(self) -> List[str]:
+        """
+        Gibt Vorschläge zur Problembehebung.
+
+        Holo kann sagen: "Ich schlage vor: ..."
+
+        Returns:
+            Liste von Vorschlägen
+        """
+        if not hasattr(self, 'live_monitor') or not self.live_monitor:
+            return []
+
+        return self.live_monitor.get_suggestions()
+
+    def force_system_check(self, module_name: str = None):
+        """
+        Erzwingt einen sofortigen System-Check.
+
+        Args:
+            module_name: Optional - nur dieses Modul prüfen
+        """
+        if hasattr(self, 'live_monitor') and self.live_monitor:
+            self.live_monitor.force_check(module_name)
+
+    def on_system_issue(self, issue: Dict):
+        """
+        Callback wenn ein System-Problem erkannt wird.
+
+        Args:
+            issue: Das erkannte Problem als Dict
+        """
+        # Hier kann Holo auf Probleme reagieren
+        severity = issue.get('severity', 'info')
+        module = issue.get('module', 'unknown')
+        message = issue.get('message', '')
+
+        # Bei kritischen Problemen: Versuche zu reagieren
+        if severity == 'critical':
+            logger.error(f"❌ KRITISCHES PROBLEM: {module} - {message}")
+
+            # Versuche Modul zu pausieren wenn Control Center verfügbar
+            if self.control_center:
+                self.control_center.pause_module(module, f"Kritischer Fehler: {message}")
+
+        elif severity == 'error':
+            logger.warning(f"⚠️ FEHLER: {module} - {message}")
 
     # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
@@ -14580,6 +14725,25 @@ class HoloPersona:
                 self.control_center = None
         else:
             logger.debug("🎛️ Control Center nicht verfügbar")
+
+        # ================================================================
+        # 📊 LIVE MONITOR - Echtzeit-Systemüberwachung
+        # ================================================================
+        self.live_monitor = None
+        if LIVE_MONITOR_AVAILABLE:
+            try:
+                self.live_monitor = create_live_monitor(
+                    project_dir=Path(__file__).parent,
+                    holo_brain=self,
+                    control_center=self.control_center,
+                    auto_start=True
+                )
+                logger.info("📊 Live Monitor aktiviert (Echtzeit-Überwachung)")
+            except Exception as e:
+                logger.warning(f"⚠️ Live Monitor Fehler: {e}")
+                self.live_monitor = None
+        else:
+            logger.debug("📊 Live Monitor nicht verfügbar")
 
         # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
