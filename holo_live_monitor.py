@@ -227,8 +227,29 @@ class HoloLiveMonitor:
         self._on_issue_callbacks: List[Callable] = []
         self._on_recovery_callbacks: List[Callable] = []
 
-        # Config
-        self._ignore_modules: Set[str] = {"holo_tester", "__pycache__"}
+        # Config - Module die ignoriert werden
+        self._ignore_modules: Set[str] = {
+            "holo_tester",      # Der Tester selbst
+            "setup",            # Setup-Dateien
+            "conftest",         # Pytest config
+        }
+
+        # Unterverzeichnisse die gescannt werden
+        self._scan_subdirs: List[str] = [
+            "skills",           # Skills-Ordner
+            "modules",          # Zusätzliche Module
+            "plugins",          # Plugins
+        ]
+
+        # Verzeichnisse die ignoriert werden
+        self._ignore_dirs: Set[str] = {
+            "__pycache__",
+            "venv",
+            ".git",
+            "node_modules",
+            "tests",
+            ".pytest_cache",
+        }
 
         # Standard-Library Module (werden nicht gepruft)
         self._stdlib_modules = self._get_stdlib_modules()
@@ -349,12 +370,30 @@ class HoloLiveMonitor:
             self._update_system_health()
 
     def _discover_modules(self):
-        """Entdeckt alle Python-Module im Projekt"""
-        py_files = list(self.project_dir.glob("holo_*.py"))
+        """
+        Entdeckt ALLE Python-Module im Projekt.
+
+        Scannt nicht nur holo_*.py, sondern alle .py Dateien.
+        Ignoriert: __pycache__, venv, .git, tests, etc.
+        """
+        # Alle .py Dateien im Hauptverzeichnis
+        py_files = list(self.project_dir.glob("*.py"))
+
+        # Optional: Auch Unterverzeichnisse scannen (skills/, etc.)
+        for subdir in self._scan_subdirs:
+            subdir_path = self.project_dir / subdir
+            if subdir_path.exists():
+                py_files.extend(subdir_path.glob("*.py"))
 
         for py_file in py_files:
             name = py_file.stem
+
+            # Ignoriere bestimmte Dateien
             if name in self._ignore_modules:
+                continue
+            if name.startswith("__"):  # __init__, __main__, etc.
+                continue
+            if name.startswith("test_"):  # Test-Dateien
                 continue
 
             if name not in self.modules:
