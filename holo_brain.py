@@ -5121,6 +5121,32 @@ class PiCommunicator:
         stats["available"] = True
         return stats
 
+    def get_cognitive_connections(self) -> Dict:
+        """
+        Zeigt welche kognitiven Systeme mit dem Problem Solver verbunden sind.
+
+        Holo kann sagen: "Ich bin mit folgenden Systemen verbunden..."
+
+        Returns:
+            Dict mit verbundenen Systemen
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return {"available": False}
+
+        return self.problem_solver.get_cognitive_connections()
+
+    def reconnect_cognitive_systems(self) -> Dict:
+        """
+        Verbindet den Problem Solver erneut mit allen kognitiven Systemen.
+
+        Returns:
+            Dict mit neuen Verbindungen
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return {"available": False}
+
+        return self.problem_solver.reconnect_cognitive_systems()
+
     # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
     # =========================================================================

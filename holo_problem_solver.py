@@ -1070,7 +1070,195 @@ class HoloProblemSolver:
             "total_thinking_time_ms": 0,
         }
 
+        # Kognitive System-Verbindungen
+        self._cognitive_systems = {}
+        self._init_cognitive_connections()
+
         logger.info("HoloProblemSolver initialisiert")
+
+    def _init_cognitive_connections(self):
+        """Verbindet mit allen kognitiven Systemen"""
+
+        # 1. Meta-Cognition - Denken über das Denken
+        try:
+            from holo_meta_cognition import HoloMetaCognition
+            if self.brain and hasattr(self.brain, 'meta_observer'):
+                self._cognitive_systems['meta_cognition'] = self.brain.meta_observer
+                logger.debug("Problem Solver mit Meta-Cognition verbunden")
+        except ImportError:
+            pass
+
+        # 2. Learning System - Lernen aus Erfahrungen
+        try:
+            from holo_learning import HoloLearning
+            if self.brain and hasattr(self.brain, 'learning_system'):
+                self._cognitive_systems['learning'] = self.brain.learning_system
+                logger.debug("Problem Solver mit Learning System verbunden")
+        except ImportError:
+            pass
+
+        # 3. Context Mind - Kontext und Gedächtnis
+        try:
+            from holo_context_mind import HoloContextMind
+            if self.brain and hasattr(self.brain, 'context_mind'):
+                self._cognitive_systems['context_mind'] = self.brain.context_mind
+                logger.debug("Problem Solver mit Context Mind verbunden")
+        except ImportError:
+            pass
+
+        # 4. Self-Awareness - Selbstwahrnehmung
+        try:
+            from holo_self_awareness import HoloSelfAwareness
+            if self.brain and hasattr(self.brain, 'self_awareness'):
+                self._cognitive_systems['self_awareness'] = self.brain.self_awareness
+                logger.debug("Problem Solver mit Self-Awareness verbunden")
+        except ImportError:
+            pass
+
+        # 5. Creative Mind - Kreatives Denken
+        try:
+            from holo_creative_mind import HoloCreativeMind
+            if self.brain and hasattr(self.brain, 'creative_mind'):
+                self._cognitive_systems['creative_mind'] = self.brain.creative_mind
+                logger.debug("Problem Solver mit Creative Mind verbunden")
+        except ImportError:
+            pass
+
+        # 6. Cognitive Engine - Haupt-Kognition
+        try:
+            from holo_cognitive_engine import HoloCognitiveEngine
+            if self.brain and hasattr(self.brain, 'cognitive_engine'):
+                self._cognitive_systems['cognitive_engine'] = self.brain.cognitive_engine
+                logger.debug("Problem Solver mit Cognitive Engine verbunden")
+        except ImportError:
+            pass
+
+        # 7. Autonomous Thinking - Autonomes Denken
+        try:
+            from holo_autonomous_thinking import AutonomousThinking
+            if self.brain and hasattr(self.brain, 'autonomous_thinking'):
+                self._cognitive_systems['autonomous_thinking'] = self.brain.autonomous_thinking
+                logger.debug("Problem Solver mit Autonomous Thinking verbunden")
+        except ImportError:
+            pass
+
+        logger.info(f"Problem Solver mit {len(self._cognitive_systems)} kognitiven Systemen verbunden")
+
+    def _consult_meta_cognition(self, phase: ThinkingPhase, thought: str) -> Optional[str]:
+        """Fragt Meta-Cognition um Reflexion"""
+        meta = self._cognitive_systems.get('meta_cognition')
+        if not meta:
+            return None
+
+        try:
+            if hasattr(meta, 'reflect_on_thought'):
+                return meta.reflect_on_thought(thought, phase.value)
+            elif hasattr(meta, 'observe'):
+                meta.observe({
+                    'type': 'problem_solving',
+                    'phase': phase.value,
+                    'thought': thought
+                })
+        except Exception as e:
+            logger.debug(f"Meta-Cognition Fehler: {e}")
+
+        return None
+
+    def _consult_learning(self, problem: Problem) -> List[Dict]:
+        """Fragt Learning System nach ähnlichen Erfahrungen"""
+        learning = self._cognitive_systems.get('learning')
+        if not learning:
+            return []
+
+        try:
+            if hasattr(learning, 'find_similar_experiences'):
+                return learning.find_similar_experiences(problem.description)
+            elif hasattr(learning, 'recall'):
+                return learning.recall(problem.description)
+        except Exception as e:
+            logger.debug(f"Learning System Fehler: {e}")
+
+        return []
+
+    def _consult_context_mind(self, problem: Problem) -> Dict:
+        """Fragt Context Mind nach relevantem Kontext"""
+        context_mind = self._cognitive_systems.get('context_mind')
+        if not context_mind:
+            return {}
+
+        try:
+            if hasattr(context_mind, 'get_relevant_context'):
+                return context_mind.get_relevant_context(problem.description)
+            elif hasattr(context_mind, 'search'):
+                return context_mind.search(problem.description)
+        except Exception as e:
+            logger.debug(f"Context Mind Fehler: {e}")
+
+        return {}
+
+    def _consult_creative_mind(self, problem: Problem, strategies: List[Strategy]) -> Optional[Strategy]:
+        """Fragt Creative Mind nach kreativen Lösungen"""
+        creative = self._cognitive_systems.get('creative_mind')
+        if not creative or problem.problem_type != ProblemType.CREATIVE:
+            return None
+
+        try:
+            if hasattr(creative, 'generate_creative_solution'):
+                creative_idea = creative.generate_creative_solution(problem.description)
+                if creative_idea:
+                    return Strategy(
+                        id=f"creative_{problem.id}",
+                        strategy_type=StrategyType.DIRECT,
+                        description=f"Kreative Lösung: {creative_idea[:100]}",
+                        steps=["Kreative Idee umsetzen", "Ergebnis prüfen"],
+                        estimated_success=0.7,
+                        estimated_effort=0.5,
+                    )
+        except Exception as e:
+            logger.debug(f"Creative Mind Fehler: {e}")
+
+        return None
+
+    def _notify_learning_result(self, problem: Problem, solution: Solution):
+        """Informiert Learning System über das Ergebnis"""
+        learning = self._cognitive_systems.get('learning')
+        if not learning:
+            return
+
+        try:
+            if hasattr(learning, 'learn_from_experience'):
+                learning.learn_from_experience({
+                    'problem': problem.description,
+                    'problem_type': problem.problem_type.value,
+                    'success': solution.success,
+                    'strategies_tried': solution.strategies_tried,
+                    'lessons': solution.lessons_learned,
+                    'duration_ms': solution.duration_ms,
+                })
+            elif hasattr(learning, 'record'):
+                learning.record({
+                    'type': 'problem_solved',
+                    'success': solution.success,
+                    'problem': problem.description[:100],
+                })
+        except Exception as e:
+            logger.debug(f"Learning Notification Fehler: {e}")
+
+    def _update_self_awareness(self, phase: ThinkingPhase, success: bool = None):
+        """Aktualisiert Self-Awareness über den aktuellen Zustand"""
+        awareness = self._cognitive_systems.get('self_awareness')
+        if not awareness:
+            return
+
+        try:
+            if hasattr(awareness, 'update_state'):
+                awareness.update_state({
+                    'activity': 'problem_solving',
+                    'phase': phase.value,
+                    'success': success,
+                })
+        except Exception as e:
+            logger.debug(f"Self-Awareness Update Fehler: {e}")
 
     def solve(self,
               problem_description: str,
@@ -1092,11 +1280,23 @@ class HoloProblemSolver:
         start_time = time.time()
         self.thinking_log.clear()
 
+        # Self-Awareness: Problem-Solving gestartet
+        self._update_self_awareness(ThinkingPhase.UNDERSTAND)
+
         # ============================================
         # PHASE 1: VERSTEHEN
         # ============================================
         self._think(ThinkingPhase.UNDERSTAND,
                    f"Was ist das Problem? '{problem_description[:100]}...'")
+
+        # Meta-Cognition konsultieren
+        meta_reflection = self._consult_meta_cognition(
+            ThinkingPhase.UNDERSTAND,
+            f"Analysiere Problem: {problem_description[:50]}"
+        )
+        if meta_reflection:
+            self._think(ThinkingPhase.UNDERSTAND,
+                       f"Meta-Reflexion: {meta_reflection}")
 
         # Problem-Objekt erstellen
         problem = self._create_problem(
@@ -1119,6 +1319,14 @@ class HoloProblemSolver:
 
         analysis = self.analyzer.analyze(problem)
 
+        # Context Mind nach relevantem Kontext fragen
+        context_info = self._consult_context_mind(problem)
+        if context_info:
+            self._think(ThinkingPhase.ANALYZE,
+                       f"Context Mind liefert: {list(context_info.keys())}")
+            # Kontext zur Analyse hinzufügen
+            analysis["context_memory"] = context_info
+
         # Ursachen
         if analysis["root_causes"]:
             self._think(ThinkingPhase.ANALYZE,
@@ -1139,6 +1347,15 @@ class HoloProblemSolver:
         # ============================================
         # PHASE 3: WISSEN SAMMELN
         # ============================================
+
+        # Learning System nach Erfahrungen fragen
+        past_experiences = self._consult_learning(problem)
+        if past_experiences:
+            self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                       f"Learning System hat {len(past_experiences)} ähnliche Erfahrungen",
+                       "Nutze vergangenes Wissen")
+            analysis["past_experiences"] = past_experiences
+
         if analysis["missing_information"]:
             self._think(ThinkingPhase.GATHER_KNOWLEDGE,
                        f"Fehlende Infos: {analysis['missing_information']}",
@@ -1152,6 +1369,14 @@ class HoloProblemSolver:
 
         strategies = self.strategy_finder.find_strategies(problem, analysis)
 
+        # Creative Mind nach kreativen Lösungen fragen
+        creative_strategy = self._consult_creative_mind(problem, strategies)
+        if creative_strategy:
+            self._think(ThinkingPhase.FIND_STRATEGIES,
+                       f"Creative Mind schlägt vor: {creative_strategy.description[:50]}",
+                       "Kreative Lösung hinzugefügt")
+            strategies.insert(0, creative_strategy)
+
         self._think(ThinkingPhase.FIND_STRATEGIES,
                    f"Gefundene Strategien: {[s.strategy_type.value for s in strategies]}",
                    f"{len(strategies)} Strategien zur Auswahl")
@@ -1161,6 +1386,12 @@ class HoloProblemSolver:
         # ============================================
         self._think(ThinkingPhase.EVALUATE,
                    "Bewerte Strategien nach Erfolgswahrscheinlichkeit und Aufwand...")
+
+        # Meta-Cognition: Strategien reflektieren
+        self._consult_meta_cognition(
+            ThinkingPhase.EVALUATE,
+            f"Bewerte {len(strategies)} Strategien für {problem.problem_type.value}"
+        )
 
         # Beste Strategie wählen
         best_strategy = strategies[0] if strategies else None
@@ -1249,6 +1480,12 @@ class HoloProblemSolver:
             self.stats["problems_failed"] += 1
 
         self.stats["total_thinking_time_ms"] += duration
+
+        # Learning System über Ergebnis informieren
+        self._notify_learning_result(problem, solution)
+
+        # Self-Awareness aktualisieren
+        self._update_self_awareness(ThinkingPhase.LEARN, success)
 
         return solution
 
@@ -1433,7 +1670,57 @@ class HoloProblemSolver:
             "total_thinking_time": f"{self.stats['total_thinking_time_ms']}ms",
             "knowledge_patterns": len(self.knowledge.problem_patterns),
             "lessons_learned": len(self.knowledge.lessons),
+            "cognitive_connections": len(self._cognitive_systems),
         }
+
+    def get_cognitive_connections(self) -> Dict:
+        """
+        Gibt die verbundenen kognitiven Systeme zurück.
+
+        Holo kann sagen: "Ich bin mit folgenden kognitiven Systemen verbunden..."
+
+        Returns:
+            Dict mit verbundenen Systemen und ihrem Status
+        """
+        connections = {}
+
+        for name, system in self._cognitive_systems.items():
+            connections[name] = {
+                "connected": True,
+                "type": type(system).__name__ if system else "None",
+                "available": system is not None,
+            }
+
+        # Auch nicht verbundene Systeme anzeigen
+        expected_systems = [
+            'meta_cognition', 'learning', 'context_mind',
+            'self_awareness', 'creative_mind', 'cognitive_engine',
+            'autonomous_thinking'
+        ]
+
+        for sys_name in expected_systems:
+            if sys_name not in connections:
+                connections[sys_name] = {
+                    "connected": False,
+                    "type": None,
+                    "available": False,
+                }
+
+        return {
+            "connected_count": len(self._cognitive_systems),
+            "total_expected": len(expected_systems),
+            "systems": connections,
+        }
+
+    def reconnect_cognitive_systems(self):
+        """
+        Versucht die kognitiven Verbindungen neu herzustellen.
+
+        Nützlich wenn HoloBrain später initialisiert wird.
+        """
+        self._cognitive_systems.clear()
+        self._init_cognitive_connections()
+        return self.get_cognitive_connections()
 
 
 # ==================== FACTORY FUNCTION ====================
