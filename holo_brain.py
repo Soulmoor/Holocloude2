@@ -14190,6 +14190,17 @@ class HoloPersona:
             self.cognitive_engine = None
 
         # ================================================================
+        # 💕 CONVERSATION ENGINE - Emotionale Engines für natürliche Gespräche
+        # ================================================================
+        try:
+            from holo_cognitive_engine import ConversationEngine
+            self.conversation_engine = ConversationEngine()
+            logger.info("💕 Conversation Engine mit 15 emotionalen Engines aktiviert")
+        except Exception as e:
+            logger.warning(f"⚠️ Conversation Engine nicht verfügbar: {e}")
+            self.conversation_engine = None
+
+        # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
         # (KONSOLIDIERT in holo_context_mind.py)
         # ================================================================
@@ -20887,6 +20898,105 @@ Nutze alternative Formulierungen!
         return {"mood": mood, "valence": valence, "confidence": 0.7}
 
     # =========================================================================
+    # EMOTIONAL ENGINES INTEGRATION
+    # =========================================================================
+
+    def _enhance_with_emotional_engines(self, response: str, user_input: str = "",
+                                        intent_type: str = None) -> str:
+        """
+        Verbessert eine Antwort mit den 15 emotionalen Engines aus ConversationEngine.
+
+        Args:
+            response: Die Basis-Antwort
+            user_input: Die User-Nachricht (für Kontext)
+            intent_type: Der erkannte Intent (optional)
+
+        Returns:
+            Verbesserte Antwort mit emotionalen Elementen
+        """
+        if not hasattr(self, 'conversation_engine') or not self.conversation_engine:
+            return response
+
+        try:
+            import random
+            enhancements = []
+
+            # Nur bei ~50% der Antworten enhancen für Natürlichkeit
+            if random.random() > 0.5:
+                return response
+
+            # 1. Bei Begrüßungen: Tageszeit-Gruß oder saisonaler Kommentar
+            if intent_type == 'greeting':
+                if random.random() < 0.4:
+                    time_greeting = self.conversation_engine.get_time_aware_greeting()
+                    if time_greeting:
+                        return time_greeting
+                if random.random() < 0.3:
+                    seasonal = self.conversation_engine.get_seasonal_comment()
+                    if seasonal:
+                        enhancements.append(seasonal)
+
+            # 2. Bei Trostsuche: Comfort Provider und Empathetic Reframing
+            elif intent_type == 'comfort_seek':
+                if hasattr(self.conversation_engine, 'comfort_provider'):
+                    comfort = self.conversation_engine.comfort_provider.provide_comfort(user_input)
+                    if comfort:
+                        enhancements.append(comfort)
+                if random.random() < 0.4 and hasattr(self.conversation_engine, 'empathetic_reframing'):
+                    reframe = self.conversation_engine.empathetic_reframing.reframe(user_input)
+                    if reframe:
+                        enhancements.append(reframe)
+
+            # 3. Bei Dankbarkeit: GratitudeEngine
+            elif intent_type == 'gratitude':
+                gratitude = self.conversation_engine.express_gratitude()
+                if gratitude:
+                    return gratitude
+
+            # 4. Bei positiven Antworten: Gelegentlich Humor oder Anekdoten
+            elif intent_type in ['flirty', 'feelings_ask']:
+                if random.random() < 0.25:
+                    joke = self.conversation_engine.tell_joke()
+                    if joke:
+                        enhancements.append(joke)
+                elif random.random() < 0.2:
+                    anecdote = self.conversation_engine.tell_anecdote()
+                    if anecdote:
+                        enhancements.append(anecdote)
+
+            # 5. Allgemein: Curiosity, Metaphern oder Shared Experience
+            else:
+                if random.random() < 0.2 and hasattr(self.conversation_engine, 'curiosity_engine'):
+                    curiosity = self.conversation_engine.curiosity_engine.express_curiosity(user_input)
+                    if curiosity:
+                        enhancements.append(curiosity)
+                elif random.random() < 0.15 and hasattr(self.conversation_engine, 'shared_experience'):
+                    shared = self.conversation_engine.shared_experience.share_experience(user_input)
+                    if shared:
+                        enhancements.append(shared)
+
+            # 6. Relationship Tracker aktualisieren
+            if hasattr(self.conversation_engine, 'relationship_tracker'):
+                self.conversation_engine.relationship_tracker.record_interaction()
+                milestone = self.conversation_engine.relationship_tracker.check_milestone()
+                if milestone:
+                    enhancements.append(milestone)
+
+            # Enhancements zur Antwort hinzufügen
+            if enhancements:
+                # Enhancement am Ende oder Anfang hinzufügen (variiert)
+                if random.random() < 0.6:
+                    return response + " " + " ".join(enhancements)
+                else:
+                    return " ".join(enhancements) + " " + response
+
+            return response
+
+        except Exception as e:
+            logger.debug(f"Emotional enhancement error: {e}")
+            return response
+
+    # =========================================================================
     # ORGANIC INTENT HANDLING
     # =========================================================================
 
@@ -20896,22 +21006,28 @@ Nutze alternative Formulierungen!
             return None
 
         intent_type = intent['intent']
+        response = None
 
         try:
             if intent_type == 'greeting':
-                return self.response_generator.generate_greeting()
+                response = self.response_generator.generate_greeting()
             elif intent_type == 'goodbye':
-                return self.response_generator.generate_goodbye()
+                response = self.response_generator.generate_goodbye()
             elif intent_type == 'feelings_ask':
-                return self.response_generator.generate_feelings_response()
+                response = self.response_generator.generate_feelings_response()
             elif intent_type == 'flirty':
-                return self.response_generator.generate_affection_response()
+                response = self.response_generator.generate_affection_response()
             elif intent_type == 'gratitude':
-                return self.response_generator.generate_gratitude_response()
+                response = self.response_generator.generate_gratitude_response()
             elif intent_type == 'comfort_seek':
-                return self.response_generator.generate_comfort_response()
-        except Exception:
-            pass
+                response = self.response_generator.generate_comfort_response()
+
+            # Emotionale Engines anwenden wenn Response vorhanden
+            if response:
+                return self._enhance_with_emotional_engines(response, "", intent_type)
+
+        except Exception as e:
+            logger.debug(f"Organic intent handling error: {e}")
 
         return None  # LLM verwenden
 
