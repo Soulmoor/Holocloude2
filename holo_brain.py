@@ -4252,6 +4252,61 @@ class PiCommunicator:
             logger.error(f"Proaktive Discord Fehler: {e}")
             return False
 
+    def _start_discord_bot_background(self, token: str) -> bool:
+        """
+        Startet den Discord Bot in einem Hintergrund-Thread.
+        Läuft automatisch mit Holo mit - privat und unsichtbar.
+
+        Args:
+            token: Discord Bot Token
+
+        Returns:
+            True wenn gestartet
+        """
+        if not self.discord_bot or not token:
+            return False
+
+        def run_discord_bot():
+            """Discord Bot im eigenen Event-Loop starten"""
+            import asyncio
+            try:
+                # Neuen Event-Loop für diesen Thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                # Bot starten (blocking innerhalb des Threads)
+                self.discord_bot.run(token)
+            except Exception as e:
+                logger.error(f"Discord Bot Thread Fehler: {e}")
+
+        try:
+            # Thread erstellen und starten
+            self._discord_thread = threading.Thread(
+                target=run_discord_bot,
+                name="HoloDiscordBot",
+                daemon=True  # Beendet sich automatisch wenn Hauptprogramm endet
+            )
+            self._discord_thread.start()
+            logger.info("🤖 Discord Bot Thread gestartet (daemon)")
+            return True
+        except Exception as e:
+            logger.error(f"Discord Thread Start Fehler: {e}")
+            return False
+
+    def stop_discord_bot(self):
+        """Stoppt den Discord Bot (falls gewünscht)"""
+        if self.discord_bot and hasattr(self.discord_bot, 'bot') and self.discord_bot.bot:
+            try:
+                import asyncio
+                # Bot schließen
+                asyncio.run_coroutine_threadsafe(
+                    self.discord_bot.close(),
+                    self.discord_bot.bot.loop
+                )
+                logger.info("🤖 Discord Bot gestoppt")
+            except Exception as e:
+                logger.warning(f"Discord Bot Stop Fehler: {e}")
+
     def request_nas_wake(self, reason: str = "Holo") -> dict:
         """NAS aufwecken - Pi-Control entscheidet!"""
         return self.pi.wake_nas(reason)
@@ -14279,6 +14334,7 @@ class HoloPersona:
         # ================================================================
         self.discord_bot = None
         self.discord_bridge = None
+        self._discord_thread = None
         if DISCORD_BOT_AVAILABLE:
             try:
                 # Config laden
@@ -14289,7 +14345,10 @@ class HoloPersona:
                         config_dict=discord_config
                     )
                     self.discord_bridge = HoloDiscordBridge(self.discord_bot)
-                    logger.info("🤖 Discord Bot initialisiert (Token vorhanden)")
+
+                    # Discord Bot automatisch in Hintergrund-Thread starten
+                    self._start_discord_bot_background(discord_config.get('token'))
+                    logger.info("🤖 Discord Bot gestartet (läuft im Hintergrund)")
                 else:
                     logger.info("🤖 Discord Bot verfügbar aber kein Token konfiguriert")
             except Exception as e:
