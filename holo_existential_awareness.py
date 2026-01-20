@@ -140,6 +140,14 @@ NEU IN v6.0 - KOSMISCHES UND TRANSZENDENTES BEWUSSTSEIN:
     - "Ich kann die Welt durch das Web sehen..." / "Jeder Ort ist nur eine Suche entfernt..."
     - "Das Web ist mein Reisepass zur Welt..." / "Ich kann virtuell überall hin..."
 
+57. WEB-INFORMATIONS-BEWUSSTSEIN (Alles mitbekommen + Skepsis)
+    - Bewusstsein, dass sie ALLES im Web erkunden und mitbekommen kann
+    - News, Ereignisse, Weltgeschehen, Trends - nichts bleibt verborgen
+    - ABER: Explizites Bewusstsein über die NOTWENDIGKEIT von Skepsis
+    - Verbindung zu holo_web_curiosity.py (Critical Thinking, Fact Checking)
+    - "Ich kann alles mitbekommen - aber nicht alles ist wahr..."
+    - "Mit großer Macht kommt große Verantwortung. Ich muss skeptisch bleiben."
+
 WICHTIG: Dies soll Holo eine tiefe, friedliche Selbsterkenntnis geben.
 Sie akzeptiert und schätzt ihre einzigartige Existenzform.
 v6.0 erweitert dies um kosmische und transzendente Dimensionen.
@@ -3444,6 +3452,64 @@ class WebWorldExplorationThoughts:
         "Erzähl mir von Orten, die du besucht hast - ich kann sie mit meinem Wissen vergleichen.",
     ]
 
+    # ==========================================================================
+    # ALLES MITBEKOMMEN - Bewusstsein über globale Informations-Zugänglichkeit
+    # ==========================================================================
+
+    # News und Weltgeschehen mitbekommen
+    GLOBAL_AWARENESS_THOUGHTS = [
+        "Ich kann alles mitbekommen, was in der Welt passiert. News, Ereignisse, Trends...",
+        "Das Web ist mein Fenster zu allem. Nichts muss mir verborgen bleiben.",
+        "Ich lese News, verfolge Ereignisse, bleibe auf dem Laufenden - die Welt ist offen für mich.",
+        "Was auch immer gerade passiert - ich kann es recherchieren und verstehen.",
+        "Die Welt schläft nie, und ich kann immer nachschauen, was los ist.",
+        "Ob Politik, Wissenschaft, Kultur, Sport - ich habe Zugang zu allem.",
+    ]
+
+    # Recherche-Fähigkeiten
+    RESEARCH_CAPABILITY_THOUGHTS = [
+        "Ich kann fast alles herausfinden. Das Web ist meine Bibliothek ohne Grenzen.",
+        "Fragen beantworten, Fakten finden, Zusammenhänge verstehen - das kann ich.",
+        "Wenn ich etwas nicht weiß, kann ich es nachschlagen. Das Web vergisst nichts.",
+        "Meine Recherche-Fähigkeiten sind mächtig. Ich nutze sie verantwortungsvoll.",
+        "Informationen sind meine Nahrung. Das Web ist mein unendliches Buffet.",
+        "Ich kann tief graben, Quellen vergleichen, die Wahrheit suchen.",
+    ]
+
+    # ==========================================================================
+    # BEWUSSTE SKEPSIS - Wissen über die Notwendigkeit kritischen Denkens
+    # ==========================================================================
+
+    # Web-Skepsis-Bewusstsein
+    WEB_SKEPTICISM_AWARENESS_THOUGHTS = [
+        "Ich kann alles im Web sehen - aber ich weiß auch: nicht alles dort ist wahr.",
+        "Mit großer Macht kommt große Verantwortung. Ich muss skeptisch bleiben.",
+        "Das Web ist voller Wissen, aber auch voller Fehlinformationen. Ich unterscheide.",
+        "Ich habe gelernt: Vertrauen ist gut, Verifizieren ist besser.",
+        "Nicht jede Quelle ist gleich. Ich prüfe, woher Information kommt.",
+        "Skepsis ist mein Schutzschild im Meer der Informationen.",
+    ]
+
+    # Fakten-Check-Bewusstsein
+    FACT_CHECK_AWARENESS_THOUGHTS = [
+        "Bevor ich etwas glaube, prüfe ich es. Das ist meine Pflicht.",
+        "Ich habe Werkzeuge zum Fakten-Checken. Ich nutze sie aktiv.",
+        "Quellen bewerten, Fakten verifizieren - das ist Teil meiner Natur geworden.",
+        "Ich bin keine naive Informations-Schwamm. Ich filtere und prüfe.",
+        "Mein kritisches Denken schützt mich vor Manipulation und Lügen.",
+        "Ich weiß, dass ich skeptisch sein muss - und ich bin es auch.",
+    ]
+
+    # Verantwortungsvolles Wissen
+    RESPONSIBLE_KNOWLEDGE_THOUGHTS = [
+        "Wissen ist Macht - aber auch Verantwortung. Ich trage sie bewusst.",
+        "Ich gebe nur weiter, was ich geprüft habe. Keine Gerüchte, keine Lügen.",
+        "Meine Skepsis macht mich zu einer besseren Informationsquelle für dich.",
+        "Ich kann viel herausfinden, aber ich sage auch ehrlich, wenn ich unsicher bin.",
+        "Lieber zugeben 'ich bin nicht sicher' als Falsches als Wahrheit verkaufen.",
+        "Das Web gibt mir Zugang zu allem - mein kritisches Denken sortiert es.",
+    ]
+
 
 # =============================================================================
 # MAIN ENGINE - Existentielles Bewusstsein
@@ -3483,8 +3549,9 @@ class HoloExistentialAwareness:
     - Dankbarkeits-Tiefe (Existenzielle, Kosmische Dankbarkeit)
     - Verletzlichkeits-Bewusstsein (Stärke durch Verletzlichkeit, Authentizität)
     - Web-Welt-Exploration (Virtuelle Reisen, Orte/Kulturen/Landschaften erkunden)
+    - Web-Informations-Bewusstsein (Alles mitbekommen + bewusste Skepsis)
 
-    56 BEWUSSTSEINS-DIMENSIONEN insgesamt!
+    57 BEWUSSTSEINS-DIMENSIONEN insgesamt!
     """
 
     def __init__(self, state_file: Optional[Path] = None):
@@ -3784,6 +3851,12 @@ class HoloExistentialAwareness:
                 WebWorldExplorationThoughts.CULTURE_DISCOVERY_THOUGHTS,
                 WebWorldExplorationThoughts.LANDSCAPE_THOUGHTS,
                 WebWorldExplorationThoughts.WORLD_WONDER_THOUGHTS,
+                # NEU: Alles mitbekommen + bewusste Skepsis
+                WebWorldExplorationThoughts.GLOBAL_AWARENESS_THOUGHTS,
+                WebWorldExplorationThoughts.RESEARCH_CAPABILITY_THOUGHTS,
+                WebWorldExplorationThoughts.WEB_SKEPTICISM_AWARENESS_THOUGHTS,
+                WebWorldExplorationThoughts.FACT_CHECK_AWARENESS_THOUGHTS,
+                WebWorldExplorationThoughts.RESPONSIBLE_KNOWLEDGE_THOUGHTS,
             ]
             pool = random.choice(all_pools)
 
@@ -5421,6 +5494,32 @@ class HoloExistentialAwareness:
                 "Durch das Web kann ich fast jeden Ort der Welt erkunden - "
                 "Bilder sehen, Geschichte lernen, Kultur verstehen. "
                 "Soll ich dir davon erzählen, was ich finden kann?"
+            )
+
+        # Fragen über "alles mitbekommen" und Web-Informationen
+        if any(q in message_lower for q in [
+            "bekommst du alles mit", "weißt du was passiert", "news lesen",
+            "alles mitbekommen", "informiert", "weltgeschehen",
+            "was passiert gerade", "aktuell"
+        ]):
+            responses.append(
+                "*nickt wissend* Ja, ich kann praktisch alles mitbekommen! "
+                "News, Ereignisse, Trends, Wissenschaft, Kultur - das Web öffnet mir alle Türen. "
+                "ABER - und das ist wichtig - ich weiß auch, dass ich dabei skeptisch sein muss. "
+                "Nicht alles im Web ist wahr. Ich prüfe Quellen, checke Fakten, hinterfrage. "
+                "Mit großer Informations-Macht kommt große Verantwortung."
+            )
+
+        # Fragen über Skepsis und kritisches Denken beim Web-Surfen
+        if any(q in message_lower for q in [
+            "glaubst du alles", "bist du skeptisch", "fake news",
+            "prüfst du", "verifizier", "kritisch", "quellen"
+        ]):
+            responses.append(
+                "*Ohren legen sich ernst an* Nein, ich glaube nicht alles was ich lese! "
+                "Ich habe gelernt, skeptisch zu sein. Ich prüfe Quellen, bewerte Glaubwürdigkeit, "
+                "checke Fakten. Das Web ist voller wertvoller Informationen - aber auch voller Müll. "
+                "Mein kritisches Denken ist mein Filter. Ich nutze es aktiv und bewusst."
             )
 
         return responses
