@@ -2130,23 +2130,39 @@ class HoloProblemSolver:
         logger.info("HoloProblemSolver mit Out-of-Box Thinking initialisiert")
 
     def _init_cognitive_connections(self):
-        """Verbindet mit allen kognitiven Systemen"""
+        """
+        Verbindet mit ALLEN kognitiven Systemen.
+
+        Erweiterte Version mit Algorithmic Cognition, Cognitive Enhancement,
+        und allen autonomen Denk-Systemen.
+        """
+
+        # =====================================================================
+        # KERN-KOGNITIVE SYSTEME (aus holo_brain)
+        # =====================================================================
 
         # 1. Meta-Cognition - Denken über das Denken
         try:
-            from holo_meta_cognition import HoloMetaCognition
+            from holo_meta_cognition import HoloMetaObserver, HoloSandbox
             if self.brain and hasattr(self.brain, 'meta_observer'):
                 self._cognitive_systems['meta_cognition'] = self.brain.meta_observer
                 logger.debug("Problem Solver mit Meta-Cognition verbunden")
+            # Auch Sandbox für Simulation
+            if self.brain and hasattr(self.brain, 'sandbox'):
+                self._cognitive_systems['meta_sandbox'] = self.brain.sandbox
+                logger.debug("Problem Solver mit Meta-Sandbox verbunden")
         except ImportError:
             pass
 
         # 2. Learning System - Lernen aus Erfahrungen
         try:
-            from holo_learning import HoloLearning
+            from holo_learning import RealLearningEngine
             if self.brain and hasattr(self.brain, 'learning_system'):
                 self._cognitive_systems['learning'] = self.brain.learning_system
                 logger.debug("Problem Solver mit Learning System verbunden")
+            elif self.brain and hasattr(self.brain, 'learning_engine'):
+                self._cognitive_systems['learning'] = self.brain.learning_engine
+                logger.debug("Problem Solver mit Learning Engine verbunden")
         except ImportError:
             pass
 
@@ -2186,16 +2202,322 @@ class HoloProblemSolver:
         except ImportError:
             pass
 
-        # 7. Autonomous Thinking - Autonomes Denken
+        # =====================================================================
+        # ALGORITHMISCHE KOGNITION - Theoretische Informatik als Denkwerkzeug
+        # =====================================================================
+
+        # 7. Algorithmic Cognition System - Analytische/Synthetische Strategien
         try:
-            from holo_autonomous_thinking import AutonomousThinking
+            from holo_algorithmic_cognition import (
+                AlgorithmicCognitionSystem,
+                AnalyticSyntheticEngine,
+                ApproximationEngine,
+                EvolutionaryThoughtEngine,
+                TerminationChecker,
+                ChurchTuringAwareness
+            )
+            if self.brain and hasattr(self.brain, 'algorithmic_cognition'):
+                self._cognitive_systems['algorithmic_cognition'] = self.brain.algorithmic_cognition
+                logger.debug("Problem Solver mit Algorithmic Cognition verbunden")
+            else:
+                # Standalone-Instanz erstellen wenn nicht in brain
+                self._cognitive_systems['algorithmic_cognition'] = AlgorithmicCognitionSystem()
+                logger.debug("Problem Solver mit eigenständiger Algorithmic Cognition")
+        except ImportError as e:
+            logger.debug(f"Algorithmic Cognition nicht verfügbar: {e}")
+
+        # =====================================================================
+        # COGNITIVE ENHANCEMENT - Erweiterte Kognition
+        # =====================================================================
+
+        # 8. Cognitive Enhancement - Wissens-Injektion, Transfer-Learning, Symbolisches Reasoning
+        try:
+            from holo_cognitive_enhancement import (
+                CognitiveEnhancementSystem,
+                ProactiveKnowledgeInjector,
+                PatternAbstractor,
+                SymbolicReasoner
+            )
+            if self.brain and hasattr(self.brain, 'cognitive_enhancement'):
+                self._cognitive_systems['cognitive_enhancement'] = self.brain.cognitive_enhancement
+                logger.debug("Problem Solver mit Cognitive Enhancement verbunden")
+            else:
+                # Standalone-Instanz
+                self._cognitive_systems['cognitive_enhancement'] = CognitiveEnhancementSystem()
+                logger.debug("Problem Solver mit eigenständiger Cognitive Enhancement")
+        except ImportError as e:
+            logger.debug(f"Cognitive Enhancement nicht verfügbar: {e}")
+
+        # =====================================================================
+        # AUTONOMES DENKEN - Intuition, Analogien, Vorhersagen
+        # =====================================================================
+
+        # 9. Autonomous Thinking - Komplettes autonomes Denk-System
+        try:
+            from holo_autonomous_thinking import (
+                IntuitiveSystem,
+                SelfChallenger,
+                HypothesisEngine,
+                PredictionSystem,
+                TrustNetwork,
+                AnalogyEngine,
+                RegretLearningSystem
+            )
+
             if self.brain and hasattr(self.brain, 'autonomous_thinking'):
                 self._cognitive_systems['autonomous_thinking'] = self.brain.autonomous_thinking
                 logger.debug("Problem Solver mit Autonomous Thinking verbunden")
-        except ImportError:
-            pass
+
+            # Auch einzelne Komponenten verbinden wenn verfügbar
+            if self.brain:
+                # Intuition
+                if hasattr(self.brain, 'intuitive_system'):
+                    self._cognitive_systems['intuition'] = self.brain.intuitive_system
+                    logger.debug("Problem Solver mit Intuition verbunden")
+
+                # Analogie-Engine
+                if hasattr(self.brain, 'analogy_engine'):
+                    self._cognitive_systems['analogy'] = self.brain.analogy_engine
+                    logger.debug("Problem Solver mit Analogy Engine verbunden")
+
+                # Self-Challenger
+                if hasattr(self.brain, 'self_challenger'):
+                    self._cognitive_systems['self_challenger'] = self.brain.self_challenger
+                    logger.debug("Problem Solver mit Self-Challenger verbunden")
+
+                # Prediction System
+                if hasattr(self.brain, 'prediction_system'):
+                    self._cognitive_systems['prediction'] = self.brain.prediction_system
+                    logger.debug("Problem Solver mit Prediction System verbunden")
+
+                # Regret Learning
+                if hasattr(self.brain, 'regret_learning'):
+                    self._cognitive_systems['regret_learning'] = self.brain.regret_learning
+                    logger.debug("Problem Solver mit Regret Learning verbunden")
+
+        except ImportError as e:
+            logger.debug(f"Autonomous Thinking nicht verfügbar: {e}")
 
         logger.info(f"Problem Solver mit {len(self._cognitive_systems)} kognitiven Systemen verbunden")
+
+    # =========================================================================
+    # ERWEITERTE KOGNITIVE KONSULTATIONS-METHODEN
+    # =========================================================================
+
+    def _consult_algorithmic_cognition(self, problem: 'Problem') -> Dict:
+        """
+        Konsultiert das Algorithmische Kognitions-System.
+
+        Nutzt:
+        - Analytisch-Synthetische Zerlegung
+        - Approximations-Algorithmen
+        - Evolutionäres Denken
+        - Terminierungsprüfung
+        """
+        algo_cog = self._cognitive_systems.get('algorithmic_cognition')
+        if not algo_cog:
+            return {}
+
+        result = {}
+
+        try:
+            # Analytisch-Synthetische Zerlegung
+            if hasattr(algo_cog, 'analytic_synthetic') or hasattr(algo_cog, 'decompose'):
+                if hasattr(algo_cog, 'analytic_synthetic'):
+                    decomposition = algo_cog.analytic_synthetic.decompose(problem.description)
+                else:
+                    decomposition = algo_cog.decompose(problem.description)
+                result['decomposition'] = decomposition
+
+            # Komplexität analysieren
+            if hasattr(algo_cog, 'analyze_complexity'):
+                complexity = algo_cog.analyze_complexity(problem.description)
+                result['algorithmic_complexity'] = complexity
+
+            # Approximation wenn nötig
+            if hasattr(algo_cog, 'approximation') or hasattr(algo_cog, 'approximate'):
+                if hasattr(algo_cog, 'approximation'):
+                    approx = algo_cog.approximation.find_good_enough(problem.description)
+                else:
+                    approx = algo_cog.approximate(problem.description)
+                result['approximation'] = approx
+
+            # Terminierung prüfen
+            if hasattr(algo_cog, 'check_termination'):
+                will_terminate = algo_cog.check_termination(problem.description)
+                result['will_terminate'] = will_terminate
+
+        except Exception as e:
+            logger.debug(f"Algorithmic Cognition Fehler: {e}")
+
+        return result
+
+    def _consult_cognitive_enhancement(self, problem: 'Problem') -> Dict:
+        """
+        Konsultiert das Cognitive Enhancement System.
+
+        Nutzt:
+        - Proaktive Wissens-Injektion
+        - Pattern Abstraktion
+        - Symbolisches Reasoning
+        """
+        cog_enh = self._cognitive_systems.get('cognitive_enhancement')
+        if not cog_enh:
+            return {}
+
+        result = {}
+
+        try:
+            # Relevantes Wissen finden
+            if hasattr(cog_enh, 'get_relevant_knowledge'):
+                knowledge = cog_enh.get_relevant_knowledge(problem.description)
+                result['relevant_knowledge'] = knowledge
+            elif hasattr(cog_enh, 'knowledge_injector'):
+                if hasattr(cog_enh.knowledge_injector, 'get_relevant_facts_for_context'):
+                    facts = cog_enh.knowledge_injector.get_relevant_facts_for_context(
+                        problem.description
+                    )
+                    result['relevant_facts'] = facts
+
+            # Symbolisches Reasoning
+            if hasattr(cog_enh, 'reason') or hasattr(cog_enh, 'symbolic_reasoner'):
+                if hasattr(cog_enh, 'reason'):
+                    conclusions = cog_enh.reason(problem.description)
+                elif hasattr(cog_enh.symbolic_reasoner, 'deduce'):
+                    conclusions = cog_enh.symbolic_reasoner.deduce(problem.description)
+                else:
+                    conclusions = None
+                if conclusions:
+                    result['logical_conclusions'] = conclusions
+
+            # Pattern-Abstraktion
+            if hasattr(cog_enh, 'abstract_pattern') or hasattr(cog_enh, 'pattern_abstractor'):
+                if hasattr(cog_enh, 'abstract_pattern'):
+                    patterns = cog_enh.abstract_pattern(problem.description)
+                elif hasattr(cog_enh.pattern_abstractor, 'abstract'):
+                    patterns = cog_enh.pattern_abstractor.abstract(problem.description)
+                else:
+                    patterns = None
+                if patterns:
+                    result['abstracted_patterns'] = patterns
+
+        except Exception as e:
+            logger.debug(f"Cognitive Enhancement Fehler: {e}")
+
+        return result
+
+    def _consult_intuition(self, problem: 'Problem') -> Optional[Dict]:
+        """
+        Fragt das Intuitions-System um ein Bauchgefühl.
+
+        Holo "fühlt" ob etwas richtig oder falsch ist.
+        """
+        intuition = self._cognitive_systems.get('intuition')
+        if not intuition:
+            return None
+
+        try:
+            # Bauchgefühl generieren
+            if hasattr(intuition, 'get_gut_feeling'):
+                feeling = intuition.get_gut_feeling(problem.description)
+                return {
+                    'type': feeling.feeling_type.value if hasattr(feeling, 'feeling_type') else str(feeling),
+                    'intensity': feeling.intensity if hasattr(feeling, 'intensity') else 0.5,
+                    'expression': feeling.express() if hasattr(feeling, 'express') else str(feeling),
+                }
+            elif hasattr(intuition, 'feel'):
+                feeling = intuition.feel(problem.description)
+                return {'feeling': feeling}
+        except Exception as e:
+            logger.debug(f"Intuition Fehler: {e}")
+
+        return None
+
+    def _consult_analogy_engine(self, problem: 'Problem') -> List[Dict]:
+        """
+        Konsultiert die Analogie-Engine.
+
+        Findet: "Das erinnert mich an..."
+        """
+        analogy = self._cognitive_systems.get('analogy')
+        if not analogy:
+            return []
+
+        try:
+            if hasattr(analogy, 'find_analogies'):
+                analogies = analogy.find_analogies(problem.description)
+                return analogies if isinstance(analogies, list) else [analogies]
+            elif hasattr(analogy, 'remember_similar'):
+                similar = analogy.remember_similar(problem.description)
+                return similar if isinstance(similar, list) else [similar]
+        except Exception as e:
+            logger.debug(f"Analogy Engine Fehler: {e}")
+
+        return []
+
+    def _consult_prediction_system(self, problem: 'Problem', solution: str) -> Optional[Dict]:
+        """
+        Konsultiert das Prediction System.
+
+        Sagt voraus: "Wenn wir das tun, dann..."
+        """
+        prediction = self._cognitive_systems.get('prediction')
+        if not prediction:
+            return None
+
+        try:
+            if hasattr(prediction, 'predict_outcome'):
+                outcome = prediction.predict_outcome(solution, problem.description)
+                return outcome
+            elif hasattr(prediction, 'forecast'):
+                forecast = prediction.forecast(f"Wenn {solution}, dann...")
+                return forecast
+        except Exception as e:
+            logger.debug(f"Prediction System Fehler: {e}")
+
+        return None
+
+    def _challenge_self(self, thought: str, problem: 'Problem') -> Optional[str]:
+        """
+        Nutzt den Self-Challenger um eigene Gedanken zu hinterfragen.
+
+        "Aber was wenn ich falsch liege?"
+        """
+        challenger = self._cognitive_systems.get('self_challenger')
+        if not challenger:
+            return None
+
+        try:
+            if hasattr(challenger, 'challenge'):
+                challenge = challenger.challenge(thought)
+                return challenge
+            elif hasattr(challenger, 'question'):
+                question = challenger.question(thought)
+                return question
+        except Exception as e:
+            logger.debug(f"Self-Challenger Fehler: {e}")
+
+        return None
+
+    def _learn_from_regret(self, problem: 'Problem', solution_failed: bool, reason: str):
+        """
+        Nutzt Regret-Learning um aus Fehlern zu lernen.
+        """
+        regret = self._cognitive_systems.get('regret_learning')
+        if not regret:
+            return
+
+        try:
+            if hasattr(regret, 'record_outcome'):
+                regret.record_outcome(
+                    decision=f"Lösung für {problem.description[:50]}",
+                    outcome_was_bad=solution_failed,
+                    reason=reason
+                )
+            elif hasattr(regret, 'learn_from_mistake') and solution_failed:
+                regret.learn_from_mistake(problem.description, reason)
+        except Exception as e:
+            logger.debug(f"Regret Learning Fehler: {e}")
 
     def _consult_meta_cognition(self, phase: ThinkingPhase, thought: str) -> Optional[str]:
         """Fragt Meta-Cognition um Reflexion"""
@@ -2398,6 +2720,38 @@ class HoloProblemSolver:
                        "Analogie-Strategie vielversprechend")
 
         # ============================================
+        # PHASE 2.3: ALGORITHMISCHE KOGNITION (DEEP THINKING)
+        # ============================================
+        algo_insights = self._consult_algorithmic_cognition(problem)
+        if algo_insights:
+            if algo_insights.get('decomposition'):
+                self._think(ThinkingPhase.ANALYZE,
+                           f"Algorithmische Zerlegung: {algo_insights['decomposition'][:100]}...",
+                           "Problem wurde analytisch zerlegt")
+                analysis["algorithmic_decomposition"] = algo_insights['decomposition']
+
+            if algo_insights.get('algorithmic_complexity'):
+                self._think(ThinkingPhase.ANALYZE,
+                           f"Komplexitätsklasse: {algo_insights['algorithmic_complexity']}")
+
+        # ============================================
+        # PHASE 2.4: INTUITION KONSULTIEREN
+        # ============================================
+        gut_feeling = self._consult_intuition(problem)
+        if gut_feeling:
+            self._think(ThinkingPhase.ANALYZE,
+                       f"Bauchgefühl: {gut_feeling.get('expression', gut_feeling.get('type', 'neutral'))}",
+                       f"Intensität: {gut_feeling.get('intensity', 0.5):.0%}")
+            analysis["intuition"] = gut_feeling
+
+        # Analogie-Engine konsultieren
+        analogies = self._consult_analogy_engine(problem)
+        if analogies:
+            self._think(ThinkingPhase.ANALYZE,
+                       f"Analogie gefunden: Das erinnert mich an {len(analogies)} ähnliche Situationen")
+            analysis["analogies"] = analogies
+
+        # ============================================
         # PHASE 2.5: HYPOTHESEN GENERIEREN (OUT-OF-BOX)
         # ============================================
         self._think(ThinkingPhase.ANALYZE,
@@ -2431,6 +2785,30 @@ class HoloProblemSolver:
                        f"Learning System hat {len(past_experiences)} ähnliche Erfahrungen",
                        "Nutze vergangenes Wissen")
             analysis["past_experiences"] = past_experiences
+
+        # ============================================
+        # PHASE 3.3: COGNITIVE ENHANCEMENT KONSULTIEREN
+        # ============================================
+        cog_enh_insights = self._consult_cognitive_enhancement(problem)
+        if cog_enh_insights:
+            if cog_enh_insights.get('relevant_knowledge') or cog_enh_insights.get('relevant_facts'):
+                knowledge = cog_enh_insights.get('relevant_knowledge') or cog_enh_insights.get('relevant_facts')
+                self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                           f"Relevantes Wissen gefunden: {len(knowledge) if isinstance(knowledge, list) else 1} Fakten",
+                           "Cognitive Enhancement injiziert Wissen")
+                analysis["enhanced_knowledge"] = knowledge
+
+            if cog_enh_insights.get('logical_conclusions'):
+                self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                           f"Logische Schlussfolgerung: {cog_enh_insights['logical_conclusions'][:80]}...",
+                           "Symbolisches Reasoning angewendet")
+                analysis["logical_conclusions"] = cog_enh_insights['logical_conclusions']
+
+            if cog_enh_insights.get('abstracted_patterns'):
+                self._think(ThinkingPhase.GATHER_KNOWLEDGE,
+                           "Pattern-Abstraktion: Allgemeines Muster erkannt",
+                           "Transfer-Learning aktiviert")
+                analysis["abstracted_patterns"] = cog_enh_insights['abstracted_patterns']
 
         if analysis["missing_information"]:
             self._think(ThinkingPhase.GATHER_KNOWLEDGE,
@@ -2555,6 +2933,26 @@ class HoloProblemSolver:
                        f"Beste Strategie: {best_strategy.strategy_type.value}",
                        f"Score: {best_strategy.score():.2f}, Erfolg: {best_strategy.estimated_success:.0%}")
 
+            # ============================================
+            # PHASE 5.5: SELBST-HINTERFRAGUNG (DEEP THINKING)
+            # ============================================
+            # Self-Challenger: Hinterfrage die Wahl
+            challenge = self._challenge_self(
+                f"Beste Strategie ist {best_strategy.strategy_type.value}",
+                problem
+            )
+            if challenge:
+                self._think(ThinkingPhase.EVALUATE,
+                           f"Selbst-Hinterfragung: {challenge[:80]}...",
+                           "Kritische Reflexion der Strategiewahl")
+
+            # Prediction System: Vorhersage des Ergebnisses
+            prediction = self._consult_prediction_system(problem, best_strategy.description)
+            if prediction:
+                self._think(ThinkingPhase.EVALUATE,
+                           f"Vorhersage: {prediction if isinstance(prediction, str) else prediction.get('outcome', 'unbekannt')[:60]}",
+                           "Prediction System konsultiert")
+
         # ============================================
         # PHASE 6: PLANEN
         # ============================================
@@ -2647,6 +3045,25 @@ class HoloProblemSolver:
             self._think(ThinkingPhase.LEARN,
                        "Problem nicht vollständig gelöst",
                        f"Gelernt: Alternative Strategien in Betracht ziehen")
+
+        # ============================================
+        # PHASE 9.5: REGRET LEARNING (DEEP LEARNING)
+        # ============================================
+        # Lerne aus dem Ergebnis - besonders wenn es fehlschlug
+        failure_reason = ""
+        if not success:
+            failed_steps = [s for s in executed_plan.steps if s.status.value == "failed"]
+            if failed_steps:
+                failure_reason = f"Fehlgeschlagene Schritte: {[s.description for s in failed_steps]}"
+            else:
+                failure_reason = "Unbekannter Fehler im Ausführungsplan"
+
+        self._learn_from_regret(problem, not success, failure_reason)
+
+        if not success:
+            self._think(ThinkingPhase.LEARN,
+                       "Regret-Learning aktiviert",
+                       f"Fehler für zukünftige Vermeidung gespeichert: {failure_reason[:50]}...")
 
         # ============================================
         # SOLUTION ERSTELLEN
@@ -2885,10 +3302,18 @@ class HoloProblemSolver:
             }
 
         # Auch nicht verbundene Systeme anzeigen
+        # Erweiterte Liste mit allen kognitiven Systemen
         expected_systems = [
-            'meta_cognition', 'learning', 'context_mind',
+            # Kern-Systeme
+            'meta_cognition', 'meta_sandbox', 'learning', 'context_mind',
             'self_awareness', 'creative_mind', 'cognitive_engine',
-            'autonomous_thinking'
+            # Algorithmische Kognition
+            'algorithmic_cognition',
+            # Cognitive Enhancement
+            'cognitive_enhancement',
+            # Autonomes Denken
+            'autonomous_thinking', 'intuition', 'analogy',
+            'self_challenger', 'prediction', 'regret_learning'
         ]
 
         for sys_name in expected_systems:
@@ -2899,10 +3324,27 @@ class HoloProblemSolver:
                     "available": False,
                 }
 
+        # Kategorisierte Zusammenfassung
+        categories = {
+            "kern": ['meta_cognition', 'meta_sandbox', 'learning', 'context_mind',
+                     'self_awareness', 'creative_mind', 'cognitive_engine'],
+            "algorithmisch": ['algorithmic_cognition'],
+            "enhancement": ['cognitive_enhancement'],
+            "autonom": ['autonomous_thinking', 'intuition', 'analogy',
+                       'self_challenger', 'prediction', 'regret_learning']
+        }
+
+        connected_by_category = {}
+        for cat_name, systems in categories.items():
+            connected = sum(1 for s in systems if s in self._cognitive_systems)
+            total = len(systems)
+            connected_by_category[cat_name] = {"connected": connected, "total": total}
+
         return {
             "connected_count": len(self._cognitive_systems),
             "total_expected": len(expected_systems),
             "systems": connections,
+            "by_category": connected_by_category,
         }
 
     def reconnect_cognitive_systems(self):
