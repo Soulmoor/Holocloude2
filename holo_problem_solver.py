@@ -680,6 +680,301 @@ class ProblemAnalyzer:
         return suggestions
 
 
+# ==================== REKURSIVE PROBLEM-ZERLEGUNG ====================
+
+@dataclass
+class SubProblem:
+    """Ein Teilproblem das aus einem größeren Problem extrahiert wurde"""
+    id: str
+    description: str
+    parent_id: Optional[str] = None
+    depth: int = 0
+    complexity: float = 0.5  # 0-1
+    dependencies: List[str] = field(default_factory=list)
+    solved: bool = False
+    solution: Optional[str] = None
+    children: List['SubProblem'] = field(default_factory=list)
+
+    def is_atomic(self) -> bool:
+        """Ist das Problem klein genug um direkt gelöst zu werden?"""
+        return self.complexity < 0.3 and len(self.children) == 0
+
+    def get_all_leaves(self) -> List['SubProblem']:
+        """Gibt alle Blatt-Knoten (atomare Probleme) zurück"""
+        if not self.children:
+            return [self]
+        leaves = []
+        for child in self.children:
+            leaves.extend(child.get_all_leaves())
+        return leaves
+
+
+class RecursiveDecomposer:
+    """
+    Zerlegt Probleme rekursiv in kleine, lösbare Teile.
+
+    Denk-Prozess:
+    1. Ist das Problem zu komplex? -> Zerlegen
+    2. Jeden Teil analysieren
+    3. Wenn Teil noch zu komplex -> Weiter zerlegen
+    4. Atomare Teile lösen
+    5. Lösungen zusammenführen
+
+    Holo kann damit über komplexe Probleme "Stück für Stück" nachdenken.
+    """
+
+    def __init__(self, max_depth: int = 5, min_complexity_for_split: float = 0.3):
+        self.max_depth = max_depth
+        self.min_complexity_for_split = min_complexity_for_split
+        self.decomposition_log: List[Dict] = []
+        self._counter = 0
+
+    def decompose(self, problem: 'Problem', depth: int = 0) -> SubProblem:
+        """
+        Zerlegt ein Problem rekursiv in Teilprobleme.
+
+        Args:
+            problem: Das zu zerlegende Problem
+            depth: Aktuelle Tiefe der Rekursion
+
+        Returns:
+            SubProblem-Baum mit allen Teilproblemen
+        """
+        self._counter += 1
+
+        # Erstelle Haupt-SubProblem
+        root = SubProblem(
+            id=f"sub_{self._counter}",
+            description=problem.description,
+            depth=depth,
+            complexity=self._estimate_complexity(problem.description)
+        )
+
+        # Log
+        self.decomposition_log.append({
+            "action": "analyze",
+            "problem_id": root.id,
+            "depth": depth,
+            "complexity": root.complexity
+        })
+
+        # Prüfe ob Zerlegung nötig
+        if depth >= self.max_depth:
+            self.decomposition_log.append({
+                "action": "stop",
+                "reason": "max_depth_reached",
+                "problem_id": root.id
+            })
+            return root
+
+        if root.complexity < self.min_complexity_for_split:
+            self.decomposition_log.append({
+                "action": "stop",
+                "reason": "simple_enough",
+                "problem_id": root.id
+            })
+            return root
+
+        # Zerlege in Teilprobleme
+        sub_descriptions = self._extract_subproblems(problem.description, problem)
+
+        if not sub_descriptions or len(sub_descriptions) < 2:
+            # Kann nicht weiter zerlegt werden
+            return root
+
+        # Rekursiv für jeden Teil
+        for i, sub_desc in enumerate(sub_descriptions):
+            self._counter += 1
+            sub_problem = SubProblem(
+                id=f"sub_{self._counter}",
+                description=sub_desc,
+                parent_id=root.id,
+                depth=depth + 1,
+                complexity=self._estimate_complexity(sub_desc)
+            )
+
+            # Rekursiv weiter zerlegen wenn nötig
+            if sub_problem.complexity >= self.min_complexity_for_split and depth + 1 < self.max_depth:
+                # Erstelle temporäres Problem für Rekursion
+                temp_problem = Problem(
+                    id=sub_problem.id,
+                    description=sub_desc,
+                    context=problem.context if hasattr(problem, 'context') else {},
+                )
+                sub_problem = self.decompose(temp_problem, depth + 1)
+                sub_problem.parent_id = root.id
+
+            root.children.append(sub_problem)
+
+            self.decomposition_log.append({
+                "action": "split",
+                "parent_id": root.id,
+                "child_id": sub_problem.id,
+                "child_description": sub_desc[:50]
+            })
+
+        return root
+
+    def _estimate_complexity(self, description: str) -> float:
+        """Schätzt die Komplexität eines Problems (0-1)"""
+        complexity = 0.3  # Basis
+
+        # Länge
+        words = len(description.split())
+        if words > 50:
+            complexity += 0.2
+        elif words > 20:
+            complexity += 0.1
+
+        # Komplexitäts-Indikatoren
+        complex_keywords = [
+            'komplex', 'schwierig', 'mehrere', 'verschiedene',
+            'abhängig', 'zusammen', 'verbinden', 'integrieren',
+            'system', 'architektur', 'optimieren', 'refactoring'
+        ]
+        desc_lower = description.lower()
+        for keyword in complex_keywords:
+            if keyword in desc_lower:
+                complexity += 0.05
+
+        # Einfachheits-Indikatoren
+        simple_keywords = [
+            'einfach', 'nur', 'simple', 'basic', 'klein',
+            'einzeln', 'direkt', 'fix', 'schnell'
+        ]
+        for keyword in simple_keywords:
+            if keyword in desc_lower:
+                complexity -= 0.05
+
+        return max(0.0, min(1.0, complexity))
+
+    def _extract_subproblems(self, description: str, problem: 'Problem') -> List[str]:
+        """Extrahiert Teilprobleme aus der Beschreibung"""
+        subproblems = []
+
+        # Methode 1: Natürliche Aufzählungen erkennen
+        # "und", "sowie", ",", nummerierte Listen
+        if ' und ' in description:
+            parts = description.split(' und ')
+            if len(parts) >= 2:
+                subproblems.extend([p.strip() for p in parts if len(p.strip()) > 10])
+
+        # Methode 2: Typbasierte Zerlegung
+        if not subproblems and hasattr(problem, 'problem_type'):
+            if problem.problem_type == ProblemType.TASK:
+                subproblems = [
+                    f"Anforderungen verstehen: {description[:50]}",
+                    f"Design planen für: {description[:50]}",
+                    f"Implementieren: {description[:50]}",
+                    f"Testen: {description[:50]}"
+                ]
+            elif problem.problem_type == ProblemType.TECHNICAL:
+                subproblems = [
+                    f"Fehler reproduzieren: {description[:50]}",
+                    f"Ursache finden: {description[:50]}",
+                    f"Lösung entwickeln: {description[:50]}",
+                    f"Lösung verifizieren: {description[:50]}"
+                ]
+            elif problem.problem_type == ProblemType.DECISION:
+                subproblems = [
+                    f"Optionen sammeln für: {description[:50]}",
+                    f"Kriterien definieren für: {description[:50]}",
+                    f"Optionen bewerten: {description[:50]}",
+                    f"Entscheidung treffen: {description[:50]}"
+                ]
+            elif problem.problem_type == ProblemType.CREATIVE:
+                subproblems = [
+                    f"Inspiration sammeln: {description[:50]}",
+                    f"Ideen generieren: {description[:50]}",
+                    f"Ideen bewerten: {description[:50]}",
+                    f"Beste Idee ausarbeiten: {description[:50]}"
+                ]
+
+        # Methode 3: Generische Zerlegung
+        if not subproblems:
+            subproblems = [
+                f"Was ist das Ziel? {description[:30]}",
+                f"Was sind die Hindernisse? {description[:30]}",
+                f"Wie überwinden wir sie? {description[:30]}"
+            ]
+
+        return subproblems
+
+    def solve_recursive(self, root: SubProblem,
+                       solve_func: Callable[[str], str] = None) -> SubProblem:
+        """
+        Löst ein zerlegtes Problem von den Blättern aufwärts.
+
+        Args:
+            root: Der SubProblem-Baum
+            solve_func: Funktion zum Lösen eines atomaren Problems
+
+        Returns:
+            Der gelöste SubProblem-Baum
+        """
+        # Erst alle Kinder lösen (Postorder-Traversierung)
+        for child in root.children:
+            self.solve_recursive(child, solve_func)
+
+        # Dann dieses Problem lösen
+        if root.children:
+            # Kombiniere Kind-Lösungen
+            child_solutions = [c.solution for c in root.children if c.solution]
+            if child_solutions:
+                root.solution = self._combine_solutions(child_solutions)
+                root.solved = True
+        else:
+            # Atomares Problem - direkt lösen
+            if solve_func:
+                root.solution = solve_func(root.description)
+            else:
+                root.solution = f"Gelöst: {root.description[:50]}"
+            root.solved = True
+
+        return root
+
+    def _combine_solutions(self, solutions: List[str]) -> str:
+        """Kombiniert mehrere Teil-Lösungen zu einer Gesamtlösung"""
+        if not solutions:
+            return ""
+
+        if len(solutions) == 1:
+            return solutions[0]
+
+        combined = "Kombinierte Lösung:\n"
+        for i, sol in enumerate(solutions, 1):
+            combined += f"  {i}. {sol}\n"
+
+        return combined
+
+    def get_decomposition_tree_str(self, root: SubProblem, indent: int = 0) -> str:
+        """Gibt den Zerlegungs-Baum als String zurück"""
+        lines = []
+        prefix = "  " * indent
+
+        status = "✓" if root.solved else "○"
+        complexity = f"[{root.complexity:.0%}]"
+
+        lines.append(f"{prefix}{status} {complexity} {root.description[:60]}...")
+
+        for child in root.children:
+            lines.append(self.get_decomposition_tree_str(child, indent + 1))
+
+        return "\n".join(lines)
+
+    def get_atomic_problems(self, root: SubProblem) -> List[SubProblem]:
+        """Gibt alle atomaren (kleinsten) Probleme zurück"""
+        return root.get_all_leaves()
+
+    def get_stats(self) -> Dict:
+        """Gibt Statistiken über die Zerlegung zurück"""
+        return {
+            "total_subproblems": self._counter,
+            "decomposition_steps": len(self.decomposition_log),
+            "max_depth_used": max((log.get("depth", 0) for log in self.decomposition_log), default=0)
+        }
+
+
 # ==================== OUT-OF-BOX THINKING ENGINE ====================
 
 @dataclass
@@ -2100,6 +2395,9 @@ class HoloProblemSolver:
 
         # 5. Autonome Exploration
         self.autonomous_explorer = AutonomousExplorer(self.knowledge)
+
+        # 6. Rekursive Problem-Zerlegung
+        self.recursive_decomposer = RecursiveDecomposer(max_depth=5)
 
         # State
         self.current_problem: Optional[Problem] = None
@@ -3566,6 +3864,161 @@ class HoloProblemSolver:
             }
             for h in self._current_hypotheses
         ]
+
+    # =========================================================================
+    # PROBLEM-ZERLEGUNG INTERFACE - In kleine Teile zerlegen
+    # =========================================================================
+
+    def decompose_problem(self, problem: str, max_depth: int = 3) -> Dict:
+        """
+        Holo zerlegt ein Problem in kleine, handhabbare Teile.
+
+        Ermöglicht "Schritt für Schritt" Denken über komplexe Probleme.
+
+        Args:
+            problem: Das zu zerlegende Problem
+            max_depth: Maximale Tiefe der Zerlegung (1-5)
+
+        Returns:
+            Dict mit Zerlegungs-Baum und Statistiken
+        """
+        # Temporär max_depth anpassen
+        original_depth = self.recursive_decomposer.max_depth
+        self.recursive_decomposer.max_depth = min(max_depth, 5)
+        self.recursive_decomposer._counter = 0
+        self.recursive_decomposer.decomposition_log.clear()
+
+        try:
+            # Problem-Objekt erstellen
+            problem_obj = self._create_problem(problem, {}, [], [])
+
+            # Rekursiv zerlegen
+            root = self.recursive_decomposer.decompose(problem_obj)
+
+            # Baum-Visualisierung
+            tree_str = self.recursive_decomposer.get_decomposition_tree_str(root)
+
+            # Atomare Probleme extrahieren
+            atomic = self.recursive_decomposer.get_atomic_problems(root)
+
+            return {
+                "success": True,
+                "root": {
+                    "id": root.id,
+                    "description": root.description,
+                    "complexity": root.complexity,
+                    "children_count": len(root.children),
+                },
+                "tree_visualization": tree_str,
+                "atomic_problems": [
+                    {"id": a.id, "description": a.description, "complexity": a.complexity}
+                    for a in atomic
+                ],
+                "total_subproblems": self.recursive_decomposer._counter,
+                "max_depth_reached": self.recursive_decomposer.get_stats()["max_depth_used"],
+                "decomposition_log": self.recursive_decomposer.decomposition_log,
+            }
+        finally:
+            self.recursive_decomposer.max_depth = original_depth
+
+    def think_step_by_step(self, problem: str) -> List[str]:
+        """
+        Holo denkt Schritt für Schritt über ein Problem nach.
+
+        Einfache Interface-Methode für schrittweises Nachdenken.
+
+        Returns:
+            Liste von Denk-Schritten
+        """
+        decomposition = self.decompose_problem(problem, max_depth=2)
+
+        steps = []
+        steps.append(f"1. Problem verstehen: {problem[:50]}...")
+
+        # Atomare Probleme als Schritte
+        for i, atomic in enumerate(decomposition.get("atomic_problems", []), 2):
+            steps.append(f"{i}. {atomic['description'][:70]}...")
+
+        steps.append(f"{len(steps)+1}. Lösungen zusammenführen")
+
+        return steps
+
+    def break_down_and_solve(self, problem: str) -> Dict:
+        """
+        Holo zerlegt ein Problem UND löst jeden Teil einzeln.
+
+        Vollständige Zerlegung mit Lösungs-Versuch für jeden Teil.
+
+        Returns:
+            Dict mit Zerlegung und Teil-Lösungen
+        """
+        # Erst zerlegen
+        problem_obj = self._create_problem(problem, {}, [], [])
+        self.recursive_decomposer._counter = 0
+        self.recursive_decomposer.decomposition_log.clear()
+
+        root = self.recursive_decomposer.decompose(problem_obj, depth=0)
+
+        # Löse jeden Teil
+        def solve_atomic(description: str) -> str:
+            """Löst ein atomares Problem"""
+            # Nutze die normale solve-Methode aber vereinfacht
+            mini_solution = self.solve(
+                description,
+                context={"is_subproblem": True},
+                goals=["Teil-Problem lösen"]
+            )
+            return mini_solution.explanation[:100] if mini_solution.explanation else "Gelöst"
+
+        # Rekursiv lösen
+        solved_root = self.recursive_decomposer.solve_recursive(root, solve_atomic)
+
+        return {
+            "success": solved_root.solved,
+            "overall_solution": solved_root.solution,
+            "tree_visualization": self.recursive_decomposer.get_decomposition_tree_str(solved_root),
+            "parts_solved": sum(1 for a in solved_root.get_all_leaves() if a.solved),
+            "total_parts": len(solved_root.get_all_leaves()),
+        }
+
+    def get_smallest_parts(self, problem: str) -> List[str]:
+        """
+        Gibt die kleinsten Teile eines Problems zurück.
+
+        Nützlich um zu sehen worauf man sich fokussieren kann.
+
+        Returns:
+            Liste der atomaren Teil-Probleme
+        """
+        decomposition = self.decompose_problem(problem, max_depth=3)
+        return [a["description"] for a in decomposition.get("atomic_problems", [])]
+
+    def explain_decomposition(self, problem: str) -> str:
+        """
+        Erklärt wie Holo ein Problem zerlegt hat.
+
+        Returns:
+            Verständliche Erklärung der Zerlegung
+        """
+        decomposition = self.decompose_problem(problem, max_depth=3)
+
+        lines = []
+        lines.append("=== WIE ICH ÜBER DAS PROBLEM NACHDENKE ===")
+        lines.append("")
+        lines.append(f"Hauptproblem: {problem[:80]}...")
+        lines.append(f"Geschätzte Komplexität: {decomposition['root']['complexity']:.0%}")
+        lines.append("")
+        lines.append("Zerlegung in Teile:")
+        lines.append(decomposition["tree_visualization"])
+        lines.append("")
+        lines.append(f"Insgesamt {decomposition['total_subproblems']} Teilprobleme identifiziert.")
+        lines.append(f"Davon {len(decomposition['atomic_problems'])} atomare (kleinste) Teile.")
+        lines.append("")
+        lines.append("Die kleinsten Teile die ich lösen muss:")
+        for i, atomic in enumerate(decomposition["atomic_problems"], 1):
+            lines.append(f"  {i}. {atomic['description'][:60]}...")
+
+        return "\n".join(lines)
 
 
 # ==================== FACTORY FUNCTION ====================
