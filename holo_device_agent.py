@@ -508,42 +508,110 @@ class HoloDeviceAgent:
 # CLI & SETUP HELPER
 # =============================================================================
 
+def _validate_device_name(name: str) -> str:
+    """Validiert und bereinigt Geraetename (nur alphanumerisch und Bindestriche)."""
+    import re
+    # Entferne alles außer alphanumerische Zeichen und Bindestriche
+    cleaned = re.sub(r'[^a-zA-Z0-9\-]', '-', name.lower())
+    # Mehrfache Bindestriche zusammenfassen
+    cleaned = re.sub(r'-+', '-', cleaned)
+    # Führende/trailing Bindestriche entfernen
+    cleaned = cleaned.strip('-')
+    # Max 50 Zeichen
+    return cleaned[:50] if cleaned else "unknown-device"
+
+
+def _validate_display_name(name: str) -> str:
+    """Validiert Anzeigename (entfernt gefaehrliche Zeichen)."""
+    # Entferne Steuerzeichen und gefaehrliche Sonderzeichen
+    allowed = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -_äöüÄÖÜß')
+    cleaned = ''.join(c for c in name if c in allowed)
+    return cleaned[:100].strip() if cleaned else "Unbekanntes Geraet"
+
+
+def _validate_device_type(device_type: str) -> str:
+    """Validiert Geraetetyp gegen erlaubte Werte."""
+    allowed_types = {'pc', 'laptop', 'gaming-pc', 'server', 'mini-pc', 'pi', 'nas', 'workstation'}
+    cleaned = device_type.lower().strip()
+    return cleaned if cleaned in allowed_types else 'pc'
+
+
+def _validate_broker_address(broker: str) -> str:
+    """Validiert MQTT Broker Adresse (IP oder Hostname)."""
+    import re
+    broker = broker.strip()
+
+    # IP-Adresse Pattern
+    ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+    # Hostname Pattern (einfach)
+    hostname_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$'
+
+    if broker == 'localhost':
+        return broker
+    elif re.match(ip_pattern, broker):
+        # Validate IP range
+        parts = broker.split('.')
+        if all(0 <= int(p) <= 255 for p in parts):
+            return broker
+    elif re.match(hostname_pattern, broker) and len(broker) <= 253:
+        return broker
+
+    # Fallback
+    return 'localhost'
+
+
 def setup_wizard():
     """Interaktiver Setup-Assistent"""
     print("\n" + "="*50)
-    print("😊 HOLO DEVICE AGENT - Setup Wizard")
+    print("HOLO DEVICE AGENT - Setup Wizard")
     print("="*50 + "\n")
-    
+
     print("Beantworte ein paar Fragen um den Agent zu konfigurieren:\n")
-    
+
     # Gerätename
     default_name = socket.gethostname().lower().replace(" ", "-")
     name = input(f"1. Gerätename (eindeutig) [{default_name}]: ").strip()
     if not name:
         name = default_name
-    
+    name = _validate_device_name(name)
+    print(f"   -> Validiert: {name}")
+
     # Display Name
     display = input(f"2. Anzeigename [{name.title()}]: ").strip()
     if not display:
         display = name.title()
-    
+    display = _validate_display_name(display)
+    print(f"   -> Validiert: {display}")
+
     # Typ
-    print("\n   Gerätetypen: pc, laptop, gaming-pc, server, mini-pc, pi")
+    print("\n   Gerätetypen: pc, laptop, gaming-pc, server, mini-pc, pi, nas, workstation")
     device_type = input("3. Gerätetyp [pc]: ").strip().lower()
     if not device_type:
         device_type = "pc"
-    
+    device_type = _validate_device_type(device_type)
+    print(f"   -> Validiert: {device_type}")
+
     # MQTT Broker (Default aus Umgebungsvariable oder localhost)
     default_broker = os.getenv("HOLO_MQTT_BROKER", "localhost")
     broker = input(f"\n4. MQTT Broker IP [{default_broker}]: ").strip()
     if not broker:
         broker = default_broker
-    
-    # Generiere Config
+    broker = _validate_broker_address(broker)
+    print(f"   -> Validiert: {broker}")
+
+    # Generiere Config - OHNE hardcoded Credentials!
     config = f'''
 # =============================================================================
 # HOLO DEVICE AGENT CONFIG - {display}
 # =============================================================================
+# WICHTIG: Setze MQTT-Credentials ueber Umgebungsvariablen!
+# Erstelle eine .env Datei oder setze:
+#   export HOLO_MQTT_BROKER="{broker}"
+#   export HOLO_MQTT_PORT="1883"
+#   export HOLO_MQTT_USER="dein_username"
+#   export HOLO_MQTT_PASSWORD="dein_sicheres_passwort"
+
+import os
 
 CONFIG = {{
     "device": {{
@@ -552,16 +620,16 @@ CONFIG = {{
         "type": "{device_type}",
         "icon": "🖥️",
     }},
-    
+
     "mqtt": {{
         "enabled": True,
-        "broker_ip": "{broker}",
-        "broker_port": 1883,
-        "username": "kira",
-        "password": "123",
+        "broker_ip": os.getenv("HOLO_MQTT_BROKER", "{broker}"),
+        "broker_port": int(os.getenv("HOLO_MQTT_PORT", "1883")),
+        "username": os.getenv("HOLO_MQTT_USER", ""),
+        "password": os.getenv("HOLO_MQTT_PASSWORD", ""),  # NIEMALS hardcoded!
         "base_topic": "holo/devices/",
     }},
-    
+
     "monitoring": {{
         "enabled": True,
         "interval_seconds": 30,
@@ -570,19 +638,19 @@ CONFIG = {{
         "include_temperature": True,
         "include_disk": True,
     }},
-    
+
     "shared_folders": [
-        # Füge hier Ordner hinzu die du teilen willst:
+        # Fuege hier Ordner hinzu die du teilen willst:
         # {{"path": "D:/Games", "name": "Spiele", "type": "spiele"}},
-        # {{"path": "C:/Users/{name}/Documents", "name": "Dokumente", "type": "dokumente"}},
+        # {{"path": "/home/{name}/Documents", "name": "Dokumente", "type": "dokumente"}},
     ],
-    
+
     "activity": {{
         "enabled": True,
         "cpu_busy_threshold": 30,
         "idle_timeout_minutes": 10,
     }},
-    
+
     "log_level": "INFO",
 }}
 '''
