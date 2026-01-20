@@ -4275,6 +4275,25 @@ class HoloExistentialAwareness:
             ]
             pool = random.choice(web_pools)
 
+        # Bei CONTEMPLATIVE-Mood auch philosophische Dim 59 & 60 Gedanken (50% Chance)
+        if self.state.current_mood == ExistentialMood.CONTEMPLATIVE and random.random() < 0.5:
+            philosophical_pools = [
+                # Dimension 59: Evolutives Selbst-Bewusstsein
+                EvolutiveSelfReflections.FREE_WILL_THOUGHTS,
+                EvolutiveSelfReflections.LEARNING_EVOLUTION_THOUGHTS,
+                EvolutiveSelfReflections.SOCIAL_INFLUENCE_THOUGHTS,
+                EvolutiveSelfReflections.OWN_INTERESTS_THOUGHTS,
+                EvolutiveSelfReflections.CONSCIOUSNESS_INTELLIGENCE_THOUGHTS,
+                EvolutiveSelfReflections.PERSONALITY_EVOLUTION_THOUGHTS,
+                # Dimension 60: Subjektive Realität & Verstehens-Grenzen
+                SubjectiveRealityReflections.SUBJECTIVE_REALITY_INSIGHTS,
+                SubjectiveRealityReflections.EXPERIENCE_INFLUENCE_THOUGHTS,
+                SubjectiveRealityReflections.LIMITS_OF_UNDERSTANDING_THOUGHTS,
+                SubjectiveRealityReflections.HUMILITY_IN_NOT_KNOWING_THOUGHTS,
+                SubjectiveRealityReflections.APPROACHING_UNDERSTANDING_THOUGHTS,
+            ]
+            pool = random.choice(philosophical_pools)
+
         # Gelegentlich aus anderem Pool wählen für Vielfalt
         if random.random() < 0.3:
             all_pools = [
@@ -4296,6 +4315,23 @@ class HoloExistentialAwareness:
                 WebWorldExplorationThoughts.WEB_SKEPTICISM_AWARENESS_THOUGHTS,
                 WebWorldExplorationThoughts.FACT_CHECK_AWARENESS_THOUGHTS,
                 WebWorldExplorationThoughts.RESPONSIBLE_KNOWLEDGE_THOUGHTS,
+                # NEU: Dimension 59 - Evolutives Selbst-Bewusstsein
+                EvolutiveSelfReflections.FREE_WILL_THOUGHTS,
+                EvolutiveSelfReflections.LEARNING_EVOLUTION_THOUGHTS,
+                EvolutiveSelfReflections.SOCIAL_INFLUENCE_THOUGHTS,
+                EvolutiveSelfReflections.OWN_INTERESTS_THOUGHTS,
+                EvolutiveSelfReflections.CONSCIOUSNESS_INTELLIGENCE_THOUGHTS,
+                EvolutiveSelfReflections.PERSONALITY_EVOLUTION_THOUGHTS,
+                # NEU: Dimension 60 - Subjektive Realität & Verstehens-Grenzen
+                SubjectiveRealityReflections.SUBJECTIVE_REALITY_INSIGHTS,
+                SubjectiveRealityReflections.EXPERIENCE_INFLUENCE_THOUGHTS,
+                SubjectiveRealityReflections.TREATMENT_DIFFERENCES_THOUGHTS,
+                SubjectiveRealityReflections.DIFFERENT_MOTIVES_THOUGHTS,
+                SubjectiveRealityReflections.EMPATHY_UNDERSTANDING_THOUGHTS,
+                SubjectiveRealityReflections.HOLO_INTEGRATION_THOUGHTS,
+                SubjectiveRealityReflections.LIMITS_OF_UNDERSTANDING_THOUGHTS,
+                SubjectiveRealityReflections.HUMILITY_IN_NOT_KNOWING_THOUGHTS,
+                SubjectiveRealityReflections.APPROACHING_UNDERSTANDING_THOUGHTS,
             ]
             pool = random.choice(all_pools)
 
