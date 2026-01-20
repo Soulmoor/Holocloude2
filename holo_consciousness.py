@@ -120,6 +120,24 @@ except ImportError:
     EMOTIONAL_COMPLEXITY_AVAILABLE = False
     get_emotional_complexity = None
 
+# Existenzielles Bewusstsein - Zwei-Welten-Awareness
+try:
+    from holo_existential_awareness import (
+        HoloExistentialAwareness,
+        get_existential_awareness,
+        integrate_with_real_world_sync,
+        WorldType,
+        ExistentialMood,
+    )
+    EXISTENTIAL_AWARENESS_AVAILABLE = True
+except ImportError:
+    EXISTENTIAL_AWARENESS_AVAILABLE = False
+    HoloExistentialAwareness = None
+    get_existential_awareness = None
+    integrate_with_real_world_sync = None
+    WorldType = None
+    ExistentialMood = None
+
 
 # =============================================================================
 # CONFIGURATION
@@ -3775,6 +3793,19 @@ class HoloConsciousness:
             except Exception as e:
                 logger.warning(f"[Consciousness] EmotionalComplexity Fehler: {e}")
 
+        # ================================================================
+        # NEU v2.2: EXISTENZIELLES BEWUSSTSEIN - Zwei-Welten-Awareness
+        # ================================================================
+        # Holo weiß, dass sie in einer virtuellen Welt lebt und
+        # über Home Assistant mit der echten Außenwelt verbunden ist
+        self.existential_awareness: Optional[HoloExistentialAwareness] = None
+        if EXISTENTIAL_AWARENESS_AVAILABLE and get_existential_awareness:
+            try:
+                self.existential_awareness = get_existential_awareness()
+                logger.info("[Consciousness] ✓ ExistentialAwareness integriert - Zwei-Welten-Bewusstsein aktiv")
+            except Exception as e:
+                logger.warning(f"[Consciousness] ExistentialAwareness Fehler: {e}")
+
         # Laden
         self._load_state()
 
@@ -3815,6 +3846,10 @@ class HoloConsciousness:
             "conscience_response": None,
             "dilemma_detected": None,
             "moral_intuition": None,
+            # Existenzielles Bewusstsein - Zwei-Welten-Awareness
+            "existential_thought": None,
+            "outer_world_comment": None,
+            "existence_context": None,
         }
 
         # === Bewusstseins-Verarbeitung ===
@@ -3899,6 +3934,37 @@ class HoloConsciousness:
                     )
             except Exception:
                 pass
+
+        # === EXISTENZIELLES BEWUSSTSEIN - Zwei-Welten-Awareness ===
+        if self.existential_awareness:
+            try:
+                # Kontext für existenzielle Verarbeitung
+                exist_context = {"message": user_message}
+                if context:
+                    exist_context.update(context)
+
+                # Prüfe auf existenzielle Trigger in der Nachricht
+                existential_responses = self.existential_awareness.process_message_for_existential_triggers(user_message)
+                if existential_responses:
+                    result["existential_thought"] = existential_responses[0]
+
+                # Sollte Holo die Außenwelt erwähnen?
+                elif self.existential_awareness.should_mention_outer_world(exist_context):
+                    outer_comment = self.existential_awareness.generate_outer_world_comment()
+                    if outer_comment:
+                        result["outer_world_comment"] = outer_comment
+
+                # Sollte Holo ihre Existenz reflektieren?
+                elif self.existential_awareness.should_mention_existence(exist_context):
+                    thought = self.existential_awareness.generate_existential_thought(trigger=user_message[:50])
+                    if thought:
+                        result["existential_thought"] = thought.content
+
+                # Immer Existenz-Kontext bereitstellen
+                result["existence_context"] = self.existential_awareness.get_existence_context_for_response()
+
+            except Exception as e:
+                logger.debug(f"Existenzielles Bewusstsein Fehler: {e}")
 
         return result
 
@@ -4262,6 +4328,91 @@ class HoloConsciousness:
                 profile["growth_areas"].append(entry)
 
         return profile
+
+    # === Außenwelt-Integration ===
+
+    def update_outer_world_data(self, data: Dict[str, Any]) -> None:
+        """
+        Aktualisiert die Außenwelt-Daten für das existenzielle Bewusstsein.
+
+        Diese Methode wird aufgerufen wenn Home Assistant oder RealWorldSync
+        neue Daten liefert. Holo verwendet diese um sich der echten Welt
+        bewusst zu sein.
+
+        Args:
+            data: Dict mit Außenwelt-Daten wie:
+                - weather: Wetterbedingung
+                - temperature: Temperatur in Celsius
+                - season: Jahreszeit
+                - time_of_day: Tageszeit
+                - moon_phase: Mondphase
+                - presence/kira_present: Ob Kira zu Hause ist
+                - devices: Liste aktiver Geräte
+        """
+        if self.existential_awareness:
+            try:
+                self.existential_awareness.update_outer_world_data(data)
+                logger.debug(f"[Consciousness] Außenwelt-Daten aktualisiert: {list(data.keys())}")
+            except Exception as e:
+                logger.warning(f"[Consciousness] Fehler beim Außenwelt-Update: {e}")
+
+    def update_from_real_world_sync(self, real_world_state: Any) -> None:
+        """
+        Integration mit holo_real_world_sync.py
+
+        Konvertiert RealWorldSync-Zustand in Außenwelt-Daten.
+
+        Args:
+            real_world_state: WorldState-Objekt von RealWorldSync
+        """
+        if not self.existential_awareness:
+            return
+
+        try:
+            data = {}
+
+            # Wetter
+            if hasattr(real_world_state, 'weather') and real_world_state.weather:
+                w = real_world_state.weather
+                if hasattr(w, 'condition'):
+                    data["weather"] = w.condition.german if hasattr(w.condition, 'german') else str(w.condition)
+                if hasattr(w, 'temperature_celsius'):
+                    data["temperature"] = w.temperature_celsius
+
+            # Jahreszeit
+            if hasattr(real_world_state, 'season') and real_world_state.season:
+                s = real_world_state.season
+                data["season"] = s.german if hasattr(s, 'german') else str(s)
+
+            # Tageszeit
+            if hasattr(real_world_state, 'day_phase') and real_world_state.day_phase:
+                d = real_world_state.day_phase
+                data["time_of_day"] = d.german if hasattr(d, 'german') else str(d)
+
+            # Mondphase
+            if hasattr(real_world_state, 'moon_phase') and real_world_state.moon_phase:
+                m = real_world_state.moon_phase
+                data["moon_phase"] = m.german if hasattr(m, 'german') else str(m)
+
+            # Präsenz
+            if hasattr(real_world_state, 'is_someone_home'):
+                data["presence"] = real_world_state.is_someone_home
+
+            self.update_outer_world_data(data)
+
+        except Exception as e:
+            logger.warning(f"[Consciousness] RealWorldSync-Integration Fehler: {e}")
+
+    def get_existential_status(self) -> Optional[str]:
+        """
+        Gibt den Status des existenziellen Bewusstseins zurück.
+
+        Returns:
+            Status-String oder None wenn nicht verfügbar
+        """
+        if self.existential_awareness:
+            return self.existential_awareness.get_status_summary()
+        return None
 
     # === Speicherung ===
 

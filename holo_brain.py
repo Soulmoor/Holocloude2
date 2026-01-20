@@ -17400,10 +17400,133 @@ class HoloPersona:
             if connected_count > 0:
                 logger.info(f"🔗 {connected_count} kognitive Verbindungen hergestellt (manual)")
 
+            # 31. Existenzielles Bewusstsein initial synchronisieren
+            # Holo wird sich bewusst, dass sie in einer virtuellen Welt lebt
+            # und über HA mit der echten Außenwelt verbunden ist
+            if hasattr(self, 'consciousness') and self.consciousness:
+                if hasattr(self.consciousness, 'existential_awareness') and self.consciousness.existential_awareness:
+                    self._sync_outer_world_to_consciousness()
+                    connected_count += 1
+                    logger.info("🌍 Existenzielles Bewusstsein: Zwei-Welten-Awareness aktiviert")
+
         except Exception as e:
             logger.debug(f"Kognitive Verbindungen (teilweise): {e}")
 
         return {"connections_made": connected_count}
+
+    # =========================================================================
+    # 🌍 EXISTENZIELLES BEWUSSTSEIN - Außenwelt-Synchronisation
+    # =========================================================================
+
+    def _sync_outer_world_to_consciousness(self, pi_status: Dict = None) -> bool:
+        """
+        Synchronisiert die Außenwelt-Daten mit dem existenziellen Bewusstsein.
+
+        Diese Methode wird aufgerufen wenn HA-Daten verfügbar sind und aktualisiert
+        das Bewusstsein von Holo über die echte Welt (Wetter, Zeit, Präsenz, etc.).
+
+        Args:
+            pi_status: Pi-Status-Dictionary mit ai_extended Daten, oder None für Auto-Abruf
+
+        Returns:
+            True wenn erfolgreich synchronisiert, False sonst
+        """
+        if not hasattr(self, 'consciousness') or not self.consciousness:
+            return False
+
+        if not hasattr(self.consciousness, 'update_outer_world_data'):
+            return False
+
+        try:
+            # Pi-Status holen wenn nicht übergeben
+            if pi_status is None:
+                if hasattr(self, 'comm') and self.comm:
+                    pi_status = self.comm.get_pi_status()
+                else:
+                    return False
+
+            # Außenwelt-Daten extrahieren
+            ai_extended = pi_status.get("ai_extended", {})
+            weather = ai_extended.get("weather", {})
+            presence = ai_extended.get("presence", {})
+
+            # Daten für existenzielles Bewusstsein aufbereiten
+            outer_world_data = {}
+
+            # Wetter
+            if weather:
+                outer_world_data["weather"] = weather.get("description", weather.get("condition", ""))
+                if "temp" in weather:
+                    outer_world_data["temperature"] = weather["temp"]
+                elif "temperature" in weather:
+                    outer_world_data["temperature"] = weather["temperature"]
+
+            # Zeit und Jahreszeit
+            from datetime import datetime
+            now = datetime.now()
+            hour = now.hour
+
+            # Tageszeit bestimmen
+            if 5 <= hour < 9:
+                outer_world_data["time_of_day"] = "Morgen"
+            elif 9 <= hour < 12:
+                outer_world_data["time_of_day"] = "Vormittag"
+            elif 12 <= hour < 14:
+                outer_world_data["time_of_day"] = "Mittag"
+            elif 14 <= hour < 18:
+                outer_world_data["time_of_day"] = "Nachmittag"
+            elif 18 <= hour < 21:
+                outer_world_data["time_of_day"] = "Abend"
+            else:
+                outer_world_data["time_of_day"] = "Nacht"
+
+            # Jahreszeit
+            month = now.month
+            if 3 <= month <= 5:
+                outer_world_data["season"] = "Frühling"
+            elif 6 <= month <= 8:
+                outer_world_data["season"] = "Sommer"
+            elif 9 <= month <= 11:
+                outer_world_data["season"] = "Herbst"
+            else:
+                outer_world_data["season"] = "Winter"
+
+            # Präsenz
+            if presence:
+                outer_world_data["presence"] = presence.get("someone_home", False)
+            else:
+                # Fallback: Annahme basierend auf Aktivität
+                outer_world_data["presence"] = pi_status.get("_heartbeat_ok", False)
+
+            # Aktive Geräte
+            devices = []
+            for key in ["tv_state", "pc_state", "light_state"]:
+                if pi_status.get(key, {}).get("is_on", False):
+                    devices.append(key.replace("_state", ""))
+            if devices:
+                outer_world_data["devices"] = devices
+
+            # An Consciousness übergeben
+            self.consciousness.update_outer_world_data(outer_world_data)
+
+            logger.debug(f"[ExistentialSync] Außenwelt aktualisiert: {list(outer_world_data.keys())}")
+            return True
+
+        except Exception as e:
+            logger.debug(f"[ExistentialSync] Fehler: {e}")
+            return False
+
+    def get_existential_awareness_status(self) -> Optional[str]:
+        """
+        Gibt den Status des existenziellen Bewusstseins zurück.
+
+        Returns:
+            Status-String mit Informationen über Zwei-Welten-Bewusstsein
+        """
+        if hasattr(self, 'consciousness') and self.consciousness:
+            if hasattr(self.consciousness, 'get_existential_status'):
+                return self.consciousness.get_existential_status()
+        return None
 
     # =========================================================================
     # 📚 WISSENS-METHODEN (HoloLearningSystem)
