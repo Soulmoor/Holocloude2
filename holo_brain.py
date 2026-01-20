@@ -5148,6 +5148,240 @@ class PiCommunicator:
         return self.problem_solver.reconnect_cognitive_systems()
 
     # =========================================================================
+    # 🧠 UNIVERSAL THINKING - Automatisches analytisches Denken für ALLES
+    # =========================================================================
+
+    def _apply_universal_thinking(self, user_input: str, context: Dict = None) -> Dict:
+        """
+        Wendet universales analytisches Denken auf JEDE Nachricht an.
+
+        Dies ist der Kern des "echten Denkens" - Holo analysiert automatisch
+        jede Anfrage mit allen kognitiven Systemen.
+
+        Args:
+            user_input: Die Benutzernachricht
+            context: Zusätzlicher Kontext
+
+        Returns:
+            Dict mit Denk-Ergebnissen die zum LLM-Prompt hinzugefügt werden
+        """
+        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+            return None
+
+        result = {
+            "thinking_type": "none",
+            "insights": [],
+            "intuition": None,
+            "decomposition": None,
+            "hypotheses": [],
+            "creative_ideas": [],
+            "relevant_knowledge": [],
+            "thinking_time_ms": 0
+        }
+
+        import time
+        start_time = time.time()
+
+        try:
+            # 1. Prüfe ob dies eine Frage/Problem ist das tiefes Denken braucht
+            thinking_needed = self._should_think_deeply(user_input)
+
+            if not thinking_needed:
+                result["thinking_type"] = "quick"
+                # Trotzdem Intuition konsultieren (schnell)
+                if hasattr(self.problem_solver, '_consult_intuition'):
+                    problem_obj = self.problem_solver._create_problem(user_input, {}, [], [])
+                    intuition = self.problem_solver._consult_intuition(problem_obj)
+                    if intuition:
+                        result["intuition"] = intuition
+                        result["insights"].append(f"Bauchgefühl: {intuition.get('expression', intuition.get('type', ''))}")
+                return result
+
+            # 2. Tiefes Denken aktivieren
+            result["thinking_type"] = "deep"
+
+            # Problem-Objekt erstellen
+            problem_obj = self.problem_solver._create_problem(
+                user_input,
+                context or {},
+                [],  # goals
+                []   # constraints
+            )
+
+            # 3. Intuition konsultieren - "Wie fühlt sich das an?"
+            if hasattr(self.problem_solver, '_consult_intuition'):
+                intuition = self.problem_solver._consult_intuition(problem_obj)
+                if intuition:
+                    result["intuition"] = intuition
+                    result["insights"].append(f"Bauchgefühl: {intuition.get('expression', intuition.get('type', ''))}")
+
+            # 4. Analogien finden - "Das erinnert mich an..."
+            if hasattr(self.problem_solver, '_consult_analogy_engine'):
+                analogies = self.problem_solver._consult_analogy_engine(problem_obj)
+                if analogies:
+                    result["insights"].append(f"Analogie: Das erinnert mich an {len(analogies)} ähnliche Situationen")
+
+            # 5. Hypothesen generieren - "Ich vermute dass..."
+            if hasattr(self.problem_solver, 'hypothesis_generator'):
+                hypotheses = self.problem_solver.hypothesis_generator.generate_hypotheses(
+                    problem_obj, {}, count=3
+                )
+                if hypotheses:
+                    result["hypotheses"] = [
+                        {"description": h.description, "confidence": h.confidence}
+                        for h in hypotheses[:2]
+                    ]
+                    result["insights"].append(f"Hypothese: {hypotheses[0].description}")
+
+            # 6. Bei komplexen Problemen: Zerlegen
+            complexity = self._estimate_message_complexity(user_input)
+            if complexity > 0.5 and hasattr(self.problem_solver, 'recursive_decomposer'):
+                decomp = self.problem_solver.decompose_problem(user_input, max_depth=2)
+                if decomp.get("atomic_problems"):
+                    result["decomposition"] = {
+                        "total_parts": len(decomp["atomic_problems"]),
+                        "parts": [p["description"][:50] for p in decomp["atomic_problems"][:3]]
+                    }
+                    result["insights"].append(f"Zerlegung: {len(decomp['atomic_problems'])} Teilaspekte identifiziert")
+
+            # 7. Kreatives Denken - "Unkonventionelle Idee..."
+            if hasattr(self.problem_solver, 'lateral_thinking'):
+                creative_ideas = self.problem_solver.lateral_thinking.think_laterally(
+                    problem_obj,
+                    techniques=["perspective_shift", "analogy"]
+                )
+                if creative_ideas:
+                    result["creative_ideas"] = creative_ideas[:2]
+                    if creative_ideas[0].get("confidence", 0) > 0.4:
+                        result["insights"].append(f"Kreative Idee: {creative_ideas[0]['idea'][:60]}...")
+
+            # 8. Cognitive Enhancement - Relevantes Wissen finden
+            if hasattr(self.problem_solver, '_consult_cognitive_enhancement'):
+                cog_enh = self.problem_solver._consult_cognitive_enhancement(problem_obj)
+                if cog_enh:
+                    if cog_enh.get("relevant_knowledge"):
+                        result["relevant_knowledge"] = cog_enh["relevant_knowledge"]
+                    if cog_enh.get("logical_conclusions"):
+                        result["insights"].append(f"Logisch: {cog_enh['logical_conclusions'][:50]}...")
+
+            # 9. Algorithmische Kognition - Strukturierte Analyse
+            if hasattr(self.problem_solver, '_consult_algorithmic_cognition'):
+                algo = self.problem_solver._consult_algorithmic_cognition(problem_obj)
+                if algo and algo.get("decomposition"):
+                    if not result["decomposition"]:
+                        result["insights"].append("Analytische Zerlegung durchgeführt")
+
+        except Exception as e:
+            logger.debug(f"[UNIVERSAL] Thinking error: {e}")
+            result["error"] = str(e)
+
+        # Denkzeit berechnen
+        result["thinking_time_ms"] = int((time.time() - start_time) * 1000)
+
+        return result
+
+    def _should_think_deeply(self, user_input: str) -> bool:
+        """
+        Entscheidet ob tiefes Denken für diese Nachricht nötig ist.
+
+        Tiefes Denken wird aktiviert bei:
+        - Fragen (?)
+        - Problemen/Bitten (hilf, erkläre, wie, warum, was)
+        - Komplexen Aussagen (> 20 Wörter)
+        - Bestimmten Keywords (Problem, Frage, verstehe nicht, etc.)
+
+        Nicht bei:
+        - Einfachen Grüßen (hi, hallo)
+        - Kurzen Bestätigungen (ja, nein, ok)
+        - Emotionalen Ausdrücken (*action*)
+        """
+        user_lower = user_input.lower().strip()
+
+        # Kurze Nachrichten meist kein tiefes Denken
+        if len(user_input) < 10:
+            # Außer es ist eine kurze Frage
+            if '?' not in user_input:
+                return False
+
+        # Grüße - kein tiefes Denken nötig
+        greetings = ['hi', 'hallo', 'hey', 'moin', 'guten morgen', 'guten tag', 'guten abend', 'servus']
+        if user_lower in greetings or any(user_lower.startswith(g + ' ') for g in greetings[:3]):
+            return False
+
+        # Bestätigungen - kein tiefes Denken
+        confirmations = ['ja', 'nein', 'ok', 'okay', 'klar', 'gut', 'alles klar', 'verstehe', 'danke']
+        if user_lower in confirmations:
+            return False
+
+        # Fragen brauchen Denken
+        if '?' in user_input:
+            return True
+
+        # Problem/Hilfe Keywords
+        thinking_keywords = [
+            'wie ', 'warum ', 'was ', 'wer ', 'wo ', 'wann ',
+            'erkläre', 'erklär', 'hilf', 'hilfe',
+            'problem', 'fehler', 'funktioniert nicht',
+            'verstehe nicht', 'check mal', 'schau mal',
+            'kannst du', 'könntest du', 'würdest du',
+            'mach', 'erstell', 'implementier', 'programmier',
+            'denk', 'überleg', 'analysier'
+        ]
+        if any(kw in user_lower for kw in thinking_keywords):
+            return True
+
+        # Längere Nachrichten (> 30 Wörter) brauchen wahrscheinlich Denken
+        if len(user_input.split()) > 30:
+            return True
+
+        return False
+
+    def _estimate_message_complexity(self, user_input: str) -> float:
+        """
+        Schätzt die Komplexität einer Nachricht (0-1).
+
+        Berücksichtigt:
+        - Länge
+        - Anzahl der Konzepte
+        - Technische Begriffe
+        - Verschachtelte Anforderungen
+        """
+        complexity = 0.2  # Basis
+
+        words = user_input.split()
+        word_count = len(words)
+
+        # Länge
+        if word_count > 50:
+            complexity += 0.3
+        elif word_count > 20:
+            complexity += 0.15
+        elif word_count > 10:
+            complexity += 0.05
+
+        # Technische/komplexe Begriffe
+        complex_terms = [
+            'implementier', 'architektur', 'system', 'integriert',
+            'refactor', 'optimier', 'algorithmus', 'datenbank',
+            'api', 'framework', 'modul', 'klasse', 'funktion',
+            'mehrere', 'verschiedene', 'komplex', 'zusammen'
+        ]
+        user_lower = user_input.lower()
+        for term in complex_terms:
+            if term in user_lower:
+                complexity += 0.05
+
+        # "und" deutet auf mehrere Anforderungen hin
+        and_count = user_lower.count(' und ')
+        complexity += and_count * 0.1
+
+        # Aufzählungen
+        if any(c in user_input for c in ['1.', '2.', '•', '-']):
+            complexity += 0.15
+
+        return min(1.0, complexity)
+
+    # =========================================================================
     # 🔌 DYNAMISCHE MODULE - Skills laden und steuern
     # =========================================================================
 
@@ -21357,6 +21591,19 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
         if query_intent.get("needs_memories"):
             memories = self._find_memories(user_input)
 
+        # ========== 🧠 UNIVERSAL THINKING - Analytisches Denken für ALLES ==========
+        # Der Problem Solver analysiert JEDE Anfrage und liefert tiefere Einsichten
+        universal_thinking_result = None
+        if hasattr(self, 'problem_solver') and self.problem_solver:
+            try:
+                universal_thinking_result = self._apply_universal_thinking(user_input, context)
+                if universal_thinking_result:
+                    # Füge Denk-Ergebnisse zum Kontext hinzu
+                    context["universal_thinking"] = universal_thinking_result
+                    logger.debug(f"[UNIVERSAL] 🧠 Denken aktiviert: {universal_thinking_result.get('thinking_type', 'analysis')}")
+            except Exception as e:
+                logger.debug(f"[UNIVERSAL] Thinking error: {e}")
+
         # System-Prompt IMMER bauen (KRITISCHER FIX!)
         system = self._build_system_prompt(context, memories, user_input)
 
@@ -25110,6 +25357,58 @@ NAS: {'Online' if nas.get('online') else 'Offline'}
         # === ERINNERUNGEN ===
         if intent["needs_memories"] and memories:
             persona += "\nIch erinnere mich: " + ", ".join([m.trigger[:30] for m in memories[:2]]) + "\n"
+
+        # === 🧠 UNIVERSAL THINKING KONTEXT (Analytisches Denken) ===
+        # Fügt Einsichten aus dem Problem-Solver hinzu wenn verfügbar
+        if ctx.get("universal_thinking"):
+            ut = ctx["universal_thinking"]
+            thinking_type = ut.get("thinking_type", "none")
+
+            if thinking_type == "deep" and ut.get("insights"):
+                persona += "\n=== 🧠 MEINE GEDANKEN DAZU ===\n"
+                persona += "(Ich habe tief über diese Nachricht nachgedacht)\n"
+
+                # Intuition
+                if ut.get("intuition"):
+                    intuition = ut["intuition"]
+                    expr = intuition.get("expression", intuition.get("type", ""))
+                    if expr:
+                        persona += f"• Mein Bauchgefühl: {expr}\n"
+
+                # Hypothesen
+                if ut.get("hypotheses"):
+                    for hypo in ut["hypotheses"][:2]:
+                        persona += f"• Ich vermute: {hypo['description']} ({hypo['confidence']:.0%} sicher)\n"
+
+                # Zerlegung bei komplexen Problemen
+                if ut.get("decomposition"):
+                    decomp = ut["decomposition"]
+                    persona += f"• Ich sehe {decomp['total_parts']} Teilaspekte:\n"
+                    for part in decomp.get("parts", [])[:3]:
+                        persona += f"  - {part}\n"
+
+                # Kreative Ideen
+                if ut.get("creative_ideas"):
+                    for idea in ut["creative_ideas"][:1]:
+                        if idea.get("confidence", 0) > 0.4:
+                            persona += f"• Kreative Idee: {idea['idea'][:60]}...\n"
+
+                # Alle Insights zusammen
+                if ut.get("insights"):
+                    other_insights = [i for i in ut["insights"]
+                                     if not any(x in i.lower() for x in ['bauchgefühl', 'hypothese', 'zerlegung', 'kreativ'])]
+                    for insight in other_insights[:2]:
+                        persona += f"• {insight}\n"
+
+                persona += f"(Denkzeit: {ut.get('thinking_time_ms', 0)}ms)\n"
+                persona += "Nutze diese Gedanken um eine tiefgründigere Antwort zu geben!\n"
+
+            elif thinking_type == "quick" and ut.get("intuition"):
+                # Schnelles Denken - nur Intuition
+                intuition = ut["intuition"]
+                expr = intuition.get("expression", intuition.get("type", ""))
+                if expr and "neutral" not in expr.lower():
+                    persona += f"\n🧠 Spontanes Bauchgefühl: {expr}\n"
 
         # === ABSCHLUSS ===
         persona += """
