@@ -223,7 +223,7 @@ class DreamProcessor(BackgroundProcessBase):
 
         self.memory_store = memory_store
         self.emotions = emotions
-        self._dreams: deque = deque(maxlen=100)
+        self._dreams: deque = deque(maxlen=200)  # VERDOPPELT: 100 → 200
         self._is_dream_time = False
 
     def _do_work(self, time_delta: float):
@@ -322,7 +322,7 @@ class SmartObserverProcess(BackgroundProcessBase):
 
         self.memory_store = memory_store
         self._patterns: Dict[str, Any] = {}
-        self._observations: deque = deque(maxlen=500)
+        self._observations: deque = deque(maxlen=1000)  # VERDOPPELT: 500 → 1000
 
     def _do_work(self, time_delta: float):
         """Analysiere aktuelle Daten."""
@@ -489,7 +489,7 @@ class ActivityTracker(BackgroundProcessBase):
         )
 
         self.memory_store = memory_store
-        self._activity_log: deque = deque(maxlen=1000)
+        self._activity_log: deque = deque(maxlen=2000)  # VERDOPPELT: 1000 → 2000
         self._last_activity: Optional[datetime] = None
         self._activity_patterns: Dict[str, Any] = {}
 
@@ -577,7 +577,7 @@ class LearningProcessor(BackgroundProcessBase):
         )
 
         self.learning_system = learning_system
-        self._pending_facts: deque = deque(maxlen=100)
+        self._pending_facts: deque = deque(maxlen=200)  # VERDOPPELT: 100 → 200
         self._processed_count = 0
 
     def queue_fact(self, fact: str, category: str = "general"):
@@ -700,11 +700,11 @@ class AutonomousThinkingProcess(BackgroundProcessBase):
         self.memory_store = memory_store
         self.emotions = emotions
 
-        # Gedanken-Speicher
-        self._thoughts: deque = deque(maxlen=100)
-        self._reflections: deque = deque(maxlen=50)
-        self._curiosities: deque = deque(maxlen=30)
-        self._insights: deque = deque(maxlen=50)
+        # Gedanken-Speicher - VERDOPPELT
+        self._thoughts: deque = deque(maxlen=200)      # VERDOPPELT: 100 → 200
+        self._reflections: deque = deque(maxlen=100)   # VERDOPPELT: 50 → 100
+        self._curiosities: deque = deque(maxlen=60)    # VERDOPPELT: 30 → 60
+        self._insights: deque = deque(maxlen=100)      # VERDOPPELT: 50 → 100
 
         # Timing
         self._last_deep_thought = datetime.min

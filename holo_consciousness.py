@@ -549,7 +549,7 @@ class InnerMonologue:
     }
 
     def __init__(self):
-        self.thought_stream: deque = deque(maxlen=50)
+        self.thought_stream: deque = deque(maxlen=100)  # VERDOPPELT: 50 → 100
         self.current_focus: Optional[str] = None
         self.mood_influence: float = 0.5
 
@@ -3118,7 +3118,7 @@ class ConversationMemory:
     - Langzeit-Erinnerungen
     """
 
-    MAX_MEMORIES = 100
+    MAX_MEMORIES = 200  # VERDOPPELT: 100 → 200
     IMPORTANCE_THRESHOLD = 0.5
 
     IMPORTANCE_INDICATORS = {

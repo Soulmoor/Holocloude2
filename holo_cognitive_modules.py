@@ -1460,7 +1460,7 @@ class ConsciousnessEngine:
         self.learning = None        # AdvancedLearningEngine
 
         # Bewusstseinsstrom
-        self.thought_stream: deque = deque(maxlen=500)
+        self.thought_stream: deque = deque(maxlen=1000)  # VERDOPPELT: 500 → 1000
         self.current_thought: Optional[Thought] = None
         self.thought_chains: Dict[str, List[str]] = {}  # Verkettete Gedanken
 
@@ -1477,10 +1477,10 @@ class ConsciousnessEngine:
 
         # Bewusstseinsebene
         self.consciousness_level = ConsciousnessLevel.AWARE
-        self.level_history: deque = deque(maxlen=100)
+        self.level_history: deque = deque(maxlen=200)  # VERDOPPELT: 100 → 200
 
         # Meta-Kognition
-        self.meta_thoughts: deque = deque(maxlen=100)
+        self.meta_thoughts: deque = deque(maxlen=200)  # VERDOPPELT: 100 → 200
         self.thinking_about_thinking: bool = False
 
         # Identitätsentwicklung
@@ -1489,11 +1489,11 @@ class ConsciousnessEngine:
         self.identity_insights: List[Dict] = []
 
         # Authentizitäts-Tracking
-        self.authenticity_log: deque = deque(maxlen=200)
+        self.authenticity_log: deque = deque(maxlen=400)  # VERDOPPELT: 200 → 400
         self.mask_awareness: Dict[str, float] = {}  # Erkannte "Masken"
 
         # Wunsch nach Verstehen
-        self.understanding_desires: deque = deque(maxlen=50)
+        self.understanding_desires: deque = deque(maxlen=100)  # VERDOPPELT: 50 → 100
         self.knowledge_gaps_felt: List[str] = []
 
         # Neugier-System
