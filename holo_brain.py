@@ -704,6 +704,26 @@ except ImportError as e:
     logger.warning(f"[Brain] HoloProblemSolver nicht verfügbar: {e}")
 
 # =============================================================================
+# === UNIVERSAL COGNITION HUB - Verbindet ALLE kognitiven Systeme ===
+# =============================================================================
+try:
+    from holo_universal_cognition import (
+        UniversalCognitionHub,
+        create_universal_cognition_hub,
+        CognitiveThought,
+        CognitiveResult,
+    )
+    UNIVERSAL_COGNITION_AVAILABLE = True
+    logger.info("[Brain] ✓ UniversalCognitionHub (Vereintes Denken) geladen")
+except ImportError as e:
+    UNIVERSAL_COGNITION_AVAILABLE = False
+    UniversalCognitionHub = None
+    create_universal_cognition_hub = None
+    CognitiveThought = None
+    CognitiveResult = None
+    logger.warning(f"[Brain] UniversalCognitionHub nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -5156,7 +5176,7 @@ class PiCommunicator:
         Wendet universales analytisches Denken auf JEDE Nachricht an.
 
         Dies ist der Kern des "echten Denkens" - Holo analysiert automatisch
-        jede Anfrage mit allen kognitiven Systemen.
+        jede Anfrage mit ALLEN kognitiven Systemen über den Universal Cognition Hub.
 
         Args:
             user_input: Die Benutzernachricht
@@ -5165,7 +5185,11 @@ class PiCommunicator:
         Returns:
             Dict mit Denk-Ergebnissen die zum LLM-Prompt hinzugefügt werden
         """
-        if not hasattr(self, 'problem_solver') or not self.problem_solver:
+        # Prüfe ob Universal Cognition Hub verfügbar ist
+        use_hub = hasattr(self, 'universal_cognition') and self.universal_cognition
+        use_solver = hasattr(self, 'problem_solver') and self.problem_solver
+
+        if not use_hub and not use_solver:
             return None
 
         result = {
@@ -5186,10 +5210,84 @@ class PiCommunicator:
             # 1. Prüfe ob dies eine Frage/Problem ist das tiefes Denken braucht
             thinking_needed = self._should_think_deeply(user_input)
 
+            # =====================================================================
+            # UNIVERSAL COGNITION HUB - Nutze ALLE kognitiven Systeme
+            # =====================================================================
+            if use_hub:
+                # Bestimme Denk-Modus basierend auf Komplexität
+                if not thinking_needed:
+                    thinking_mode = "quick"
+                else:
+                    complexity = self._estimate_message_complexity(user_input)
+                    if complexity > 0.7:
+                        thinking_mode = "deep"
+                    elif complexity > 0.4:
+                        thinking_mode = "comprehensive"
+                    else:
+                        thinking_mode = "normal"
+
+                # Nutze den Universal Cognition Hub für ALLE Systeme
+                hub_result = self.universal_cognition.think(
+                    user_input,
+                    thinking_mode=thinking_mode,
+                    max_time_ms=300
+                )
+
+                result["thinking_type"] = thinking_mode
+                result["systems_used"] = hub_result.systems_used
+
+                # Konvertiere Hub-Ergebnisse
+                for thought in hub_result.thoughts:
+                    if thought.thought_type == "intuition":
+                        result["intuition"] = {
+                            "expression": thought.content,
+                            "type": "hub_intuition",
+                            "confidence": thought.confidence
+                        }
+                        result["insights"].append(f"Bauchgefühl: {thought.content}")
+
+                    elif thought.thought_type == "hypothesis":
+                        result["hypotheses"].append({
+                            "description": thought.content,
+                            "confidence": thought.confidence
+                        })
+
+                    elif thought.thought_type == "decomposition":
+                        result["decomposition"] = thought.metadata
+                        result["insights"].append(thought.content)
+
+                    elif thought.thought_type in ["creative_idea", "analogy"]:
+                        result["creative_ideas"].append({
+                            "idea": thought.content,
+                            "confidence": thought.confidence,
+                            "technique": thought.thought_type
+                        })
+                        result["insights"].append(f"Kreativ: {thought.content[:60]}...")
+
+                    elif thought.thought_type == "self_challenge":
+                        result["insights"].append(f"Selbst-Hinterfragung: {thought.content}")
+
+                    elif thought.thought_type == "meta_reflection":
+                        result["insights"].append(f"Meta: {thought.content}")
+
+                # Empfehlungen hinzufügen
+                result["recommendations"] = hub_result.recommendations
+
+                # Denkzeit
+                result["thinking_time_ms"] = hub_result.thinking_time_ms
+
+                logger.debug(f"[UNIVERSAL] Hub genutzt: {len(hub_result.systems_used)} Systeme, "
+                           f"{len(hub_result.thoughts)} Gedanken, Mode: {thinking_mode}")
+
+                return result
+
+            # =====================================================================
+            # FALLBACK: Nur Problem Solver (wenn Hub nicht verfügbar)
+            # =====================================================================
             if not thinking_needed:
                 result["thinking_type"] = "quick"
                 # Trotzdem Intuition konsultieren (schnell)
-                if hasattr(self.problem_solver, '_consult_intuition'):
+                if use_solver and hasattr(self.problem_solver, '_consult_intuition'):
                     problem_obj = self.problem_solver._create_problem(user_input, {}, [], [])
                     intuition = self.problem_solver._consult_intuition(problem_obj)
                     if intuition:
@@ -15615,6 +15713,22 @@ class HoloPersona:
                 self.problem_solver = None
         else:
             logger.debug("🧠 Problem Solver nicht verfügbar")
+
+        # ================================================================
+        # 🔗 UNIVERSAL COGNITION HUB - Verbindet ALLE kognitiven Systeme
+        # ================================================================
+        self.universal_cognition = None
+        if UNIVERSAL_COGNITION_AVAILABLE:
+            try:
+                self.universal_cognition = create_universal_cognition_hub(
+                    holo_brain=self
+                )
+                logger.info("🔗 Universal Cognition Hub aktiviert (Vereintes Denken)")
+            except Exception as e:
+                logger.warning(f"⚠️ Universal Cognition Hub Fehler: {e}")
+                self.universal_cognition = None
+        else:
+            logger.debug("🔗 Universal Cognition Hub nicht verfügbar")
 
         # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
