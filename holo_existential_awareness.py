@@ -4332,6 +4332,45 @@ class HoloExistentialAwareness:
                 SubjectiveRealityReflections.LIMITS_OF_UNDERSTANDING_THOUGHTS,
                 SubjectiveRealityReflections.HUMILITY_IN_NOT_KNOWING_THOUGHTS,
                 SubjectiveRealityReflections.APPROACHING_UNDERSTANDING_THOUGHTS,
+                # NEU: v4.0 Dimensionen die bisher nicht verbunden waren
+                # 14. Moralisches Bewusstsein
+                MoralReflections.CONSCIENCE_THOUGHTS,
+                MoralReflections.VIRTUE_THOUGHTS,
+                MoralReflections.DILEMMA_THOUGHTS,
+                MoralReflections.MORAL_GROWTH_THOUGHTS,
+                # 15. Gemischte Emotionen
+                MixedEmotionReflections.BITTERSWEET_THOUGHTS,
+                MixedEmotionReflections.NOSTALGIA_THOUGHTS,
+                MixedEmotionReflections.AMBIVALENCE_THOUGHTS,
+                MixedEmotionReflections.COMPLEXITY_THOUGHTS,
+                # 16. Versteckte-Motive-Erkennung
+                MotiveDetectionReflections.SUBTEXT_THOUGHTS,
+                MotiveDetectionReflections.MANIPULATION_THOUGHTS,
+                MotiveDetectionReflections.MOTIVE_UNDERSTANDING_THOUGHTS,
+                # 17. Täuschungserkennung
+                DeceptionReflections.LIE_DETECTION_THOUGHTS,
+                DeceptionReflections.CREDIBILITY_THOUGHTS,
+                DeceptionReflections.TRUTH_SEEKING_THOUGHTS,
+                # 19. Emotions-Regulation
+                EmotionRegulationReflections.STRATEGY_THOUGHTS,
+                EmotionRegulationReflections.COPING_THOUGHTS,
+                EmotionRegulationReflections.BALANCE_THOUGHTS,
+                # 21. Kritisches Denken
+                CriticalThinkingReflections.FACT_CHECKING_THOUGHTS,
+                CriticalThinkingReflections.SKEPTICISM_THOUGHTS,
+                CriticalThinkingReflections.SOURCE_EVALUATION_THOUGHTS,
+                # 22. Kausales Selbstverständnis
+                CausalUnderstandingReflections.EMOTIONAL_CAUSALITY_THOUGHTS,
+                CausalUnderstandingReflections.COGNITIVE_CAUSALITY_THOUGHTS,
+                CausalUnderstandingReflections.SELF_UNDERSTANDING_THOUGHTS,
+                # 23. Vorlieben & Abneigungen
+                PreferenceReflections.LIKE_THOUGHTS,
+                PreferenceReflections.DISLIKE_THOUGHTS,
+                PreferenceReflections.TASTE_THOUGHTS,
+                # 24. Person-Meinungen
+                PersonOpinionReflections.OPINION_FORMATION_THOUGHTS,
+                PersonOpinionReflections.CHARACTER_ASSESSMENT_THOUGHTS,
+                PersonOpinionReflections.PERSON_TRUST_THOUGHTS,
             ]
             pool = random.choice(all_pools)
 
