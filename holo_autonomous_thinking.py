@@ -29,6 +29,46 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für authentisches autonomes Denken
+# =============================================================================
+
+# Deep Psychology Engine
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Verdrängung - Unbewusste Denkmuster
+try:
+    from holo_repression_system import (
+        HoloRepressionEngine,
+        RepressionType,
+    )
+    REPRESSION_AVAILABLE = True
+except ImportError:
+    REPRESSION_AVAILABLE = False
+    HoloRepressionEngine = None
+    RepressionType = None
+
+# Unbewusste Prozesse
+try:
+    from holo_unconscious_processes import (
+        UnconsciousProcessesIntegration,
+        UnconsciousTriggerSystem,
+    )
+    UNCONSCIOUS_AVAILABLE = True
+except ImportError:
+    UNCONSCIOUS_AVAILABLE = False
+    UnconsciousProcessesIntegration = None
+    UnconsciousTriggerSystem = None
+
 
 # ============================================================
 # ENUMS & TYPES

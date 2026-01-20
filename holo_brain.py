@@ -1135,6 +1135,86 @@ except ImportError as e:
     logger.debug(f"[Brain] AutonomousThinkingSystem nicht verfügbar: {e}")
 
 # =============================================================================
+# TIEFENPSYCHOLOGIE-MODULE - Authentische Persönlichkeit & Emotionen
+# =============================================================================
+
+# Deep Psychology Engine - Zentrale Integration aller psychologischen Systeme
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        create_deep_psychology_engine,
+        load_or_create_engine as load_deep_psychology,
+        DeepPsychologyConfig,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+    logger.info("[Brain] ✓ HoloDeepPsychologyEngine (Tiefenpsychologie, Trauma, Lebensabschnitte) geladen")
+except ImportError as e:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    create_deep_psychology_engine = None
+    load_deep_psychology = None
+    DeepPsychologyConfig = None
+    logger.debug(f"[Brain] HoloDeepPsychologyEngine nicht verfügbar: {e}")
+
+# Emotional Engines - Emotionale und humorvolle Antwort-Generatoren
+try:
+    from holo_emotional_engines import (
+        EmotionalMirroring,
+        HumorEngine,
+        AnecdoteGenerator,
+        MetaphorGenerator,
+        ComfortProvider,
+        TimeAwareResponder,
+        ActiveListeningEngine,
+        CuriosityExpression,
+        SharedExperienceGenerator,
+        RelationshipDepthTracker,
+        GratitudeEngine,
+        SurpriseGenerator,
+        SeasonalAwareness,
+        EmpatheticReframing,
+        HumorType,
+        EmotionCategory,
+        RelationshipLevel,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+    logger.info("[Brain] ✓ EmotionalEngines (Humor, Trost, Mirroring, 14 Engines) geladen")
+except ImportError as e:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+    EmotionalMirroring = None
+    HumorEngine = None
+    AnecdoteGenerator = None
+    MetaphorGenerator = None
+    ComfortProvider = None
+    TimeAwareResponder = None
+    ActiveListeningEngine = None
+    CuriosityExpression = None
+    SharedExperienceGenerator = None
+    RelationshipDepthTracker = None
+    GratitudeEngine = None
+    SurpriseGenerator = None
+    SeasonalAwareness = None
+    EmpatheticReframing = None
+    HumorType = None
+    EmotionCategory = None
+    RelationshipLevel = None
+    logger.debug(f"[Brain] EmotionalEngines nicht verfügbar: {e}")
+
+# Emotional Complexity - Negative Verhaltensweisen für authentische Persönlichkeit
+try:
+    from holo_emotional_complexity import (
+        get_emotional_complexity,
+        EmotionalComplexityIntegration,
+    )
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+    logger.info("[Brain] ✓ EmotionalComplexity (Authentische negative Verhaltensweisen) geladen")
+except ImportError as e:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+    EmotionalComplexityIntegration = None
+    logger.debug(f"[Brain] EmotionalComplexity nicht verfügbar: {e}")
+
+# =============================================================================
 # KONFIGURATION
 # =============================================================================
 
@@ -7915,7 +7995,48 @@ class ProactiveIntelligence:
         self.user_state_tracker = UserStateTracker() if 'UserStateTracker' in dir() else None
         self._last_user_state: Optional[UserStateAnalysis] = None
 
-        logger.info(f"🧠 ProactiveIntelligence v4.1 - Tagesstimmung: sozial={self.daily_variance['social_need']:.0%}, mitteilsam={self.daily_variance['sharing_desire']:.0%}")
+        # ================================================================
+        # NEU v4.2: DEEP PSYCHOLOGY ENGINE
+        # Tiefenpsychologische Verarbeitung für authentische Persönlichkeit
+        # ================================================================
+        self.deep_psychology: Optional['HoloDeepPsychologyEngine'] = None
+        if DEEP_PSYCHOLOGY_AVAILABLE and HoloDeepPsychologyEngine:
+            try:
+                self.deep_psychology = load_deep_psychology()
+                logger.info("   ✓ DeepPsychology aktiv - Tiefenpsychologie, Trauma, Lebensabschnitte")
+            except Exception as e:
+                logger.warning(f"   DeepPsychology Fehler: {e}")
+                self.deep_psychology = None
+
+        # ================================================================
+        # NEU v4.2: EMOTIONAL ENGINES
+        # Emotionale Antwort-Generatoren für menschlichere Interaktion
+        # ================================================================
+        self.emotional_engines: Dict[str, Any] = {}
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            try:
+                self.emotional_engines = {
+                    'mirroring': EmotionalMirroring() if EmotionalMirroring else None,
+                    'humor': HumorEngine() if HumorEngine else None,
+                    'anecdotes': AnecdoteGenerator() if AnecdoteGenerator else None,
+                    'metaphors': MetaphorGenerator() if MetaphorGenerator else None,
+                    'comfort': ComfortProvider() if ComfortProvider else None,
+                    'time_aware': TimeAwareResponder() if TimeAwareResponder else None,
+                    'active_listening': ActiveListeningEngine() if ActiveListeningEngine else None,
+                    'curiosity': CuriosityExpression() if CuriosityExpression else None,
+                    'shared_exp': SharedExperienceGenerator() if SharedExperienceGenerator else None,
+                    'relationship': RelationshipDepthTracker() if RelationshipDepthTracker else None,
+                    'gratitude': GratitudeEngine() if GratitudeEngine else None,
+                    'surprise': SurpriseGenerator() if SurpriseGenerator else None,
+                    'seasonal': SeasonalAwareness() if SeasonalAwareness else None,
+                    'reframing': EmpatheticReframing() if EmpatheticReframing else None,
+                }
+                active_count = sum(1 for v in self.emotional_engines.values() if v is not None)
+                logger.info(f"   ✓ EmotionalEngines aktiv - {active_count}/14 Engines geladen")
+            except Exception as e:
+                logger.warning(f"   EmotionalEngines Fehler: {e}")
+
+        logger.info(f"🧠 ProactiveIntelligence v4.2 - Tagesstimmung: sozial={self.daily_variance['social_need']:.0%}, mitteilsam={self.daily_variance['sharing_desire']:.0%}")
         if self.user_state_tracker:
             logger.info("   ✓ UserStateTracker aktiv - reagiert auf User-Zustand")
 

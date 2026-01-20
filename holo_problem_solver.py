@@ -61,6 +61,21 @@ import copy
 
 logger = logging.getLogger("HoloProblemSolver")
 
+# Tiefenpsychologie - Unbewusste Blockaden bei Problemlösung
+try:
+    from holo_repression_system import HoloRepressionEngine
+    REPRESSION_AVAILABLE = True
+except ImportError:
+    REPRESSION_AVAILABLE = False
+    HoloRepressionEngine = None
+
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
 
 # ==================== ENUMS ====================
 

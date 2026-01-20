@@ -73,6 +73,28 @@ from abc import ABC, abstractmethod
 
 logger = logging.getLogger("HoloIntegrationLayer")
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Zentrale Koordination
+# =============================================================================
+
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 
 # =============================================================================
 # UNIFIED CHANGE LOG - Zentrales Event-System

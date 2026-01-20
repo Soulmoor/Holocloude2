@@ -35,6 +35,22 @@ import random
 
 logger = logging.getLogger("HoloMetaCognition")
 
+# Tiefenpsychologie - Unbewusste Prozesse für Meta-Kognition
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine, load_or_create_engine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_or_create_engine = None
+
+try:
+    from holo_unconscious_processes import RecurringDreamEngine
+    DREAM_ENGINE_AVAILABLE = True
+except ImportError:
+    DREAM_ENGINE_AVAILABLE = False
+    RecurringDreamEngine = None
+
 
 # =============================================================================
 # KONFIGURATION

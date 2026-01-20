@@ -41,6 +41,22 @@ try:
 except ImportError:
     HAS_CORE_TYPES = False
 
+# Tiefenpsychologie - Reue und Schuldgefühle für Selbst-Bewusstsein
+try:
+    from holo_redemption_system import HoloRedemptionEngine, GuiltType
+    REDEMPTION_AVAILABLE = True
+except ImportError:
+    REDEMPTION_AVAILABLE = False
+    HoloRedemptionEngine = None
+    GuiltType = None
+
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
 logger = logging.getLogger("HoloSelfAwareness")
 
 

@@ -63,6 +63,56 @@ try:
 except ImportError:
     HAS_CORE_TYPES = False
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-MODULE - Authentische Persönlichkeit & Emotionen
+# =============================================================================
+
+# Deep Psychology Engine
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Emotional Engines
+try:
+    from holo_emotional_engines import (
+        EmotionalMirroring,
+        HumorEngine,
+        ComfortProvider,
+        TimeAwareResponder,
+        ActiveListeningEngine,
+        CuriosityExpression,
+        GratitudeEngine,
+        EmpatheticReframing,
+        EmotionCategory,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+    EmotionalMirroring = None
+    HumorEngine = None
+    ComfortProvider = None
+    TimeAwareResponder = None
+    ActiveListeningEngine = None
+    CuriosityExpression = None
+    GratitudeEngine = None
+    EmpatheticReframing = None
+    EmotionCategory = None
+
+# Emotional Complexity
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 logger = logging.getLogger("HoloDialogueEngine")
 
 
@@ -1371,6 +1421,47 @@ class HoloDialogueEngine:
         self.conversation_start = time.time()
         self.total_turns = 0
 
+        # ================================================================
+        # NEU v2.1: TIEFENPSYCHOLOGIE-INTEGRATION
+        # ================================================================
+        self.deep_psychology: Optional[HoloDeepPsychologyEngine] = None
+        if DEEP_PSYCHOLOGY_AVAILABLE and load_deep_psychology:
+            try:
+                self.deep_psychology = load_deep_psychology()
+                logger.info("[DialogueEngine] ✓ DeepPsychology integriert")
+            except Exception as e:
+                logger.warning(f"[DialogueEngine] DeepPsychology Fehler: {e}")
+
+        # ================================================================
+        # NEU v2.1: EMOTIONAL ENGINES
+        # ================================================================
+        self.emotional_engines: Dict[str, Any] = {}
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            try:
+                self.emotional_engines = {
+                    'mirroring': EmotionalMirroring() if EmotionalMirroring else None,
+                    'humor': HumorEngine() if HumorEngine else None,
+                    'comfort': ComfortProvider() if ComfortProvider else None,
+                    'time_aware': TimeAwareResponder() if TimeAwareResponder else None,
+                    'active_listening': ActiveListeningEngine() if ActiveListeningEngine else None,
+                    'curiosity': CuriosityExpression() if CuriosityExpression else None,
+                    'gratitude': GratitudeEngine() if GratitudeEngine else None,
+                    'reframing': EmpatheticReframing() if EmpatheticReframing else None,
+                }
+                active_count = sum(1 for v in self.emotional_engines.values() if v is not None)
+                logger.info(f"[DialogueEngine] ✓ {active_count} EmotionalEngines integriert")
+            except Exception as e:
+                logger.warning(f"[DialogueEngine] EmotionalEngines Fehler: {e}")
+
+        # Emotional Complexity
+        self.emotional_complexity = None
+        if EMOTIONAL_COMPLEXITY_AVAILABLE and get_emotional_complexity:
+            try:
+                self.emotional_complexity = get_emotional_complexity()
+                logger.info("[DialogueEngine] ✓ EmotionalComplexity integriert")
+            except Exception as e:
+                logger.warning(f"[DialogueEngine] EmotionalComplexity Fehler: {e}")
+
         logger.info(f"[DialogueEngine] Initialisiert für User: {user_id}")
     
     def process(self, message: str, 
@@ -1416,41 +1507,86 @@ class HoloDialogueEngine:
         # Engagement
         is_question = "?" in message
         self.engagement.record_message(message, is_question)
-        
+
+        # ================================================================
+        # NEU v2.1: TIEFENPSYCHOLOGIE-VERARBEITUNG
+        # ================================================================
+        psychological_result = None
+        if self.deep_psychology:
+            try:
+                # Berechne Stress-Level aus Engagement & Sentiment
+                stress_level = 0.3
+                if sentiment == "negative":
+                    stress_level = 0.6
+                elif sentiment == "positive":
+                    stress_level = 0.2
+
+                psychological_result = self.deep_psychology.process_input(
+                    text=message,
+                    emotional_context=sentiment,
+                    stress_level=stress_level,
+                    conversation_context=topic
+                )
+            except Exception as e:
+                logger.debug(f"[DialogueEngine] DeepPsychology Fehler: {e}")
+
+        # ================================================================
+        # NEU v2.1: EMOTIONAL MIRRORING
+        # ================================================================
+        emotional_mirroring = None
+        if self.emotional_engines.get('mirroring'):
+            try:
+                mirroring_engine = self.emotional_engines['mirroring']
+                user_emotion = mirroring_engine.detect_emotion(message)
+                if user_emotion:
+                    emotional_mirroring = {
+                        'user_emotion': user_emotion.primary_emotion.value if user_emotion.primary_emotion else None,
+                        'intensity': user_emotion.intensity,
+                        'response': mirroring_engine.generate_mirroring_response(user_emotion)
+                    }
+            except Exception as e:
+                logger.debug(f"[DialogueEngine] EmotionalMirroring Fehler: {e}")
+
         # Kontext erstellen
         context = {
             # State
             'dialogue_state': self.state_machine.current_state.name,
             'state_strategy': self.state_machine.get_strategy(),
             'state_duration': self.state_machine.get_state_duration(),
-            
+
             # User
             'user_profile': self.user_profile,
             'user_guidelines': self.profile_manager.get_response_guidelines(),
-            
+
             # Goals
             'current_goal': self.planner.get_current_goal(),
             'next_step': self.planner.suggest_next_step(),
-            
+
             # Grounding
             'understanding': understanding,
             'needs_clarification': self.grounding.needs_clarification(topic),
-            
+
             # Turn
             'timing': self.turn_manager.get_response_timing(),
             'should_wait': self.turn_manager.should_wait_for_more(),
-            
+
             # Engagement
             'engagement_level': self.engagement.get_engagement_level(),
             'engagement_metrics': self.engagement.calculate_metrics(),
-            
+
             # Meta
             'total_turns': self.total_turns,
             'conversation_duration': time.time() - self.conversation_start,
             'intent': intent,
             'sentiment': sentiment,
+
+            # NEU v2.1: Psychologie
+            'psychological_result': psychological_result,
+            'emotional_mirroring': emotional_mirroring,
+            'has_deep_psychology': self.deep_psychology is not None,
+            'has_emotional_engines': len(self.emotional_engines) > 0,
         }
-        
+
         return context
     
     def get_response_framework(self, context: Dict) -> Dict[str, Any]:

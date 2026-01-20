@@ -57,6 +57,22 @@ except ImportError:
 
 logger = logging.getLogger("HoloVoice")
 
+# Tiefenpsychologie - Emotional Engines für Tonalität
+try:
+    from holo_emotional_engines import TimeAwareResponder, EmotionCategory
+    EMOTIONAL_ENGINES_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+    TimeAwareResponder = None
+    EmotionCategory = None
+
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
 
 # =============================================================================
 # CONFIGURATION

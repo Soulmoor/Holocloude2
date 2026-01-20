@@ -51,6 +51,38 @@ try:
 except ImportError:
     EMOTIONAL_ENGINES_AVAILABLE = False
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für tieferes kognitives Verständnis
+# =============================================================================
+
+# Deep Psychology Engine
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Freudsche Versprecher für authentischere Kommunikation
+try:
+    from holo_freudian_slips import HoloFreudianSlipsEngine
+    FREUDIAN_SLIPS_AVAILABLE = True
+except ImportError:
+    FREUDIAN_SLIPS_AVAILABLE = False
+    HoloFreudianSlipsEngine = None
+
+# Emotional Complexity
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 logger = logging.getLogger(__name__)
 
 

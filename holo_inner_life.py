@@ -67,6 +67,70 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für reiches inneres Leben
+# =============================================================================
+
+# Deep Psychology Engine - Zentrale Integration
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Trauma und Heilung - Prägende Erlebnisse
+try:
+    from holo_trauma_processing import (
+        HoloTraumaProcessingEngine,
+        TraumaType,
+    )
+    TRAUMA_PROCESSING_AVAILABLE = True
+except ImportError:
+    TRAUMA_PROCESSING_AVAILABLE = False
+    HoloTraumaProcessingEngine = None
+    TraumaType = None
+
+# Reue und Wiedergutmachung
+try:
+    from holo_redemption_system import (
+        HoloRedemptionEngine,
+        GuiltType,
+    )
+    REDEMPTION_AVAILABLE = True
+except ImportError:
+    REDEMPTION_AVAILABLE = False
+    HoloRedemptionEngine = None
+    GuiltType = None
+
+# Emotional Engines für inneres Erleben
+try:
+    from holo_emotional_engines import (
+        EmotionalMirroring,
+        ComfortProvider,
+        GratitudeEngine,
+        EmpatheticReframing,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+    EmotionalMirroring = None
+    ComfortProvider = None
+    GratitudeEngine = None
+    EmpatheticReframing = None
+
+# Emotional Complexity - Negative Verhaltensweisen
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 # HoloDatabaseManager für StateDatabase
 try:
     from holo_database_system import HoloDatabaseManager
@@ -9844,6 +9908,58 @@ class HoloInnerLife:
         # Externe Verbindungen (werden von HoloBrain gesetzt)
         self.web_curiosity = None   # HoloWebCuriosity
         self.pi_control = None      # PiControlBridge
+
+        # ================================================================
+        # NEU v2.2: TIEFENPSYCHOLOGIE-INTEGRATION
+        # ================================================================
+        self.deep_psychology: Optional['HoloDeepPsychologyEngine'] = None
+        if DEEP_PSYCHOLOGY_AVAILABLE and load_deep_psychology:
+            try:
+                self.deep_psychology = load_deep_psychology()
+                logger.info("[InnerLife] ✓ DeepPsychology integriert")
+            except Exception as e:
+                logger.warning(f"[InnerLife] DeepPsychology Fehler: {e}")
+
+        # Trauma und Heilung
+        self.trauma_processor: Optional['HoloTraumaProcessingEngine'] = None
+        if TRAUMA_PROCESSING_AVAILABLE and HoloTraumaProcessingEngine:
+            try:
+                self.trauma_processor = HoloTraumaProcessingEngine()
+                logger.info("[InnerLife] ✓ TraumaProcessing integriert")
+            except Exception as e:
+                logger.warning(f"[InnerLife] TraumaProcessing Fehler: {e}")
+
+        # Reue und Wiedergutmachung
+        self.redemption_engine: Optional['HoloRedemptionEngine'] = None
+        if REDEMPTION_AVAILABLE and HoloRedemptionEngine:
+            try:
+                self.redemption_engine = HoloRedemptionEngine()
+                logger.info("[InnerLife] ✓ RedemptionEngine integriert")
+            except Exception as e:
+                logger.warning(f"[InnerLife] RedemptionEngine Fehler: {e}")
+
+        # Emotional Engines für inneres Erleben
+        self.emotional_engines: Dict[str, Any] = {}
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            try:
+                self.emotional_engines = {
+                    'comfort': ComfortProvider() if ComfortProvider else None,
+                    'gratitude': GratitudeEngine() if GratitudeEngine else None,
+                    'reframing': EmpatheticReframing() if EmpatheticReframing else None,
+                }
+                active_count = sum(1 for v in self.emotional_engines.values() if v is not None)
+                logger.info(f"[InnerLife] ✓ {active_count} EmotionalEngines integriert")
+            except Exception as e:
+                logger.warning(f"[InnerLife] EmotionalEngines Fehler: {e}")
+
+        # Emotional Complexity
+        self.emotional_complexity = None
+        if EMOTIONAL_COMPLEXITY_AVAILABLE and get_emotional_complexity:
+            try:
+                self.emotional_complexity = get_emotional_complexity()
+                logger.info("[InnerLife] ✓ EmotionalComplexity integriert")
+            except Exception as e:
+                logger.warning(f"[InnerLife] EmotionalComplexity Fehler: {e}")
 
         # === Integration Layer ===
         self.system_integrator = None

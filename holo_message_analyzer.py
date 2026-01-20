@@ -35,6 +35,21 @@ from collections import defaultdict
 
 logger = logging.getLogger("HoloMessageAnalyzer")
 
+# Tiefenpsychologie - Freudsche Versprecher erkennen
+try:
+    from holo_freudian_slips import HoloFreudianSlipsEngine
+    FREUDIAN_SLIPS_AVAILABLE = True
+except ImportError:
+    FREUDIAN_SLIPS_AVAILABLE = False
+    HoloFreudianSlipsEngine = None
+
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 
 # =============================================================================
 # PUBLIC API - Explizite Exports

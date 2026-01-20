@@ -44,6 +44,42 @@ import re
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für psychologisch reichere Kontextverarbeitung
+# =============================================================================
+
+# Deep Psychology Engine
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Trauma-Trigger für Kontexterkennung
+try:
+    from holo_trauma_processing import (
+        HoloTraumaProcessingEngine,
+        TriggerIntensity,
+    )
+    TRAUMA_TRIGGERS_AVAILABLE = True
+except ImportError:
+    TRAUMA_TRIGGERS_AVAILABLE = False
+    HoloTraumaProcessingEngine = None
+    TriggerIntensity = None
+
+# Unbewusste Trigger
+try:
+    from holo_unconscious_processes import UnconsciousTriggerSystem
+    UNCONSCIOUS_TRIGGERS_AVAILABLE = True
+except ImportError:
+    UNCONSCIOUS_TRIGGERS_AVAILABLE = False
+    UnconsciousTriggerSystem = None
+
 
 # =============================================================================
 # SMART UNDERSTANDING (aus holo_organic.py)

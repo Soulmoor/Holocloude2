@@ -84,6 +84,42 @@ except ImportError:
     HAS_CORE_TYPES = False
     Opinion = None  # Wird unten als Fallback definiert
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für authentisches Bewusstsein
+# =============================================================================
+
+# Deep Psychology Engine
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Unbewusste Prozesse (Träume, Verdrängung, Versprecher)
+try:
+    from holo_unconscious_processes import (
+        UnconsciousProcessesIntegration,
+        RecurringDreamEngine,
+    )
+    UNCONSCIOUS_PROCESSES_AVAILABLE = True
+except ImportError:
+    UNCONSCIOUS_PROCESSES_AVAILABLE = False
+    UnconsciousProcessesIntegration = None
+    RecurringDreamEngine = None
+
+# Emotional Complexity
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 
 # =============================================================================
 # CONFIGURATION
@@ -3709,6 +3745,35 @@ class HoloConsciousness:
         self.introspection_depth: int = 0
         self.moral_sensitivity: float = 0.5
         self.last_update: datetime = datetime.now()
+
+        # ================================================================
+        # NEU v2.1: TIEFENPSYCHOLOGIE-INTEGRATION
+        # ================================================================
+        self.deep_psychology: Optional[HoloDeepPsychologyEngine] = None
+        if DEEP_PSYCHOLOGY_AVAILABLE and load_deep_psychology:
+            try:
+                self.deep_psychology = load_deep_psychology()
+                logger.info("[Consciousness] ✓ DeepPsychology integriert")
+            except Exception as e:
+                logger.warning(f"[Consciousness] DeepPsychology Fehler: {e}")
+
+        # Unbewusste Prozesse (Träume, Trigger)
+        self.unconscious_processes: Optional[UnconsciousProcessesIntegration] = None
+        if UNCONSCIOUS_PROCESSES_AVAILABLE and UnconsciousProcessesIntegration:
+            try:
+                self.unconscious_processes = UnconsciousProcessesIntegration()
+                logger.info("[Consciousness] ✓ UnconsciousProcesses integriert")
+            except Exception as e:
+                logger.warning(f"[Consciousness] UnconsciousProcesses Fehler: {e}")
+
+        # Emotional Complexity
+        self.emotional_complexity = None
+        if EMOTIONAL_COMPLEXITY_AVAILABLE and get_emotional_complexity:
+            try:
+                self.emotional_complexity = get_emotional_complexity()
+                logger.info("[Consciousness] ✓ EmotionalComplexity integriert")
+            except Exception as e:
+                logger.warning(f"[Consciousness] EmotionalComplexity Fehler: {e}")
 
         # Laden
         self._load_state()

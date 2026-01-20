@@ -47,6 +47,22 @@ import re
 
 logger = logging.getLogger("HoloLearning")
 
+# Tiefenpsychologie - Lebensabschnitte prägen Lernweise
+try:
+    from holo_life_phases import HoloLifePhasesEngine, LifePhase
+    LIFE_PHASES_AVAILABLE = True
+except ImportError:
+    LIFE_PHASES_AVAILABLE = False
+    HoloLifePhasesEngine = None
+    LifePhase = None
+
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
 # Database Integration (optional)
 try:
     from holo_database_system import HoloDatabaseManager

@@ -47,6 +47,22 @@ try:
 except ImportError:
     HAS_CORE_TYPES = False
 
+# Tiefenpsychologie - Wert-Hierarchie und Lebensabschnitte
+try:
+    from holo_life_phases import HoloLifePhasesEngine, LifePhase
+    LIFE_PHASES_AVAILABLE = True
+except ImportError:
+    LIFE_PHASES_AVAILABLE = False
+    HoloLifePhasesEngine = None
+    LifePhase = None
+
+try:
+    from holo_unconscious_processes import PersonalValueHierarchy
+    VALUE_HIERARCHY_AVAILABLE = True
+except ImportError:
+    VALUE_HIERARCHY_AVAILABLE = False
+    PersonalValueHierarchy = None
+
 logger = logging.getLogger("HoloPreferences")
 
 

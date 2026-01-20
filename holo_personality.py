@@ -48,6 +48,54 @@ import logging
 
 logger = logging.getLogger("HoloPersonality")
 
+# =============================================================================
+# TIEFENPSYCHOLOGIE-INTEGRATION - Für authentische Persönlichkeitsentwicklung
+# =============================================================================
+
+# Deep Psychology Engine - Lebensabschnitte und Entwicklung
+try:
+    from holo_deep_psychology import (
+        HoloDeepPsychologyEngine,
+        load_or_create_engine as load_deep_psychology,
+    )
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+    load_deep_psychology = None
+
+# Life Phases - Persönlichkeitsentwicklung über Zeit
+try:
+    from holo_life_phases import (
+        HoloLifePhasesEngine,
+        LifePhase,
+        DevelopmentArea,
+    )
+    LIFE_PHASES_AVAILABLE = True
+except ImportError:
+    LIFE_PHASES_AVAILABLE = False
+    HoloLifePhasesEngine = None
+    LifePhase = None
+    DevelopmentArea = None
+
+# Emotional Engines für ausdrucksstarke Persönlichkeit
+try:
+    from holo_emotional_engines import (
+        EmotionalMirroring,
+        HumorEngine,
+        MetaphorGenerator,
+        CuriosityExpression,
+        SeasonalAwareness,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_ENGINES_AVAILABLE = False
+    EmotionalMirroring = None
+    HumorEngine = None
+    MetaphorGenerator = None
+    CuriosityExpression = None
+    SeasonalAwareness = None
+
 
 # =============================================================================
 # KEMONOMIMI DEFINITIONEN - Die Basis von Holos Anatomie
@@ -1985,12 +2033,48 @@ class HoloPersonalityEngine:
         self.meta_observer = None  # HoloMetaObserver
         self.sandbox = None        # HoloSandbox
 
+        # ================================================================
+        # NEU v4.1: TIEFENPSYCHOLOGIE-INTEGRATION
+        # ================================================================
+        self.deep_psychology: Optional['HoloDeepPsychologyEngine'] = None
+        if DEEP_PSYCHOLOGY_AVAILABLE and load_deep_psychology:
+            try:
+                self.deep_psychology = load_deep_psychology()
+                logger.info("[PERSONALITY] ✓ DeepPsychology integriert")
+            except Exception as e:
+                logger.warning(f"[PERSONALITY] DeepPsychology Fehler: {e}")
+
+        # Life Phases - Persönlichkeitsentwicklung
+        self.life_phases: Optional['HoloLifePhasesEngine'] = None
+        if LIFE_PHASES_AVAILABLE and HoloLifePhasesEngine:
+            try:
+                self.life_phases = HoloLifePhasesEngine()
+                logger.info("[PERSONALITY] ✓ LifePhases integriert")
+            except Exception as e:
+                logger.warning(f"[PERSONALITY] LifePhases Fehler: {e}")
+
+        # Emotional Engines für expressivere Persönlichkeit
+        self.emotional_engines: Dict[str, Any] = {}
+        if EMOTIONAL_ENGINES_AVAILABLE:
+            try:
+                self.emotional_engines = {
+                    'mirroring': EmotionalMirroring() if EmotionalMirroring else None,
+                    'humor': HumorEngine() if HumorEngine else None,
+                    'metaphors': MetaphorGenerator() if MetaphorGenerator else None,
+                    'curiosity': CuriosityExpression() if CuriosityExpression else None,
+                    'seasonal': SeasonalAwareness() if SeasonalAwareness else None,
+                }
+                active_count = sum(1 for v in self.emotional_engines.values() if v is not None)
+                logger.info(f"[PERSONALITY] ✓ {active_count} EmotionalEngines integriert")
+            except Exception as e:
+                logger.warning(f"[PERSONALITY] EmotionalEngines Fehler: {e}")
+
         # === Integration Layer ===
         self.system_integrator = None
         self.storage = None  # ModuleStorageAdapter
         self._try_connect_integrator()
 
-        logger.info("[PERSONALITY] Engine v4.0 initialized (Kemonomimi + Emotions + Drives)")
+        logger.info("[PERSONALITY] Engine v4.1 initialized (Kemonomimi + DeepPsychology + Emotions)")
 
     def _try_connect_integrator(self):
         """Verbinde mit SystemIntegrator für zentrale Persistenz und Feedback"""

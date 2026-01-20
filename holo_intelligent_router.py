@@ -40,6 +40,21 @@ from collections import deque
 
 logger = logging.getLogger("HoloRouter")
 
+# Tiefenpsychologie für Routing-Entscheidungen
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
 # Import der neuen Detektoren aus holo_smart_understanding
 try:
     from holo_smart_understanding import (
