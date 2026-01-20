@@ -210,7 +210,13 @@
         "enable_proactive_messages": true,
         "enable_autonomous_activity": true,
         "enable_web_curiosity": true,
-        "enable_discord": true
+        "enable_discord": true,
+        "enable_emotional_engines": true,
+        "enable_humor_engine": true,
+        "enable_emotional_complexity": true,
+        "enable_emotional_mirroring": true,
+        "enable_negative_behaviors": true,
+        "enable_sarcasm": true
     },
 
     "discord": {

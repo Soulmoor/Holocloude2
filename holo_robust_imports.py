@@ -252,13 +252,102 @@ except ImportError as e:
     KEMONOMIMI_AVAILABLE = False
 
 
+# --- EMOTIONAL ENGINES ---
+EMOTIONAL_ENGINES_AVAILABLE = False
+EmotionalMirroring = None
+HumorEngine = None
+AnecdoteGenerator = None
+MetaphorGenerator = None
+ComfortProvider = None
+TimeAwareResponder = None
+ActiveListeningEngine = None
+CuriosityExpression = None
+SharedExperienceGenerator = None
+RelationshipDepthTracker = None
+GratitudeEngine = None
+SurpriseGenerator = None
+SeasonalAwareness = None
+ConversationMemoryRecaller = None
+EmpatheticReframing = None
+EmotionalResponseSystem = None
+HumorType = None
+EmotionCategory = None
+RelationshipLevel = None
+UserEmotionalState = None
+
+try:
+    from holo_emotional_engines import (
+        # Enums & Datenstrukturen
+        HumorType,
+        EmotionCategory,
+        RelationshipLevel,
+        UserEmotionalState,
+        # Engines
+        EmotionalMirroring,
+        HumorEngine,
+        AnecdoteGenerator,
+        MetaphorGenerator,
+        ComfortProvider,
+        TimeAwareResponder,
+        ActiveListeningEngine,
+        CuriosityExpression,
+        SharedExperienceGenerator,
+        RelationshipDepthTracker,
+        GratitudeEngine,
+        SurpriseGenerator,
+        SeasonalAwareness,
+        ConversationMemoryRecaller,
+        EmpatheticReframing,
+        EmotionalResponseSystem,
+    )
+    EMOTIONAL_ENGINES_AVAILABLE = True
+    logger.info("[RobustImports] ✓ holo_emotional_engines (14 Engines + Humor)")
+except ImportError as e:
+    logger.warning(f"[RobustImports] holo_emotional_engines: {e}")
+
+
+# --- EMOTIONAL COMPLEXITY ---
+EMOTIONAL_COMPLEXITY_AVAILABLE = False
+NegativeBehavior = None
+HurtLevel = None
+NegativeBehaviorSystem = None
+AdaptiveEmotionEngine = None
+OpinionVolatilitySystem = None
+EmotionalComplexitySystem = None
+get_emotional_complexity = None
+
+try:
+    from holo_emotional_complexity import (
+        # Enums
+        NegativeBehavior,
+        HurtLevel,
+        # Klassen
+        Grudge,
+        HurtMemory,
+        NegativeBehaviorSystem,
+        EmotionalContext,
+        AdaptiveEmotionEngine,
+        VolatileOpinion,
+        OpinionVolatilitySystem,
+        EmotionalComplexitySystem,
+        # Factory
+        get_emotional_complexity,
+    )
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+    logger.info("[RobustImports] ✓ holo_emotional_complexity (Negative Behaviors, Sarkasmus)")
+except ImportError as e:
+    logger.warning(f"[RobustImports] holo_emotional_complexity: {e}")
+
+
 def get_core_modules_status() -> Dict[str, bool]:
-    """Status aller 4 Kerndateien"""
+    """Status aller Kerndateien inkl. emotionaler Module"""
     return {
         "consciousness": CONSCIOUSNESS_AVAILABLE,
         "inner_life": INNER_LIFE_AVAILABLE,
         "context_mind": CONTEXT_MIND_AVAILABLE,
         "personality": PERSONALITY_AVAILABLE,
+        "emotional_engines": EMOTIONAL_ENGINES_AVAILABLE,
+        "emotional_complexity": EMOTIONAL_COMPLEXITY_AVAILABLE,
     }
 
 

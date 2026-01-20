@@ -15007,6 +15007,65 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"MixedEmotionAnalyzer nicht verfügbar: {e}")
 
+        # ================================================================
+        # EMOTIONAL ENGINES - 14 Engines für emotionale Antworten (NEU!)
+        # ================================================================
+        self.emotional_response_system = None
+        self.humor_engine = None
+        self.emotional_mirroring = None
+        self.comfort_provider = None
+        self.anecdote_generator = None
+        self.gratitude_engine = None
+        self.surprise_generator = None
+
+        if EMOTIONAL_ENGINES_AVAILABLE and EmotionalResponseSystem:
+            try:
+                # Haupt-System mit allen 14 Engines
+                self.emotional_response_system = EmotionalResponseSystem()
+
+                # Individuelle Engine-Referenzen für direkten Zugriff
+                if HumorEngine:
+                    self.humor_engine = HumorEngine()
+                if EmotionalMirroring:
+                    self.emotional_mirroring = EmotionalMirroring()
+                if ComfortProvider:
+                    self.comfort_provider = ComfortProvider()
+                if AnecdoteGenerator:
+                    self.anecdote_generator = AnecdoteGenerator()
+                if GratitudeEngine:
+                    self.gratitude_engine = GratitudeEngine()
+                if SurpriseGenerator:
+                    self.surprise_generator = SurpriseGenerator()
+
+                logger.info("😄 EmotionalResponseSystem aktiviert (14 Engines)")
+                logger.info("   └─ HumorEngine (8 Humor-Typen)")
+                logger.info("   └─ EmotionalMirroring (Emotionen spiegeln)")
+                logger.info("   └─ ComfortProvider (Trost & Unterstützung)")
+            except Exception as e:
+                logger.warning(f"⚠️ EmotionalResponseSystem nicht verfügbar: {e}")
+
+        # ================================================================
+        # EMOTIONAL COMPLEXITY - Negative Verhaltensweisen & Sarkasmus (NEU!)
+        # ================================================================
+        self.emotional_complexity = None
+        self.negative_behavior_system = None
+
+        if EMOTIONAL_COMPLEXITY_AVAILABLE and get_emotional_complexity:
+            try:
+                # Singleton-Instanz holen
+                self.emotional_complexity = get_emotional_complexity()
+
+                # Negative Behavior System für Sarkasmus, Schmollen, etc.
+                if NegativeBehaviorSystem:
+                    self.negative_behavior_system = NegativeBehaviorSystem()
+
+                logger.info("😤 EmotionalComplexitySystem aktiviert")
+                logger.info("   └─ NegativeBehaviorSystem (8 Verhaltensweisen)")
+                logger.info("   └─ Sarkasmus, Schmollen, Passiv-Aggressiv")
+                logger.info("   └─ Hurt-Level Tracking (5 Stufen)")
+            except Exception as e:
+                logger.warning(f"⚠️ EmotionalComplexitySystem nicht verfügbar: {e}")
+
         # Deception Detection - Täuschungserkennung
         self.deception_detector = None
         if DECEPTION_DETECTION_AVAILABLE and DeceptionDetector:
@@ -22493,7 +22552,12 @@ Nutze alternative Formulierungen!
     def _enhance_with_emotional_engines(self, response: str, user_input: str = "",
                                         intent_type: str = None) -> str:
         """
-        Verbessert eine Antwort mit den 15 emotionalen Engines aus ConversationEngine.
+        Verbessert eine Antwort mit den emotionalen Engines.
+
+        Nutzt jetzt:
+        - EmotionalResponseSystem (14 Engines)
+        - EmotionalComplexitySystem (Negative Verhaltensweisen)
+        - HumorEngine, ComfortProvider, etc.
 
         Args:
             response: Die Basis-Antwort
@@ -22503,75 +22567,132 @@ Nutze alternative Formulierungen!
         Returns:
             Verbesserte Antwort mit emotionalen Elementen
         """
-        if not hasattr(self, 'conversation_engine') or not self.conversation_engine:
-            return response
-
         try:
             import random
             enhancements = []
 
-            # Nur bei ~50% der Antworten enhancen für Natürlichkeit
-            if random.random() > 0.5:
+            # Feature-Check: Sind emotionale Engines aktiviert?
+            enable_engines = get_config("features.enable_emotional_engines", True)
+            enable_humor = get_config("features.enable_humor_engine", True)
+            enable_complexity = get_config("features.enable_emotional_complexity", True)
+
+            if not enable_engines:
                 return response
 
-            # 1. Bei Begrüßungen: Tageszeit-Gruß oder saisonaler Kommentar
-            if intent_type == 'greeting':
-                if random.random() < 0.4:
-                    time_greeting = self.conversation_engine.get_time_aware_greeting()
-                    if time_greeting:
-                        return time_greeting
-                if random.random() < 0.3:
-                    seasonal = self.conversation_engine.get_seasonal_comment()
-                    if seasonal:
-                        enhancements.append(seasonal)
+            # Nur bei ~60% der Antworten enhancen für Natürlichkeit
+            if random.random() > 0.6:
+                return response
 
-            # 2. Bei Trostsuche: Comfort Provider und Empathetic Reframing
-            elif intent_type == 'comfort_seek':
-                if hasattr(self.conversation_engine, 'comfort_provider'):
-                    comfort = self.conversation_engine.comfort_provider.provide_comfort(user_input)
+            # ================================================================
+            # NEUE EMOTIONAL ENGINES (direkte Nutzung)
+            # ================================================================
+
+            # 1. EmotionalMirroring - Emotionen spiegeln
+            if self.emotional_mirroring and user_input:
+                try:
+                    user_state = self.emotional_mirroring.detect_emotion(user_input)
+                    if user_state and user_state.intensity > 0.4:
+                        mirror_response = self.emotional_mirroring.generate_mirror_response(user_state)
+                        if mirror_response and random.random() < 0.35:
+                            enhancements.append(mirror_response)
+                except Exception as e:
+                    logger.debug(f"EmotionalMirroring error: {e}")
+
+            # 2. HumorEngine - Witze und Humor
+            if self.humor_engine and enable_humor:
+                try:
+                    if intent_type in ['flirty', 'feelings_ask', 'greeting'] or random.random() < 0.2:
+                        joke = self.humor_engine.generate_humor()
+                        if joke and random.random() < 0.3:
+                            enhancements.append(joke)
+                except Exception as e:
+                    logger.debug(f"HumorEngine error: {e}")
+
+            # 3. ComfortProvider - Trost bei Traurigkeit
+            if self.comfort_provider and intent_type == 'comfort_seek':
+                try:
+                    comfort = self.comfort_provider.provide_comfort(user_input)
                     if comfort:
                         enhancements.append(comfort)
-                if random.random() < 0.4 and hasattr(self.conversation_engine, 'empathetic_reframing'):
-                    reframe = self.conversation_engine.empathetic_reframing.reframe(user_input)
-                    if reframe:
-                        enhancements.append(reframe)
+                except Exception as e:
+                    logger.debug(f"ComfortProvider error: {e}")
 
-            # 3. Bei Dankbarkeit: GratitudeEngine
-            elif intent_type == 'gratitude':
-                gratitude = self.conversation_engine.express_gratitude()
-                if gratitude:
-                    return gratitude
+            # 4. GratitudeEngine - Dankbarkeit
+            if self.gratitude_engine and intent_type == 'gratitude':
+                try:
+                    gratitude = self.gratitude_engine.express_gratitude()
+                    if gratitude:
+                        return gratitude  # Ersetzt komplett
+                except Exception as e:
+                    logger.debug(f"GratitudeEngine error: {e}")
 
-            # 4. Bei positiven Antworten: Gelegentlich Humor oder Anekdoten
-            elif intent_type in ['flirty', 'feelings_ask']:
-                if random.random() < 0.25:
-                    joke = self.conversation_engine.tell_joke()
-                    if joke:
-                        enhancements.append(joke)
-                elif random.random() < 0.2:
-                    anecdote = self.conversation_engine.tell_anecdote()
+            # 5. SurpriseGenerator - Überraschende Elemente
+            if self.surprise_generator and random.random() < 0.1:
+                try:
+                    surprise = self.surprise_generator.generate_surprise()
+                    if surprise:
+                        enhancements.append(surprise)
+                except Exception as e:
+                    logger.debug(f"SurpriseGenerator error: {e}")
+
+            # 6. AnecdoteGenerator - Persönliche Geschichten
+            if self.anecdote_generator and random.random() < 0.15:
+                try:
+                    anecdote = self.anecdote_generator.get_anecdote()
                     if anecdote:
                         enhancements.append(anecdote)
+                except Exception as e:
+                    logger.debug(f"AnecdoteGenerator error: {e}")
 
-            # 5. Allgemein: Curiosity, Metaphern oder Shared Experience
-            else:
-                if random.random() < 0.2 and hasattr(self.conversation_engine, 'curiosity_engine'):
-                    curiosity = self.conversation_engine.curiosity_engine.express_curiosity(user_input)
-                    if curiosity:
-                        enhancements.append(curiosity)
-                elif random.random() < 0.15 and hasattr(self.conversation_engine, 'shared_experience'):
-                    shared = self.conversation_engine.shared_experience.share_experience(user_input)
-                    if shared:
-                        enhancements.append(shared)
+            # ================================================================
+            # EMOTIONAL COMPLEXITY - Negative Verhaltensweisen
+            # ================================================================
+            if self.emotional_complexity and enable_complexity:
+                try:
+                    # Hole aktuellen Zustand
+                    state = self.emotional_complexity.get_current_state()
 
-            # 6. Relationship Tracker aktualisieren
-            if hasattr(self.conversation_engine, 'relationship_tracker'):
-                self.conversation_engine.relationship_tracker.record_interaction()
-                milestone = self.conversation_engine.relationship_tracker.check_milestone()
-                if milestone:
-                    enhancements.append(milestone)
+                    # Prüfe ob negativer Zustand aktiv ist
+                    if state.get('active_negative_behavior'):
+                        # Verarbeite Interaktion durch Complexity-System
+                        result = self.emotional_complexity.process_interaction(
+                            interaction_type="message",
+                            from_person="user",
+                            content=user_input,
+                            intensity=0.5
+                        )
+                        # Bei aktiver negativer Reaktion modifizieren
+                        if result.get('final_expression'):
+                            enhancements.insert(0, result['final_expression'])
+                        # Bei Verweigerung komplette Ersetzung
+                        if result.get('request_refused'):
+                            return result.get('refusal_message', response)
+                except Exception as e:
+                    logger.debug(f"EmotionalComplexity error: {e}")
 
-            # Enhancements zur Antwort hinzufügen
+            # ================================================================
+            # LEGACY: ConversationEngine (falls vorhanden)
+            # ================================================================
+            if hasattr(self, 'conversation_engine') and self.conversation_engine:
+                try:
+                    # Bei Begrüßungen: Tageszeit-Gruß
+                    if intent_type == 'greeting' and random.random() < 0.4:
+                        time_greeting = self.conversation_engine.get_time_aware_greeting()
+                        if time_greeting:
+                            return time_greeting
+
+                    # Relationship Tracker aktualisieren
+                    if hasattr(self.conversation_engine, 'relationship_tracker'):
+                        self.conversation_engine.relationship_tracker.record_interaction()
+                        milestone = self.conversation_engine.relationship_tracker.check_milestone()
+                        if milestone:
+                            enhancements.append(milestone)
+                except Exception as e:
+                    logger.debug(f"ConversationEngine error: {e}")
+
+            # ================================================================
+            # ENHANCEMENTS ZUSAMMENFÜGEN
+            # ================================================================
             if enhancements:
                 # Enhancement am Ende oder Anfang hinzufügen (variiert)
                 if random.random() < 0.6:
@@ -22583,6 +22704,7 @@ Nutze alternative Formulierungen!
 
         except Exception as e:
             logger.debug(f"Emotional enhancement error: {e}")
+            return response
             return response
 
     # =========================================================================
