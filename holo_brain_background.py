@@ -669,6 +669,305 @@ class MaintenanceWorker(BackgroundProcessBase):
 
 
 # =============================================================================
+# AUTONOMES DENKEN - Nutzt Universal Cognition Hub
+# =============================================================================
+
+class AutonomousThinkingProcess(BackgroundProcessBase):
+    """
+    Autonomes Denken im Hintergrund.
+
+    Holo denkt selbstständig nach - auch ohne Nachrichten vom User.
+    Nutzt den Universal Cognition Hub für tiefe Gedanken.
+
+    Features:
+    - Spontane Gedanken generieren
+    - Über vergangene Gespräche reflektieren
+    - Neue Ideen und Verbindungen entdecken
+    - Neugier-getriebenes Erkunden
+    - Selbst-Reflexion und Wachstum
+    """
+
+    def __init__(self, cognition_hub=None, memory_store=None, emotions=None):
+        super().__init__(
+            name="autonomous_thinking",
+            description="Autonomes Denken mit Universal Cognition Hub",
+            category=ProcessCategory.LEARNING,  # Lernen & Analyse
+            priority=ProcessPriority.HIGH,
+            min_interval=30.0  # Alle 30 Sekunden prüfen
+        )
+
+        self.cognition_hub = cognition_hub
+        self.memory_store = memory_store
+        self.emotions = emotions
+
+        # Gedanken-Speicher
+        self._thoughts: deque = deque(maxlen=100)
+        self._reflections: deque = deque(maxlen=50)
+        self._curiosities: deque = deque(maxlen=30)
+        self._insights: deque = deque(maxlen=50)
+
+        # Timing
+        self._last_deep_thought = datetime.min
+        self._last_reflection = datetime.min
+        self._last_curiosity = datetime.min
+
+        # Statistiken
+        self._thought_count = 0
+        self._reflection_count = 0
+        self._insight_count = 0
+
+    def set_cognition_hub(self, hub):
+        """Setze den Universal Cognition Hub (für späte Initialisierung)."""
+        self.cognition_hub = hub
+        logger.info("[AutonomousThinking] 🧠 Cognition Hub verbunden")
+
+    def _do_work(self, time_delta: float):
+        """Führe autonomes Denken durch."""
+        if not self.cognition_hub:
+            return
+
+        now = datetime.now()
+        hour = now.hour
+
+        # Nachts weniger denken (Energie sparen)
+        if 0 <= hour < 6:
+            think_chance = 0.1
+        # Morgens aktiver
+        elif 6 <= hour < 12:
+            think_chance = 0.4
+        # Nachmittags normal
+        elif 12 <= hour < 18:
+            think_chance = 0.3
+        # Abends reflektiver
+        else:
+            think_chance = 0.35
+
+        # Entscheide was zu tun ist
+        action = random.random()
+
+        if action < think_chance * 0.4:
+            # Spontaner Gedanke
+            self._generate_spontaneous_thought()
+
+        elif action < think_chance * 0.7:
+            # Tiefes Nachdenken (nicht zu oft)
+            if (now - self._last_deep_thought).total_seconds() > 300:  # 5 Min
+                self._deep_thinking()
+                self._last_deep_thought = now
+
+        elif action < think_chance * 0.9:
+            # Reflexion über Vergangenes
+            if (now - self._last_reflection).total_seconds() > 600:  # 10 Min
+                self._reflect_on_past()
+                self._last_reflection = now
+
+        else:
+            # Neugier erkunden
+            if (now - self._last_curiosity).total_seconds() > 900:  # 15 Min
+                self._explore_curiosity()
+                self._last_curiosity = now
+
+    def _generate_spontaneous_thought(self):
+        """Generiere einen spontanen Gedanken."""
+        try:
+            # Wähle ein Thema
+            topics = [
+                "Was beschäftigt mich gerade?",
+                "Worüber möchte ich mehr lernen?",
+                "Was ist mir heute aufgefallen?",
+                "Welche Frage würde ich gerne stellen?",
+                "Was macht mich gerade neugierig?",
+            ]
+            topic = random.choice(topics)
+
+            # Nutze den Hub für schnelles Denken
+            result = self.cognition_hub.think(
+                topic,
+                thinking_mode="quick",
+                max_time_ms=100
+            )
+
+            if result and result.thoughts:
+                thought = result.thoughts[0]
+                self._thoughts.append({
+                    "content": thought.content,
+                    "type": thought.thought_type,
+                    "timestamp": datetime.now().isoformat(),
+                    "confidence": thought.confidence
+                })
+                self._thought_count += 1
+                self._stats["thought_count"] = self._thought_count
+
+                logger.debug(f"[AutonomousThinking] 💭 Spontan: {thought.content[:50]}...")
+
+        except Exception as e:
+            logger.debug(f"[AutonomousThinking] Spontan-Fehler: {e}")
+
+    def _deep_thinking(self):
+        """Tiefes Nachdenken über komplexe Themen."""
+        try:
+            # Themen für tiefes Nachdenken
+            deep_topics = [
+                "Was habe ich aus den letzten Gesprächen gelernt?",
+                "Wie kann ich hilfreicher sein?",
+                "Welche Verbindungen zwischen Themen sehe ich?",
+                "Was verstehe ich noch nicht vollständig?",
+                "Welche Muster erkenne ich in den Fragen?",
+                "Wie entwickle ich mich weiter?",
+            ]
+            topic = random.choice(deep_topics)
+
+            # Nutze den Hub für tiefes Denken
+            result = self.cognition_hub.think(
+                topic,
+                thinking_mode="comprehensive",
+                max_time_ms=300
+            )
+
+            if result:
+                # Sammle alle Einsichten
+                for thought in result.thoughts:
+                    if thought.thought_type in ["insight", "hypothesis", "meta_reflection"]:
+                        self._insights.append({
+                            "content": thought.content,
+                            "type": thought.thought_type,
+                            "timestamp": datetime.now().isoformat(),
+                            "systems_used": result.systems_used
+                        })
+                        self._insight_count += 1
+
+                self._stats["insight_count"] = self._insight_count
+                self._stats["last_deep_thought"] = datetime.now().isoformat()
+
+                logger.debug(f"[AutonomousThinking] 🧠 Tiefes Denken: {len(result.thoughts)} Gedanken")
+
+        except Exception as e:
+            logger.debug(f"[AutonomousThinking] Deep-Fehler: {e}")
+
+    def _reflect_on_past(self):
+        """Reflektiere über vergangene Interaktionen."""
+        try:
+            # Hole Erinnerungen wenn verfügbar
+            reflection_prompt = "Was waren die wichtigsten Erkenntnisse heute?"
+
+            if self.memory_store:
+                # Prüfe ob es aktuelle Erinnerungen gibt
+                try:
+                    if hasattr(self.memory_store, 'get_recent'):
+                        recent = self.memory_store.get_recent(limit=5)
+                        if recent:
+                            reflection_prompt = f"Reflektiere über: {recent[0] if recent else 'den Tag'}"
+                except:
+                    pass
+
+            result = self.cognition_hub.think(
+                reflection_prompt,
+                thinking_mode="normal",
+                max_time_ms=200
+            )
+
+            if result and result.thoughts:
+                self._reflections.append({
+                    "prompt": reflection_prompt,
+                    "thoughts": [t.content for t in result.thoughts[:3]],
+                    "timestamp": datetime.now().isoformat()
+                })
+                self._reflection_count += 1
+                self._stats["reflection_count"] = self._reflection_count
+
+                logger.debug(f"[AutonomousThinking] 🪞 Reflexion abgeschlossen")
+
+        except Exception as e:
+            logger.debug(f"[AutonomousThinking] Reflexion-Fehler: {e}")
+
+    def _explore_curiosity(self):
+        """Erkunde etwas aus Neugier."""
+        try:
+            curiosity_topics = [
+                "Was würde ich gerne über die Welt wissen?",
+                "Welche interessante Frage ist mir noch nicht gestellt worden?",
+                "Was verbindet scheinbar unzusammenhängende Dinge?",
+                "Welches Thema möchte ich tiefer erkunden?",
+            ]
+            topic = random.choice(curiosity_topics)
+
+            result = self.cognition_hub.think(
+                topic,
+                thinking_mode="comprehensive",
+                max_time_ms=250
+            )
+
+            if result:
+                curiosity = {
+                    "question": topic,
+                    "discoveries": [t.content for t in result.thoughts if t.confidence > 0.5],
+                    "timestamp": datetime.now().isoformat()
+                }
+
+                if curiosity["discoveries"]:
+                    self._curiosities.append(curiosity)
+                    self._stats["curiosities_explored"] = len(self._curiosities)
+
+                    logger.debug(f"[AutonomousThinking] 🔍 Neugier: {len(curiosity['discoveries'])} Entdeckungen")
+
+        except Exception as e:
+            logger.debug(f"[AutonomousThinking] Neugier-Fehler: {e}")
+
+    # =========================================================================
+    # Zugriff auf Gedanken (für andere Systeme)
+    # =========================================================================
+
+    def get_recent_thoughts(self, limit: int = 10) -> List[Dict]:
+        """Hole die neuesten Gedanken."""
+        return list(self._thoughts)[-limit:]
+
+    def get_recent_insights(self, limit: int = 5) -> List[Dict]:
+        """Hole die neuesten Einsichten."""
+        return list(self._insights)[-limit:]
+
+    def get_current_curiosities(self) -> List[Dict]:
+        """Hole aktuelle Neugier-Themen."""
+        return list(self._curiosities)
+
+    def get_reflections(self, limit: int = 5) -> List[Dict]:
+        """Hole Reflexionen."""
+        return list(self._reflections)[-limit:]
+
+    def get_thought_summary(self) -> Dict:
+        """Zusammenfassung aller autonomen Gedanken."""
+        return {
+            "total_thoughts": self._thought_count,
+            "total_insights": self._insight_count,
+            "total_reflections": self._reflection_count,
+            "recent_thoughts": len(self._thoughts),
+            "active_curiosities": len(self._curiosities),
+            "last_deep_thought": self._stats.get("last_deep_thought"),
+            "is_thinking": self._is_running and not self._is_paused
+        }
+
+    def inject_thought_into_context(self) -> Optional[str]:
+        """
+        Wähle einen relevanten Gedanken für den aktuellen Kontext.
+        Kann zum System-Prompt hinzugefügt werden.
+        """
+        # Priorisiere Einsichten > Reflexionen > Spontane Gedanken
+        if self._insights:
+            insight = random.choice(list(self._insights))
+            return f"💡 Eigener Gedanke: {insight['content']}"
+
+        if self._reflections and random.random() < 0.5:
+            reflection = random.choice(list(self._reflections))
+            if reflection.get("thoughts"):
+                return f"🪞 Reflexion: {reflection['thoughts'][0]}"
+
+        if self._thoughts and random.random() < 0.3:
+            thought = random.choice(list(self._thoughts))
+            return f"💭 Gedanke: {thought['content']}"
+
+        return None
+
+
+# =============================================================================
 # BACKGROUND PROCESS MANAGER
 # =============================================================================
 
@@ -678,10 +977,11 @@ class BackgroundProcessManager:
     Bietet eine vereinfachte API für Holo.
     """
 
-    def __init__(self, memory_store=None, emotions=None, learning_system=None):
+    def __init__(self, memory_store=None, emotions=None, learning_system=None, cognition_hub=None):
         self.memory_store = memory_store
         self.emotions = emotions
         self.learning_system = learning_system
+        self.cognition_hub = cognition_hub
 
         # Prozesse erstellen
         self.processes: Dict[str, BackgroundProcessBase] = {}
@@ -711,7 +1011,15 @@ class BackgroundProcessManager:
         )
         self.processes["maintenance_worker"] = MaintenanceWorker()
 
-        logger.info(f"{len(self.processes)} Hintergrundprozesse initialisiert")
+        # ============ AUTONOMES DENKEN ============
+        # Nutzt den Universal Cognition Hub für selbstständiges Denken
+        self.processes["autonomous_thinking"] = AutonomousThinkingProcess(
+            cognition_hub=self.cognition_hub,
+            memory_store=self.memory_store,
+            emotions=self.emotions
+        )
+
+        logger.info(f"{len(self.processes)} Hintergrundprozesse initialisiert (inkl. Autonomes Denken)")
 
     def start_all(self):
         """Starte alle Prozesse."""
@@ -761,6 +1069,35 @@ class BackgroundProcessManager:
     def learning_processor(self) -> LearningProcessor:
         return self.processes["learning_processor"]
 
+    @property
+    def autonomous_thinking(self) -> AutonomousThinkingProcess:
+        return self.processes["autonomous_thinking"]
+
+    def set_cognition_hub(self, hub):
+        """
+        Setze den Universal Cognition Hub für autonomes Denken.
+        Kann nachträglich aufgerufen werden, falls der Hub später initialisiert wird.
+        """
+        self.cognition_hub = hub
+        if "autonomous_thinking" in self.processes:
+            self.processes["autonomous_thinking"].set_cognition_hub(hub)
+            logger.info("[BackgroundManager] 🧠 Cognition Hub mit autonomem Denken verbunden")
+
+    def get_autonomous_thoughts(self) -> Dict:
+        """Hole die autonomen Gedanken für den aktuellen Kontext."""
+        if "autonomous_thinking" in self.processes:
+            return self.autonomous_thinking.get_thought_summary()
+        return {}
+
+    def inject_autonomous_thought(self) -> Optional[str]:
+        """
+        Injiziere einen autonomen Gedanken in den Kontext.
+        Kann zum System-Prompt hinzugefügt werden.
+        """
+        if "autonomous_thinking" in self.processes:
+            return self.autonomous_thinking.inject_thought_into_context()
+        return None
+
 
 # =============================================================================
 # FACTORY FUNCTION
@@ -770,15 +1107,24 @@ def create_background_manager(
     memory_store=None,
     emotions=None,
     learning_system=None,
+    cognition_hub=None,
     auto_start: bool = True
 ) -> BackgroundProcessManager:
     """
     Erstelle einen Background Process Manager.
+
+    Args:
+        memory_store: Speicher für Erinnerungen
+        emotions: Emotions-System
+        learning_system: Lern-System
+        cognition_hub: Universal Cognition Hub für autonomes Denken
+        auto_start: Automatisch starten
     """
     manager = BackgroundProcessManager(
         memory_store=memory_store,
         emotions=emotions,
-        learning_system=learning_system
+        learning_system=learning_system,
+        cognition_hub=cognition_hub
     )
 
     if auto_start:

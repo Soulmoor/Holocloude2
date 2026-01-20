@@ -724,6 +724,24 @@ except ImportError as e:
     logger.warning(f"[Brain] UniversalCognitionHub nicht verfügbar: {e}")
 
 # =============================================================================
+# === BACKGROUND MANAGER - Autonomes Denken & Hintergrundprozesse ===
+# =============================================================================
+try:
+    from holo_brain_background import (
+        BackgroundProcessManager,
+        create_background_manager,
+        AutonomousThinkingProcess,
+    )
+    BACKGROUND_MANAGER_AVAILABLE = True
+    logger.info("[Brain] ✓ BackgroundManager (Autonomes Denken) geladen")
+except ImportError as e:
+    BACKGROUND_MANAGER_AVAILABLE = False
+    BackgroundProcessManager = None
+    create_background_manager = None
+    AutonomousThinkingProcess = None
+    logger.warning(f"[Brain] BackgroundManager nicht verfügbar: {e}")
+
+# =============================================================================
 # === HOLO DRIVE SYSTEM - Antriebe & Bedürfnisse ===
 # =============================================================================
 try:
@@ -15736,6 +15754,27 @@ class HoloPersona:
             logger.debug("🔗 Universal Cognition Hub nicht verfügbar")
 
         # ================================================================
+        # 🧠 BACKGROUND MANAGER - Autonomes Denken im Hintergrund
+        # Holo denkt selbstständig, auch ohne Nachrichten
+        # ================================================================
+        self.background_manager = None
+        if BACKGROUND_MANAGER_AVAILABLE:
+            try:
+                self.background_manager = create_background_manager(
+                    memory_store=getattr(self, 'memory_store', None),
+                    emotions=getattr(self, 'emotions', None),
+                    learning_system=getattr(self, 'learning_system', None),
+                    cognition_hub=self.universal_cognition,
+                    auto_start=True  # Starte automatisch
+                )
+                logger.info("🧠 Background Manager aktiviert (Autonomes Denken läuft)")
+            except Exception as e:
+                logger.warning(f"⚠️ Background Manager Fehler: {e}")
+                self.background_manager = None
+        else:
+            logger.debug("🧠 Background Manager nicht verfügbar")
+
+        # ================================================================
         # 🌐 CONTEXT MIND - Universelles Kontext & Memory System
         # (KONSOLIDIERT in holo_context_mind.py)
         # ================================================================
@@ -25530,6 +25569,17 @@ NAS: {'Online' if nas.get('online') else 'Offline'}
                 expr = intuition.get("expression", intuition.get("type", ""))
                 if expr and "neutral" not in expr.lower():
                     persona += f"\n🧠 Spontanes Bauchgefühl: {expr}\n"
+
+        # === 💭 AUTONOME GEDANKEN (selbstständiges Denken im Hintergrund) ===
+        # Holo hat auch eigene Gedanken, die unabhängig vom User entstehen
+        if hasattr(self, 'background_manager') and self.background_manager:
+            try:
+                autonomous_thought = self.background_manager.inject_autonomous_thought()
+                if autonomous_thought:
+                    persona += f"\n{autonomous_thought}\n"
+                    persona += "(Diesen Gedanken hatte ich gerade von selbst - teile ihn wenn passend!)\n"
+            except Exception as e:
+                logger.debug(f"Autonomous thought injection error: {e}")
 
         # === ABSCHLUSS ===
         persona += """
