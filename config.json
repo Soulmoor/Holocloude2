@@ -150,6 +150,53 @@
         "sd_storage_gb": 16
     },
 
+    "paths": {
+        "_comment": "Zentrale Pfadkonfiguration - relative Pfade sind relativ zum Projektverzeichnis",
+        "data_dir": "data",
+        "logs_dir": "logs",
+        "databases": {
+            "main": "data/holo_brain_v12.db",
+            "memory": "data/holo_memory.db",
+            "emotions": "data/holo_emotions.db",
+            "identity": "data/holo_identity.db",
+            "language": "data/holo_language.db",
+            "knowledge": "data/holo_knowledge.db",
+            "media": "data/holo_media.db",
+            "news": "data/holo_news.db",
+            "conversations": "data/holo_conversations.db",
+            "activity": "data/holo_activity.db",
+            "productivity": "data/holo_productivity.db",
+            "environment": "data/holo_environment.db",
+            "network": "data/holo_network.db",
+            "presence": "data/holo_presence.db",
+            "home": "data/holo_home.db",
+            "calendar": "data/holo_calendar.db",
+            "predictions": "data/holo_predictions.db",
+            "state": "data/holo_state.db",
+            "skills": "data/holo_skills.db",
+            "music": "data/holo_music.db",
+            "media_index": "data/media_index.db",
+            "device_registry": "data/device_registry.db"
+        },
+        "subdirs": {
+            "journal": "data/journal",
+            "connections": "data/connections",
+            "knowledge": "data/knowledge",
+            "media": "data/media",
+            "histories": "data/histories",
+            "local_understanding": "data/local_understanding",
+            "music": "data/holo_music",
+            "energy_management": "data/energy_management",
+            "cognitive_enhancement": "data/cognitive_enhancement",
+            "offloaded": "data/offloaded",
+            "cache": "data/cache"
+        },
+        "files": {
+            "error_log": "data/error_log.json",
+            "disk_index": "data/disk_index.json"
+        }
+    },
+
     "logging": {
         "level": "INFO",
         "file": "logs/holocloude.log",
