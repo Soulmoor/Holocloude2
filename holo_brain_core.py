@@ -277,23 +277,53 @@ class TypingSimulatorBase:
 # SEASONAL EVENTS - Saisonale Events für Holo
 # =============================================================================
 
+# Import des Real World Sync Moduls (optional)
+try:
+    from holo_real_world_sync import get_real_world_sync, init_from_config_file, RealWorldState
+    _real_world_sync_available = True
+except ImportError:
+    _real_world_sync_available = False
+    logger.warning("holo_real_world_sync nicht verfügbar, verwende einfache Zeit-Berechnung")
+
+
 class SeasonalEventsBase:
-    """Basis-Klasse für saisonale Events"""
+    """
+    Basis-Klasse für saisonale Events.
+
+    Nutzt jetzt das RealWorldSync-Modul für:
+    - Echtes Wetter (von API oder Home Assistant)
+    - Präzise Tag/Nacht-Zyklen basierend auf Sonnenauf-/untergang
+    - Mondphasen
+    - Standort-basierte Berechnungen
+    """
 
     GERMAN_HOLIDAYS = {
-        (1, 1): ("Neujahr", "Frohes neues Jahr! 🎆"),
-        (2, 14): ("Valentinstag", "Alles Liebe zum Valentinstag! 💕"),
-        (3, 8): ("Frauentag", "Alles Gute zum Internationalen Frauentag! 🌸"),
-        (4, 1): ("April April", "April April! 🃏"),
-        (5, 1): ("Tag der Arbeit", "Schönen Tag der Arbeit! ⚒️"),
-        (10, 3): ("Tag der Deutschen Einheit", "Schönen Feiertag! 🇩🇪"),
-        (10, 31): ("Halloween", "Gruseliger Halloween-Abend! 🎃"),
-        (12, 6): ("Nikolaus", "Der Nikolaus war da! 🎅"),
-        (12, 24): ("Heiligabend", "Frohe Weihnachten! 🎄"),
-        (12, 25): ("1. Weihnachtstag", "Frohe Weihnachten! ⭐"),
-        (12, 26): ("2. Weihnachtstag", "Entspannte Weihnachtstage! 🎁"),
-        (12, 31): ("Silvester", "Guten Rutsch ins neue Jahr! 🎉"),
+        (1, 1): ("Neujahr", "Frohes neues Jahr!"),
+        (2, 14): ("Valentinstag", "Alles Liebe zum Valentinstag!"),
+        (3, 8): ("Frauentag", "Alles Gute zum Internationalen Frauentag!"),
+        (4, 1): ("April April", "April April!"),
+        (5, 1): ("Tag der Arbeit", "Schoenen Tag der Arbeit!"),
+        (10, 3): ("Tag der Deutschen Einheit", "Schoenen Feiertag!"),
+        (10, 31): ("Halloween", "Gruseliger Halloween-Abend!"),
+        (12, 6): ("Nikolaus", "Der Nikolaus war da!"),
+        (12, 24): ("Heiligabend", "Frohe Weihnachten!"),
+        (12, 25): ("1. Weihnachtstag", "Frohe Weihnachten!"),
+        (12, 26): ("2. Weihnachtstag", "Entspannte Weihnachtstage!"),
+        (12, 31): ("Silvester", "Guten Rutsch ins neue Jahr!"),
     }
+
+    # Singleton-Instanz des RealWorldSync
+    _real_world_sync = None
+
+    @classmethod
+    def _get_real_world_sync(cls):
+        """Holt oder initialisiert den RealWorldSync Singleton."""
+        if cls._real_world_sync is None and _real_world_sync_available:
+            try:
+                cls._real_world_sync = init_from_config_file()
+            except Exception as e:
+                logger.warning(f"RealWorldSync konnte nicht initialisiert werden: {e}")
+        return cls._real_world_sync
 
     @classmethod
     def get_today_event(cls) -> Optional[Tuple[str, str]]:
@@ -304,7 +334,12 @@ class SeasonalEventsBase:
 
     @classmethod
     def get_season(cls) -> str:
-        """Aktuelle Jahreszeit."""
+        """Aktuelle Jahreszeit (nutzt RealWorldSync wenn verfügbar)."""
+        sync = cls._get_real_world_sync()
+        if sync:
+            return sync.get_season_simple()
+
+        # Fallback: einfache Berechnung
         month = datetime.now().month
         if month in [3, 4, 5]:
             return "Frühling"
@@ -317,7 +352,12 @@ class SeasonalEventsBase:
 
     @classmethod
     def get_time_of_day(cls) -> str:
-        """Aktuelle Tageszeit."""
+        """Aktuelle Tageszeit (nutzt RealWorldSync wenn verfügbar)."""
+        sync = cls._get_real_world_sync()
+        if sync:
+            return sync.get_time_of_day_simple()
+
+        # Fallback: einfache Berechnung
         hour = datetime.now().hour
         if 5 <= hour < 12:
             return "Morgen"
@@ -329,6 +369,76 @@ class SeasonalEventsBase:
             return "Abend"
         else:
             return "Nacht"
+
+    @classmethod
+    def is_daytime(cls) -> bool:
+        """Prüft ob es Tag ist (basierend auf Sonnenstand)."""
+        sync = cls._get_real_world_sync()
+        if sync and sync.current_state:
+            return sync.current_state.is_daytime
+
+        # Fallback
+        hour = datetime.now().hour
+        return 6 <= hour < 20
+
+    @classmethod
+    def get_light_level(cls) -> float:
+        """Gibt den aktuellen Lichtlevel zurück (0.0-1.0)."""
+        sync = cls._get_real_world_sync()
+        if sync:
+            return sync.get_light_level()
+
+        # Fallback
+        hour = datetime.now().hour
+        if 10 <= hour <= 16:
+            return 1.0
+        elif 6 <= hour < 10:
+            return 0.5 + (hour - 6) / 8
+        elif 16 < hour <= 20:
+            return 1.0 - (hour - 16) / 8
+        else:
+            return 0.1
+
+    @classmethod
+    def get_mood_modifiers(cls) -> Dict[str, float]:
+        """Gibt Stimmungsmodifikatoren basierend auf Umwelt zurück."""
+        sync = cls._get_real_world_sync()
+        if sync:
+            return sync.get_mood_modifiers()
+        return {}
+
+    @classmethod
+    def get_world_state_summary(cls) -> Dict[str, Any]:
+        """Gibt eine Zusammenfassung des aktuellen Weltzustands zurück."""
+        sync = cls._get_real_world_sync()
+
+        if sync and sync.current_state:
+            state = sync.current_state
+            return {
+                "season": state.season.german,
+                "time_of_day": state.day_phase.german,
+                "is_daytime": state.is_daytime,
+                "is_weekend": state.is_weekend,
+                "is_holiday": state.is_holiday,
+                "holiday_name": state.holiday_name,
+                "weather": {
+                    "condition": state.weather.condition.german if state.weather else "unbekannt",
+                    "temperature": state.weather.temperature_celsius if state.weather else None,
+                    "description": state.weather.temperature_description if state.weather else None,
+                } if state.weather else None,
+                "moon_phase": state.moon_phase.german,
+                "light_level": sync.get_light_level(),
+                "atmosphere": state.get_atmosphere_description(),
+            }
+
+        # Fallback: minimale Info
+        return {
+            "season": cls.get_season(),
+            "time_of_day": cls.get_time_of_day(),
+            "is_daytime": cls.is_daytime(),
+            "is_weekend": datetime.now().weekday() >= 5,
+            "light_level": cls.get_light_level(),
+        }
 
 
 # =============================================================================

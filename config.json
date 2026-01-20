@@ -1,6 +1,24 @@
 {
     "_comment": "Zentrale Konfiguration fuer Holocloude - NICHT in Git committen wenn sensible Daten!",
-    "_version": "1.1.0",
+    "_version": "1.2.0",
+
+    "location": {
+        "_comment": "Standort fuer Wetter, Sonnenauf-/untergang, etc. - Standardmaessig Berlin",
+        "latitude": 52.5200,
+        "longitude": 13.4050,
+        "timezone": "Europe/Berlin",
+        "city": "Berlin",
+        "country": "DE",
+        "altitude_m": 34.0
+    },
+
+    "weather": {
+        "_comment": "Wetter-Konfiguration - API Key in .env speichern!",
+        "openweathermap_api_key": "",
+        "update_interval_minutes": 15,
+        "use_home_assistant": true,
+        "fallback_to_simulation": true
+    },
 
     "network": {
         "ollama": {
