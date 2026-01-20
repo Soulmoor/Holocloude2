@@ -5214,6 +5214,8 @@ class PiCommunicator:
             # UNIVERSAL COGNITION HUB - Nutze ALLE kognitiven Systeme
             # =====================================================================
             if use_hub:
+                logger.debug("[UNIVERSAL] 🔗 Hub aktiv - nutze ALLE kognitiven Systeme")
+
                 # Bestimme Denk-Modus basierend auf Komplexität
                 if not thinking_needed:
                     thinking_mode = "quick"
@@ -5226,6 +5228,8 @@ class PiCommunicator:
                     else:
                         thinking_mode = "normal"
 
+                logger.debug(f"[UNIVERSAL] 🧠 Denkmodus: {thinking_mode}")
+
                 # Nutze den Universal Cognition Hub für ALLE Systeme
                 hub_result = self.universal_cognition.think(
                     user_input,
@@ -5235,6 +5239,7 @@ class PiCommunicator:
 
                 result["thinking_type"] = thinking_mode
                 result["systems_used"] = hub_result.systems_used
+                logger.debug(f"[UNIVERSAL] ✅ Systeme genutzt: {hub_result.systems_used}")
 
                 # Konvertiere Hub-Ergebnisse
                 for thought in hub_result.thoughts:
@@ -21706,9 +21711,11 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             memories = self._find_memories(user_input)
 
         # ========== 🧠 UNIVERSAL THINKING - Analytisches Denken für ALLES ==========
-        # Der Problem Solver analysiert JEDE Anfrage und liefert tiefere Einsichten
+        # Der Universal Cognition Hub nutzt ALLE kognitiven Systeme für tiefere Einsichten
         universal_thinking_result = None
-        if hasattr(self, 'problem_solver') and self.problem_solver:
+        has_universal_cognition = hasattr(self, 'universal_cognition') and self.universal_cognition
+        has_problem_solver = hasattr(self, 'problem_solver') and self.problem_solver
+        if has_universal_cognition or has_problem_solver:
             try:
                 universal_thinking_result = self._apply_universal_thinking(user_input, context)
                 if universal_thinking_result:
