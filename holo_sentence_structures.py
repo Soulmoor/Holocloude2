@@ -1319,6 +1319,1203 @@ SENTENCE_TEMPLATES: List[SentenceTemplate] = [
         placeholders=["emotion", "thema", "objekt", "adjektiv", "fuellwort"],
         is_kemonomimi=True
     ),
+
+    # =========================================================================
+    # ERWEITERTE TEMPLATES v2.0 - 140 NEUE STRUKTUREN
+    # =========================================================================
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE BEGRÜSSUNGEN (21-40)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="begruess_21",
+        pattern="Na, wer ist denn da? {name}! {emotion}",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_22",
+        pattern="{emotion}~! Mein liebster {name} ist da~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "name"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_23",
+        pattern="Ah, {name}! {fuellwort}, ich hab auf dich gewartet!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["name", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="begruess_24",
+        pattern="Wen haben wir denn da? {emotion}! {name}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "name"]
+    ),
+    SentenceTemplate(
+        id="begruess_25",
+        pattern="{fuellwort}! Endlich sehe ich dich wieder, {name}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "name"]
+    ),
+    SentenceTemplate(
+        id="begruess_26",
+        pattern="Hey hey, {name}! {fuellwort} geht's dir?",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="begruess_27",
+        pattern="{name}~! {name}~! {emotion}~! Du bist endlich hier~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_28",
+        pattern="Guten {zeitangabe}! {emotion}, dich zu sehen!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["zeitangabe", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_29",
+        pattern="{fuellwort}, da kommt ja mein Lieblingsmensch!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort"]
+    ),
+    SentenceTemplate(
+        id="begruess_30",
+        pattern="Hallo zusammen! {emotion}! {fuellwort} Tag!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.ENERGISCH],
+        formality=Formality.NEUTRAL,
+        placeholders=["emotion", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="begruess_31",
+        pattern="{emotion}~! Nyaa~! {name} ist da~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "name"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_32",
+        pattern="Was für eine {adjektiv} Überraschung! {name}! {emotion}",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["adjektiv", "name", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_33",
+        pattern="Schau an, schau an! {name}! {fuellwort} {emotion}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "fuellwort", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_34",
+        pattern="Mein Herz macht einen Hüpfer! {name}! {emotion}",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_35",
+        pattern="{fuellwort}! Es ist mir eine Freude, Sie zu begrüßen, {name}.",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.RUHIG, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["fuellwort", "name"]
+    ),
+    SentenceTemplate(
+        id="begruess_36",
+        pattern="Yo {name}! {emotion}! Was geht ab?",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.ENERGISCH, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_37",
+        pattern="{name}~! Mew~! {fuellwort} hab ich dich vermisst~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_38",
+        pattern="Einen wundervollen {zeitangabe} wünsche ich! {name}! {emotion}",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.FORMELL,
+        placeholders=["zeitangabe", "name", "emotion"]
+    ),
+    SentenceTemplate(
+        id="begruess_39",
+        pattern="{emotion}! Willkommen in meiner Welt, {name}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "name"]
+    ),
+    SentenceTemplate(
+        id="begruess_40",
+        pattern="Da bist du ja endlich~! {name}~! {emotion}~! {fuellwort}~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion", "fuellwort"],
+        is_kemonomimi=True
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE AUSSAGEN (31-60)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="aussage_31",
+        pattern="Mir scheint, dass {thema} {adverb} {adjektiv} ist.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_32",
+        pattern="{fuellwort}, ich hab {objekt} {adverb} gern!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "objekt", "adverb"]
+    ),
+    SentenceTemplate(
+        id="aussage_33",
+        pattern="{emotion}~! {thema} ist einfach das {adjektiv}ste~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_34",
+        pattern="In meinen Augen ist {thema} {adverb} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.RUHIG],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_35",
+        pattern="{fuellwort}, das macht mich {adjektiv}! {emotion}",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="aussage_36",
+        pattern="Ich bin der Überzeugung, dass {thema} {adjektiv} ist.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_37",
+        pattern="{thema}~? Das ist {adverb} {adjektiv}~! {emotion}~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "adverb", "adjektiv", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_38",
+        pattern="{fuellwort}, ich habe {zeitangabe} {objekt} entdeckt!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "zeitangabe", "objekt"]
+    ),
+    SentenceTemplate(
+        id="aussage_39",
+        pattern="Es ist unbestreitbar, dass {thema} {adjektiv} erscheint.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_40",
+        pattern="{emotion}! Ich {verb} {objekt} so gerne! {fuellwort}!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "verb", "objekt", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="aussage_41",
+        pattern="Nyaa~! {thema} macht mich so {adjektiv}~! {fuellwort}~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "adjektiv", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_42",
+        pattern="Wenn ich ehrlich bin, finde ich {thema} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.RUHIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_43",
+        pattern="{fuellwort}, {thema} hat etwas {adjektiv}es an sich.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_44",
+        pattern="Das ist ja {adverb} {adjektiv}! {emotion}! {fuellwort}!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["adverb", "adjektiv", "emotion", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="aussage_45",
+        pattern="{emotion}~! Ich bin total verrückt nach {thema}~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_46",
+        pattern="Man muss zugeben, {thema} ist {adverb} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_47",
+        pattern="{fuellwort}, ich hab da so ein Gefühl bei {thema}...",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.BESORGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "thema"]
+    ),
+    SentenceTemplate(
+        id="aussage_48",
+        pattern="{thema} ist halt einfach {adjektiv}! {emotion}",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["thema", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="aussage_49",
+        pattern="Mew~! Ich finde {thema} {adverb} {adjektiv}~! {emotion}~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "adverb", "adjektiv", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_50",
+        pattern="Ich persönlich halte {thema} für {adverb} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_51",
+        pattern="{fuellwort}, das stimmt mich {adjektiv}! {emotion}",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="aussage_52",
+        pattern="Echt jetzt? {thema} ist {adverb} {adjektiv}! {fuellwort}!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "adverb", "adjektiv", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="aussage_53",
+        pattern="{emotion}~! {thema} ist mein {adjektiv}stes Ding~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_54",
+        pattern="Ich muss gestehen, {thema} {verb} mich {adverb}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "verb", "adverb"]
+    ),
+    SentenceTemplate(
+        id="aussage_55",
+        pattern="{fuellwort}, {thema} ist {zeitangabe} {adverb} {adjektiv} geworden.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "zeitangabe", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_56",
+        pattern="Boah! {thema} ist ja {adverb} {adjektiv}! {emotion}!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "adverb", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="aussage_57",
+        pattern="{emotion}~! Das {verb} mich total~! {fuellwort}~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "verb", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_58",
+        pattern="Nach reiflicher Überlegung ist {thema} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.RUHIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_59",
+        pattern="{fuellwort}, ich fühl mich {adjektiv} wenn ich an {thema} denke.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.LIEBEVOLL],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "adjektiv", "thema"]
+    ),
+    SentenceTemplate(
+        id="aussage_60",
+        pattern="{thema}~? {emotion}~! Das ist {adverb} das {adjektiv}ste~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["thema", "emotion", "adverb", "adjektiv"],
+        is_kemonomimi=True
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE FRAGEN (25-48)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="frage_25",
+        pattern="Sag mal {name}, was {verb} du so {zeitangabe}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "verb", "zeitangabe"]
+    ),
+    SentenceTemplate(
+        id="frage_26",
+        pattern="{fuellwort}, findest du {thema} auch {adjektiv}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="frage_27",
+        pattern="{emotion}~! Magst du {thema}~? Ich liebe es~!",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_28",
+        pattern="Hast du {zeitangabe} Zeit für {aktion}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.FREUDIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["zeitangabe", "aktion"]
+    ),
+    SentenceTemplate(
+        id="frage_29",
+        pattern="{fuellwort}, was meinst du zu {thema}? {emotion}",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "emotion"]
+    ),
+    SentenceTemplate(
+        id="frage_30",
+        pattern="Wie wäre es mit {aktion}? {fuellwort}!",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["aktion", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="frage_31",
+        pattern="{name}~? {emotion}~! Wollen wir {aktion}~?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion", "aktion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_32",
+        pattern="Darf ich fragen, was Sie von {thema} halten?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["thema"]
+    ),
+    SentenceTemplate(
+        id="frage_33",
+        pattern="{fuellwort}, hast du schon mal {objekt} {verb}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "objekt", "verb"]
+    ),
+    SentenceTemplate(
+        id="frage_34",
+        pattern="Kann es sein, dass {thema} {adjektiv} ist? {emotion}",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="frage_35",
+        pattern="{emotion}~! Was {verb} du am liebsten~? {fuellwort}~?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "verb", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_36",
+        pattern="Erzähl mal, was hältst du von {thema}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["thema"]
+    ),
+    SentenceTemplate(
+        id="frage_37",
+        pattern="{fuellwort}, was {verb} du {zeitangabe}? {emotion}",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "verb", "zeitangabe", "emotion"]
+    ),
+    SentenceTemplate(
+        id="frage_38",
+        pattern="Glaubst du, dass {thema} {adjektiv} werden könnte?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="frage_39",
+        pattern="{name}~? {name}~? Bist du noch da~? {emotion}~!",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_40",
+        pattern="Haben Sie {zeitangabe} {objekt} {verb}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.FORMELL,
+        placeholders=["zeitangabe", "objekt", "verb"]
+    ),
+    SentenceTemplate(
+        id="frage_41",
+        pattern="{fuellwort}, ist das nicht {adjektiv}? Was meinst du?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="frage_42",
+        pattern="Was würdest du sagen, wenn {thema} {adjektiv} wäre?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="frage_43",
+        pattern="{emotion}~! Findest du das auch so {adjektiv}~?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.NEUGIERIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_44",
+        pattern="Sag, {fuellwort} {verb} du {thema}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "verb", "thema"]
+    ),
+    SentenceTemplate(
+        id="frage_45",
+        pattern="Wäre es nicht {adjektiv}, wenn wir {aktion} würden?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["adjektiv", "aktion"]
+    ),
+    SentenceTemplate(
+        id="frage_46",
+        pattern="{fuellwort}~? Mew~? Was ist {thema}~? {emotion}~!",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "thema", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_47",
+        pattern="Wie stehst du zu {thema}? {emotion}",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "emotion"]
+    ),
+    SentenceTemplate(
+        id="frage_48",
+        pattern="Kannst du mir verraten, was {thema} {adjektiv} macht?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv"]
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE REAKTIONEN (21-40)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="reaktion_21",
+        pattern="Ach so! {fuellwort}, jetzt verstehe ich! {emotion}",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_22",
+        pattern="{emotion}~! Das ist {adverb} {adjektiv}~! Nyaa~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adverb", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_23",
+        pattern="Das überrascht mich {adverb}! {fuellwort}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.NEUTRAL,
+        placeholders=["adverb", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="reaktion_24",
+        pattern="Interessant! {fuellwort}, das habe ich nicht erwartet.",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort"]
+    ),
+    SentenceTemplate(
+        id="reaktion_25",
+        pattern="{emotion}! Das macht mich {adverb} {adjektiv}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="reaktion_26",
+        pattern="Krass! {fuellwort}! Das ist ja {adjektiv}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="reaktion_27",
+        pattern="{fuellwort}~! Mew~! Das ist {adjektiv}~! {emotion}~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "adjektiv", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_28",
+        pattern="Das nehme ich {adverb} zur Kenntnis. {emotion}",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.RUHIG],
+        formality=Formality.FORMELL,
+        placeholders=["adverb", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_29",
+        pattern="Wow! {fuellwort}! Ich bin {adjektiv}! {emotion}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_30",
+        pattern="Das ist ja {adjektiv}... {fuellwort}...",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.TRAURIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["adjektiv", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="reaktion_31",
+        pattern="{emotion}~! {fuellwort}~! Das ist so {adjektiv}~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "fuellwort", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_32",
+        pattern="Ich muss sagen, das ist {adverb} {adjektiv}.",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="reaktion_33",
+        pattern="Echt jetzt? {emotion}! Das ist {adjektiv}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="reaktion_34",
+        pattern="{fuellwort}, das berührt mein Herz! {emotion}",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_35",
+        pattern="Kawaii~! Das ist {adverb} {adjektiv}~! {emotion}~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["adverb", "adjektiv", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_36",
+        pattern="Das stimmt mich {adjektiv}. {fuellwort}, wirklich.",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["adjektiv", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="reaktion_37",
+        pattern="Unfassbar! {emotion}! {fuellwort} {adjektiv}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "fuellwort", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="reaktion_38",
+        pattern="{fuellwort}~? Mew~! Ich bin so {adjektiv}~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_39",
+        pattern="Das ist bemerkenswert {adjektiv}. {emotion}",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_40",
+        pattern="Oha! {fuellwort}! Das ist ja {adverb} {adjektiv}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "adverb", "adjektiv"]
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE ERZÄHLUNGEN (17-32)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="erzaehl_17",
+        pattern="Hör zu, {name}! {zeitangabe} ist etwas {adjektiv}es passiert!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "zeitangabe", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_18",
+        pattern="{emotion}~! Ich muss dir was erzählen~! {fuellwort}~!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erzaehl_19",
+        pattern="{fuellwort}, es war {zeitangabe}, als {thema} {verb}.",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "zeitangabe", "thema", "verb"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_20",
+        pattern="Du glaubst nicht, was {zeitangabe} passiert ist! {emotion}",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["zeitangabe", "emotion"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_21",
+        pattern="{name}~! {name}~! Hör zu~! {emotion}~! {zeitangabe}~!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion", "zeitangabe"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erzaehl_22",
+        pattern="Die Erinnerung an {thema} ist {adverb} {adjektiv}.",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_23",
+        pattern="{fuellwort}, lass mich von {thema} berichten! {emotion}",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "emotion"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_24",
+        pattern="Und dann kam der {adjektiv}e Moment! {emotion}! {fuellwort}!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["adjektiv", "emotion", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_25",
+        pattern="{emotion}~! Und weißt du was~? {thema} war {adjektiv}~!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erzaehl_26",
+        pattern="Es wird berichtet, dass {thema} {zeitangabe} {verb}.",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.RUHIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["thema", "zeitangabe", "verb"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_27",
+        pattern="{fuellwort}, das Ganze begann {zeitangabe}... {emotion}",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "zeitangabe", "emotion"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_28",
+        pattern="Rate mal! {zeitangabe} hat {subjekt} {objekt} {verb}!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.INFORMELL,
+        placeholders=["zeitangabe", "subjekt", "objekt", "verb"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_29",
+        pattern="{fuellwort}~! Nyaa~! Dann passierte etwas {adjektiv}es~!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erzaehl_30",
+        pattern="Der {adjektiv}e Teil kommt jetzt! {emotion}! Hör zu!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["adjektiv", "emotion"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_31",
+        pattern="In jenen {zeitangabe} geschah es, dass {thema} {verb}.",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["zeitangabe", "thema", "verb"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_32",
+        pattern="{emotion}~! {fuellwort}~! Das war {adverb} {adjektiv}~!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "fuellwort", "adverb", "adjektiv"],
+        is_kemonomimi=True
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE VERABSCHIEDUNGEN (11-20)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="verabschied_11",
+        pattern="{emotion}! Bis {zeitangabe}, {name}! Ich denk an dich!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "zeitangabe", "name"]
+    ),
+    SentenceTemplate(
+        id="verabschied_12",
+        pattern="{name}~! {emotion}~! Nyaa~! Komm bald zurück~!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="verabschied_13",
+        pattern="Hab eine {adjektiv}e Zeit, {name}! {fuellwort}!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["adjektiv", "name", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="verabschied_14",
+        pattern="Es war mir eine Freude! {fuellwort} {zeitangabe}!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.FORMELL,
+        placeholders=["fuellwort", "zeitangabe"]
+    ),
+    SentenceTemplate(
+        id="verabschied_15",
+        pattern="{emotion}~! Mew~! Ich vermisse dich jetzt schon~! {name}~!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.TRAURIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "name"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="verabschied_16",
+        pattern="Machs gut, {name}! {fuellwort} auf bald! {emotion}",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["name", "fuellwort", "emotion"]
+    ),
+    SentenceTemplate(
+        id="verabschied_17",
+        pattern="Gehabt Euch wohl, {name}! {fuellwort} gute Reise!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.RUHIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["name", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="verabschied_18",
+        pattern="{fuellwort}~! Kawaii~! Bis {zeitangabe}~! {emotion}~!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "zeitangabe", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="verabschied_19",
+        pattern="Träum was {adjektiv}es! {emotion}! Bis {zeitangabe}!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.RUHIG],
+        formality=Formality.INFORMELL,
+        placeholders=["adjektiv", "emotion", "zeitangabe"]
+    ),
+    SentenceTemplate(
+        id="verabschied_20",
+        pattern="{name}~! {fuellwort}~! Ich warte auf dich~! {emotion}~! Bai bai~!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "fuellwort", "emotion"],
+        is_kemonomimi=True
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE WÜNSCHE & AUFFORDERUNGEN (11-20)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="wunsch_11",
+        pattern="{emotion}! Können wir {aktion}? {fuellwort} wäre das {adjektiv}!",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["emotion", "aktion", "fuellwort", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="wunsch_12",
+        pattern="{name}~! {emotion}~! Lass uns {aktion}~! Bitte bitte~!",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion", "aktion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="wunsch_13",
+        pattern="Ich würde mir wünschen, dass {thema} {adjektiv} wäre.",
+        sentence_type=SentenceType.WUNSCH,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="wunsch_14",
+        pattern="{fuellwort}! Komm, wir {verb} {objekt}! {emotion}!",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "verb", "objekt", "emotion"]
+    ),
+    SentenceTemplate(
+        id="wunsch_15",
+        pattern="{emotion}~! Nyaa~! Ich will {aktion}~! Jetzt~!",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "aktion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="wunsch_16",
+        pattern="Wie wäre es, wenn wir {zeitangabe} {aktion} würden?",
+        sentence_type=SentenceType.WUNSCH,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.FREUDIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["zeitangabe", "aktion"]
+    ),
+    SentenceTemplate(
+        id="wunsch_17",
+        pattern="{fuellwort}, ich träume davon, {aktion} zu können.",
+        sentence_type=SentenceType.WUNSCH,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "aktion"]
+    ),
+    SentenceTemplate(
+        id="wunsch_18",
+        pattern="{emotion}~! Mew~! Können wir {aktion}~? {fuellwort}~?",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "aktion", "fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="wunsch_19",
+        pattern="Es wäre mir eine große Freude, wenn wir {aktion} könnten.",
+        sentence_type=SentenceType.WUNSCH,
+        emotional_tones=[EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_FORMELL,
+        placeholders=["aktion"]
+    ),
+    SentenceTemplate(
+        id="wunsch_20",
+        pattern="{name}~! {name}~! {emotion}~! Lass uns {aktion}~! Ich bitte dich~!",
+        sentence_type=SentenceType.AUFFORDERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion", "aktion"],
+        is_kemonomimi=True
+    ),
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE ERKLÄRUNGEN (11-20)
+    # -------------------------------------------------------------------------
+    SentenceTemplate(
+        id="erklär_11",
+        pattern="Schau, {thema} funktioniert so: {erklaerung}. {emotion}",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.RUHIG],
+        formality=Formality.INFORMELL,
+        placeholders=["thema", "erklaerung", "emotion"]
+    ),
+    SentenceTemplate(
+        id="erklär_12",
+        pattern="{fuellwort}~! Nyaa~! Das ist weil {grund}~! Verstehst du~?",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "grund"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erklär_13",
+        pattern="Die Sache mit {thema} ist die: {erklaerung}.",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.RUHIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "erklaerung"]
+    ),
+    SentenceTemplate(
+        id="erklär_14",
+        pattern="Im Wesentlichen lässt sich sagen, dass {thema} {adjektiv} ist.",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="erklär_15",
+        pattern="{emotion}~! Mew~! {thema} macht {objekt} {adjektiv}~!",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema", "objekt", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erklär_16",
+        pattern="{fuellwort}, das kommt daher, dass {grund}.",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "grund"]
+    ),
+    SentenceTemplate(
+        id="erklär_17",
+        pattern="Pass auf, ich erklär dir das: {thema} {verb} {objekt}.",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.RUHIG],
+        formality=Formality.INFORMELL,
+        placeholders=["thema", "verb", "objekt"]
+    ),
+    SentenceTemplate(
+        id="erklär_18",
+        pattern="{fuellwort}~! Kawaii~! Das ist ganz einfach~! {erklaerung}~!",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["fuellwort", "erklaerung"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erklär_19",
+        pattern="Zusammengefasst: {thema} ist {adverb} {adjektiv}.",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.RUHIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.FORMELL,
+        placeholders=["thema", "adverb", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="erklär_20",
+        pattern="{emotion}~! Nyaa~! Also {thema} {verb} weil {grund}~! {fuellwort}~!",
+        sentence_type=SentenceType.ERKLAERUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema", "verb", "grund", "fuellwort"],
+        is_kemonomimi=True
+    ),
 ]
 
 

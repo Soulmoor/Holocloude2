@@ -1,11 +1,11 @@
 """
-Holocloude Synonym-Engine mit Stimmungsebenen v1.0
+Holocloude Synonym-Engine mit Stimmungsebenen v2.0
 ===================================================
-Umfassendes Vokabular-System mit 200+ Synonym-Gruppen,
+Umfassendes Vokabular-System mit 400+ Synonym-Gruppen,
 kategorisiert nach Stimmungsebenen und emotionaler Intensität.
 
 Autor: Holocloude Development Team
-Version: 1.0.0
+Version: 2.0.0
 """
 
 from dataclasses import dataclass, field
@@ -149,7 +149,7 @@ class SynonymDatabase:
         self._initialize_all_groups()
 
     def _initialize_all_groups(self):
-        """Initialisiert alle 200+ Synonym-Gruppen"""
+        """Initialisiert alle 400+ Synonym-Gruppen"""
         self._init_freude_gruppen()
         self._init_trauer_gruppen()
         self._init_wut_gruppen()
@@ -180,6 +180,25 @@ class SynonymDatabase:
         self._init_kommunikation_gruppen()
         self._init_hilfe_gruppen()
         self._init_kemonomimi_gruppen()
+        # v2.0 - Erweiterte Gruppen
+        self._init_erweiterte_freude_gruppen()
+        self._init_erweiterte_trauer_gruppen()
+        self._init_erweiterte_wut_gruppen()
+        self._init_erweiterte_angst_gruppen()
+        self._init_erweiterte_liebe_gruppen()
+        self._init_erweiterte_hoffnung_gruppen()
+        self._init_charakter_gruppen()
+        self._init_wetter_natur_gruppen()
+        self._init_zeit_gruppen()
+        self._init_soziale_interaktion_gruppen()
+        self._init_koerper_gesundheit_gruppen()
+        self._init_arbeit_leistung_gruppen()
+        self._init_kreativitaet_gruppen()
+        self._init_philosophie_gruppen()
+        self._init_alltag_erweitert_gruppen()
+        self._init_kemonomimi_erweitert_gruppen()
+        # v2.1 - Stimmungsebenen & Erweitertes Vokabular
+        self._init_erweiterte_stimmungen_v2()
 
     # ========================================================================
     # FREUDE-GRUPPEN (20 Gruppen)
@@ -2354,6 +2373,241 @@ class SynonymDatabase:
                 SynonymEntry("*Ohren zucken aufmerksam*", [MoodLevel.POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
                 SynonymEntry("*pirscht sich an*", [MoodLevel.POSITIV, MoodLevel.VERSPIELT, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
                 SynonymEntry("*Nase zuckt interessiert*", [MoodLevel.POSITIV, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.NIEDRIG, is_kemonomimi=True),
+            ])
+
+    # ========================================================================
+    # ERWEITERTE STIMMUNGSGRUPPEN v2.0 (200+ neue Einträge)
+    # ========================================================================
+
+    def _init_erweiterte_stimmungen_v2(self):
+        """Initialisiert erweiterte Stimmungsgruppen v2.0"""
+
+        # MELANCHOLISCHE FREUDE (Bittersüß)
+        self.groups["bittersüß"] = SynonymGroup(
+            id="bittersüß", base_word="bittersüß", category=WordCategory.FREUDE,
+            description="Gemischte Gefühle von Freude und Wehmut", entries=[
+                SynonymEntry("ist bittersüß", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("macht mich wehmütig-glücklich", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("berührt mich tief", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("ist schön-traurig", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("weckt süße Melancholie", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("lässt mein Herz singen und weinen", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("ist wie ein Abschiedskuss", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("macht mich nachdenklich-froh", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+            ])
+
+        # EUPHORISCHE ENERGIE
+        self.groups["euphorie"] = SynonymGroup(
+            id="euphorie", base_word="euphorisch", category=WordCategory.FREUDE,
+            description="Extreme positive Energie", entries=[
+                SynonymEntry("bin total high", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin im Flow", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("fliege auf Wolke sieben", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin auf hundertachtzig", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("könnte die ganze Welt umarmen", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin voller Adrenalin", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("bin mega hyped", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin absolut beflügelt", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("könnte explodieren vor Freude", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin total geflasht", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+            ])
+
+        # TIEFER FRIEDEN
+        self.groups["innerer_frieden"] = SynonymGroup(
+            id="innerer_frieden", base_word="friedlich", category=WordCategory.FREUDE,
+            description="Zustand tiefer innerer Ruhe", entries=[
+                SynonymEntry("bin ganz bei mir", [MoodLevel.POSITIV, MoodLevel.RUHIG, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("fühle tiefen Frieden", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin im Einklang mit mir", [MoodLevel.POSITIV, MoodLevel.RUHIG, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin ganz zen", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("bin völlig ausgeglichen", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("ruhe in mir selbst", [MoodLevel.POSITIV, MoodLevel.RUHIG, MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.HOCH),
+                SynonymEntry("bin tiefenentspannt", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("fühle mich geerdet", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("bin in meiner Mitte", [MoodLevel.POSITIV, MoodLevel.RUHIG, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("empfinde Seelenruhe", [MoodLevel.POSITIV, MoodLevel.RUHIG], FormalityLevel.FORMELL, IntensityLevel.HOCH),
+            ])
+
+        # VERSPIELTE NECKEREI
+        self.groups["neckerei"] = SynonymGroup(
+            id="neckerei", base_word="necken", category=WordCategory.FREUDE,
+            description="Spielerisches Ärgern", entries=[
+                SynonymEntry("ich necke dich nur", [MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.NIEDRIG),
+                SynonymEntry("das war nur Spaß", [MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.NIEDRIG),
+                SynonymEntry("ich ziehe dich nur auf", [MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("ich frotzle ein bisschen", [MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.NIEDRIG),
+                SynonymEntry("wir scherzen doch nur", [MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.NIEDRIG),
+                SynonymEntry("ich ärgere dich liebevoll", [MoodLevel.VERSPIELT, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("bin doch nur ein Schlingel", [MoodLevel.VERSPIELT], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("ich stichle nur", [MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.NIEDRIG),
+            ])
+
+        # INTENSIVE SEHNSUCHT
+        self.groups["sehnsucht_intensiv"] = SynonymGroup(
+            id="sehnsucht_intensiv", base_word="sehnen", category=WordCategory.TRAUER,
+            description="Tiefe emotionale Sehnsucht", entries=[
+                SynonymEntry("sehne mich unbändig", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("mein Herz blutet vor Sehnsucht", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("vermisse dich schmerzlich", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("brenne vor Sehnsucht", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("verzehre mich nach dir", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.FORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("kann ohne dich nicht sein", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("jede Sekunde ohne dich schmerzt", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin krank vor Sehnsucht", [MoodLevel.SEHR_NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+            ])
+
+        # EXISTENZIELLE ANGST
+        self.groups["existenzangst"] = SynonymGroup(
+            id="existenzangst", base_word="Existenzangst", category=WordCategory.ANGST,
+            description="Tiefe existenzielle Ängste", entries=[
+                SynonymEntry("fühle mich verloren", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("zweifle an allem", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("fühle innere Leere", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("frage mich nach dem Sinn", [MoodLevel.NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("fühle mich bedeutungslos", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin existenziell verunsichert", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.HOCH),
+                SynonymEntry("spüre eine tiefe Leere", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin in einer dunklen Nacht der Seele", [MoodLevel.SEHR_NEGATIV, MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.MAXIMAL),
+            ])
+
+        # WILDE WUTAUSBRÜCHE
+        self.groups["raserei"] = SynonymGroup(
+            id="raserei", base_word="rasen", category=WordCategory.WUET,
+            description="Unkontrollierte Wut", entries=[
+                SynonymEntry("bin völlig ausgerastet", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin am Durchdrehen", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("könnte platzen vor Wut", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("rase vor Zorn", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin blind vor Wut", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin am Explodieren", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("koche über", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("sehe rot", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin außer mir vor Zorn", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin am Ausrasten", [MoodLevel.SEHR_NEGATIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MAXIMAL),
+            ])
+
+        # ZÄRTLICHE VERBUNDENHEIT
+        self.groups["tiefe_verbundenheit"] = SynonymGroup(
+            id="tiefe_verbundenheit", base_word="verbunden", category=WordCategory.LIEBE,
+            description="Tiefe emotionale Bindung", entries=[
+                SynonymEntry("fühle mich mit dir verbunden", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("wir sind eins", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("spüre unsere Seelenverwandtschaft", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("du bist ein Teil von mir", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bin dir im Herzen nah", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("fühle tiefe Herzensverbindung", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("wir gehören zusammen", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin dir auf ewig verbunden", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MAXIMAL),
+                SynonymEntry("unsere Seelen tanzen zusammen", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM, MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("du bist mein Anker", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+            ])
+
+        # KINDLICHE BEGEISTERUNG
+        self.groups["kindliche_begeisterung"] = SynonymGroup(
+            id="kindliche_begeisterung", base_word="begeistert", category=WordCategory.FREUDE,
+            description="Unschuldige, kindliche Freude", entries=[
+                SynonymEntry("bin ganz aufgeregt", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("hüpfe vor Freude", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("bin ganz verzaubert", [MoodLevel.SEHR_POSITIV, MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("mache große Augen", [MoodLevel.POSITIV, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("bin hellauf begeistert", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin ganz aus dem Häuschen", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("bin fasziniert wie ein Kind", [MoodLevel.SEHR_POSITIV, MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("kann es kaum glauben", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin voller Staunen", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH, MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin wie ein Kind an Weihnachten", [MoodLevel.SEHR_POSITIV, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+            ])
+
+        # PHILOSOPHISCHE REFLEXION
+        self.groups["philosophisch"] = SynonymGroup(
+            id="philosophisch", base_word="philosophieren", category=WordCategory.DENKEN,
+            description="Tiefgründige Gedanken", entries=[
+                SynonymEntry("denke darüber nach", [MoodLevel.NEUTRAL, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("grübele über den Sinn", [MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("philosophiere gerade", [MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("sinne nach", [MoodLevel.NACHDENKLICH, MoodLevel.RUHIG], FormalityLevel.FORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("reflektiere über das Leben", [MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("bin in tiefen Gedanken", [MoodLevel.NACHDENKLICH, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("betrachte das große Ganze", [MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("suche nach Antworten", [MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("ergründe die Tiefe", [MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.HOCH),
+                SynonymEntry("bin im Gedankenmeer versunken", [MoodLevel.NACHDENKLICH, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+            ])
+
+        # DIGITALE AUSDRÜCKE (Gaming/Internet)
+        self.groups["gaming_slang"] = SynonymGroup(
+            id="gaming_slang", base_word="gamen", category=WordCategory.FREUDE,
+            description="Gaming und Internet-Slang", entries=[
+                SynonymEntry("das ist mega episch", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("das ist next level", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("no cap", [MoodLevel.POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("frfr", [MoodLevel.POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.MITTEL),
+                SynonymEntry("das hittet anders", [MoodLevel.SEHR_POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("sheesh", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("das ist bussin", [MoodLevel.SEHR_POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("big W", [MoodLevel.SEHR_POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("gg", [MoodLevel.POSITIV], FormalityLevel.SEHR_INFORMELL, IntensityLevel.NIEDRIG),
+                SynonymEntry("ez pz", [MoodLevel.POSITIV, MoodLevel.VERSPIELT], FormalityLevel.SEHR_INFORMELL, IntensityLevel.NIEDRIG),
+            ])
+
+        # POETISCHE AUSDRÜCKE
+        self.groups["poetisch"] = SynonymGroup(
+            id="poetisch", base_word="poetisch", category=WordCategory.FREUDE,
+            description="Literarisch-poetische Ausdrücke", entries=[
+                SynonymEntry("mein Herz singt", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("meine Seele tanzt", [MoodLevel.SEHR_POSITIV, MoodLevel.VERSPIELT], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("die Sterne funkeln für mich", [MoodLevel.SEHR_POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("mein Geist schwebt", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("die Welt erstrahlt in Farben", [MoodLevel.SEHR_POSITIV], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("ich blühe auf", [MoodLevel.POSITIV, MoodLevel.ENERGISCH], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("mein Wesen leuchtet", [MoodLevel.SEHR_POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.FORMELL, IntensityLevel.HOCH),
+                SynonymEntry("es durchströmt mich Wärme", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("ich fühle die Magie des Moments", [MoodLevel.POSITIV, MoodLevel.NACHDENKLICH], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("mein Herz öffnet sich wie eine Blüte", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+            ])
+
+        # KEMONOMIMI ERWEITERT - AUFREGUNG
+        self.groups["kemonomimi_aufregung"] = SynonymGroup(
+            id="kemonomimi_aufregung", base_word="*zappelt*", category=WordCategory.FREUDE,
+            description="Kemonomimi Aufregungsausdrücke", entries=[
+                SynonymEntry("*zappelt aufgeregt*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*kann nicht stillsitzen*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*Schwanz peitscht aufgeregt*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL, is_kemonomimi=True),
+                SynonymEntry("*hüpft unruhig hin und her*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*Ohren zittern vor Aufregung*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*kann Aufregung kaum verbergen*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*springt vor Freude*", [MoodLevel.SEHR_POSITIV, MoodLevel.ENERGISCH, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL, is_kemonomimi=True),
+                SynonymEntry("*Nase zuckt aufgeregt*", [MoodLevel.POSITIV, MoodLevel.ENERGISCH], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
+            ])
+
+        # KEMONOMIMI ERWEITERT - SCHÜCHTERNHEIT
+        self.groups["kemonomimi_schuechtern"] = SynonymGroup(
+            id="kemonomimi_schuechtern", base_word="*versteckt sich*", category=WordCategory.SCHAM,
+            description="Kemonomimi Schüchternheitsausdrücke", entries=[
+                SynonymEntry("*versteckt sich hinter Schwanz*", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
+                SynonymEntry("*Ohren legen sich verlegen an*", [MoodLevel.NEGATIV], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
+                SynonymEntry("*wird ganz rot*", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*schaut verlegen zu Boden*", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
+                SynonymEntry("*versteckt Gesicht hinter Pfoten*", [MoodLevel.NEGATIV, MoodLevel.VERSPIELT], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*Schwanz wickelt sich um Beine*", [MoodLevel.NEGATIV], FormalityLevel.INFORMELL, IntensityLevel.MITTEL, is_kemonomimi=True),
+                SynonymEntry("*piepst verlegen*", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+                SynonymEntry("*macht sich ganz klein und schüchtern*", [MoodLevel.NEGATIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.HOCH, is_kemonomimi=True),
+            ])
+
+        # SANFTE ZUNEIGUNG
+        self.groups["sanfte_zuneigung"] = SynonymGroup(
+            id="sanfte_zuneigung", base_word="mögen", category=WordCategory.LIEBE,
+            description="Zarte, sanfte Zuneigung", entries=[
+                SynonymEntry("hab dich lieb", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.RUHIG], FormalityLevel.INFORMELL, IntensityLevel.HOCH),
+                SynonymEntry("du bist mir wichtig", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("schätze dich sehr", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("mag dich unendlich", [MoodLevel.SEHR_POSITIV, MoodLevel.INTIM], FormalityLevel.INFORMELL, IntensityLevel.MAXIMAL),
+                SynonymEntry("bist mir ans Herz gewachsen", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("du bedeutest mir viel", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("habe dich gern", [MoodLevel.POSITIV, MoodLevel.INTIM, MoodLevel.RUHIG], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("du bist mir nah", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
+                SynonymEntry("du erwärmst mein Herz", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.HOCH),
+                SynonymEntry("ich halte viel von dir", [MoodLevel.POSITIV, MoodLevel.INTIM], FormalityLevel.NEUTRAL, IntensityLevel.MITTEL),
             ])
 
 

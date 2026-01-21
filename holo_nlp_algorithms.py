@@ -86,6 +86,13 @@ __all__ = [
     # Search
     "SemanticSearchEngine",
 
+    # Extended NLP v4.1
+    "EmotionalToneAnalyzer",
+    "ContextualResponseGenerator",
+    "SemanticClusterEngine",
+    "AdaptiveMarkovChain",
+    "HumorDetector",
+
     # Helper Functions
     "get_smart_understanding",
     "has_smart_understanding",
@@ -3336,6 +3343,636 @@ class TFIDFIntentDetector:
         """Legacy train - nicht mehr nötig"""
         logger.debug("TFIDFIntentDetector.train() ist deprecated - SmartUnderstanding braucht kein Training")
         pass
+
+
+# =============================================================================
+# ERWEITERTE NLP-ALGORITHMEN v4.1
+# =============================================================================
+
+class EmotionalToneAnalyzer:
+    """
+    Erweiterte emotionale Tonanalyse für differenzierte Stimmungserkennung.
+    Erkennt subtile emotionale Nuancen und kontextuelle Stimmungswechsel.
+    """
+
+    def __init__(self):
+        self._init_tone_lexicons()
+        self._init_pattern_rules()
+
+    def _init_tone_lexicons(self):
+        """Initialisiert erweiterte emotionale Lexika"""
+        # Primäre Emotionen mit Gewichtung
+        self.primary_emotions = {
+            # FREUDE-SPEKTRUM
+            "freude": {
+                "euphorie": ["ekstatisch", "überwältigt", "beseelt", "verzückt", "überglücklich"],
+                "begeisterung": ["begeistert", "fasziniert", "hingerissen", "entzückt", "enthusiastisch"],
+                "zufriedenheit": ["zufrieden", "glücklich", "froh", "erfreut", "content"],
+                "gelassenheit": ["gelassen", "ruhig", "entspannt", "friedlich", "ausgeglichen"],
+            },
+            # TRAUER-SPEKTRUM
+            "trauer": {
+                "verzweiflung": ["verzweifelt", "hoffnungslos", "gebrochen", "zerbrochen", "am Ende"],
+                "kummer": ["traurig", "niedergeschlagen", "bedrückt", "melancholisch", "schwermütig"],
+                "sehnsucht": ["sehnsüchtig", "vermissend", "nostalgisch", "wehmütig"],
+                "enttäuschung": ["enttäuscht", "desillusioniert", "ernüchtert", "frustriert"],
+            },
+            # WUT-SPEKTRUM
+            "wut": {
+                "rage": ["rasend", "tobend", "außer sich", "blind vor Wut", "kochend"],
+                "zorn": ["zornig", "wütend", "erbost", "aufgebracht", "empört"],
+                "ärger": ["ärgerlich", "verärgert", "genervt", "gereizt", "irritiert"],
+                "frustration": ["frustriert", "entnervt", "angespannt", "ungeduldig"],
+            },
+            # ANGST-SPEKTRUM
+            "angst": {
+                "panik": ["panisch", "in Todesangst", "paralysiert", "erstarrt"],
+                "furcht": ["ängstlich", "verängstigt", "furchtsam", "eingeschüchtert"],
+                "sorge": ["besorgt", "beunruhigt", "in Sorge", "unruhig"],
+                "unsicherheit": ["unsicher", "verunsichert", "nervös", "beklommen"],
+            },
+            # LIEBE-SPEKTRUM
+            "liebe": {
+                "leidenschaft": ["leidenschaftlich", "hingegeben", "verzehrend", "brennend"],
+                "zuneigung": ["liebevoll", "zugetan", "herzlich", "warmherzig"],
+                "fürsorge": ["fürsorglich", "beschützend", "umsorgend", "behutsam"],
+                "verbundenheit": ["verbunden", "nah", "vertraut", "innig"],
+            },
+            # ÜBERRASCHUNG-SPEKTRUM
+            "ueberraschung": {
+                "schock": ["schockiert", "fassungslos", "sprachlos", "erschüttert"],
+                "staunen": ["erstaunt", "verwundert", "verblüfft", "baff"],
+                "neugier": ["neugierig", "interessiert", "gespannt", "wissbegierig"],
+            },
+        }
+
+        # Kontextuelle Modifikatoren
+        self.modifiers = {
+            "verstärker": ["sehr", "extrem", "total", "absolut", "mega", "super", "ultra", "richtig", "echt", "voll"],
+            "abschwächer": ["etwas", "ein bisschen", "leicht", "ein wenig", "kaum", "minimal"],
+            "negation": ["nicht", "kein", "keine", "niemals", "nie", "ohne", "kaum"],
+        }
+
+    def _init_pattern_rules(self):
+        """Initialisiert Mustererkennung für komplexe Emotionen"""
+        self.patterns = {
+            "ironie": [
+                r"ja\s+klar",
+                r"super\s+toll",
+                r"na\s+toll",
+                r"oh\s+wie\s+(schön|toll)",
+                r"wirklich\?+$",
+            ],
+            "sarkasmus": [
+                r"das\s+war\s+ja\s+zu\s+erwarten",
+                r"überraschung",
+                r"hätte\s+ich\s+nie\s+gedacht",
+                r"wie\s+originell",
+            ],
+            "freundliche_ablehnung": [
+                r"ich\s+schätze",
+                r"das\s+ist\s+nett\s+aber",
+                r"danke\s+aber",
+            ],
+        }
+        self._compiled_patterns = {
+            key: [re.compile(p, re.IGNORECASE) for p in patterns]
+            for key, patterns in self.patterns.items()
+        }
+
+    def analyze_emotional_tone(self, text: str) -> Dict[str, Any]:
+        """
+        Analysiert den emotionalen Ton eines Textes.
+
+        Returns:
+            Dict mit primary_emotion, intensity, subtype, modifiers, patterns
+        """
+        text_lower = text.lower()
+        words = text_lower.split()
+
+        # Finde primäre Emotion
+        emotion_scores = {}
+        for emotion, subtypes in self.primary_emotions.items():
+            score = 0
+            detected_subtype = None
+            for subtype, keywords in subtypes.items():
+                for keyword in keywords:
+                    if keyword in text_lower:
+                        score += 1
+                        detected_subtype = subtype
+            if score > 0:
+                emotion_scores[emotion] = {"score": score, "subtype": detected_subtype}
+
+        # Bestimme dominante Emotion
+        primary_emotion = None
+        max_score = 0
+        subtype = None
+        for emotion, data in emotion_scores.items():
+            if data["score"] > max_score:
+                max_score = data["score"]
+                primary_emotion = emotion
+                subtype = data["subtype"]
+
+        # Analysiere Modifikatoren
+        detected_modifiers = []
+        intensity = 1.0
+        for word in words:
+            if word in self.modifiers["verstärker"]:
+                intensity *= 1.3
+                detected_modifiers.append(("verstärker", word))
+            elif word in self.modifiers["abschwächer"]:
+                intensity *= 0.7
+                detected_modifiers.append(("abschwächer", word))
+            elif word in self.modifiers["negation"]:
+                intensity *= -1 if intensity > 0 else 1
+                detected_modifiers.append(("negation", word))
+
+        # Erkenne Muster
+        detected_patterns = []
+        for pattern_type, compiled_list in self._compiled_patterns.items():
+            for pattern in compiled_list:
+                if pattern.search(text):
+                    detected_patterns.append(pattern_type)
+                    break
+
+        return {
+            "primary_emotion": primary_emotion or "neutral",
+            "subtype": subtype,
+            "intensity": min(max(intensity, 0.1), 2.0),
+            "modifiers": detected_modifiers,
+            "patterns": detected_patterns,
+            "confidence": min(max_score * 0.25, 1.0) if max_score > 0 else 0.5,
+        }
+
+
+class ContextualResponseGenerator:
+    """
+    Kontextbasierter Antwortgenerator für natürlichere Dialoge.
+    Berücksichtigt Gesprächskontext, emotionalen Ton und Benutzerpräferenzen.
+    """
+
+    def __init__(self):
+        self._init_response_templates()
+        self._init_transition_phrases()
+
+    def _init_response_templates(self):
+        """Initialisiert kontextuelle Antwort-Templates"""
+        self.templates = {
+            "empathie": {
+                "freude": [
+                    "Das freut mich zu hören!",
+                    "Wie schön für dich!",
+                    "Das klingt wunderbar!",
+                    "Ich kann deine Freude nachempfinden!",
+                ],
+                "trauer": [
+                    "Das tut mir wirklich leid.",
+                    "Ich kann verstehen, dass das schwer ist.",
+                    "Das muss wirklich belastend sein.",
+                    "Ich bin für dich da.",
+                ],
+                "wut": [
+                    "Ich kann verstehen, dass dich das ärgert.",
+                    "Das wäre auch für mich frustrierend.",
+                    "Es ist okay, wütend zu sein.",
+                    "Ich kann nachvollziehen, warum du aufgebracht bist.",
+                ],
+                "angst": [
+                    "Es ist verständlich, dass du besorgt bist.",
+                    "Deine Ängste sind berechtigt.",
+                    "Es ist okay, Angst zu haben.",
+                    "Ich bin hier, um zu helfen.",
+                ],
+            },
+            "interesse": {
+                "neutral": [
+                    "Erzähl mir mehr darüber!",
+                    "Das klingt interessant!",
+                    "Wie meinst du das genau?",
+                    "Kannst du das näher erklären?",
+                ],
+                "neugier": [
+                    "Oh, das ist spannend!",
+                    "Da bin ich aber gespannt!",
+                    "Jetzt machst du mich neugierig!",
+                    "Das würde ich gerne wissen!",
+                ],
+            },
+            "bestaetigung": [
+                "Ich verstehe.",
+                "Alles klar!",
+                "Das macht Sinn.",
+                "Ja, das kann ich nachvollziehen.",
+                "Verstanden!",
+            ],
+            "ermutigung": [
+                "Du schaffst das!",
+                "Ich glaube an dich!",
+                "Das wird schon!",
+                "Kopf hoch!",
+                "Gemeinsam schaffen wir das!",
+            ],
+        }
+
+    def _init_transition_phrases(self):
+        """Initialisiert Übergangsphrasen für flüssigere Dialoge"""
+        self.transitions = {
+            "themenwechsel": [
+                "Übrigens,",
+                "Apropos,",
+                "Da fällt mir ein,",
+                "Wenn wir schon dabei sind,",
+                "Das erinnert mich an",
+            ],
+            "vertiefung": [
+                "Um darauf zurückzukommen,",
+                "Was das betrifft,",
+                "In diesem Zusammenhang,",
+                "Diesbezüglich,",
+            ],
+            "zusammenfassung": [
+                "Also zusammengefasst,",
+                "Kurz gesagt,",
+                "Mit anderen Worten,",
+                "Im Wesentlichen,",
+            ],
+            "gegensatz": [
+                "Andererseits,",
+                "Allerdings,",
+                "Jedoch,",
+                "Aber bedenke,",
+            ],
+        }
+
+    def generate_contextual_response(
+        self,
+        emotion: str,
+        response_type: str = "empathie",
+        use_transition: bool = False,
+        transition_type: str = None
+    ) -> str:
+        """
+        Generiert eine kontextbezogene Antwort.
+
+        Args:
+            emotion: Erkannte Emotion des Benutzers
+            response_type: Art der gewünschten Antwort
+            use_transition: Ob eine Übergangsphrase verwendet werden soll
+            transition_type: Art der Übergangsphrase
+
+        Returns:
+            Generierte Antwort
+        """
+        response_parts = []
+
+        # Füge Übergangsphrase hinzu
+        if use_transition and transition_type in self.transitions:
+            response_parts.append(random.choice(self.transitions[transition_type]))
+
+        # Wähle passende Antwort
+        if response_type == "empathie":
+            if emotion in self.templates["empathie"]:
+                response_parts.append(random.choice(self.templates["empathie"][emotion]))
+            else:
+                response_parts.append(random.choice(self.templates["bestaetigung"]))
+        elif response_type == "interesse":
+            emotion_key = emotion if emotion in self.templates["interesse"] else "neutral"
+            response_parts.append(random.choice(self.templates["interesse"][emotion_key]))
+        elif response_type in self.templates:
+            if isinstance(self.templates[response_type], list):
+                response_parts.append(random.choice(self.templates[response_type]))
+            elif isinstance(self.templates[response_type], dict):
+                key = emotion if emotion in self.templates[response_type] else list(self.templates[response_type].keys())[0]
+                response_parts.append(random.choice(self.templates[response_type][key]))
+
+        return " ".join(response_parts)
+
+
+class SemanticClusterEngine:
+    """
+    Semantisches Clustering für Themen- und Konzepterkennung.
+    Gruppiert verwandte Begriffe und erkennt thematische Zusammenhänge.
+    """
+
+    def __init__(self):
+        self._init_semantic_clusters()
+
+    def _init_semantic_clusters(self):
+        """Initialisiert semantische Cluster"""
+        self.clusters = {
+            "technologie": {
+                "core": ["computer", "software", "hardware", "app", "programm", "system"],
+                "web": ["internet", "website", "browser", "online", "cloud", "server"],
+                "gaming": ["spiel", "game", "zocken", "controller", "konsole", "pc"],
+                "mobile": ["handy", "smartphone", "tablet", "app", "android", "ios"],
+            },
+            "gefuehle": {
+                "positiv": ["glücklich", "froh", "zufrieden", "begeistert", "entspannt"],
+                "negativ": ["traurig", "wütend", "ängstlich", "frustriert", "gestresst"],
+                "neutral": ["gelassen", "ruhig", "ausgeglichen", "neutral", "sachlich"],
+            },
+            "aktivitaeten": {
+                "freizeit": ["spielen", "lesen", "schauen", "hören", "entspannen"],
+                "arbeit": ["arbeiten", "lernen", "studieren", "programmieren", "schreiben"],
+                "sport": ["laufen", "schwimmen", "trainieren", "joggen", "wandern"],
+                "sozial": ["treffen", "reden", "feiern", "besuchen", "einladen"],
+            },
+            "zeit": {
+                "vergangenheit": ["gestern", "letztens", "früher", "damals", "vor"],
+                "gegenwart": ["heute", "jetzt", "gerade", "momentan", "aktuell"],
+                "zukunft": ["morgen", "bald", "später", "demnächst", "irgendwann"],
+            },
+            "orte": {
+                "zuhause": ["zuhause", "wohnung", "haus", "zimmer", "küche", "wohnzimmer"],
+                "draussen": ["draußen", "park", "wald", "stadt", "natur", "garten"],
+                "arbeit": ["büro", "firma", "arbeit", "schule", "uni", "werkstatt"],
+            },
+        }
+
+        # Baue inverses Mapping
+        self.word_to_cluster = {}
+        for category, subclusters in self.clusters.items():
+            for subcluster, words in subclusters.items():
+                for word in words:
+                    self.word_to_cluster[word.lower()] = {
+                        "category": category,
+                        "subcluster": subcluster
+                    }
+
+    def identify_clusters(self, text: str) -> Dict[str, List[str]]:
+        """
+        Identifiziert semantische Cluster im Text.
+
+        Returns:
+            Dict mit gefundenen Clustern und deren Begriffen
+        """
+        text_lower = text.lower()
+        words = re.findall(r'\b\w+\b', text_lower)
+
+        found_clusters = {}
+        for word in words:
+            if word in self.word_to_cluster:
+                info = self.word_to_cluster[word]
+                category = info["category"]
+                if category not in found_clusters:
+                    found_clusters[category] = {
+                        "words": [],
+                        "subclusters": set()
+                    }
+                found_clusters[category]["words"].append(word)
+                found_clusters[category]["subclusters"].add(info["subcluster"])
+
+        # Konvertiere sets zu lists für JSON-Kompatibilität
+        for category in found_clusters:
+            found_clusters[category]["subclusters"] = list(found_clusters[category]["subclusters"])
+
+        return found_clusters
+
+    def get_related_terms(self, word: str, limit: int = 10) -> List[str]:
+        """Findet verwandte Begriffe zu einem Wort"""
+        word_lower = word.lower()
+        if word_lower not in self.word_to_cluster:
+            return []
+
+        info = self.word_to_cluster[word_lower]
+        category = info["category"]
+        subcluster = info["subcluster"]
+
+        # Hole alle Wörter aus demselben Subcluster
+        related = [w for w in self.clusters[category][subcluster] if w.lower() != word_lower]
+
+        # Füge Wörter aus anderen Subclustern der gleichen Kategorie hinzu
+        for other_subcluster, words in self.clusters[category].items():
+            if other_subcluster != subcluster:
+                for w in words:
+                    if w.lower() not in related and w.lower() != word_lower:
+                        related.append(w)
+
+        return related[:limit]
+
+
+class AdaptiveMarkovChain:
+    """
+    Adaptive Markov-Kette für kontextbewusste Textgenerierung.
+    Lernt aus Eingaben und passt sich an den Stil an.
+    """
+
+    def __init__(self, order: int = 2):
+        self.order = order
+        self.chains: Dict[Tuple, Counter] = defaultdict(Counter)
+        self.start_tokens: List[Tuple] = []
+        self.vocabulary: Set[str] = set()
+        self._trained = False
+
+    def train(self, text: str):
+        """Trainiert die Markov-Kette mit neuem Text"""
+        tokens = self._tokenize(text)
+        if len(tokens) < self.order + 1:
+            return
+
+        # Füge Start-Token hinzu
+        self.start_tokens.append(tuple(tokens[:self.order]))
+
+        # Baue Ketten auf
+        for i in range(len(tokens) - self.order):
+            state = tuple(tokens[i:i + self.order])
+            next_token = tokens[i + self.order]
+            self.chains[state][next_token] += 1
+            self.vocabulary.add(next_token)
+
+        self._trained = True
+
+    def train_batch(self, texts: List[str]):
+        """Trainiert mit mehreren Texten"""
+        for text in texts:
+            self.train(text)
+
+    def generate(self, max_length: int = 50, seed: str = None) -> str:
+        """Generiert Text basierend auf trainierten Mustern"""
+        if not self._trained:
+            return ""
+
+        # Wähle Startzustand
+        if seed:
+            seed_tokens = self._tokenize(seed)
+            if len(seed_tokens) >= self.order:
+                state = tuple(seed_tokens[-self.order:])
+            else:
+                state = random.choice(self.start_tokens) if self.start_tokens else None
+        else:
+            state = random.choice(self.start_tokens) if self.start_tokens else None
+
+        if state is None:
+            return ""
+
+        result = list(state)
+
+        for _ in range(max_length - self.order):
+            if state not in self.chains:
+                break
+
+            # Gewichtete Auswahl des nächsten Tokens
+            choices = self.chains[state]
+            total = sum(choices.values())
+            r = random.uniform(0, total)
+            cumulative = 0
+            next_token = None
+
+            for token, count in choices.items():
+                cumulative += count
+                if cumulative >= r:
+                    next_token = token
+                    break
+
+            if next_token is None:
+                break
+
+            result.append(next_token)
+            state = tuple(result[-self.order:])
+
+            # Stoppe bei Satzende
+            if next_token in '.!?':
+                break
+
+        return self._detokenize(result)
+
+    def _tokenize(self, text: str) -> List[str]:
+        """Tokenisiert Text"""
+        # Einfache Tokenisierung mit Satzzeichen als separate Tokens
+        tokens = []
+        current_word = []
+
+        for char in text:
+            if char.isalnum() or char == '-':
+                current_word.append(char)
+            else:
+                if current_word:
+                    tokens.append(''.join(current_word).lower())
+                    current_word = []
+                if char in '.!?,;:':
+                    tokens.append(char)
+                elif char.isspace() and tokens and tokens[-1] != ' ':
+                    pass  # Ignoriere Whitespace
+
+        if current_word:
+            tokens.append(''.join(current_word).lower())
+
+        return tokens
+
+    def _detokenize(self, tokens: List[str]) -> str:
+        """Konvertiert Tokens zurück zu Text"""
+        result = []
+        capitalize_next = True
+
+        for token in tokens:
+            if token in '.!?':
+                if result:
+                    result[-1] = result[-1] + token
+                capitalize_next = True
+            elif token in ',;:':
+                if result:
+                    result[-1] = result[-1] + token
+            else:
+                if capitalize_next:
+                    token = token.capitalize()
+                    capitalize_next = False
+                result.append(token)
+
+        return ' '.join(result)
+
+
+class HumorDetector:
+    """
+    Erkennt humoristische Elemente in Texten.
+    Identifiziert Witze, Wortspiele, Ironie und Sarkasmus.
+    """
+
+    def __init__(self):
+        self._init_humor_patterns()
+
+    def _init_humor_patterns(self):
+        """Initialisiert Humor-Erkennungsmuster"""
+        self.patterns = {
+            "wortspiel": [
+                r"\b(\w+)\s+\1\b",  # Wiederholungen
+                r"(?:heißt|nennt|bedeutet).*?(?:weil|da)\s",  # Wortspiel-Erklärungen
+            ],
+            "uebertreibung": [
+                r"(millionen|milliarden|unendlich|ewig)\s+\w+",
+                r"immer\s+\w+\s+immer",
+                r"größte|kleinste|beste|schlechteste\s+\w+\s+aller\s+zeiten",
+            ],
+            "kontrast": [
+                r"aber\s+(?:eigentlich|in\s+wirklichkeit)",
+                r"dachte.*?(?:stellt\s+sich\s+heraus|war\s+aber)",
+            ],
+            "selbstironie": [
+                r"ich\s+(?:dummkopf|idiot|trottel|depp)",
+                r"wieder\s+mal\s+(?:ich|mein)",
+                r"typisch\s+ich",
+            ],
+            "absurdität": [
+                r"warum\s+(?:liegt|steht|sitzt).*?\?",
+                r"was\s+macht\s+ein\w*\s+(?:wenn|auf|in)",
+            ],
+        }
+
+        self._compiled_patterns = {
+            key: [re.compile(p, re.IGNORECASE) for p in patterns]
+            for key, patterns in self.patterns.items()
+        }
+
+        # Humor-Signalwörter
+        self.humor_signals = {
+            "einleitung": ["kennst du den", "witz", "weißt du was", "stell dir vor", "spaß"],
+            "reaktion": ["haha", "hihi", "lol", "rofl", "xd", "😂", "🤣", "😄"],
+            "ironie_marker": ["natürlich", "klar doch", "oh ja", "super", "toll"],
+        }
+
+    def analyze_humor(self, text: str) -> Dict[str, Any]:
+        """
+        Analysiert Text auf humoristische Elemente.
+
+        Returns:
+            Dict mit humor_detected, types, confidence, signals
+        """
+        text_lower = text.lower()
+
+        detected_types = []
+        signals_found = []
+
+        # Prüfe Muster
+        for humor_type, compiled_list in self._compiled_patterns.items():
+            for pattern in compiled_list:
+                if pattern.search(text):
+                    detected_types.append(humor_type)
+                    break
+
+        # Prüfe Signalwörter
+        for signal_type, signals in self.humor_signals.items():
+            for signal in signals:
+                if signal in text_lower:
+                    signals_found.append((signal_type, signal))
+
+        # Berechne Konfidenz
+        confidence = 0.0
+        if detected_types:
+            confidence += 0.3 * len(detected_types)
+        if signals_found:
+            confidence += 0.2 * len(signals_found)
+
+        # Zusätzliche Heuristiken
+        if text.count('!') > 2:
+            confidence += 0.1
+        if text.count('?') > 1 and any(s[0] == "einleitung" for s in signals_found):
+            confidence += 0.15
+
+        return {
+            "humor_detected": confidence > 0.3,
+            "types": list(set(detected_types)),
+            "signals": signals_found,
+            "confidence": min(confidence, 1.0),
+        }
 
 
 # =============================================================================
