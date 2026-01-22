@@ -22410,10 +22410,66 @@ Nutze alternative Formulierungen!
     def _generate_offline_fallback(self, user_input: str) -> str:
         """
         Generiert eine Offline-Antwort wenn das LLM nicht erreichbar ist.
-        Nutzt Pattern-Matching für einfache Antworten.
+        Nutzt Markov Intelligence und Pattern-Matching für natürliche Antworten.
         """
         import random
         user_lower = user_input.lower().strip()
+
+        # === MARKOV INTELLIGENCE NUTZEN (wenn verfügbar) ===
+        if hasattr(self, 'markov_intelligence') and self.markov_intelligence and MARKOV_INTELLIGENCE_AVAILABLE:
+            try:
+                # Verarbeite Nachricht mit Intelligence Engine
+                intel = self.markov_intelligence.process_message(user_input)
+                emotion_modifier = intel.get('emotion_modifier', '')
+                thought = intel.get('thought', '')
+                knowledge = intel.get('knowledge_tangent', '')
+
+                # Greetings mit Markov
+                if any(g in user_lower for g in ['hallo', 'hey', 'hi', 'moin', 'morgen', 'guten tag', 'guten abend']):
+                    greeting = get_greeting_for_time_of_day() if 'get_greeting_for_time_of_day' in dir() else None
+                    if greeting:
+                        return greeting
+                    # Fallback auf Trainingssätze
+                    from holo_markov_training import TRAINING_SENTENCES, TrainingCategory
+                    greetings = TRAINING_SENTENCES.get(TrainingCategory.BEGRUESSUNGEN, [])
+                    if greetings:
+                        return random.choice(greetings)
+
+                # Farewells mit Markov
+                if any(f in user_lower for f in ['tschüss', 'bye', 'ciao', 'bis später', 'gute nacht', 'schlaf gut']):
+                    farewell = get_farewell() if 'get_farewell' in dir() else None
+                    if farewell:
+                        return farewell
+                    from holo_markov_training import TRAINING_SENTENCES, TrainingCategory
+                    farewells = TRAINING_SENTENCES.get(TrainingCategory.VERABSCHIEDUNGEN, [])
+                    if farewells:
+                        return random.choice(farewells)
+
+                # Emotionale Antworten
+                if any(kw in user_lower for kw in ['traurig', 'schlecht', 'mies', 'einsam']):
+                    from holo_markov_training import TRAINING_SENTENCES, TrainingCategory
+                    comfort = TRAINING_SENTENCES.get(TrainingCategory.TROST, [])
+                    if comfort:
+                        return random.choice(comfort)
+
+                if any(kw in user_lower for kw in ['freue', 'glücklich', 'toll', 'super', 'geil']):
+                    from holo_markov_training import TRAINING_SENTENCES, TrainingCategory
+                    joy = TRAINING_SENTENCES.get(TrainingCategory.FREUDE, [])
+                    if joy:
+                        return random.choice(joy)
+
+                # Wissen teilen wenn relevant
+                if knowledge and random.random() < 0.4:
+                    return f"{emotion_modifier} {knowledge}" if emotion_modifier else knowledge
+
+                # Gedanken teilen wenn relevant
+                if thought and random.random() < 0.3:
+                    return f"{emotion_modifier} {thought}" if emotion_modifier else thought
+
+            except Exception as e:
+                logger.debug(f"Markov offline fallback error: {e}")
+
+        # === FALLBACK PATTERN MATCHING ===
 
         # Greetings
         if any(g in user_lower for g in ['hallo', 'hey', 'hi', 'moin', 'morgen', 'guten tag', 'guten abend']):
@@ -25983,6 +26039,47 @@ NAS: {'Online' if nas.get('online') else 'Offline'}
                     persona += "(Diesen Gedanken hatte ich gerade von selbst - teile ihn wenn passend!)\n"
             except Exception as e:
                 logger.debug(f"Autonomous thought injection error: {e}")
+
+        # === MARKOV INTELLIGENCE KONTEXT (Gedanken, Assoziationen, Wissen) ===
+        if hasattr(self, 'markov_intelligence') and self.markov_intelligence:
+            try:
+                # Hole aktuelle Emotion und Gedanken
+                current_emotion = self.markov_intelligence.emotion_chain.current_emotion.value
+                current_trait = self.markov_intelligence.personality_chain.current_trait.value
+
+                # Generiere einen spontanen Gedanken basierend auf der Query
+                if query:
+                    intel = self.markov_intelligence.process_message(query)
+                    thought = intel.get('thought', '')
+                    knowledge = intel.get('knowledge_tangent', '')
+
+                    markov_hints = []
+                    if thought:
+                        markov_hints.append(f"Spontaner Gedanke: \"{thought}\"")
+                    if knowledge:
+                        markov_hints.append(f"Interessantes Wissen: {knowledge}")
+
+                    if markov_hints:
+                        persona += "\n=== DEINE GEDANKEN & ASSOZIATIONEN ===\n"
+                        persona += "\n".join(f"• {h}" for h in markov_hints) + "\n"
+                        persona += "(Teile diese Gedanken natürlich im Gespräch wenn passend!)\n"
+
+                # Persönlichkeits-Trait Hinweis
+                trait_style = {
+                    'flauschig': 'Sei kuschelig und warm in deiner Art',
+                    'verspielt': 'Sei spielerisch und fröhlich',
+                    'neugierig': 'Zeige echte Neugier, stelle Fragen',
+                    'selbstironisch': 'Nutze selbstironischen Humor wenn passend',
+                    'beschuetzend': 'Zeige deine beschützende Seite',
+                    'ehrlich': 'Sei direkt und aufrichtig',
+                    'sensibel': 'Sei einfühlsam und verständnisvoll',
+                    'loyal': 'Zeige deine treue, loyale Art',
+                }
+                if current_trait in trait_style:
+                    persona += f"\nAktueller Charakter-Fokus: {trait_style[current_trait]}\n"
+
+            except Exception as e:
+                logger.debug(f"Markov intelligence context error: {e}")
 
         # === ABSCHLUSS ===
         persona += """
