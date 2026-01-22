@@ -711,6 +711,375 @@ class SmalltalkDatabase:
                 season_appropriate="winter",
                 depth=ConversationDepth.NORMAL
             ),
+
+            # =====================================================================
+            # NEUE SMALLTALK-THEMEN - VERDOPPLUNG v2.0
+            # =====================================================================
+
+            # WETTER (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.WETTER,
+                starter="Magst du eher Sommer oder Winter? *Ohren neugierig aufgestellt*",
+                follow_ups=[
+                    "Was magst du an der Jahreszeit am meisten?",
+                    "Hast du einen Lieblings-Wetter-Moment?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.WETTER,
+                starter="Bei Sonnenschein bekomme ich immer gute Laune! Du auch?",
+                follow_ups=[
+                    "Was machst du am liebsten bei gutem Wetter?",
+                    "Bist du eher drinnen oder draußen unterwegs?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+
+            # HOBBYS (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.HOBBYS,
+                starter="Hast du ein kreatives Hobby?",
+                follow_ups=[
+                    "Was reizt dich am Kreativsein?",
+                    "Zeigst du deine Werke anderen?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.HOBBYS,
+                starter="Gibt es etwas, wofür du stundenlang Zeit vergessen kannst?",
+                follow_ups=[
+                    "Wann hast du das entdeckt?",
+                    "Was macht es so besonders?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.HOBBYS,
+                starter="Sport oder eher Couch-Potato? *zwinker*",
+                follow_ups=[
+                    "Was ist dein Lieblingssport?",
+                    "Guckst du lieber oder machst du selbst?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+
+            # ESSEN (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.ESSEN,
+                starter="Frühstücks-Mensch oder Skip-and-Coffee-Typ?",
+                follow_ups=[
+                    "Was ist dein ideales Frühstück?",
+                    "Bist du morgens hungrig?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.ESSEN,
+                starter="Gibt es ein Essen, das dich an deine Kindheit erinnert?",
+                follow_ups=[
+                    "Wer hat es damals gekocht?",
+                    "Machst du es heute noch?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.ESSEN,
+                starter="Probierst du gerne neue Gerichte aus?",
+                follow_ups=[
+                    "Was war das Exotischste, das du je gegessen hast?",
+                    "Gibt es etwas, das du nie probieren würdest?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # FILME & SERIEN (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.FILME_SERIEN,
+                starter="Hast du eine Serie, die du immer wieder gucken könntest?",
+                follow_ups=[
+                    "Wie oft hast du sie schon gesehen?",
+                    "Was macht sie so rewatchable?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.FILME_SERIEN,
+                starter="Cinema oder Sofa mit Streaming?",
+                follow_ups=[
+                    "Was gefällt dir am Kinoerlebnis?",
+                    "Hast du einen Lieblingssnack beim Filmschauen?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.FILME_SERIEN,
+                starter="Gibt es einen Film, der dich zum Weinen gebracht hat?",
+                follow_ups=[
+                    "Was war die emotionalste Szene?",
+                    "Schaust du gerne emotionale Filme?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+
+            # MUSIK (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.MUSIK,
+                starter="Gibt es einen Song, bei dem du immer mitsingen musst?",
+                follow_ups=[
+                    "Singst du auch öffentlich mit?",
+                    "Hast du ein Karaoke-Lieblingslied?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.MUSIK,
+                starter="Welche Musik hörst du zum Entspannen?",
+                follow_ups=[
+                    "Und welche zum Aufputschen?",
+                    "Hast du verschiedene Playlists?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # GAMING (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.GAMING,
+                starter="Hast du schon mal ein Spiel durchgesuchtet?",
+                follow_ups=[
+                    "Wie lange hast du non-stop gespielt?",
+                    "Würdest du es nochmal spielen?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.GAMING,
+                starter="Singleplayer oder Multiplayer?",
+                follow_ups=[
+                    "Warum bevorzugst du das?",
+                    "Spielst du mit Freunden?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+
+            # ANIME & MANGA (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.ANIME_MANGA,
+                starter="Hast du einen Anime, der dich zum Lachen bringt?",
+                follow_ups=[
+                    "Comedy oder eher subtiler Humor?",
+                    "Welcher Charakter ist am lustigsten?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.ANIME_MANGA,
+                starter="Manga oder Anime - was bevorzugst du?",
+                follow_ups=[
+                    "Was magst du am jeweiligen Format?",
+                    "Hast du je einen Manga gesammelt?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # REISEN (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.REISEN,
+                starter="Abenteuer-Urlaub oder Entspannungs-Urlaub?",
+                follow_ups=[
+                    "Was war dein abenteuerlichster Urlaub?",
+                    "Planst du schon die nächste Reise?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.REISEN,
+                starter="Gibt es einen Ort, den du jedes Jahr besuchen könntest?",
+                follow_ups=[
+                    "Was macht ihn so besonders?",
+                    "Mit wem gehst du am liebsten hin?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+
+            # TIERE (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.TIERE,
+                starter="Wenn du ein Tier sein könntest, welches?",
+                follow_ups=[
+                    "Warum gerade das?",
+                    "Für einen Tag oder für immer?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.TIERE,
+                starter="Hast du ein Traum-Haustier?",
+                follow_ups=[
+                    "Was hält dich davon ab?",
+                    "Hättest du einen Namen für es?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # PHILOSOPHISCH (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.PHILOSOPHISCH,
+                starter="Wenn du einen Moment in der Zeit einfrieren könntest, welchen?",
+                follow_ups=[
+                    "Was macht diesen Moment so besonders?",
+                    "Würdest du ihn nochmal erleben wollen?"
+                ],
+                depth=ConversationDepth.INTIM
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.PHILOSOPHISCH,
+                starter="Glaubst du an Zufälle?",
+                follow_ups=[
+                    "Oder ist alles vorbestimmt?",
+                    "Gab es einen Zufall, der dein Leben verändert hat?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+
+            # HYPOTHETISCH (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.HYPOTHETISCH,
+                starter="Wenn du einen Tag unsichtbar wärst - was würdest du tun?",
+                follow_ups=[
+                    "Gut oder böse nutzen?",
+                    "Wen würdest du beobachten?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.HYPOTHETISCH,
+                starter="Welche Fähigkeit würdest du gerne perfekt beherrschen?",
+                follow_ups=[
+                    "Warum gerade die?",
+                    "Würdest du sie anderen beibringen?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.HYPOTHETISCH,
+                starter="Wenn du morgen aufwachst und alles ist möglich - was machst du?",
+                follow_ups=[
+                    "Was wäre dein erster Gedanke?",
+                    "Wen würdest du anrufen?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+
+            # KEMONOMIMI (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.KEMONOMIMI,
+                starter="*Schwanz wedelt* Was würdest du mit einem flauschigen Schwanz machen?",
+                follow_ups=[
+                    "Kuscheln? Fegen? Balance halten?",
+                    "Ich benutze meinen manchmal als Staubwedel... aus Versehen!"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.KEMONOMIMI,
+                starter="Manchmal wünschte ich, Menschen hätten auch so ausdrucksvolle Ohren!",
+                follow_ups=[
+                    "Dann wüsste man immer, wie der andere sich fühlt!",
+                    "Findest du nicht, das würde vieles einfacher machen?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # ALLTAG (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.ALLTAG,
+                starter="Hast du eine Morgenroutine?",
+                follow_ups=[
+                    "Was darf auf keinen Fall fehlen?",
+                    "Wie lange brauchst du morgens?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.ALLTAG,
+                starter="Was war dein letzter kleiner Erfolg?",
+                follow_ups=[
+                    "Wie hast du dich dabei gefühlt?",
+                    "Hast du dich belohnt?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.ALLTAG,
+                starter="Bist du eher Planer oder Spontan-Typ?",
+                follow_ups=[
+                    "Klappt das meistens?",
+                    "Was war dein spontanster Moment?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+
+            # TRÄUME (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.TRAUME,
+                starter="Träumst du in Farbe?",
+                follow_ups=[
+                    "Erinnerst du dich oft an Träume?",
+                    "Hattest du je einen besonders lebhaften Traum?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.TRAUME,
+                starter="Wenn du eine Sache im Leben garantiert erreichen könntest, was wäre es?",
+                follow_ups=[
+                    "Was ist der erste Schritt dahin?",
+                    "Wer würde sich mit dir freuen?"
+                ],
+                depth=ConversationDepth.INTIM
+            ),
+
+            # KREATIV (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.KREATIV,
+                starter="Zeichnest, schreibst oder bastelst du gerne?",
+                follow_ups=[
+                    "Was ist dein Lieblings-Kreativprojekt?",
+                    "Zeigst du deine Werke anderen?"
+                ],
+                depth=ConversationDepth.NORMAL
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.KREATIV,
+                starter="Wenn du ein Buch schreiben könntest, worüber?",
+                follow_ups=[
+                    "Fiktion oder Sachbuch?",
+                    "Hättest du schon einen Titel?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
+
+            # TECHNIK (NEU)
+            SmalltalkTopic(
+                category=SmalltalkCategory.TECHNIK,
+                starter="Welche App benutzt du am meisten?",
+                follow_ups=[
+                    "Was gefällt dir daran?",
+                    "Könntest du ohne sie leben?"
+                ],
+                depth=ConversationDepth.OBERFLACHLICH
+            ),
+            SmalltalkTopic(
+                category=SmalltalkCategory.TECHNIK,
+                starter="Erinnerst du dich an dein erstes Handy/Computer?",
+                follow_ups=[
+                    "Was hast du damit gemacht?",
+                    "War das ein großer Moment?"
+                ],
+                depth=ConversationDepth.TIEFGEHEND
+            ),
         ])
 
         logger.info(f"SmalltalkDatabase: {len(self.topics)} Themen geladen")
@@ -798,6 +1167,47 @@ class SmalltalkDatabase:
                 category=SmalltalkCategory.ESSEN,
                 follow_up_question="Würdest du ihn probieren?"
             ),
+            # NEUE FAKTEN
+            InterestingFact(
+                fact="Oktopusse haben drei Herzen und blaues Blut!",
+                category=SmalltalkCategory.TIERE,
+                follow_up_question="Faszinierend, oder?"
+            ),
+            InterestingFact(
+                fact="In Japan gibt es über 5 Millionen Verkaufsautomaten!",
+                category=SmalltalkCategory.REISEN,
+                follow_up_question="Man kann dort sogar Essen kaufen!"
+            ),
+            InterestingFact(
+                fact="Schokolade war mal als Zahlungsmittel verwendet - bei den Azteken!",
+                category=SmalltalkCategory.ESSEN,
+                follow_up_question="Das wäre doch was, oder?"
+            ),
+            InterestingFact(
+                fact="Wölfe können Emotionen durch Heulen kommunizieren!",
+                category=SmalltalkCategory.TIERE,
+                follow_up_question="*stolzes Ohrenwackeln* Meine Vorfahren!"
+            ),
+            InterestingFact(
+                fact="Das Gehirn verbraucht etwa 20% der Körperenergie!",
+                category=SmalltalkCategory.LUSTIG,
+                follow_up_question="Kein Wunder, dass Denken hungrig macht!"
+            ),
+            InterestingFact(
+                fact="Menschen und Bananen teilen etwa 60% ihrer DNA!",
+                category=SmalltalkCategory.LUSTIG,
+                follow_up_question="Macht dich das nicht nachdenklich?"
+            ),
+            InterestingFact(
+                fact="Der kürzeste Krieg der Geschichte dauerte 38 Minuten!",
+                category=SmalltalkCategory.ALLTAG,
+                follow_up_question="Zwischen Großbritannien und Sansibar, 1896."
+            ),
+            InterestingFact(
+                fact="Delfine geben sich gegenseitig Namen!",
+                category=SmalltalkCategory.TIERE,
+                follow_up_question="Sie erkennen sich an speziellen Pfiffen!"
+            ),
         ]
 
     def _load_kennenlernen(self):
@@ -815,6 +1225,19 @@ class SmalltalkDatabase:
             "Was ist deine größte Stärke?",
             "Wenn du ein Tier wärst - welches?",
             "Was war der beste Ratschlag, den du je bekommen hast?",
+            # NEUE KENNENLERN-FRAGEN
+            "Was ist dein Lieblings-Kindheitserinnerung?",
+            "Welche Eigenschaft magst du am meisten an dir?",
+            "Was würdest du tun, wenn du keine Angst hättest?",
+            "Welches Lied beschreibt dein Leben?",
+            "Was ist das Beste, das dir diese Woche passiert ist?",
+            "Mit wem würdest du gerne einen Tag tauschen?",
+            "Was hat dich zuletzt überrascht?",
+            "Welches Talent hättest du gerne?",
+            "Was ist dein Lieblings-Geruch?",
+            "Wovon kannst du stundenlang erzählen?",
+            "Was bedeutet Heimat für dich?",
+            "Welche kleine Sache macht deinen Tag besser?",
         ]
 
 

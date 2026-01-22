@@ -1012,6 +1012,414 @@ class IdiomDatabase:
                 category=IdiomCategory.KEMONOMIMI,
                 is_kemonomimi_friendly=True
             ),
+
+            # =====================================================================
+            # NEUE REDEWENDUNGEN - VERDOPPLUNG v2.0
+            # =====================================================================
+
+            # FREUDE & POSITIVES (NEU)
+            Idiom(
+                text="das Herz geht auf",
+                meaning="Sich sehr freuen",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.MITTEL
+            ),
+            Idiom(
+                text="auf Rosen gebettet sein",
+                meaning="Es sehr gut haben",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.MITTEL
+            ),
+            Idiom(
+                text="aus dem Häuschen sein",
+                meaning="Vor Freude außer sich sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="im siebten Himmel schweben",
+                meaning="Überglücklich sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="sich die Hände reiben",
+                meaning="Sich auf etwas freuen",
+                category=IdiomCategory.FREUDE
+            ),
+
+            # TRAUER & NEGATIVES (NEU)
+            Idiom(
+                text="mit dem Schicksal hadern",
+                meaning="Unzufrieden mit der Situation sein",
+                category=IdiomCategory.TRAUER
+            ),
+            Idiom(
+                text="graue Wolken ziehen auf",
+                meaning="Traurige Zeiten beginnen",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.MITTEL
+            ),
+            Idiom(
+                text="das Herz ist schwer wie Blei",
+                meaning="Sehr traurig sein",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="in Tränen aufgelöst sein",
+                meaning="Sehr viel weinen",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.STARK
+            ),
+
+            # WUT & ÄRGER (NEU)
+            Idiom(
+                text="mir reißt der Geduldsfaden",
+                meaning="Die Geduld verlieren",
+                category=IdiomCategory.WUTT,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="das Fass zum Überlaufen bringen",
+                meaning="Das letzte bisschen zu viel sein",
+                category=IdiomCategory.WUTT
+            ),
+            Idiom(
+                text="Dampf ablassen",
+                meaning="Sich abreagieren",
+                category=IdiomCategory.WUTT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="auf hundertachtzig sein",
+                meaning="Sehr wütend sein",
+                category=IdiomCategory.WUTT,
+                formality=IdiomFormality.SEHR_INFORMELL,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+
+            # ÜBERRASCHUNG (NEU)
+            Idiom(
+                text="das verschlägt mir die Sprache",
+                meaning="Vor Überraschung sprachlos sein",
+                category=IdiomCategory.UEBERRASCHUNG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="wie vom Donner gerührt",
+                meaning="Völlig überrascht und erstarrt",
+                category=IdiomCategory.UEBERRASCHUNG,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="mir fällt die Kinnlade runter",
+                meaning="Sehr erstaunt sein",
+                category=IdiomCategory.UEBERRASCHUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # LIEBE & ZUNEIGUNG (NEU)
+            Idiom(
+                text="bis über beide Ohren verliebt",
+                meaning="Total verliebt",
+                category=IdiomCategory.LIEBE,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="das Herz auf der Zunge tragen",
+                meaning="Seine Gefühle offen zeigen",
+                category=IdiomCategory.LIEBE
+            ),
+            Idiom(
+                text="jemanden auf Händen tragen",
+                meaning="Jemanden verwöhnen und verehren",
+                category=IdiomCategory.LIEBE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="wie die Made im Speck leben",
+                meaning="Es sich gut gehen lassen",
+                category=IdiomCategory.LIEBE,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # ERFOLG (NEU)
+            Idiom(
+                text="den Vogel abschießen",
+                meaning="Den größten Erfolg haben",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="alle Trümpfe in der Hand haben",
+                meaning="Alle Vorteile besitzen",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="auf dem aufsteigenden Ast sitzen",
+                meaning="Immer erfolgreicher werden",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="das Rennen machen",
+                meaning="Als Sieger hervorgehen",
+                category=IdiomCategory.ERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # MISSERFOLG (NEU)
+            Idiom(
+                text="vom Regen in die Traufe kommen",
+                meaning="Vom Schlechten ins Schlimmere geraten",
+                category=IdiomCategory.MISSERFOLG
+            ),
+            Idiom(
+                text="in die Röhre gucken",
+                meaning="Leer ausgehen",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="mit fliegenden Fahnen untergehen",
+                meaning="Ehrenvoll scheitern",
+                category=IdiomCategory.MISSERFOLG
+            ),
+
+            # ARBEIT & FLEISS (NEU)
+            Idiom(
+                text="das Eisen schmieden, solange es heiß ist",
+                meaning="Eine Gelegenheit sofort nutzen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="sich die Nacht um die Ohren schlagen",
+                meaning="Die ganze Nacht arbeiten",
+                category=IdiomCategory.ARBEIT,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="die Kohlen aus dem Feuer holen",
+                meaning="Eine schwierige Aufgabe übernehmen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="mehrere Eisen im Feuer haben",
+                meaning="Mehrere Möglichkeiten verfolgen",
+                category=IdiomCategory.ARBEIT
+            ),
+
+            # ZEIT (NEU)
+            Idiom(
+                text="die Zeit totschlagen",
+                meaning="Die Zeit verstreichen lassen",
+                category=IdiomCategory.ZEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="sich die Zeit vertreiben",
+                meaning="Die Zeit angenehm verbringen",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="die Uhr tickt",
+                meaning="Die Zeit wird knapp",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="ein für alle Mal",
+                meaning="Endgültig, für immer",
+                category=IdiomCategory.ZEIT
+            ),
+
+            # FREUNDSCHAFT (NEU)
+            Idiom(
+                text="in der Not frisst der Teufel Fliegen",
+                meaning="In schwierigen Zeiten nimmt man, was man kriegt",
+                category=IdiomCategory.FREUNDSCHAFT
+            ),
+            Idiom(
+                text="Freunde in der Not gehen tausend auf ein Lot",
+                meaning="Wahre Freunde zeigen sich in schweren Zeiten",
+                category=IdiomCategory.FREUNDSCHAFT
+            ),
+            Idiom(
+                text="wie Pech und Schwefel zusammenhalten",
+                meaning="Unzertrennlich sein",
+                category=IdiomCategory.FREUNDSCHAFT,
+                intensity=IdiomIntensity.STARK
+            ),
+
+            # WEISHEIT & RATSCHLAG (NEU)
+            Idiom(
+                text="wer rastet, der rostet",
+                meaning="Man muss aktiv bleiben",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="der frühe Vogel fängt den Wurm",
+                meaning="Wer früh anfängt, hat Vorteile",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="viele Köche verderben den Brei",
+                meaning="Zu viele Beteiligte sind schlecht",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="gut Ding will Weile haben",
+                meaning="Gute Ergebnisse brauchen Zeit",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="in der Ruhe liegt die Kraft",
+                meaning="Gelassenheit bringt Stärke",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="aus Fehlern lernt man",
+                meaning="Fehler helfen beim Wachsen",
+                category=IdiomCategory.RATSCHLAG
+            ),
+
+            # WARNUNG (NEU)
+            Idiom(
+                text="das Spiel mit dem Feuer",
+                meaning="Riskantes Verhalten",
+                category=IdiomCategory.WARNUNG
+            ),
+            Idiom(
+                text="wer Wind sät, wird Sturm ernten",
+                meaning="Böse Taten haben Konsequenzen",
+                category=IdiomCategory.WARNUNG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="nicht alle Tassen im Schrank haben",
+                meaning="Nicht ganz bei Verstand sein",
+                category=IdiomCategory.WARNUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # ERMUTIGUNG (NEU)
+            Idiom(
+                text="wo ein Wille ist, ist auch ein Weg",
+                meaning="Mit Entschlossenheit ist alles möglich",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="hinfallen, aufstehen, Krone richten, weitergehen",
+                meaning="Sich nicht unterkriegen lassen",
+                category=IdiomCategory.ERMUTIGUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="jeder Tag ist ein neuer Anfang",
+                meaning="Immer neue Chancen",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+
+            # TIERE (NEU)
+            Idiom(
+                text="der Hund bellt, aber die Karawane zieht weiter",
+                meaning="Sich nicht von Kritik aufhalten lassen",
+                category=IdiomCategory.TIERE
+            ),
+            Idiom(
+                text="schlafende Hunde wecken",
+                meaning="Unnötig Probleme verursachen",
+                category=IdiomCategory.TIERE
+            ),
+            Idiom(
+                text="wenn die Katze aus dem Haus ist, tanzen die Mäuse auf dem Tisch",
+                meaning="Ohne Aufsicht wird gefeiert",
+                category=IdiomCategory.TIERE
+            ),
+            Idiom(
+                text="ein Wolf im Schafspelz",
+                meaning="Jemand, der harmlos erscheint, aber gefährlich ist",
+                category=IdiomCategory.TIERE,
+                is_kemonomimi_friendly=True
+            ),
+
+            # ALLTAG (NEU)
+            Idiom(
+                text="das ist Schnee von gestern",
+                meaning="Das ist nicht mehr relevant",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="alles in Butter",
+                meaning="Alles ist in Ordnung",
+                category=IdiomCategory.ALLTAG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="unter vier Augen",
+                meaning="Vertraulich, nur zu zweit",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="aus dem Nähkästchen plaudern",
+                meaning="Geheimnisse verraten",
+                category=IdiomCategory.ALLTAG
+            ),
+
+            # KEMONOMIMI-SPEZIFISCH (NEU)
+            Idiom(
+                text="die Ohren steif halten",
+                meaning="Durchhalten und nicht aufgeben",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="mit gespitzten Ohren lauschen",
+                meaning="Sehr aufmerksam zuhören",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="der Schwanz zwischen den Beinen",
+                meaning="Beschämt oder verängstigt sein",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="das Fell gesträubt haben",
+                meaning="Aufgeregt oder verängstigt sein",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Vollmond anrufen",
+                meaning="Sehnsucht oder Melancholie ausdrücken",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="das Rudel zusammenhalten",
+                meaning="Für Zusammenhalt sorgen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+
+            # HUMOR (NEU)
+            Idiom(
+                text="das hat Hand und Fuß",
+                meaning="Das ist gut durchdacht",
+                category=IdiomCategory.HUMOR
+            ),
+            Idiom(
+                text="das ist mir Wurst",
+                meaning="Das ist mir egal",
+                category=IdiomCategory.HUMOR,
+                formality=IdiomFormality.SEHR_INFORMELL
+            ),
+            Idiom(
+                text="sich einen Wolf laufen",
+                meaning="Wund laufen",
+                category=IdiomCategory.HUMOR,
+                is_kemonomimi_friendly=True
+            ),
         ])
 
         logger.info(f"IdiomDatabase: {len(self.idioms)} Redewendungen geladen")
