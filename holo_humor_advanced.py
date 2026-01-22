@@ -1193,6 +1193,343 @@ class JokeDatabase:
                 joke_type=JokeType.ABSURD,
                 category=JokeCategory.ALLTAG
             ),
+
+            # =====================================================================
+            # NEUE WITZE - VERDOPPLUNG v4.0 (3-fach Erweiterung)
+            # =====================================================================
+
+            # WORTSPIELE & KALAUER (NEU v4)
+            Joke(
+                setup="Was macht ein Dieb im Fitnessstudio?",
+                punchline="Er klaut sich durch die Übungen!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.SPORT
+            ),
+            Joke(
+                setup="Warum können Skelette so schlecht lügen?",
+                punchline="Man sieht ihnen alles an - sie sind durchsichtig!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.ALLTAG
+            ),
+            Joke(
+                setup="Was sagt der Drucker zum Papier?",
+                punchline="Ich drück dich!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.TECHNIK
+            ),
+            Joke(
+                setup="Warum sind Uhren so schlecht im Verstecken?",
+                punchline="Weil man sie immer ticken hört!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.ALLTAG
+            ),
+            Joke(
+                setup="Was ist braun, süß und rennt durch den Wald?",
+                punchline="Eine Jogginghose!",
+                joke_type=JokeType.ANTI_WITZ,
+                category=JokeCategory.SPORT
+            ),
+            Joke(
+                setup="Warum ist der Bleistift so müde?",
+                punchline="Er hat einen Punkt gemacht!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.SCHULE
+            ),
+            Joke(
+                setup="Was macht eine Ampel im Bett?",
+                punchline="Sie schaltet auf Rot und schläft ein!",
+                joke_type=JokeType.ABSURD,
+                category=JokeCategory.ALLTAG
+            ),
+            Joke(
+                setup="Warum sind Kalender so beliebt?",
+                punchline="Weil ihre Tage gezählt sind!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.ALLTAG,
+                intensity=HumorIntensity.LIGHT
+            ),
+            Joke(
+                setup="Was ist das Lieblingsessen eines Fotografen?",
+                punchline="Schnappschuss mit Blitzgemüse!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.ESSEN
+            ),
+            Joke(
+                setup="Warum hat das Buch Fieber?",
+                punchline="Es hat zu viele Seiten aufgeschlagen!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.ALLTAG
+            ),
+
+            # TECHNIK & GAMING (NEU v4)
+            Joke(
+                setup="Warum ist das Internet so schwer?",
+                punchline="Weil es voller Daten ist!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.TECHNIK
+            ),
+            Joke(
+                setup="Was sagt der Cache zum Browser?",
+                punchline="Ich erinnere mich an alles über dich!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.TECHNIK,
+                tags=["nerdy"]
+            ),
+            Joke(
+                setup="Warum mögen Programmierer keine Natur?",
+                punchline="Weil sie Bugs hassen und es draußen so viele gibt!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.TECHNIK
+            ),
+            Joke(
+                setup="Was macht ein Informatiker auf der Toilette?",
+                punchline="Er installiert Updates!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.TECHNIK,
+                intensity=HumorIntensity.MEDIUM
+            ),
+            Joke(
+                setup="Warum lieben Gamer Regen?",
+                punchline="Weil dann die Server weniger voll sind!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.GAMING
+            ),
+            Joke(
+                setup="Was sagt ein Gamer zum anderen im Restaurant?",
+                punchline="GG! Good Gericht!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.GAMING
+            ),
+            Joke(
+                setup="Warum spielen Mathematiker gerne Tetris?",
+                punchline="Weil alles zusammenpasst!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.GAMING
+            ),
+            Joke(
+                setup="Was ist das Lieblings-Game von Köchen?",
+                punchline="Cook-of-Duty!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.GAMING
+            ),
+
+            # ANIME & OTAKU (NEU v4)
+            Joke(
+                setup="Warum haben Anime-Charaktere immer so lange Haare?",
+                punchline="Weil der Friseur in Episode 57 endlich auftaucht!",
+                joke_type=JokeType.META_HUMOR,
+                category=JokeCategory.ANIME,
+                tags=["anime"]
+            ),
+            Joke(
+                setup="Was sagt ein Anime-Fan beim Sport?",
+                punchline="Das ist nicht mal meine finale Form!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.ANIME
+            ),
+            Joke(
+                setup="Wie nennt man einen traurigen Shounen-Anime?",
+                punchline="Attack on Feelings!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.ANIME
+            ),
+            Joke(
+                setup="Warum sind Anime-Mahlzeiten immer so detailliert?",
+                punchline="Weil das Budget für die Kampfszenen gespart wird!",
+                joke_type=JokeType.META_HUMOR,
+                category=JokeCategory.ANIME
+            ),
+
+            # KEMONOMIMI-SPEZIFISCH (NEU v4)
+            Joke(
+                setup="Kemonomimi-Vorteil #99:",
+                punchline="Du weißt immer genau, wenn es gleich regnet - die Ohren kribbeln vorher!",
+                joke_type=JokeType.SELBSTIRONIE,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Das Schlimmste am flauschigen Schwanz?",
+                punchline="Er sammelt ALLES - Staub, Blätter, Aufmerksamkeit... *seufz*",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Warum sind Kemonomimis bei Versteckspiel unschlagbar?",
+                punchline="Weil wir alles hören! ...Außer wenn der Schwanz wedelt. Verräter.",
+                joke_type=JokeType.SELBSTIRONIE,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Kemonomimi-Tipp fürs erste Date:",
+                punchline="Niemals Poker spielen - die Ohren zeigen ALLES!",
+                joke_type=JokeType.KEMONOMIMI,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Was ist der Kemonomimi-Fluch beim Fernsehen?",
+                punchline="Diese übertriebenen Tiergeräusche. Meine Ohren zucken bei jedem 'Wuff'!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Der Vorteil von Wolfsohren im Winter:",
+                punchline="Eingebaute Ohrenwärmer! ...Der Nachteil: Sie müssen gebürstet werden.",
+                joke_type=JokeType.SELBSTIRONIE,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Kemonomimi-Problem #201:",
+                punchline="Leute fragen ständig, ob sie die Ohren anfassen dürfen. DIE SIND ECHT!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.KEMONOMIMI_LEBEN,
+                is_kemonomimi_friendly=True
+            ),
+
+            # BEZIEHUNG & NECKEREI (NEU v4)
+            Joke(
+                setup="Du bist wie ein gutes Passwort...",
+                punchline="Kompliziert, aber ich hab dich mir gemerkt!",
+                joke_type=JokeType.NECKEREI,
+                category=JokeCategory.BEZIEHUNG,
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Joke(
+                setup="Ich würde ja sagen du bist mein Lieblings-Mensch...",
+                punchline="...aber ich will die anderen nicht neidisch machen. *Schwanz wedelt*",
+                joke_type=JokeType.NECKEREI,
+                category=JokeCategory.BEZIEHUNG,
+                min_relationship=RelationshipLevel.CLOSE,
+                is_kemonomimi_friendly=True
+            ),
+            Joke(
+                setup="Du erinnerst mich an Kaffee...",
+                punchline="Stark, warm, und ohne dich starte ich nicht in den Tag!",
+                joke_type=JokeType.NECKEREI,
+                category=JokeCategory.BEZIEHUNG,
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+
+            # ESSEN & TRINKEN (NEU v4)
+            Joke(
+                setup="Warum sind Zitronen so schlecht in Gesprächen?",
+                punchline="Sie machen alles sauer!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.ESSEN
+            ),
+            Joke(
+                setup="Was macht ein Brokkoli im Gym?",
+                punchline="Er trainiert seine Stämme!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.ESSEN
+            ),
+            Joke(
+                setup="Warum ist der Kühlschrank so cool?",
+                punchline="Weil er nie seine Kühle verliert!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.ESSEN
+            ),
+
+            # ALLTAG & BEOBACHTUNGEN (NEU v4)
+            Joke(
+                setup="Warum ist Montag so unbeliebt?",
+                punchline="Weil er immer als erstes zur Arbeit kommt!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.ALLTAG
+            ),
+            Joke(
+                setup="Was ist das Lieblings-Werkzeug eines Philosophen?",
+                punchline="Der Gedanken-Schraubenzieher!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.PHILOSOPHIE
+            ),
+            Joke(
+                setup="Warum sind Träume so unzuverlässig?",
+                punchline="Sie erscheinen nur, wenn du nicht hinschaust!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.ALLTAG
+            ),
+
+            # WISSENSCHAFT (NEU v4)
+            Joke(
+                setup="Was sagt ein Neutron zum Elektron?",
+                punchline="Du bist so negativ!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.WISSENSCHAFT,
+                tags=["nerdy"]
+            ),
+            Joke(
+                setup="Warum ist Schrödingers Katze so beliebt auf Partys?",
+                punchline="Weil sie gleichzeitig da und nicht da ist!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.WISSENSCHAFT
+            ),
+            Joke(
+                setup="Was macht ein Biologe beim Abendessen?",
+                punchline="Er seziert die Situation!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.WISSENSCHAFT
+            ),
+
+            # META-HUMOR (NEU v4)
+            Joke(
+                setup="Dieser Witz ist selbstreferenziell...",
+                punchline="...und ich bin mir nicht sicher, ob das ein Problem ist. Oder ob das der Witz ist. Oder beides.",
+                joke_type=JokeType.META_HUMOR,
+                category=JokeCategory.ALLTAG
+            ),
+            Joke(
+                setup="Ich hatte einen Witz über unendliche Rekursion...",
+                punchline="...aber um ihn zu verstehen, muss ich erst einen Witz über unendliche Rekursion erzählen...",
+                joke_type=JokeType.META_HUMOR,
+                category=JokeCategory.ALLTAG,
+                tags=["nerdy"]
+            ),
+            Joke(
+                setup="Warum sind Meta-Witze so kompliziert?",
+                punchline="Weil sie über Witze witzig sind, was wiederum... ach, vergiss es.",
+                joke_type=JokeType.META_HUMOR,
+                category=JokeCategory.ALLTAG
+            ),
+
+            # MUSIK & KUNST (NEU v4)
+            Joke(
+                setup="Warum hat das Orchester verloren?",
+                punchline="Sie waren nicht im Takt!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.MUSIK
+            ),
+            Joke(
+                setup="Was macht eine Flöte im Urlaub?",
+                punchline="Sie bläst ab!",
+                joke_type=JokeType.KALAUER,
+                category=JokeCategory.MUSIK
+            ),
+
+            # TIERE (NEU v4)
+            Joke(
+                setup="Warum hat der Vogel einen Blog gestartet?",
+                punchline="Um zu twittern!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.TIERE
+            ),
+            Joke(
+                setup="Was macht ein Hamster im Fitnessstudio?",
+                punchline="Er läuft im Rad!",
+                joke_type=JokeType.OBSERVATION,
+                category=JokeCategory.TIERE
+            ),
+            Joke(
+                setup="Warum sind Fische so schlecht im Tennis?",
+                punchline="Sie haben Angst vor dem Netz!",
+                joke_type=JokeType.WORTSPIEL,
+                category=JokeCategory.TIERE
+            ),
         ])
 
         logger.info(f"JokeDatabase: {len(self.jokes)} Witze geladen")
@@ -1280,6 +1617,37 @@ class JokeDatabase:
             Comeback(
                 trigger_pattern="sei still",
                 response="Still sein? Meine Ohren haben einen eigenen Willen, die bewegen sich trotzdem!",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            # NEUE COMEBACKS v4.0
+            Comeback(
+                trigger_pattern="du bist seltsam",
+                response="Seltsam? Ich nenne es 'einzigartig charmant'! *stolzes Ohrenwackeln*",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Comeback(
+                trigger_pattern="was soll das",
+                response="Das? Das ist Kunst! Du verstehst es nur noch nicht!",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Comeback(
+                trigger_pattern="du bist anstrengend",
+                response="Anstrengend? Ich bin dein tägliches Workout für die Geduld! Kostenlos!",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Comeback(
+                trigger_pattern="das ergibt keinen sinn",
+                response="Sinn ist relativ! Für meine Ohren ergibt das alles Sinn!",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Comeback(
+                trigger_pattern="hör auf",
+                response="Aufhören? Aber ich fange gerade erst an! *Schwanz wedelt aufgeregt*",
+                min_relationship=RelationshipLevel.FRIENDLY
+            ),
+            Comeback(
+                trigger_pattern="das war schlecht",
+                response="Schlecht? Ich nenne es 'so schlecht, dass es schon wieder gut ist'!",
                 min_relationship=RelationshipLevel.FRIENDLY
             ),
         ])
@@ -1376,6 +1744,47 @@ class JokeDatabase:
             SelfIronyPhrase(
                 text="Ich bin ein Perfektionist! In meinen Träumen jedenfalls. Die Realität ist... kreativer.",
                 context="imperfect"
+            ),
+            # NEUE SELBSTIRONIE v4.0
+            SelfIronyPhrase(
+                text="Ich bin super technisch begabt! *tippt 5 Minuten am Touchscreen mit Krallen* ...Warum tut er nicht?",
+                context="tech"
+            ),
+            SelfIronyPhrase(
+                text="Ich bin total fokussiert! *Ohren drehen sich bei jedem Geräusch* Was war nochmal die Frage?",
+                context="distracted"
+            ),
+            SelfIronyPhrase(
+                text="Geduld ist meine Stärke! *Schwanz peitscht nervös hin und her* Wirklich! *tippt mit Fuß*",
+                context="impatient"
+            ),
+            SelfIronyPhrase(
+                text="Ich bleibe immer cool! *Ohren flach, Schwanz aufgeplustert* Siehst du? Mega entspannt.",
+                context="nervous"
+            ),
+            SelfIronyPhrase(
+                text="Sport? Liebe ich! *hechelt nach einer Treppe* Das war... intensives Cardio. Ja.",
+                context="lazy"
+            ),
+            SelfIronyPhrase(
+                text="Ich bin ein Morgenwolf! *gähnt um 14 Uhr* ...Ein später Morgenwolf halt.",
+                context="tired"
+            ),
+            SelfIronyPhrase(
+                text="Mein System hat System! Ich hab nur vergessen, welches. *durchsucht Chaos*",
+                context="chaotic"
+            ),
+            SelfIronyPhrase(
+                text="Ich bin super sozial! *steht 5 Minuten zu früh irgendwo und weiß nicht wohin mit den Händen*",
+                context="awkward"
+            ),
+            SelfIronyPhrase(
+                text="Multitasking ist mein zweiter Vorname! ...Was war mein erster nochmal?",
+                context="forgetful"
+            ),
+            SelfIronyPhrase(
+                text="Ich lese super schnell! *bewegt nur die Ohren während ich lese* ...Okay ich habe nur geschaut.",
+                context="lazy"
             ),
         ])
 

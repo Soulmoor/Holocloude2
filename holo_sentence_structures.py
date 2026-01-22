@@ -3363,6 +3363,91 @@ FILLER_PHRASES: List[FillerPhrase] = [
     FillerPhrase("Davon abgesehen", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
     FillerPhrase("Hinzu kommt", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
     FillerPhrase("Was mich daran erinnert", "uebergang", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+
+    # =========================================================================
+    # NEUE FÜLLWÖRTER - VERDOPPLUNG v4.0 (3-fach Erweiterung)
+    # =========================================================================
+
+    # ANFANGS-FÜLLWÖRTER (NEU v4)
+    FillerPhrase("Hach", "anfang", [EmotionalTone.NACHDENKLICH, EmotionalTone.TRAURIG], Formality.INFORMELL),
+    FillerPhrase("Tatsache", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Uff", "anfang", [EmotionalTone.BESORGT, EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL),
+    FillerPhrase("Puh", "anfang", [EmotionalTone.BESORGT], Formality.SEHR_INFORMELL),
+    FillerPhrase("Na dann", "anfang", [EmotionalTone.NEUTRAL], Formality.INFORMELL),
+    FillerPhrase("So so", "anfang", [EmotionalTone.NACHDENKLICH, EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Ach du meine Güte", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Herrje", "anfang", [EmotionalTone.BESORGT, EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Du glaubst nicht", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Rat mal", "anfang", [EmotionalTone.VERSPIELT, EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Achtung jetzt", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Schätzchen", "anfang", [EmotionalTone.LIEBEVOLL], Formality.INFORMELL),
+    FillerPhrase("Mein Lieber", "anfang", [EmotionalTone.LIEBEVOLL, EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Gute Neuigkeiten", "anfang", [EmotionalTone.FREUDIG], Formality.NEUTRAL),
+    FillerPhrase("Kleine Info", "anfang", [EmotionalTone.NEUTRAL], Formality.INFORMELL),
+
+    # Kemonomimi (NEU v4)
+    FillerPhrase("Nyuu~", "anfang", [EmotionalTone.TRAURIG, EmotionalTone.LIEBEVOLL], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("Wan wan", "anfang", [EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("Awoo~", "anfang", [EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*schnüffel schnüffel*", "anfang", [EmotionalTone.NEUGIERIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*Ohren gespitzt*", "anfang", [EmotionalTone.NEUGIERIG, EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*wedel wedel*", "anfang", [EmotionalTone.FREUDIG, EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # MITTEN-FÜLLWÖRTER (NEU v4)
+    FillerPhrase("gewiss", "mitte", [EmotionalTone.NEUTRAL, EmotionalTone.RUHIG], Formality.FORMELL),
+    FillerPhrase("zweifelsohne", "mitte", [EmotionalTone.NEUTRAL], Formality.FORMELL),
+    FillerPhrase("fraglos", "mitte", [EmotionalTone.NEUTRAL], Formality.FORMELL),
+    FillerPhrase("keineswegs", "mitte", [EmotionalTone.NEUTRAL], Formality.FORMELL),
+    FillerPhrase("durchweg", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("schlichtweg", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("schlicht", "mitte", [EmotionalTone.NEUTRAL, EmotionalTone.RUHIG], Formality.NEUTRAL),
+    FillerPhrase("mitunter", "mitte", [EmotionalTone.NACHDENKLICH], Formality.FORMELL),
+    FillerPhrase("weitestgehend", "mitte", [EmotionalTone.NEUTRAL], Formality.FORMELL),
+    FillerPhrase("im Wesentlichen", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("schlechthin", "mitte", [EmotionalTone.AUFGEREGT], Formality.FORMELL),
+    FillerPhrase("buchstäblich", "mitte", [EmotionalTone.AUFGEREGT], Formality.NEUTRAL),
+    FillerPhrase("wortwörtlich", "mitte", [EmotionalTone.AUFGEREGT], Formality.NEUTRAL),
+    FillerPhrase("im Grunde genommen", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("streng genommen", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+
+    # Kemonomimi Mitte (NEU v4)
+    FillerPhrase("totaaal", "mitte", [EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("suuper", "mitte", [EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("extreeeem", "mitte", [EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # END-FÜLLWÖRTER (NEU v4)
+    FillerPhrase("muss ich sagen", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("wenn ich ehrlich bin", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("so denke ich", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("nach meinem Dafürhalten", "ende", [EmotionalTone.NACHDENKLICH], Formality.FORMELL),
+    FillerPhrase("würde ich meinen", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("möchte ich meinen", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("kann man wohl sagen", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("das steht fest", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("ohne Zweifel", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("ganz klar", "ende", [EmotionalTone.NEUTRAL], Formality.INFORMELL),
+    FillerPhrase("na klar", "ende", [EmotionalTone.FREUDIG], Formality.INFORMELL),
+
+    # Kemonomimi Ende (NEU v4)
+    FillerPhrase("*wedel*", "ende", [EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("nya~!", "ende", [EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*zufriedenes Schnurren*", "ende", [EmotionalTone.RUHIG, EmotionalTone.LIEBEVOLL], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*stolzes Ohrenwackeln*", "ende", [EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # ÜBERGANGS-FÜLLWÖRTER (NEU v4)
+    FillerPhrase("Und noch was", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Ach da fällt mir ein", "uebergang", [EmotionalTone.AUFGEREGT, EmotionalTone.NEUGIERIG], Formality.INFORMELL),
+    FillerPhrase("Wusstest du eigentlich", "uebergang", [EmotionalTone.NEUGIERIG], Formality.INFORMELL),
+    FillerPhrase("Ich wollte noch sagen", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("Ganz am Rande", "uebergang", [EmotionalTone.VERSPIELT], Formality.NEUTRAL),
+    FillerPhrase("Nur so nebenbei", "uebergang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Zwischen den Zeilen", "uebergang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Hier kommt der Clou", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Und jetzt wird's spannend", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Das Beste kommt noch", "uebergang", [EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG], Formality.INFORMELL),
+    FillerPhrase("Halt stop", "uebergang", [EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL),
+    FillerPhrase("Eine Sache noch", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("Nicht zu vergessen", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
 ]
 
 
