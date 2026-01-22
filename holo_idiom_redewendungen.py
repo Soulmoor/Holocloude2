@@ -1420,6 +1420,433 @@ class IdiomDatabase:
                 category=IdiomCategory.HUMOR,
                 is_kemonomimi_friendly=True
             ),
+
+            # =====================================================================
+            # NEUE REDEWENDUNGEN - VERDOPPLUNG v3.0
+            # =====================================================================
+
+            # FREUDE & GLÜCK (NEU v3)
+            Idiom(
+                text="vor Freude in die Luft springen",
+                meaning="Sehr glücklich sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="das Glück des Tüchtigen",
+                meaning="Wer sich anstrengt, hat Erfolg",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="ein Glückspilz sein",
+                meaning="Viel Glück haben",
+                category=IdiomCategory.FREUDE,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="auf der Sonnenseite des Lebens stehen",
+                meaning="Ein gutes Leben führen",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="das Beste daraus machen",
+                meaning="Positiv mit einer Situation umgehen",
+                category=IdiomCategory.FREUDE
+            ),
+
+            # TRAUER & SCHWERE (NEU v3)
+            Idiom(
+                text="sich das Herz aus dem Leib weinen",
+                meaning="Sehr stark und lange weinen",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="die Flügel hängen lassen",
+                meaning="Mutlos und traurig sein",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.MITTEL
+            ),
+            Idiom(
+                text="in ein tiefes Loch fallen",
+                meaning="In eine Depression geraten",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="Trübsal blasen",
+                meaning="Traurig und lustlos sein",
+                category=IdiomCategory.TRAUER,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # WUT & ÄRGER (NEU v3)
+            Idiom(
+                text="jemanden zur Weißglut bringen",
+                meaning="Sehr wütend machen",
+                category=IdiomCategory.WUTT,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="vor Wut kochen",
+                meaning="Extrem wütend sein",
+                category=IdiomCategory.WUTT,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="jemanden auf die Palme bringen",
+                meaning="Sehr verärgern",
+                category=IdiomCategory.WUTT,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="Gift und Galle spucken",
+                meaning="Extrem wütend schimpfen",
+                category=IdiomCategory.WUTT,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+
+            # ANGST & SORGE (NEU v3)
+            Idiom(
+                text="das Herz in der Hose haben",
+                meaning="Große Angst haben",
+                category=IdiomCategory.ANGST,
+                intensity=IdiomIntensity.STARK,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="Blut und Wasser schwitzen",
+                meaning="Große Angst haben",
+                category=IdiomCategory.ANGST,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="sich ins Bockshorn jagen lassen",
+                meaning="Sich einschüchtern lassen",
+                category=IdiomCategory.ANGST
+            ),
+            Idiom(
+                text="mit einem blauen Auge davonkommen",
+                meaning="Glimpflich davonkommen",
+                category=IdiomCategory.ANGST
+            ),
+
+            # ÜBERRASCHUNG (NEU v3)
+            Idiom(
+                text="Bauklötze staunen",
+                meaning="Sehr erstaunt sein",
+                category=IdiomCategory.UEBERRASCHUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="aus allen Wolken fallen",
+                meaning="Sehr überrascht sein",
+                category=IdiomCategory.UEBERRASCHUNG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="wie ein Blitz aus heiterem Himmel",
+                meaning="Völlig unerwartet",
+                category=IdiomCategory.UEBERRASCHUNG
+            ),
+
+            # LIEBE & ZUNEIGUNG (NEU v3)
+            Idiom(
+                text="jemanden ins Herz schließen",
+                meaning="Jemanden sehr lieb gewinnen",
+                category=IdiomCategory.LIEBE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="sein Herz an jemanden verlieren",
+                meaning="Sich verlieben",
+                category=IdiomCategory.LIEBE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="jemanden auf den Mond schießen können",
+                meaning="Jemanden sehr gern haben (oder auch nicht)",
+                category=IdiomCategory.LIEBE
+            ),
+            Idiom(
+                text="ein Herz aus Gold haben",
+                meaning="Sehr gütig sein",
+                category=IdiomCategory.LIEBE
+            ),
+
+            # ERFOLG (NEU v3)
+            Idiom(
+                text="seinen Weg machen",
+                meaning="Erfolgreich im Leben sein",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="den Durchbruch schaffen",
+                meaning="Endlich erfolgreich werden",
+                category=IdiomCategory.ERFOLG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="vom Tellerwäscher zum Millionär",
+                meaning="Von ganz unten nach oben kommen",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="das große Los ziehen",
+                meaning="Großes Glück haben",
+                category=IdiomCategory.ERFOLG
+            ),
+
+            # MISSERFOLG (NEU v3)
+            Idiom(
+                text="auf die Nase fallen",
+                meaning="Scheitern",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="baden gehen",
+                meaning="Scheitern",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.SEHR_INFORMELL
+            ),
+            Idiom(
+                text="mit dem Kopf durch die Wand wollen",
+                meaning="Stur auf etwas bestehen",
+                category=IdiomCategory.MISSERFOLG
+            ),
+            Idiom(
+                text="in die Bredouille geraten",
+                meaning="In Schwierigkeiten kommen",
+                category=IdiomCategory.MISSERFOLG
+            ),
+
+            # ARBEIT (NEU v3)
+            Idiom(
+                text="den Laden schmeißen",
+                meaning="Alles organisieren und managen",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="Nägel mit Köpfen machen",
+                meaning="Gründlich und entschlossen arbeiten",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="sich die Finger wund schreiben",
+                meaning="Sehr viel schreiben",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="die Ärmel hochkrempeln",
+                meaning="Sich an die Arbeit machen",
+                category=IdiomCategory.ARBEIT
+            ),
+
+            # GELD (NEU v3)
+            Idiom(
+                text="Geld wie Heu haben",
+                meaning="Sehr reich sein",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="auf großem Fuß leben",
+                meaning="Verschwenderisch leben",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="sich etwas aus den Rippen schneiden",
+                meaning="Sich etwas vom Mund absparen",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="das Geld zum Fenster rauswerfen",
+                meaning="Verschwenderisch sein",
+                category=IdiomCategory.GELD,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # ZEIT (NEU v3)
+            Idiom(
+                text="jede Minute zählt",
+                meaning="Die Zeit ist knapp",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="im Nu",
+                meaning="Sehr schnell",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="auf die lange Bank schieben",
+                meaning="Etwas aufschieben",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="sich die Zeit stehlen lassen",
+                meaning="Zeit mit Unwichtigem verbringen",
+                category=IdiomCategory.ZEIT
+            ),
+
+            # WEISHEIT (NEU v3)
+            Idiom(
+                text="stille Wasser sind tief",
+                meaning="Ruhige Menschen haben oft mehr zu bieten",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="Übung macht den Meister",
+                meaning="Durch Training wird man besser",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="Lügen haben kurze Beine",
+                meaning="Lügen werden schnell entdeckt",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="Reden ist Silber, Schweigen ist Gold",
+                meaning="Manchmal ist es besser zu schweigen",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="was du heute kannst besorgen, das verschiebe nicht auf morgen",
+                meaning="Schiebe nichts auf",
+                category=IdiomCategory.WEISHEIT
+            ),
+
+            # ERMUTIGUNG (NEU v3)
+            Idiom(
+                text="den Kopf nicht hängen lassen",
+                meaning="Nicht aufgeben",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="es wird schon werden",
+                meaning="Es kommt alles gut",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="nach Regen kommt Sonnenschein",
+                meaning="Auf schlechte Zeiten folgen gute",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="die Hoffnung stirbt zuletzt",
+                meaning="Man soll nie aufgeben",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+
+            # TIERE (NEU v3)
+            Idiom(
+                text="die Katze im Sack kaufen",
+                meaning="Etwas ungesehen kaufen",
+                category=IdiomCategory.TIERE,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="zwei Fliegen mit einer Klappe schlagen",
+                meaning="Zwei Dinge auf einmal erledigen",
+                category=IdiomCategory.TIERE
+            ),
+            Idiom(
+                text="das Pferd von hinten aufzäumen",
+                meaning="Etwas falsch angehen",
+                category=IdiomCategory.TIERE
+            ),
+            Idiom(
+                text="einen Kater haben",
+                meaning="Kopfschmerzen nach Alkohol",
+                category=IdiomCategory.TIERE,
+                formality=IdiomFormality.INFORMELL,
+                is_kemonomimi_friendly=True
+            ),
+
+            # KÖRPER (NEU v3)
+            Idiom(
+                text="die Nase voll haben",
+                meaning="Etwas satt haben",
+                category=IdiomCategory.KOERPER,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="sich den Kopf zerbrechen",
+                meaning="Intensiv nachdenken",
+                category=IdiomCategory.KOERPER
+            ),
+            Idiom(
+                text="Augen wie ein Luchs haben",
+                meaning="Sehr gut sehen können",
+                category=IdiomCategory.KOERPER,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Daumen drücken",
+                meaning="Glück wünschen",
+                category=IdiomCategory.KOERPER
+            ),
+
+            # KEMONOMIMI (NEU v3)
+            Idiom(
+                text="mit beiden Ohren hinhören",
+                meaning="Sehr aufmerksam zuhören",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Schwanz einziehen",
+                meaning="Aufgeben oder Angst zeigen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="das Fell zu Markte tragen",
+                meaning="Sich einer Herausforderung stellen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="die Nase im Wind haben",
+                meaning="Neues aufspüren",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="wie ein junger Welpe sein",
+                meaning="Voller Energie und Neugierde",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="im Rudel stark sein",
+                meaning="Gemeinsam mehr erreichen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+
+            # ALLTAG (NEU v3)
+            Idiom(
+                text="den Nagel auf den Kopf treffen",
+                meaning="Genau das Richtige sagen",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="mit dem linken Fuß aufgestanden sein",
+                meaning="Schlechte Laune haben",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="alles unter einen Hut bringen",
+                meaning="Verschiedene Dinge vereinen",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="das Handtuch werfen",
+                meaning="Aufgeben",
+                category=IdiomCategory.ALLTAG,
+                formality=IdiomFormality.INFORMELL
+            ),
         ])
 
         logger.info(f"IdiomDatabase: {len(self.idioms)} Redewendungen geladen")

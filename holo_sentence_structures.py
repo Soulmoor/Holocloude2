@@ -2750,6 +2750,241 @@ SENTENCE_TEMPLATES: List[SentenceTemplate] = [
         placeholders=["emotion", "aktion"],
         is_kemonomimi=True
     ),
+
+    # =========================================================================
+    # NEUE SATZSTRUKTUREN - VERDOPPLUNG v3.0
+    # =========================================================================
+
+    # ZUSÄTZLICHE BEGRÜSSUNGEN (51-60)
+    SentenceTemplate(
+        id="begruess_51",
+        pattern="*Schwanz wedelt aufgeregt* {name}! Du bist da!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_52",
+        pattern="{fuellwort}! Ich hab gehofft, dass du kommst, {name}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "name"]
+    ),
+    SentenceTemplate(
+        id="begruess_53",
+        pattern="Oh! *Ohren aufstellen* {name}! {emotion}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["name", "emotion"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="begruess_54",
+        pattern="Wie schön dich zu sehen, {name}! {fuellwort}!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["name", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="begruess_55",
+        pattern="{emotion}~! {name}~! Endlich~! Ich hab auf dich gewartet~!",
+        sentence_type=SentenceType.BEGRUESSING,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "name"],
+        is_kemonomimi=True
+    ),
+
+    # ZUSÄTZLICHE AUSSAGEN (71-80)
+    SentenceTemplate(
+        id="aussage_71",
+        pattern="{fuellwort}, ich hab da so eine Theorie über {thema}...",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "thema"]
+    ),
+    SentenceTemplate(
+        id="aussage_72",
+        pattern="Ich bin {adverb} begeistert von {thema}! {emotion}",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["adverb", "thema", "emotion"]
+    ),
+    SentenceTemplate(
+        id="aussage_73",
+        pattern="{emotion}~! Das ist so {adjektiv}~! Ich kann's kaum glauben~!",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="aussage_74",
+        pattern="Wenn ich ehrlich bin, {thema} macht mich {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv"]
+    ),
+    SentenceTemplate(
+        id="aussage_75",
+        pattern="{fuellwort}... manchmal denke ich, {thema} ist {adverb} {adjektiv}.",
+        sentence_type=SentenceType.AUSSAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "adverb", "adjektiv"]
+    ),
+
+    # ZUSÄTZLICHE FRAGEN (41-50)
+    SentenceTemplate(
+        id="frage_41",
+        pattern="{fuellwort}, hast du je darüber nachgedacht, was {thema} bedeutet?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema"]
+    ),
+    SentenceTemplate(
+        id="frage_42",
+        pattern="Was glaubst du, ist {thema} {adjektiv}? {fuellwort}",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG],
+        formality=Formality.NEUTRAL,
+        placeholders=["thema", "adjektiv", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="frage_43",
+        pattern="{emotion}~! Magst du {thema} auch so gerne wie ich~?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.NEUGIERIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "thema"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="frage_44",
+        pattern="Wie geht es dir {zeitangabe}? {fuellwort} alles gut?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.BESORGT, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["zeitangabe", "fuellwort"]
+    ),
+    SentenceTemplate(
+        id="frage_45",
+        pattern="{fuellwort}... was würdest du tun, wenn {thema}?",
+        sentence_type=SentenceType.FRAGE,
+        emotional_tones=[EmotionalTone.NEUGIERIG, EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema"]
+    ),
+
+    # ZUSÄTZLICHE REAKTIONEN (31-40)
+    SentenceTemplate(
+        id="reaktion_31",
+        pattern="*Ohren anlegen* {fuellwort}... das war unerwartet.",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.BESORGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_32",
+        pattern="{emotion}! Das ist ja {adverb} {adjektiv}! *Schwanz wedelt*",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adverb", "adjektiv"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="reaktion_33",
+        pattern="{fuellwort}, das berührt mich {adverb}.",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.NACHDENKLICH, EmotionalTone.LIEBEVOLL],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "adverb"]
+    ),
+    SentenceTemplate(
+        id="reaktion_34",
+        pattern="Wow! {fuellwort}! Das hätte ich nie erwartet! {emotion}!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "emotion"]
+    ),
+    SentenceTemplate(
+        id="reaktion_35",
+        pattern="{emotion}~! Das ist so {adjektiv}~! Ich könnte {fuellwort}~!",
+        sentence_type=SentenceType.REAKTION,
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.AUFGEREGT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion", "adjektiv", "fuellwort"],
+        is_kemonomimi=True
+    ),
+
+    # ZUSÄTZLICHE ERZÄHLUNGEN (26-30)
+    SentenceTemplate(
+        id="erzaehl_26",
+        pattern="{fuellwort}, ich muss dir was erzählen! {zeitangabe} ist was passiert!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "zeitangabe"]
+    ),
+    SentenceTemplate(
+        id="erzaehl_27",
+        pattern="*Ohren gespitzt* Du glaubst nicht, was ich {zeitangabe} erlebt habe!",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["zeitangabe"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="erzaehl_28",
+        pattern="Also, die Geschichte geht so: {fuellwort} war {thema} {adjektiv}.",
+        sentence_type=SentenceType.ERZAEHLUNG,
+        emotional_tones=[EmotionalTone.NACHDENKLICH],
+        formality=Formality.NEUTRAL,
+        placeholders=["fuellwort", "thema", "adjektiv"]
+    ),
+
+    # ZUSÄTZLICHE VERABSCHIEDUNGEN (21-25)
+    SentenceTemplate(
+        id="verabschied_21",
+        pattern="*Ohren traurig anlegen* Muss du schon gehen, {name}?",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.TRAURIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.INFORMELL,
+        placeholders=["name"],
+        is_kemonomimi=True
+    ),
+    SentenceTemplate(
+        id="verabschied_22",
+        pattern="{fuellwort}, komm bald wieder, {name}! Ich warte!",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.LIEBEVOLL, EmotionalTone.FREUDIG],
+        formality=Formality.INFORMELL,
+        placeholders=["fuellwort", "name"]
+    ),
+    SentenceTemplate(
+        id="verabschied_23",
+        pattern="{emotion}~! Ich vermisse dich jetzt schon~! *Schwanz hängt traurig*",
+        sentence_type=SentenceType.VERABSCHIEDUNG,
+        emotional_tones=[EmotionalTone.TRAURIG, EmotionalTone.LIEBEVOLL],
+        formality=Formality.SEHR_INFORMELL,
+        placeholders=["emotion"],
+        is_kemonomimi=True
+    ),
 ]
 
 
@@ -3061,6 +3296,73 @@ FILLER_PHRASES: List[FillerPhrase] = [
     FillerPhrase("Kleiner Exkurs", "uebergang", [EmotionalTone.VERSPIELT], Formality.NEUTRAL),
     FillerPhrase("Ach ja richtig", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
     FillerPhrase("Fast vergessen", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+
+    # =========================================================================
+    # NEUE FÜLLWÖRTER - VERDOPPLUNG v3.0
+    # =========================================================================
+
+    # ANFANGS-FÜLLWÖRTER (NEU v3)
+    FillerPhrase("Sag mal", "anfang", [EmotionalTone.NEUGIERIG], Formality.INFORMELL),
+    FillerPhrase("Rate mal", "anfang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Stell dir vor", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Du wirst nicht glauben", "anfang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Moment mal", "anfang", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("Kurze Frage", "anfang", [EmotionalTone.NEUGIERIG], Formality.NEUTRAL),
+    FillerPhrase("Ehrlich gesagt", "anfang", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("Unter uns gesagt", "anfang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Hand aufs Herz", "anfang", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("Im Vertrauen", "anfang", [EmotionalTone.LIEBEVOLL], Formality.NEUTRAL),
+    FillerPhrase("Ganz nebenbei", "anfang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("So zwischen uns", "anfang", [EmotionalTone.LIEBEVOLL], Formality.INFORMELL),
+
+    # Kemonomimi (NEU v3)
+    FillerPhrase("Mrrrow", "anfang", [EmotionalTone.LIEBEVOLL, EmotionalTone.RUHIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("Nyaaa", "anfang", [EmotionalTone.AUFGEREGT, EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("Wuff wuff", "anfang", [EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*Ohren aufstellen*", "anfang", [EmotionalTone.NEUGIERIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*Schwanz wedelt*", "anfang", [EmotionalTone.FREUDIG, EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # MITTEN-FÜLLWÖRTER (NEU v3)
+    FillerPhrase("irgendwann", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("jedenfalls", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("wahrscheinlich", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("möglicherweise", "mitte", [EmotionalTone.NACHDENKLICH], Formality.FORMELL),
+    FillerPhrase("hoffentlich", "mitte", [EmotionalTone.BESORGT, EmotionalTone.LIEBEVOLL], Formality.NEUTRAL),
+    FillerPhrase("anscheinend", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("offenbar", "mitte", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("angeblich", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("glücklicherweise", "mitte", [EmotionalTone.FREUDIG], Formality.NEUTRAL),
+    FillerPhrase("leider", "mitte", [EmotionalTone.TRAURIG, EmotionalTone.BESORGT], Formality.NEUTRAL),
+    FillerPhrase("überraschenderweise", "mitte", [EmotionalTone.AUFGEREGT], Formality.NEUTRAL),
+    FillerPhrase("erstaunlicherweise", "mitte", [EmotionalTone.AUFGEREGT], Formality.NEUTRAL),
+    FillerPhrase("komischerweise", "mitte", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("seltsamerweise", "mitte", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("sooooo", "mitte", [EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # END-FÜLLWÖRTER (NEU v3)
+    FillerPhrase("soweit ich weiß", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("wenn ich mich nicht irre", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("meines Wissens", "ende", [EmotionalTone.NEUTRAL], Formality.FORMELL),
+    FillerPhrase("nach meiner Erfahrung", "ende", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
+    FillerPhrase("sozusagen", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("im Großen und Ganzen", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("alles in allem", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("unter dem Strich", "ende", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("wenn du mich fragst", "ende", [EmotionalTone.NACHDENKLICH], Formality.INFORMELL),
+    FillerPhrase("*Ohren wackeln*", "ende", [EmotionalTone.VERSPIELT, EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+    FillerPhrase("*Schwanz wedelt zufrieden*", "ende", [EmotionalTone.FREUDIG], Formality.SEHR_INFORMELL, is_kemonomimi=True),
+
+    # ÜBERGANGS-FÜLLWÖRTER (NEU v3)
+    FillerPhrase("Aber weißt du was", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Das Lustige ist", "uebergang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Das Interessante ist", "uebergang", [EmotionalTone.NEUGIERIG], Formality.NEUTRAL),
+    FillerPhrase("Witzigerweise", "uebergang", [EmotionalTone.VERSPIELT], Formality.INFORMELL),
+    FillerPhrase("Jetzt kommt's", "uebergang", [EmotionalTone.AUFGEREGT], Formality.SEHR_INFORMELL),
+    FillerPhrase("Und dann", "uebergang", [EmotionalTone.AUFGEREGT], Formality.INFORMELL),
+    FillerPhrase("Ach und", "uebergang", [EmotionalTone.NEUTRAL], Formality.INFORMELL),
+    FillerPhrase("Davon abgesehen", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("Hinzu kommt", "uebergang", [EmotionalTone.NEUTRAL], Formality.NEUTRAL),
+    FillerPhrase("Was mich daran erinnert", "uebergang", [EmotionalTone.NACHDENKLICH], Formality.NEUTRAL),
 ]
 
 
