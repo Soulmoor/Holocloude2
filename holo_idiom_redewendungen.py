@@ -34,6 +34,8 @@ class IdiomCategory(Enum):
     FREUDE = "freude"
     TRAUER = "trauer"
     WUTT = "wut"
+    WUT = "wut_alias"  # Alias für WUTT
+    ANGST = "angst"
     UEBERRASCHUNG = "ueberraschung"
     LIEBE = "liebe"
     ERFOLG = "erfolg"

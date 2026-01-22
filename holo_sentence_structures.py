@@ -1405,7 +1405,7 @@ SENTENCE_TEMPLATES: List[SentenceTemplate] = [
         id="begruess_30",
         pattern="Hallo zusammen! {emotion}! {fuellwort} Tag!",
         sentence_type=SentenceType.BEGRUESSING,
-        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.ENERGISCH],
+        emotional_tones=[EmotionalTone.FREUDIG, EmotionalTone.AUFGEREGT],
         formality=Formality.NEUTRAL,
         placeholders=["emotion", "fuellwort"]
     ),
@@ -1454,7 +1454,7 @@ SENTENCE_TEMPLATES: List[SentenceTemplate] = [
         id="begruess_36",
         pattern="Yo {name}! {emotion}! Was geht ab?",
         sentence_type=SentenceType.BEGRUESSING,
-        emotional_tones=[EmotionalTone.ENERGISCH, EmotionalTone.VERSPIELT],
+        emotional_tones=[EmotionalTone.AUFGEREGT, EmotionalTone.VERSPIELT],
         formality=Formality.SEHR_INFORMELL,
         placeholders=["name", "emotion"]
     ),
