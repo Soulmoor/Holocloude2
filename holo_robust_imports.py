@@ -339,6 +339,61 @@ except ImportError as e:
     logger.warning(f"[RobustImports] holo_emotional_complexity: {e}")
 
 
+# --- MARKOV TRAINING & INTELLIGENCE ---
+MARKOV_INTELLIGENCE_AVAILABLE = False
+HoloIntelligenceEngine = None
+ThoughtMarkovChain = None
+EmotionMarkovChain = None
+PersonalityMarkovChain = None
+KnowledgeMarkovChain = None
+MarkovTrainer = None
+get_intelligence_engine = None
+process_with_intelligence = None
+enhance_response = None
+get_random_fun_fact = None
+get_kemonomimi_expression = None
+get_greeting_for_time_of_day = None
+get_farewell = None
+
+try:
+    from holo_markov_training import (
+        # Enums
+        EmotionState,
+        ThoughtCategory,
+        PersonalityTrait,
+        TrainingCategory,
+        # Haupt-Engine
+        HoloIntelligenceEngine,
+        ThoughtMarkovChain,
+        EmotionMarkovChain,
+        PersonalityMarkovChain,
+        KnowledgeMarkovChain,
+        MarkovTrainer,
+        # Convenience Functions
+        get_intelligence_engine,
+        process_with_intelligence,
+        enhance_response,
+        get_random_fun_fact,
+        get_random_thought,
+        get_kemonomimi_expression,
+        get_greeting_for_time_of_day,
+        get_farewell,
+        get_emotional_response,
+        get_personality_response,
+        get_current_emotion,
+        get_current_personality_trait,
+        get_all_knowledge_topics,
+        generate_random_sentence,
+        get_markov_trainer,
+        count_training_sentences,
+        TRAINING_SENTENCES,
+    )
+    MARKOV_INTELLIGENCE_AVAILABLE = True
+    logger.info("[RobustImports] ✓ holo_markov_training (Intelligence Engine + 3000 Sätze)")
+except ImportError as e:
+    logger.warning(f"[RobustImports] holo_markov_training: {e}")
+
+
 def get_core_modules_status() -> Dict[str, bool]:
     """Status aller Kerndateien inkl. emotionaler Module"""
     return {
@@ -347,6 +402,7 @@ def get_core_modules_status() -> Dict[str, bool]:
         "context_mind": CONTEXT_MIND_AVAILABLE,
         "personality": PERSONALITY_AVAILABLE,
         "emotional_engines": EMOTIONAL_ENGINES_AVAILABLE,
+        "markov_intelligence": MARKOV_INTELLIGENCE_AVAILABLE,
         "emotional_complexity": EMOTIONAL_COMPLEXITY_AVAILABLE,
     }
 
@@ -1469,4 +1525,16 @@ __all__ = [
     # NEU: Web Curiosity
     'HoloWebCuriosity', 'TrustedSourcesDB',
     'FactVerificationEngine', 'WebFactsDB',
+
+    # NEU: Markov Intelligence Engine
+    'MARKOV_INTELLIGENCE_AVAILABLE',
+    'HoloIntelligenceEngine', 'ThoughtMarkovChain', 'EmotionMarkovChain',
+    'PersonalityMarkovChain', 'KnowledgeMarkovChain', 'MarkovTrainer',
+    'get_intelligence_engine', 'process_with_intelligence', 'enhance_response',
+    'get_random_fun_fact', 'get_random_thought', 'get_kemonomimi_expression',
+    'get_greeting_for_time_of_day', 'get_farewell', 'get_emotional_response',
+    'get_personality_response', 'get_current_emotion', 'get_current_personality_trait',
+    'get_all_knowledge_topics', 'generate_random_sentence', 'get_markov_trainer',
+    'count_training_sentences', 'TRAINING_SENTENCES',
+    'EmotionState', 'ThoughtCategory', 'PersonalityTrait', 'TrainingCategory',
 ]

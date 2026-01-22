@@ -15277,6 +15277,24 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"WebSocketHandler nicht verfügbar: {e}")
 
+        # ================================================================
+        # MARKOV INTELLIGENCE ENGINE - Gedanken, Emotionen, Wissen (NEU!)
+        # ================================================================
+        self.markov_intelligence = None
+        if MARKOV_INTELLIGENCE_AVAILABLE and get_intelligence_engine:
+            try:
+                self.markov_intelligence = get_intelligence_engine()
+                logger.info("🧠 MarkovIntelligenceEngine aktiviert")
+                logger.info("   └─ ThoughtMarkovChain (91 Gedankenknoten)")
+                logger.info("   └─ EmotionMarkovChain (12 Emotionen)")
+                logger.info("   └─ KnowledgeMarkovChain (23 Wissensthemen)")
+                logger.info("   └─ 3000+ Trainingssätze")
+            except Exception as e:
+                logger.warning(f"⚠️ MarkovIntelligenceEngine nicht verfügbar: {e}")
+                self.markov_intelligence = None
+        else:
+            logger.debug("MarkovIntelligenceEngine nicht importiert")
+
         # Cognitive Enhancement System - Proaktives Wissen, Transfer-Learning, Symbolisches Reasoning
         self.cognitive_enhancement = None
         if COGNITIVE_ENHANCEMENT_AVAILABLE and create_cognitive_enhancement:
@@ -20603,6 +20621,25 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                 self.personality.process_message(user_message)
             except Exception as e:
                 logger.debug(f"Personality update error: {e}")
+
+        # 4b. MARKOV INTELLIGENCE - Gedanken, Emotionen, Wissen (NEU!)
+        if hasattr(self, 'markov_intelligence') and self.markov_intelligence:
+            try:
+                # Verarbeite Nachricht mit Intelligence Engine
+                intel_result = self.markov_intelligence.process_message(user_message)
+
+                # Logge interessante Ergebnisse
+                if intel_result.get('thought'):
+                    logger.debug(f"[MARKOV] Gedanke: {intel_result['thought'][:50]}...")
+                if intel_result.get('knowledge_tangent'):
+                    logger.debug(f"[MARKOV] Wissen: {intel_result['knowledge_tangent'][:50]}...")
+                if intel_result.get('emotion'):
+                    logger.debug(f"[MARKOV] Emotion: {intel_result['emotion']}")
+
+                # Speichere für mögliche spätere Nutzung
+                self._last_markov_intel = intel_result
+            except Exception as e:
+                logger.debug(f"Markov Intelligence error: {e}")
 
         # 5. Consciousness verarbeiten
         if self.consciousness and hasattr(self.consciousness, 'process_interaction'):
