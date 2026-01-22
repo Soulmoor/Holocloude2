@@ -2269,6 +2269,687 @@ class IdiomDatabase:
                 category=IdiomCategory.ALLTAG,
                 formality=IdiomFormality.INFORMELL
             ),
+
+            # =====================================================================
+            # ERWEITERUNG v5.0 - NEUE REDEWENDUNGEN FÜR 2000 EINTRÄGE
+            # =====================================================================
+
+            # FREUDE & POSITIVES (15 neue)
+            Idiom(
+                text="das Herz geht auf",
+                meaning="Sehr glücklich und gerührt sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="auf Rosen gebettet sein",
+                meaning="Im Überfluss leben, es gut haben",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="im siebten Himmel schweben",
+                meaning="Überglücklich sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="das Leben genießen",
+                meaning="Sich am Dasein erfreuen",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="Freudensprünge machen",
+                meaning="Vor Glück herumhüpfen",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="die Welt umarmen können",
+                meaning="Grenzenlos glücklich sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="sein Glück kaum fassen können",
+                meaning="Überwältigt vor Freude sein",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="auf Wolken wandeln",
+                meaning="Sehr glücklich und unbeschwert sein",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="das Herz hüpft vor Freude",
+                meaning="Innerlich jubeln",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.MITTEL
+            ),
+            Idiom(
+                text="wie ein Kind freuen",
+                meaning="Sich unbefangen und echt freuen",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="überglücklich sein",
+                meaning="Extremes Glücksgefühl empfinden",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="vor Freude aus der Haut fahren",
+                meaning="Kaum zu bändigende Freude",
+                category=IdiomCategory.FREUDE,
+                intensity=IdiomIntensity.SEHR_STARK,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="glücklich wie ein Schnitzel",
+                meaning="Sehr zufrieden und glücklich",
+                category=IdiomCategory.FREUDE,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="das Herz lacht",
+                meaning="Innerlich froh sein",
+                category=IdiomCategory.FREUDE
+            ),
+            Idiom(
+                text="sich pudelwohl fühlen",
+                meaning="Sich sehr wohl und zufrieden fühlen",
+                category=IdiomCategory.FREUDE,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # TRAUER & NEGATIVES (10 neue)
+            Idiom(
+                text="am Boden zerstört sein",
+                meaning="Völlig niedergeschmettert sein",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="wie ein Häufchen Elend",
+                meaning="Sehr bedauernswert aussehen",
+                category=IdiomCategory.TRAUER,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="das Herz blutet",
+                meaning="Sehr traurig sein",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="sich in Trauer hüllen",
+                meaning="Um jemanden oder etwas trauern",
+                category=IdiomCategory.TRAUER
+            ),
+            Idiom(
+                text="ins Bodenlose fallen",
+                meaning="In tiefe Verzweiflung geraten",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.SEHR_STARK
+            ),
+            Idiom(
+                text="die Seele baumeln lassen",
+                meaning="Sich entspannen und erholen",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.LEICHT
+            ),
+            Idiom(
+                text="Krokodilstränen weinen",
+                meaning="Geheuchelte Trauer zeigen",
+                category=IdiomCategory.TRAUER
+            ),
+            Idiom(
+                text="sich die Haare raufen",
+                meaning="Verzweifelt sein",
+                category=IdiomCategory.TRAUER,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="Weltschmerz empfinden",
+                meaning="Tiefe melancholische Traurigkeit",
+                category=IdiomCategory.TRAUER
+            ),
+            Idiom(
+                text="den Blues haben",
+                meaning="Melancholisch und traurig sein",
+                category=IdiomCategory.TRAUER,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # ARBEIT & BERUF (12 neue)
+            Idiom(
+                text="die Ärmel hochkrempeln",
+                meaning="Sich an die Arbeit machen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="Überstunden schieben",
+                meaning="Länger arbeiten als geplant",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="ein heißes Eisen anfassen",
+                meaning="Ein schwieriges Thema angehen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="den Karren aus dem Dreck ziehen",
+                meaning="Eine schwierige Situation retten",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="ans Ruder kommen",
+                meaning="Die Führung übernehmen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="unter Volldampf arbeiten",
+                meaning="Mit voller Kraft arbeiten",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="die Strippen ziehen",
+                meaning="Im Hintergrund die Kontrolle haben",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="den Laden schmeißen",
+                meaning="Die Verantwortung tragen",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="sich in die Arbeit stürzen",
+                meaning="Intensiv mit der Arbeit beginnen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="einen Durchbruch schaffen",
+                meaning="Einen wichtigen Erfolg erzielen",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="sein Handwerk verstehen",
+                meaning="Kompetent in seinem Bereich sein",
+                category=IdiomCategory.ARBEIT
+            ),
+            Idiom(
+                text="Dienst nach Vorschrift",
+                meaning="Nur das Nötigste tun",
+                category=IdiomCategory.ARBEIT,
+                formality=IdiomFormality.NEUTRAL
+            ),
+
+            # ERFOLG & LEISTUNG (10 neue)
+            Idiom(
+                text="den Vogel abschießen",
+                meaning="Den größten Erfolg haben",
+                category=IdiomCategory.ERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="Berge versetzen können",
+                meaning="Zu großen Leistungen fähig sein",
+                category=IdiomCategory.ERFOLG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="auf der Überholspur sein",
+                meaning="Schneller vorankommen als andere",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="sein Ziel erreichen",
+                meaning="Das Gewünschte schaffen",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="Lorbeeren ernten",
+                meaning="Anerkennung für Leistungen bekommen",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="Geschichte schreiben",
+                meaning="Etwas Bedeutendes vollbringen",
+                category=IdiomCategory.ERFOLG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="den Durchbruch schaffen",
+                meaning="Endlich erfolgreich werden",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="hoch hinaus wollen",
+                meaning="Große Ambitionen haben",
+                category=IdiomCategory.ERFOLG
+            ),
+            Idiom(
+                text="alle Erwartungen übertreffen",
+                meaning="Besser abschneiden als gedacht",
+                category=IdiomCategory.ERFOLG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="auf dem aufsteigenden Ast sein",
+                meaning="Sich positiv entwickeln",
+                category=IdiomCategory.ERFOLG
+            ),
+
+            # MISSERFOLG (8 neue)
+            Idiom(
+                text="auf die Nase fallen",
+                meaning="Scheitern",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="baden gehen",
+                meaning="Einen Misserfolg erleiden",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="gegen die Wand fahren",
+                meaning="Vollständig scheitern",
+                category=IdiomCategory.MISSERFOLG,
+                intensity=IdiomIntensity.STARK
+            ),
+            Idiom(
+                text="eine Bruchlandung hinlegen",
+                meaning="Kläglich scheitern",
+                category=IdiomCategory.MISSERFOLG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="den Kürzeren ziehen",
+                meaning="Als Verlierer dastehen",
+                category=IdiomCategory.MISSERFOLG
+            ),
+            Idiom(
+                text="Schiffbruch erleiden",
+                meaning="Mit einem Vorhaben scheitern",
+                category=IdiomCategory.MISSERFOLG
+            ),
+            Idiom(
+                text="ins Straucheln geraten",
+                meaning="In Schwierigkeiten kommen",
+                category=IdiomCategory.MISSERFOLG
+            ),
+            Idiom(
+                text="auf dem absteigenden Ast sein",
+                meaning="Sich negativ entwickeln",
+                category=IdiomCategory.MISSERFOLG
+            ),
+
+            # ERMUTIGUNG (12 neue)
+            Idiom(
+                text="Kopf hoch!",
+                meaning="Nicht aufgeben, mutig sein",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="sich ins Zeug legen",
+                meaning="Sich sehr anstrengen",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="alle Register ziehen",
+                meaning="Alles versuchen",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="über sich hinauswachsen",
+                meaning="Mehr schaffen als erwartet",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="nicht klein beigeben",
+                meaning="Nicht aufgeben",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="die Flinte nicht ins Korn werfen",
+                meaning="Nicht vorzeitig aufgeben",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="Mund abwischen und weitermachen",
+                meaning="Nach Rückschlag weitermachen",
+                category=IdiomCategory.ERMUTIGUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="sich zusammenreißen",
+                meaning="Seine Gefühle kontrollieren",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="die Zähne zusammenbeißen",
+                meaning="Durchhalten trotz Schwierigkeiten",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="sich nicht unterkriegen lassen",
+                meaning="Standhaft bleiben",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="Nerven wie Drahtseile haben",
+                meaning="Sehr belastbar sein",
+                category=IdiomCategory.ERMUTIGUNG
+            ),
+            Idiom(
+                text="kein Spielverderber sein",
+                meaning="Mitmachen und positiv bleiben",
+                category=IdiomCategory.ERMUTIGUNG,
+                formality=IdiomFormality.INFORMELL
+            ),
+
+            # GELD & FINANZEN (10 neue)
+            Idiom(
+                text="auf großem Fuß leben",
+                meaning="Luxuriös leben",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="Geld wie Heu haben",
+                meaning="Sehr reich sein",
+                category=IdiomCategory.GELD,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="den Gürtel enger schnallen",
+                meaning="Weniger ausgeben müssen",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="nicht aus Zucker sein",
+                meaning="Robust und nicht verwöhnt sein",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="jeden Cent umdrehen",
+                meaning="Sehr sparsam sein",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="einen Batzen Geld kosten",
+                meaning="Sehr teuer sein",
+                category=IdiomCategory.GELD,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="auf Pump leben",
+                meaning="Von geliehenem Geld leben",
+                category=IdiomCategory.GELD,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="sein letztes Hemd geben",
+                meaning="Alles opfern was man hat",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="Gold wert sein",
+                meaning="Sehr wertvoll sein",
+                category=IdiomCategory.GELD
+            ),
+            Idiom(
+                text="aus dem Vollen schöpfen",
+                meaning="Ohne Einschränkungen genießen",
+                category=IdiomCategory.GELD
+            ),
+
+            # ZEIT (8 neue)
+            Idiom(
+                text="die Zeit totschlagen",
+                meaning="Zeit sinnlos verbringen",
+                category=IdiomCategory.ZEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="die Zeit fliegt",
+                meaning="Die Zeit vergeht schnell",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="jemandem die Zeit stehlen",
+                meaning="Jemandes Zeit verschwenden",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="der Zeit voraus sein",
+                meaning="Moderner denken als andere",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="auf Zeit spielen",
+                meaning="Absichtlich verzögern",
+                category=IdiomCategory.ZEIT
+            ),
+            Idiom(
+                text="es ist höchste Eisenbahn",
+                meaning="Es ist allerhöchste Zeit",
+                category=IdiomCategory.ZEIT,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="Tempus fugit",
+                meaning="Die Zeit vergeht",
+                category=IdiomCategory.ZEIT,
+                formality=IdiomFormality.FORMELL
+            ),
+            Idiom(
+                text="in letzter Minute",
+                meaning="Gerade noch rechtzeitig",
+                category=IdiomCategory.ZEIT
+            ),
+
+            # WEISHEIT & ERKENNTNIS (10 neue)
+            Idiom(
+                text="Eulen nach Athen tragen",
+                meaning="Unnötiges tun",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="mit Kanonen auf Spatzen schießen",
+                meaning="Übertriebene Mittel einsetzen",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="stille Wasser sind tief",
+                meaning="Ruhige Menschen haben oft mehr zu bieten",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="wer zuletzt lacht, lacht am besten",
+                meaning="Das Ende zählt",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="Reden ist Silber, Schweigen ist Gold",
+                meaning="Manchmal ist Schweigen besser",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="der Apfel fällt nicht weit vom Stamm",
+                meaning="Kinder ähneln ihren Eltern",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="wer A sagt, muss auch B sagen",
+                meaning="Wer anfängt, muss auch weitermachen",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="Hochmut kommt vor dem Fall",
+                meaning="Überheblichkeit führt zu Misserfolg",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="alle Wege führen nach Rom",
+                meaning="Viele Wege führen zum Ziel",
+                category=IdiomCategory.WEISHEIT
+            ),
+            Idiom(
+                text="was du heute kannst besorgen",
+                meaning="Nicht aufschieben",
+                category=IdiomCategory.WEISHEIT
+            ),
+
+            # KEMONOMIMI-SPEZIFISCH (15 neue)
+            Idiom(
+                text="mit gespitzten Ohren lauschen",
+                meaning="Aufmerksam zuhören",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Schwanz wedeln lassen",
+                meaning="Freude zeigen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="auf leisen Pfoten schleichen",
+                meaning="Sich vorsichtig bewegen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="die Ohren anlegen",
+                meaning="Sich erschrecken oder Angst zeigen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Rücken krümmen",
+                meaning="Sich zur Verteidigung bereit machen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="das Fell sträuben lassen",
+                meaning="Sich aufregen oder provozieren lassen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="mit wedelndem Schwanz begrüßen",
+                meaning="Jemanden freudig willkommen heißen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="die Ohren spitzen",
+                meaning="Aufhorchen und aufpassen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="im Rudel bleiben",
+                meaning="Zusammenhalten",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="seinen Bau hüten",
+                meaning="Das Zuhause beschützen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="das Fell pflegen",
+                meaning="Sich um sich selbst kümmern",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="auf vier Pfoten landen",
+                meaning="Sich aus einer schwierigen Lage befreien",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="mit allen Sinnen wahrnehmen",
+                meaning="Vollständig aufmerksam sein",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="den Mond anheulen",
+                meaning="Sein Leid klagen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+            Idiom(
+                text="sein Territorium verteidigen",
+                meaning="Seinen Bereich schützen",
+                category=IdiomCategory.KEMONOMIMI,
+                is_kemonomimi_friendly=True
+            ),
+
+            # ALLTAG & ALLGEMEIN (10 neue)
+            Idiom(
+                text="aus allen Wolken fallen",
+                meaning="Sehr überrascht sein",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="den Nagel auf den Kopf treffen",
+                meaning="Genau das Richtige sagen",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="die Karten auf den Tisch legen",
+                meaning="Offen und ehrlich sein",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="reinen Tisch machen",
+                meaning="Eine Sache klären",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="über den Tellerrand schauen",
+                meaning="Den Horizont erweitern",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="Nägel mit Köpfen machen",
+                meaning="Ganze Arbeit leisten",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="den Faden verlieren",
+                meaning="Den Zusammenhang vergessen",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="den Ball flach halten",
+                meaning="Sich zurückhalten",
+                category=IdiomCategory.ALLTAG,
+                formality=IdiomFormality.INFORMELL
+            ),
+            Idiom(
+                text="die Nadel im Heuhaufen suchen",
+                meaning="Etwas nahezu Unmögliches versuchen",
+                category=IdiomCategory.ALLTAG
+            ),
+            Idiom(
+                text="das Zünglein an der Waage sein",
+                meaning="Die entscheidende Rolle spielen",
+                category=IdiomCategory.ALLTAG
+            ),
         ])
 
         logger.info(f"IdiomDatabase: {len(self.idioms)} Redewendungen geladen")
