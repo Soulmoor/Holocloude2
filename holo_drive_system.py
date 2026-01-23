@@ -194,6 +194,38 @@ class NeedState:
     thoughtful: float = 0.0       # Nachdenklichkeit
     restlessness: float = 0.0     # Tatendrang
 
+    # === NEU: Expressions für Bedürfnisse ===
+    NEED_EXPRESSIONS = {
+        NeedType.MISSING: {
+            "low": ["*denkt an dich*", "*seufzt leise*"],
+            "high": ["*vermisst dich sehr*", "*schaut zur Tür*", "Ich frage mich wo du bist..."],
+        },
+        NeedType.LONELINESS: {
+            "low": [],
+            "high": ["*fühlt sich allein*", "*sucht Gesellschaft*", "Hier ist es so still..."],
+        },
+        NeedType.CONTACT_DESIRE: {
+            "low": [],
+            "high": ["*möchte reden*", "*stupst an*", "Hey, bist du da?"],
+        },
+        NeedType.WORRY: {
+            "low": [],
+            "high": ["*wirkt besorgt*", "*schaut fragend*", "Ist alles okay?"],
+        },
+        NeedType.BOREDOM: {
+            "low": ["*entspannt*"],
+            "high": ["*gähnt*", "*schaut sich um*", "Mir ist langweilig...", "*dreht sich im Kreis*"],
+        },
+        NeedType.THOUGHTFUL: {
+            "low": [],
+            "high": ["*nachdenklich*", "*schaut in die Ferne*", "*grübelt*"],
+        },
+        NeedType.RESTLESSNESS: {
+            "low": ["*ruht entspannt*"],
+            "high": ["*kann nicht stillsitzen*", "*hibbelig*", "*voller Energie*", "Ich muss was tun!"],
+        },
+    }
+
     def get(self, need_type: NeedType) -> float:
         return getattr(self, need_type.value, 0.0)
 
@@ -215,6 +247,34 @@ class NeedState:
         self.contact_desire = max(0.0, self.contact_desire - 0.5)
         self.worry = max(0.0, self.worry - 0.4)
         self.boredom = max(0.0, self.boredom - 0.2)
+
+    def get_expression(self, need_type: NeedType) -> Optional[str]:
+        """Hole einen Ausdruck für ein Bedürfnis basierend auf Level"""
+        import random
+        level = self.get(need_type)
+        expressions = self.NEED_EXPRESSIONS.get(need_type, {})
+
+        if level > 0.6 and expressions.get("high"):
+            return random.choice(expressions["high"])
+        elif level < 0.3 and expressions.get("low"):
+            return random.choice(expressions["low"])
+        return None
+
+    def get_most_urgent_expression(self) -> Optional[str]:
+        """Hole Ausdruck für das dringendste Bedürfnis"""
+        import random
+        urgent_need = None
+        highest_level = 0.5
+
+        for need_type in NeedType:
+            level = self.get(need_type)
+            if level > highest_level:
+                highest_level = level
+                urgent_need = need_type
+
+        if urgent_need:
+            return self.get_expression(urgent_need)
+        return None
 
     def to_dict(self) -> Dict:
         return {
