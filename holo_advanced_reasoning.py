@@ -184,19 +184,35 @@ class DialecticalPosition:
 
 class BayesianReasoner:
     """
-    Bayesianisches Reasoning mit Prior-Updates.
+    Erweitertes Bayesianisches Reasoning mit Prior-Updates.
 
     Implementiert:
     - Bayes' Theorem: P(H|E) = P(E|H) * P(H) / P(E)
-    - Belief Networks
-    - Evidenz-Updates
+    - Belief Networks mit Abhängigkeiten
+    - Evidenz-Updates mit verschiedenen Strategien
     - Konfidenz-Kalibrierung
+    - Bedingte Wahrscheinlichkeiten
+    - Sensitivitätsanalyse
+    - Bayesian Model Averaging
+    - Multi-Hypothesen-Vergleich
+    - Sequentielles Belief-Update
+    - Jeffreys' Prior für uninformative Priors
+    - Beta-Binomial Konjugate Priors
     """
 
     def __init__(self):
         self.beliefs: Dict[str, Belief] = {}
         self.evidence_pool: List[Dict] = []
         self.calibration_history: List[Tuple[float, bool]] = []
+        # NEU: Erweiterungen
+        self.belief_network: Dict[str, List[str]] = {}  # Abhängigkeiten zwischen Beliefs
+        self.conditional_probabilities: Dict[str, Dict[str, float]] = {}  # P(A|B) Speicher
+        self.hypothesis_models: Dict[str, Dict[str, Any]] = {}  # Mehrere Modelle
+        self.prior_strategies: Dict[str, str] = {}  # Prior-Typ pro Belief
+        self.sensitivity_cache: Dict[str, Dict[str, float]] = {}  # Sensitivitäts-Ergebnisse
+        self.beta_parameters: Dict[str, Tuple[float, float]] = {}  # Alpha, Beta für konjugate Priors
+        self.evidence_weights: Dict[str, float] = {}  # Gewichtung verschiedener Evidenzquellen
+        self.model_weights: Dict[str, float] = {}  # Für Bayesian Model Averaging
 
     def add_belief(self, name: str, content: str, prior: float = 0.5) -> Belief:
         """Fügt eine neue Überzeugung hinzu"""
@@ -361,6 +377,513 @@ class BayesianReasoner:
 
         return total / len(self.calibration_history)
 
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Belief Networks
+    # =========================================================================
+
+    def add_belief_dependency(self, dependent: str, parent: str,
+                               conditional_prob: float = 0.7) -> bool:
+        """
+        Fügt eine Abhängigkeit zwischen Beliefs hinzu.
+
+        Args:
+            dependent: Der abhängige Belief
+            parent: Der Eltern-Belief
+            conditional_prob: P(dependent|parent)
+
+        Returns:
+            True wenn erfolgreich
+        """
+        if dependent not in self.beliefs or parent not in self.beliefs:
+            logger.warning(f"Belief nicht gefunden: {dependent} oder {parent}")
+            return False
+
+        if dependent not in self.belief_network:
+            self.belief_network[dependent] = []
+
+        if parent not in self.belief_network[dependent]:
+            self.belief_network[dependent].append(parent)
+
+        # Speichere bedingte Wahrscheinlichkeit
+        key = f"{dependent}|{parent}"
+        self.conditional_probabilities[key] = max(0.001, min(0.999, conditional_prob))
+
+        logger.debug(f"Belief-Abhängigkeit: P({dependent}|{parent}) = {conditional_prob:.3f}")
+        return True
+
+    def get_conditional_probability(self, belief: str, given: str) -> float:
+        """
+        Gibt P(belief|given) zurück.
+        """
+        key = f"{belief}|{given}"
+        if key in self.conditional_probabilities:
+            return self.conditional_probabilities[key]
+
+        # Fallback: Unabhängigkeitsannahme
+        if belief in self.beliefs:
+            return self.beliefs[belief].posterior
+        return 0.5
+
+    def propagate_belief_network(self, updated_belief: str) -> Dict[str, float]:
+        """
+        Propagiert Updates durch das Belief-Netzwerk.
+        Wenn ein Belief aktualisiert wird, werden abhängige Beliefs angepasst.
+
+        Returns:
+            Dict mit allen aktualisierten Beliefs und neuen Wahrscheinlichkeiten
+        """
+        updates = {}
+        if updated_belief not in self.beliefs:
+            return updates
+
+        new_value = self.beliefs[updated_belief].posterior
+        updates[updated_belief] = new_value
+
+        # Finde alle Beliefs, die von diesem abhängen
+        for dependent, parents in self.belief_network.items():
+            if updated_belief in parents:
+                # Berechne neuen Wert basierend auf bedingter Wahrscheinlichkeit
+                cond_key = f"{dependent}|{updated_belief}"
+                if cond_key in self.conditional_probabilities:
+                    cond_prob = self.conditional_probabilities[cond_key]
+                    # P(D) = P(D|U)*P(U) + P(D|¬U)*P(¬U)
+                    # Vereinfacht: Gewichtete Anpassung
+                    old_posterior = self.beliefs[dependent].posterior
+                    adjustment = cond_prob * new_value + (1 - cond_prob) * (1 - new_value)
+                    new_posterior = 0.7 * old_posterior + 0.3 * adjustment
+                    self.beliefs[dependent].posterior = max(0.001, min(0.999, new_posterior))
+                    updates[dependent] = self.beliefs[dependent].posterior
+
+        return updates
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Multi-Hypothesen-Vergleich
+    # =========================================================================
+
+    def add_hypothesis_model(self, model_name: str, hypotheses: Dict[str, float],
+                              prior_weight: float = 1.0) -> None:
+        """
+        Fügt ein Hypothesen-Modell hinzu für Bayesian Model Averaging.
+
+        Args:
+            model_name: Name des Modells
+            hypotheses: Dict {hypothesis_name: prior_probability}
+            prior_weight: Gewichtung des Modells
+        """
+        # Normalisiere Wahrscheinlichkeiten
+        total = sum(hypotheses.values())
+        if total > 0:
+            normalized = {h: p/total for h, p in hypotheses.items()}
+        else:
+            normalized = {h: 1.0/len(hypotheses) for h in hypotheses}
+
+        self.hypothesis_models[model_name] = {
+            "hypotheses": normalized,
+            "posteriors": normalized.copy(),
+            "evidence_history": []
+        }
+        self.model_weights[model_name] = prior_weight
+        logger.debug(f"Neues Hypothesen-Modell: {model_name} mit {len(hypotheses)} Hypothesen")
+
+    def update_hypothesis_model(self, model_name: str, evidence: str,
+                                  likelihoods: Dict[str, float]) -> Dict[str, float]:
+        """
+        Aktualisiert alle Hypothesen in einem Modell mit neuer Evidenz.
+
+        Args:
+            model_name: Name des Modells
+            evidence: Beschreibung der Evidenz
+            likelihoods: P(E|H) für jede Hypothese H
+
+        Returns:
+            Aktualisierte Posteriors
+        """
+        if model_name not in self.hypothesis_models:
+            logger.warning(f"Modell '{model_name}' nicht gefunden")
+            return {}
+
+        model = self.hypothesis_models[model_name]
+        posteriors = model["posteriors"]
+
+        # Berechne P(E) = Σ P(E|H) * P(H)
+        p_evidence = sum(
+            likelihoods.get(h, 0.5) * posteriors[h]
+            for h in posteriors
+        )
+
+        if p_evidence < 0.0001:
+            p_evidence = 0.0001
+
+        # Update jede Hypothese: P(H|E) = P(E|H) * P(H) / P(E)
+        new_posteriors = {}
+        for hypothesis, prior in posteriors.items():
+            likelihood = likelihoods.get(hypothesis, 0.5)
+            posterior = (likelihood * prior) / p_evidence
+            new_posteriors[hypothesis] = max(0.0001, min(0.9999, posterior))
+
+        # Normalisieren
+        total = sum(new_posteriors.values())
+        model["posteriors"] = {h: p/total for h, p in new_posteriors.items()}
+        model["evidence_history"].append((evidence, likelihoods))
+
+        return model["posteriors"]
+
+    def get_most_likely_hypothesis(self, model_name: str) -> Tuple[str, float]:
+        """
+        Gibt die wahrscheinlichste Hypothese eines Modells zurück.
+        """
+        if model_name not in self.hypothesis_models:
+            return ("unknown", 0.0)
+
+        posteriors = self.hypothesis_models[model_name]["posteriors"]
+        best = max(posteriors.items(), key=lambda x: x[1])
+        return best
+
+    def bayesian_model_average(self, query_hypothesis: str) -> float:
+        """
+        Bayesian Model Averaging über alle Modelle für eine Hypothese.
+
+        P(H) = Σ P(H|M) * P(M)
+        """
+        total_weight = sum(self.model_weights.values())
+        if total_weight == 0:
+            return 0.5
+
+        averaged = 0.0
+        for model_name, model in self.hypothesis_models.items():
+            if query_hypothesis in model["posteriors"]:
+                weight = self.model_weights[model_name] / total_weight
+                averaged += model["posteriors"][query_hypothesis] * weight
+
+        return averaged
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Sensitivitätsanalyse
+    # =========================================================================
+
+    def sensitivity_analysis(self, belief_name: str,
+                              prior_range: Tuple[float, float] = (0.1, 0.9),
+                              steps: int = 10) -> Dict[str, Any]:
+        """
+        Führt Sensitivitätsanalyse durch: Wie ändert sich das Posterior
+        bei verschiedenen Priors?
+
+        Args:
+            belief_name: Name des Beliefs
+            prior_range: Min/Max Prior zu testen
+            steps: Anzahl der Schritte
+
+        Returns:
+            Sensitivitätsergebnisse
+        """
+        if belief_name not in self.beliefs:
+            return {"error": "Belief nicht gefunden"}
+
+        belief = self.beliefs[belief_name]
+        results = {
+            "belief": belief_name,
+            "original_prior": belief.prior_probability,
+            "original_posterior": belief.posterior,
+            "sensitivity_curve": [],
+            "robustness": 0.0
+        }
+
+        priors = []
+        posteriors = []
+
+        step_size = (prior_range[1] - prior_range[0]) / steps
+        for i in range(steps + 1):
+            test_prior = prior_range[0] + i * step_size
+
+            # Simuliere Posterior mit diesem Prior
+            # Nutze die Evidenz-History
+            simulated_posterior = test_prior
+            for evidence, _ in belief.evidence_history:
+                # Vereinfachte Simulation
+                simulated_posterior = simulated_posterior * 1.1 if simulated_posterior < 0.5 else simulated_posterior * 0.9
+                simulated_posterior = max(0.001, min(0.999, simulated_posterior))
+
+            priors.append(test_prior)
+            posteriors.append(simulated_posterior)
+            results["sensitivity_curve"].append({
+                "prior": test_prior,
+                "posterior": simulated_posterior
+            })
+
+        # Berechne Robustheit: Wie stabil ist die Schlussfolgerung?
+        if posteriors:
+            variance = sum((p - sum(posteriors)/len(posteriors))**2 for p in posteriors) / len(posteriors)
+            results["robustness"] = 1.0 - min(variance * 4, 1.0)  # Höhere Varianz = weniger robust
+
+        self.sensitivity_cache[belief_name] = results
+        return results
+
+    def information_gain(self, belief_name: str, potential_evidence: str,
+                          p_evidence_if_true: float,
+                          p_evidence_if_false: float) -> float:
+        """
+        Berechnet den erwarteten Informationsgewinn durch potenzielle Evidenz.
+
+        KL-Divergenz zwischen Prior und erwartetem Posterior.
+        """
+        if belief_name not in self.beliefs:
+            return 0.0
+
+        prior = self.beliefs[belief_name].posterior
+
+        # Erwartetes Posterior wenn Evidenz positiv
+        p_e = p_evidence_if_true * prior + p_evidence_if_false * (1 - prior)
+        if p_e < 0.001:
+            p_e = 0.001
+
+        posterior_positive = (p_evidence_if_true * prior) / p_e
+
+        # Erwartetes Posterior wenn Evidenz negativ
+        p_not_e = (1 - p_evidence_if_true) * prior + (1 - p_evidence_if_false) * (1 - prior)
+        if p_not_e < 0.001:
+            p_not_e = 0.001
+        posterior_negative = ((1 - p_evidence_if_true) * prior) / p_not_e
+
+        # Erwarteter Informationsgewinn
+        prior_entropy = self.entropy(belief_name)
+
+        # Entropie nach positiver Evidenz
+        post_entropy_pos = 0.0
+        if 0.001 < posterior_positive < 0.999:
+            post_entropy_pos = -posterior_positive * math.log2(posterior_positive) - \
+                              (1-posterior_positive) * math.log2(1-posterior_positive)
+
+        # Entropie nach negativer Evidenz
+        post_entropy_neg = 0.0
+        if 0.001 < posterior_negative < 0.999:
+            post_entropy_neg = -posterior_negative * math.log2(posterior_negative) - \
+                              (1-posterior_negative) * math.log2(1-posterior_negative)
+
+        # Gewichteter Erwartungswert
+        expected_entropy = p_e * post_entropy_pos + (1 - p_e) * post_entropy_neg
+
+        return max(0, prior_entropy - expected_entropy)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Konjugierte Priors (Beta-Binomial)
+    # =========================================================================
+
+    def add_belief_with_beta_prior(self, name: str, content: str,
+                                     alpha: float = 1.0, beta: float = 1.0) -> Belief:
+        """
+        Fügt einen Belief mit Beta-Prior hinzu (konjugiert für Binomial).
+
+        Alpha und Beta repräsentieren "pseudobeobachtungen":
+        - Alpha: Anzahl "Erfolge" im Prior
+        - Beta: Anzahl "Misserfolge" im Prior
+        - Alpha = Beta = 1: Uniformer Prior (keine Vorinformation)
+        - Alpha = Beta = 0.5: Jeffreys' uninformativer Prior
+        """
+        self.beta_parameters[name] = (alpha, beta)
+        prior = alpha / (alpha + beta)  # Erwartungswert der Beta-Verteilung
+
+        belief = self.add_belief(name, content, prior)
+        self.prior_strategies[name] = "beta_binomial"
+
+        logger.debug(f"Beta-Prior für '{name}': α={alpha}, β={beta}, E[p]={prior:.3f}")
+        return belief
+
+    def update_beta_belief(self, belief_name: str, successes: int,
+                            failures: int) -> Optional[Belief]:
+        """
+        Aktualisiert einen Beta-Belief mit Beobachtungen.
+
+        Konjugierte Update-Regel: α' = α + successes, β' = β + failures
+        """
+        if belief_name not in self.beliefs or belief_name not in self.beta_parameters:
+            logger.warning(f"Beta-Belief '{belief_name}' nicht gefunden")
+            return None
+
+        alpha, beta = self.beta_parameters[belief_name]
+        new_alpha = alpha + successes
+        new_beta = beta + failures
+
+        self.beta_parameters[belief_name] = (new_alpha, new_beta)
+
+        # Neuer Erwartungswert
+        new_posterior = new_alpha / (new_alpha + new_beta)
+        self.beliefs[belief_name].posterior = new_posterior
+        self.beliefs[belief_name].evidence_history.append(
+            (f"+{successes}/-{failures}", new_posterior)
+        )
+
+        logger.info(f"Beta-Update '{belief_name}': α={new_alpha}, β={new_beta}, E[p]={new_posterior:.3f}")
+        return self.beliefs[belief_name]
+
+    def get_beta_credible_interval(self, belief_name: str,
+                                     credibility: float = 0.95) -> Tuple[float, float]:
+        """
+        Berechnet das Kredibilitätsintervall für einen Beta-Belief.
+
+        Args:
+            belief_name: Name des Beliefs
+            credibility: Gewünschte Glaubwürdigkeit (z.B. 0.95 für 95%)
+
+        Returns:
+            (lower, upper) Grenzen des Intervalls
+        """
+        if belief_name not in self.beta_parameters:
+            return (0.0, 1.0)
+
+        alpha, beta = self.beta_parameters[belief_name]
+
+        # Approximation des Kredibilitätsintervalls
+        # Für große α, β: Beta ≈ Normal mit μ=α/(α+β), σ²=αβ/((α+β)²(α+β+1))
+        mean = alpha / (alpha + beta)
+        variance = (alpha * beta) / ((alpha + beta)**2 * (alpha + beta + 1))
+        std = math.sqrt(variance)
+
+        # Z-Score für Kredibilitätsniveau
+        z = 1.96 if credibility >= 0.95 else 1.645 if credibility >= 0.90 else 1.28
+
+        lower = max(0.0, mean - z * std)
+        upper = min(1.0, mean + z * std)
+
+        return (lower, upper)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Erweiterte Evidenztypen
+    # =========================================================================
+
+    def add_weighted_evidence(self, belief_name: str, evidence: str,
+                               evidence_type: EvidenceType,
+                               source_reliability: float = 1.0,
+                               sample_size: int = 1) -> Optional[Belief]:
+        """
+        Fügt gewichtete Evidenz hinzu mit Quellen-Zuverlässigkeit.
+
+        Args:
+            belief_name: Name des Beliefs
+            evidence: Evidenz-Beschreibung
+            evidence_type: Art der Evidenz
+            source_reliability: Zuverlässigkeit der Quelle (0-1)
+            sample_size: Stichprobengröße (mehr = stärker)
+        """
+        if belief_name not in self.beliefs:
+            return None
+
+        # Basis-Likelihood-Ratio aus Evidenztyp
+        base_lr = self.compute_likelihood_ratio(belief_name, evidence, evidence_type)
+
+        # Gewichtung durch Quellen-Zuverlässigkeit
+        weighted_lr = 1.0 + (base_lr - 1.0) * source_reliability
+
+        # Stichprobengrößen-Anpassung (größere Stichprobe = stärkere Evidenz)
+        sample_factor = min(2.0, 1.0 + math.log10(max(1, sample_size)) * 0.3)
+        final_lr = 1.0 + (weighted_lr - 1.0) * sample_factor
+
+        # Konvertiere LR zu Likelihoods
+        if final_lr > 1:
+            likelihood_if_true = min(0.95, 0.5 + 0.45 * (final_lr - 1) / final_lr)
+            likelihood_if_false = max(0.05, 0.5 - 0.45 * (final_lr - 1) / final_lr)
+        else:
+            likelihood_if_true = max(0.05, 0.5 * final_lr)
+            likelihood_if_false = min(0.95, 0.5 / final_lr)
+
+        return self.update_belief(belief_name, evidence, likelihood_if_true, likelihood_if_false)
+
+    def sequential_update(self, belief_name: str,
+                           evidence_sequence: List[Dict[str, Any]]) -> List[float]:
+        """
+        Führt sequenzielle Belief-Updates durch und gibt Historie zurück.
+
+        Args:
+            belief_name: Name des Beliefs
+            evidence_sequence: Liste von {"evidence": str, "type": EvidenceType}
+
+        Returns:
+            Liste der Posteriors nach jedem Update
+        """
+        posteriors = []
+
+        for ev in evidence_sequence:
+            evidence = ev.get("evidence", "")
+            ev_type = ev.get("type", EvidenceType.NEUTRAL)
+            reliability = ev.get("reliability", 1.0)
+
+            result = self.add_weighted_evidence(
+                belief_name, evidence, ev_type, reliability
+            )
+
+            if result:
+                posteriors.append(result.posterior)
+
+        return posteriors
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Diagnostische Metriken
+    # =========================================================================
+
+    def belief_summary(self, belief_name: str) -> Dict[str, Any]:
+        """
+        Gibt eine umfassende Zusammenfassung eines Beliefs zurück.
+        """
+        if belief_name not in self.beliefs:
+            return {"error": "Belief nicht gefunden"}
+
+        belief = self.beliefs[belief_name]
+
+        summary = {
+            "name": belief_name,
+            "content": belief.content,
+            "prior": belief.prior_probability,
+            "posterior": belief.posterior,
+            "confidence_level": self.get_confidence_level(belief_name),
+            "entropy": self.entropy(belief_name),
+            "evidence_count": len(belief.evidence_history),
+            "last_updated": belief.last_updated.isoformat() if belief.last_updated else None,
+            "network_parents": self.belief_network.get(belief_name, []),
+            "prior_strategy": self.prior_strategies.get(belief_name, "standard"),
+        }
+
+        # Beta-Parameter wenn vorhanden
+        if belief_name in self.beta_parameters:
+            alpha, beta = self.beta_parameters[belief_name]
+            summary["beta_alpha"] = alpha
+            summary["beta_beta"] = beta
+            summary["credible_interval_95"] = self.get_beta_credible_interval(belief_name, 0.95)
+
+        # Sensitivität wenn berechnet
+        if belief_name in self.sensitivity_cache:
+            summary["robustness"] = self.sensitivity_cache[belief_name].get("robustness", None)
+
+        return summary
+
+    def get_all_beliefs_ranked(self) -> List[Tuple[str, float, str]]:
+        """
+        Gibt alle Beliefs sortiert nach Posterior zurück.
+
+        Returns:
+            Liste von (name, posterior, confidence_level)
+        """
+        ranked = []
+        for name, belief in self.beliefs.items():
+            conf = self.get_confidence_level(name)
+            ranked.append((name, belief.posterior, conf))
+
+        return sorted(ranked, key=lambda x: x[1], reverse=True)
+
+    def cross_entropy_beliefs(self, belief1: str, belief2: str) -> float:
+        """
+        Berechnet Cross-Entropy zwischen zwei Beliefs.
+        Maß für Übereinstimmung/Konflikt.
+        """
+        if belief1 not in self.beliefs or belief2 not in self.beliefs:
+            return float('inf')
+
+        p = self.beliefs[belief1].posterior
+        q = self.beliefs[belief2].posterior
+
+        # H(p,q) = -p*log(q) - (1-p)*log(1-q)
+        q = max(0.001, min(0.999, q))
+
+        return -p * math.log2(q) - (1-p) * math.log2(1-q)
+
 
 # =============================================================================
 # 2. CAUSAL REASONING - Kausalität verstehen
@@ -379,18 +902,92 @@ class BayesianReasoner:
 # erweiterte System wenn verfügbar.
 # =============================================================================
 
+class CausalDomain(Enum):
+    """Domänen für kausale Beziehungen"""
+    MEDIZIN = "medizin"
+    PSYCHOLOGIE = "psychologie"
+    WIRTSCHAFT = "wirtschaft"
+    SOZIALES = "soziales"
+    PHYSIK = "physik"
+    BIOLOGIE = "biologie"
+    TECHNOLOGIE = "technologie"
+    UMWELT = "umwelt"
+    POLITIK = "politik"
+    BILDUNG = "bildung"
+    ALLGEMEIN = "allgemein"
+
+
+class MediatorType(Enum):
+    """Typen von Mediator-Variablen"""
+    FULL_MEDIATION = "full"      # Mediator erklärt gesamten Effekt
+    PARTIAL_MEDIATION = "partial"  # Mediator erklärt Teil des Effekts
+    INCONSISTENT = "inconsistent"  # Mediator und direkter Effekt haben unterschiedliche Richtungen
+
+
+class ModeratorEffect(Enum):
+    """Arten von Moderations-Effekten"""
+    ENHANCING = "enhancing"      # Verstärkt den Effekt
+    BUFFERING = "buffering"      # Schwächt den Effekt ab
+    ANTAGONISTIC = "antagonistic"  # Kehrt den Effekt um
+
+
+@dataclass
+class CausalChain:
+    """Eine kausale Kette von Variablen"""
+    chain_id: str
+    variables: List[str]
+    domain: CausalDomain
+    total_strength: float
+    mechanisms: List[str]
+    time_delays: List[float] = field(default_factory=list)  # In Zeiteinheiten
+    is_reversible: bool = False
+    confidence: float = 0.5
+
+
+@dataclass
+class MediatorRelation:
+    """Mediator-Beziehung zwischen Variablen"""
+    cause: str
+    mediator: str
+    effect: str
+    mediation_type: MediatorType
+    indirect_effect: float  # a*b Pfad
+    direct_effect: float    # c' Pfad
+    total_effect: float     # c = c' + a*b
+    proportion_mediated: float
+
+
+@dataclass
+class ModeratorRelation:
+    """Moderator-Beziehung"""
+    cause: str
+    effect: str
+    moderator: str
+    moderator_effect: ModeratorEffect
+    base_strength: float       # Effektstärke ohne Moderator
+    moderated_strength: float  # Effektstärke mit Moderator
+    interaction_coefficient: float
+
+
 class CausalReasoner:
     """
-    Kausales Reasoning mit Kausalmodellen.
+    Erweitertes Kausales Reasoning mit Kausalmodellen.
 
     KONSOLIDIERT: Delegiert an CausalIntegrator aus holo_counterfactual_reasoning.py
     wenn verfügbar. Bietet Rückwärtskompatibilität für einfache Anwendungsfälle.
 
     Implementiert:
-    - Kausale Graphen (DAGs)
+    - Kausale Graphen (DAGs) mit Domänen
     - Interventionen (do-Operator)
     - Kontrafaktische Fragen
     - Confounder-Erkennung
+    - NEU: Mediator-Variablen
+    - NEU: Moderator-Variablen
+    - NEU: Komplexe kausale Ketten
+    - NEU: Domänen-spezifisches Wissen
+    - NEU: Zeitliche Kausalität mit Verzögerungen
+    - NEU: Feedback-Loops (zyklische Kausalität)
+    - NEU: Kausale Stärke-Aggregation
 
     Für erweiterte Funktionen (ATE, Granger-Kausalität, etc.) nutze direkt:
     - holo_counterfactual_reasoning.CausalIntegrator
@@ -400,6 +997,15 @@ class CausalReasoner:
         self.nodes: Dict[str, CausalNode] = {}
         self.edges: List[CausalEdge] = []
         self.observations: List[Dict] = []
+
+        # NEU: Erweiterte Strukturen
+        self.causal_chains: Dict[str, CausalChain] = {}
+        self.mediators: List[MediatorRelation] = []
+        self.moderators: List[ModeratorRelation] = []
+        self.domain_knowledge: Dict[CausalDomain, List[Dict]] = defaultdict(list)
+        self.feedback_loops: List[List[str]] = []
+        self.temporal_delays: Dict[Tuple[str, str], float] = {}  # (cause, effect) -> delay
+        self.variable_domains: Dict[str, CausalDomain] = {}
 
         # Integration mit erweitertem Kausalitäts-System
         self._causal_integrator = None
@@ -411,6 +1017,9 @@ class CausalReasoner:
                 logger.debug("[CausalReasoner] Nutzt CausalIntegrator für erweiterte Analyse")
             except Exception as e:
                 logger.warning(f"[CausalReasoner] CausalIntegrator nicht verfügbar: {e}")
+
+        # Initialisiere Domänen-Wissen
+        self._initialize_domain_knowledge()
 
     def add_variable(self, name: str, description: str,
                       is_observable: bool = True) -> CausalNode:
@@ -675,6 +1284,866 @@ class CausalReasoner:
             explanations.append(f"  • {chain}")
 
         return f"Kausale Pfade von '{cause}' zu '{effect}':\n" + "\n".join(explanations)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Domänen-Wissen
+    # =========================================================================
+
+    def _initialize_domain_knowledge(self):
+        """Initialisiert vordefiniertes Domänen-Wissen für kausale Beziehungen"""
+
+        # MEDIZIN
+        self.domain_knowledge[CausalDomain.MEDIZIN] = [
+            {"cause": "rauchen", "effect": "lungenkrebs", "strength": 0.85,
+             "mechanism": "Karzinogene Substanzen schädigen DNA der Lungenzellen"},
+            {"cause": "rauchen", "effect": "herzerkrankung", "strength": 0.70,
+             "mechanism": "Gefäßverengung durch Nikotinwirkung"},
+            {"cause": "bewegungsmangel", "effect": "adipositas", "strength": 0.65,
+             "mechanism": "Unverbrannte Kalorien werden als Fett gespeichert"},
+            {"cause": "adipositas", "effect": "diabetes_typ2", "strength": 0.60,
+             "mechanism": "Insulinresistenz durch überschüssiges Fettgewebe"},
+            {"cause": "stress", "effect": "bluthochdruck", "strength": 0.55,
+             "mechanism": "Dauerhafte Aktivierung des sympathischen Nervensystems"},
+            {"cause": "schlafmangel", "effect": "immunschwäche", "strength": 0.60,
+             "mechanism": "Reduzierte T-Zellen-Produktion bei Schlafentzug"},
+            {"cause": "ernährung", "effect": "darmgesundheit", "strength": 0.70,
+             "mechanism": "Mikrobiom-Zusammensetzung hängt von Nahrung ab"},
+            {"cause": "genetik", "effect": "krankheitsrisiko", "strength": 0.50,
+             "mechanism": "Vererbte Genvarianzen beeinflussen Krankheitsanfälligkeit"},
+            {"cause": "impfung", "effect": "immunität", "strength": 0.90,
+             "mechanism": "Immunsystem lernt Antigen-Erkennung"},
+            {"cause": "medikament", "effect": "symptomlinderung", "strength": 0.75,
+             "mechanism": "Pharmakologische Wirkung auf Rezeptoren"},
+        ]
+
+        # PSYCHOLOGIE
+        self.domain_knowledge[CausalDomain.PSYCHOLOGIE] = [
+            {"cause": "kindheitstrauma", "effect": "depression", "strength": 0.55,
+             "mechanism": "Frühe negative Erfahrungen prägen neuronale Muster"},
+            {"cause": "soziale_isolation", "effect": "einsamkeit", "strength": 0.80,
+             "mechanism": "Unerfülltes Zugehörigkeitsbedürfnis"},
+            {"cause": "schlafmangel", "effect": "kognitive_beeinträchtigung", "strength": 0.70,
+             "mechanism": "Gestörte Gedächtniskonsolidierung"},
+            {"cause": "achtsamkeit", "effect": "stressreduktion", "strength": 0.60,
+             "mechanism": "Aktivierung des parasympathischen Systems"},
+            {"cause": "positive_verstärkung", "effect": "verhaltensänderung", "strength": 0.75,
+             "mechanism": "Operante Konditionierung durch Belohnung"},
+            {"cause": "selbstwirksamkeit", "effect": "leistung", "strength": 0.65,
+             "mechanism": "Erhöhte Anstrengung und Persistenz bei Aufgaben"},
+            {"cause": "kognitive_verzerrung", "effect": "angst", "strength": 0.60,
+             "mechanism": "Überschätzung von Bedrohungen"},
+            {"cause": "soziale_unterstützung", "effect": "wohlbefinden", "strength": 0.70,
+             "mechanism": "Puffereffekt gegen Stressoren"},
+            {"cause": "motivation", "effect": "zielerreichung", "strength": 0.65,
+             "mechanism": "Erhöhte Persistenz und Ressourcenallokation"},
+            {"cause": "lernen", "effect": "kompetenz", "strength": 0.80,
+             "mechanism": "Neuronale Plastizität und Wissensakkumulation"},
+        ]
+
+        # WIRTSCHAFT
+        self.domain_knowledge[CausalDomain.WIRTSCHAFT] = [
+            {"cause": "zinssenkung", "effect": "wirtschaftswachstum", "strength": 0.55,
+             "mechanism": "Günstigere Kredite stimulieren Investitionen"},
+            {"cause": "geldmenge", "effect": "inflation", "strength": 0.65,
+             "mechanism": "Mehr Geld bei gleichem Güterangebot erhöht Preise"},
+            {"cause": "arbeitslosigkeit", "effect": "konsum_rückgang", "strength": 0.70,
+             "mechanism": "Geringeres Einkommen reduziert Kaufkraft"},
+            {"cause": "innovation", "effect": "produktivität", "strength": 0.75,
+             "mechanism": "Effizientere Prozesse durch neue Technologien"},
+            {"cause": "bildung", "effect": "einkommen", "strength": 0.60,
+             "mechanism": "Höhere Qualifikation ermöglicht bessere Jobs"},
+            {"cause": "steuersenkung", "effect": "investitionen", "strength": 0.50,
+             "mechanism": "Mehr verfügbares Kapital für Unternehmen"},
+            {"cause": "nachfrage", "effect": "preis", "strength": 0.80,
+             "mechanism": "Angebot-Nachfrage-Gleichgewicht"},
+            {"cause": "wettbewerb", "effect": "effizienz", "strength": 0.65,
+             "mechanism": "Druck zur Kostenoptimierung"},
+            {"cause": "globalisierung", "effect": "arbeitsteilung", "strength": 0.70,
+             "mechanism": "Spezialisierung nach komparativen Vorteilen"},
+            {"cause": "infrastruktur", "effect": "wirtschaftsentwicklung", "strength": 0.75,
+             "mechanism": "Erleichterte Güter- und Informationsflüsse"},
+        ]
+
+        # SOZIALES
+        self.domain_knowledge[CausalDomain.SOZIALES] = [
+            {"cause": "armut", "effect": "kriminalität", "strength": 0.45,
+             "mechanism": "Ökonomischer Druck und reduzierte Chancen"},
+            {"cause": "bildungsniveau", "effect": "soziale_mobilität", "strength": 0.60,
+             "mechanism": "Zugang zu besseren Berufschancen"},
+            {"cause": "diskriminierung", "effect": "ungleichheit", "strength": 0.70,
+             "mechanism": "Systematische Benachteiligung bestimmter Gruppen"},
+            {"cause": "urbanisierung", "effect": "anonymität", "strength": 0.55,
+             "mechanism": "Geringere soziale Kontrolle in Großstädten"},
+            {"cause": "migration", "effect": "kultureller_wandel", "strength": 0.50,
+             "mechanism": "Austausch von Traditionen und Werten"},
+            {"cause": "soziale_medien", "effect": "polarisierung", "strength": 0.55,
+             "mechanism": "Filterblasen verstärken bestehende Meinungen"},
+            {"cause": "vertrauen", "effect": "kooperation", "strength": 0.80,
+             "mechanism": "Erwartung von Reziprozität"},
+            {"cause": "normen", "effect": "verhalten", "strength": 0.65,
+             "mechanism": "Sozialer Druck zur Konformität"},
+            {"cause": "gemeinschaft", "effect": "resilienz", "strength": 0.70,
+             "mechanism": "Kollektive Ressourcen bei Krisen"},
+            {"cause": "ungleichheit", "effect": "soziale_spannungen", "strength": 0.60,
+             "mechanism": "Relative Deprivation erzeugt Frustration"},
+        ]
+
+        # PHYSIK
+        self.domain_knowledge[CausalDomain.PHYSIK] = [
+            {"cause": "kraft", "effect": "beschleunigung", "strength": 1.0,
+             "mechanism": "F = m * a (Newtons zweites Gesetz)"},
+            {"cause": "temperatur", "effect": "volumen_gas", "strength": 0.95,
+             "mechanism": "Thermische Expansion (ideales Gasgesetz)"},
+            {"cause": "druck", "effect": "siedepunkt", "strength": 0.90,
+             "mechanism": "Dampfdruck-Gleichgewicht"},
+            {"cause": "gravitation", "effect": "bewegung", "strength": 1.0,
+             "mechanism": "Massenanziehung"},
+            {"cause": "reibung", "effect": "wärme", "strength": 0.95,
+             "mechanism": "Energieumwandlung durch Widerstand"},
+            {"cause": "strom", "effect": "magnetfeld", "strength": 1.0,
+             "mechanism": "Elektromagnetische Induktion"},
+            {"cause": "licht", "effect": "photosynthese", "strength": 0.90,
+             "mechanism": "Energieübertragung an Chlorophyll"},
+            {"cause": "schall", "effect": "vibration", "strength": 0.95,
+             "mechanism": "Mechanische Wellenübertragung"},
+        ]
+
+        # BIOLOGIE
+        self.domain_knowledge[CausalDomain.BIOLOGIE] = [
+            {"cause": "mutation", "effect": "evolution", "strength": 0.80,
+             "mechanism": "Genetische Variation ermöglicht Selektion"},
+            {"cause": "nahrung", "effect": "energie", "strength": 0.95,
+             "mechanism": "Zelluläre Respiration"},
+            {"cause": "hormone", "effect": "stoffwechsel", "strength": 0.85,
+             "mechanism": "Signalübertragung an Zielzellen"},
+            {"cause": "umwelt", "effect": "genexpression", "strength": 0.60,
+             "mechanism": "Epigenetische Modifikationen"},
+            {"cause": "selektion", "effect": "anpassung", "strength": 0.85,
+             "mechanism": "Überleben der am besten Angepassten"},
+            {"cause": "symbiose", "effect": "überleben", "strength": 0.70,
+             "mechanism": "Gegenseitiger Nutzen"},
+            {"cause": "reproduktion", "effect": "population", "strength": 0.90,
+             "mechanism": "Nachkommenerzeugung"},
+            {"cause": "konkurrenz", "effect": "nischenbildung", "strength": 0.65,
+             "mechanism": "Ressourcenteilung zur Koexistenz"},
+        ]
+
+        # TECHNOLOGIE
+        self.domain_knowledge[CausalDomain.TECHNOLOGIE] = [
+            {"cause": "automatisierung", "effect": "effizienz", "strength": 0.80,
+             "mechanism": "Reduzierung menschlicher Fehler und Zeit"},
+            {"cause": "vernetzung", "effect": "kommunikation", "strength": 0.90,
+             "mechanism": "Instantane Informationsübertragung"},
+            {"cause": "datenmenge", "effect": "ki_leistung", "strength": 0.75,
+             "mechanism": "Mehr Trainingsbeispiele verbessern Modelle"},
+            {"cause": "rechenleistung", "effect": "innovation", "strength": 0.70,
+             "mechanism": "Komplexere Berechnungen werden möglich"},
+            {"cause": "benutzerfreundlichkeit", "effect": "adoption", "strength": 0.80,
+             "mechanism": "Geringere Lernkurve erhöht Akzeptanz"},
+            {"cause": "sicherheitslücke", "effect": "cyberangriff", "strength": 0.65,
+             "mechanism": "Ausnutzung von Schwachstellen"},
+            {"cause": "open_source", "effect": "innovation", "strength": 0.60,
+             "mechanism": "Kollaborative Entwicklung"},
+            {"cause": "regulierung", "effect": "entwicklung", "strength": 0.50,
+             "mechanism": "Kann fördern oder hemmen"},
+        ]
+
+        # UMWELT
+        self.domain_knowledge[CausalDomain.UMWELT] = [
+            {"cause": "co2_emissionen", "effect": "klimawandel", "strength": 0.85,
+             "mechanism": "Verstärkter Treibhauseffekt"},
+            {"cause": "abholzung", "effect": "biodiversitätsverlust", "strength": 0.80,
+             "mechanism": "Habitatzerstörung"},
+            {"cause": "verschmutzung", "effect": "gesundheitsschäden", "strength": 0.70,
+             "mechanism": "Toxische Substanzen im Körper"},
+            {"cause": "klimawandel", "effect": "extremwetter", "strength": 0.75,
+             "mechanism": "Veränderte atmosphärische Muster"},
+            {"cause": "überfischung", "effect": "artensterben", "strength": 0.70,
+             "mechanism": "Überschreitung der Reproduktionsrate"},
+            {"cause": "erneuerbare_energie", "effect": "emissionsreduktion", "strength": 0.80,
+             "mechanism": "Ersatz fossiler Brennstoffe"},
+            {"cause": "recycling", "effect": "ressourcenschonung", "strength": 0.65,
+             "mechanism": "Kreislaufwirtschaft"},
+            {"cause": "landwirtschaft", "effect": "bodendegradation", "strength": 0.55,
+             "mechanism": "Nährstofferschöpfung und Erosion"},
+        ]
+
+        # POLITIK
+        self.domain_knowledge[CausalDomain.POLITIK] = [
+            {"cause": "demokratie", "effect": "freiheit", "strength": 0.70,
+             "mechanism": "Bürgerrechte und Gewaltenteilung"},
+            {"cause": "korruption", "effect": "instabilität", "strength": 0.65,
+             "mechanism": "Vertrauensverlust in Institutionen"},
+            {"cause": "propaganda", "effect": "meinungsbildung", "strength": 0.60,
+             "mechanism": "Selektive Informationsverbreitung"},
+            {"cause": "sanktionen", "effect": "wirtschaftsschaden", "strength": 0.70,
+             "mechanism": "Handelsbeschränkungen"},
+            {"cause": "wahlen", "effect": "regierungswechsel", "strength": 0.80,
+             "mechanism": "Demokratische Legitimation"},
+            {"cause": "lobbying", "effect": "gesetzgebung", "strength": 0.55,
+             "mechanism": "Interessenvertretung bei Entscheidungsträgern"},
+            {"cause": "medien", "effect": "öffentliche_meinung", "strength": 0.65,
+             "mechanism": "Agenda-Setting und Framing"},
+            {"cause": "bildung", "effect": "politische_partizipation", "strength": 0.60,
+             "mechanism": "Verständnis politischer Prozesse"},
+        ]
+
+        # BILDUNG
+        self.domain_knowledge[CausalDomain.BILDUNG] = [
+            {"cause": "lehrqualität", "effect": "lernerfolg", "strength": 0.75,
+             "mechanism": "Didaktische Kompetenz und Motivation"},
+            {"cause": "klassengröße", "effect": "individuelle_förderung", "strength": 0.60,
+             "mechanism": "Mehr Zeit pro Schüler"},
+            {"cause": "elternengagement", "effect": "schulleistung", "strength": 0.65,
+             "mechanism": "Unterstützung und Wertschätzung"},
+            {"cause": "frühförderung", "effect": "späterer_erfolg", "strength": 0.70,
+             "mechanism": "Entwicklung kognitiver Grundlagen"},
+            {"cause": "motivation", "effect": "lernen", "strength": 0.80,
+             "mechanism": "Erhöhte Aufmerksamkeit und Anstrengung"},
+            {"cause": "feedback", "effect": "verbesserung", "strength": 0.75,
+             "mechanism": "Gezielte Fehlerkorrektur"},
+            {"cause": "übung", "effect": "kompetenz", "strength": 0.85,
+             "mechanism": "Neuronale Verstärkung durch Wiederholung"},
+            {"cause": "stress", "effect": "lernbehinderung", "strength": 0.60,
+             "mechanism": "Kognitive Ressourcen für Stressbewältigung"},
+        ]
+
+    def add_variable_with_domain(self, name: str, description: str,
+                                   domain: CausalDomain,
+                                   is_observable: bool = True) -> CausalNode:
+        """Fügt eine Variable mit Domänen-Zuordnung hinzu"""
+        node = self.add_variable(name, description, is_observable)
+        self.variable_domains[name] = domain
+        return node
+
+    def get_domain_causal_knowledge(self, domain: CausalDomain) -> List[Dict]:
+        """Gibt vordefiniertes Kausalwissen für eine Domäne zurück"""
+        return self.domain_knowledge.get(domain, [])
+
+    def apply_domain_knowledge(self, domain: CausalDomain) -> int:
+        """
+        Wendet vordefiniertes Domänen-Wissen an und erstellt
+        entsprechende Variablen und Kanten.
+
+        Returns:
+            Anzahl der hinzugefügten Beziehungen
+        """
+        knowledge = self.domain_knowledge.get(domain, [])
+        added = 0
+
+        for rel in knowledge:
+            cause = rel["cause"]
+            effect = rel["effect"]
+            strength = rel.get("strength", 0.5)
+            mechanism = rel.get("mechanism", "")
+
+            # Variablen hinzufügen wenn nicht vorhanden
+            if cause not in self.nodes:
+                self.add_variable_with_domain(cause, cause.replace("_", " ").title(), domain)
+            if effect not in self.nodes:
+                self.add_variable_with_domain(effect, effect.replace("_", " ").title(), domain)
+
+            # Kausale Kante hinzufügen
+            strength_enum = self._float_to_causal_strength(strength)
+            if self.add_causal_link(cause, effect, strength_enum, mechanism):
+                added += 1
+
+        logger.info(f"Domänen-Wissen '{domain.value}' angewendet: {added} Beziehungen")
+        return added
+
+    def _float_to_causal_strength(self, strength: float) -> CausalStrength:
+        """Konvertiert Float zu CausalStrength Enum"""
+        if strength >= 0.9:
+            return CausalStrength.DETERMINISTIC
+        elif strength >= 0.7:
+            return CausalStrength.STRONG
+        elif strength >= 0.4:
+            return CausalStrength.MODERATE
+        elif strength >= 0.15:
+            return CausalStrength.WEAK
+        else:
+            return CausalStrength.NEGLIGIBLE
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Mediator-Variablen
+    # =========================================================================
+
+    def add_mediator(self, cause: str, mediator: str, effect: str,
+                      a_path: float = 0.5, b_path: float = 0.5,
+                      direct_effect: float = 0.2) -> Optional[MediatorRelation]:
+        """
+        Fügt eine Mediator-Beziehung hinzu.
+
+        A → M → B (Mediation)
+        A ----→ B (direkter Effekt, kann 0 sein bei vollständiger Mediation)
+
+        Args:
+            cause: Ursprüngliche Ursache (A)
+            mediator: Mediator-Variable (M)
+            effect: Endeffekt (B)
+            a_path: Stärke A → M
+            b_path: Stärke M → B
+            direct_effect: Direkter Effekt A → B (c')
+        """
+        # Sicherstellen, dass alle Variablen existieren
+        for var in [cause, mediator, effect]:
+            if var not in self.nodes:
+                self.add_variable(var, var.replace("_", " ").title())
+
+        # Kausale Links erstellen
+        self.add_causal_link(cause, mediator, self._float_to_causal_strength(a_path))
+        self.add_causal_link(mediator, effect, self._float_to_causal_strength(b_path))
+        if direct_effect > 0.05:
+            self.add_causal_link(cause, effect, self._float_to_causal_strength(direct_effect))
+
+        # Berechnungen
+        indirect_effect = a_path * b_path
+        total_effect = direct_effect + indirect_effect
+        proportion_mediated = indirect_effect / total_effect if total_effect > 0 else 0
+
+        # Mediationstyp bestimmen
+        if proportion_mediated > 0.9:
+            med_type = MediatorType.FULL_MEDIATION
+        elif (direct_effect > 0 and indirect_effect > 0 and
+              (direct_effect * indirect_effect < 0)):
+            med_type = MediatorType.INCONSISTENT
+        else:
+            med_type = MediatorType.PARTIAL_MEDIATION
+
+        relation = MediatorRelation(
+            cause=cause,
+            mediator=mediator,
+            effect=effect,
+            mediation_type=med_type,
+            indirect_effect=indirect_effect,
+            direct_effect=direct_effect,
+            total_effect=total_effect,
+            proportion_mediated=proportion_mediated
+        )
+
+        self.mediators.append(relation)
+        logger.debug(f"Mediator hinzugefügt: {cause} → {mediator} → {effect} "
+                    f"(Proportion: {proportion_mediated:.2f})")
+        return relation
+
+    def find_mediators_for(self, cause: str, effect: str) -> List[MediatorRelation]:
+        """Findet alle Mediatoren zwischen Ursache und Effekt"""
+        return [m for m in self.mediators
+                if m.cause == cause and m.effect == effect]
+
+    def explain_mediation(self, relation: MediatorRelation) -> str:
+        """Erklärt eine Mediations-Beziehung in natürlicher Sprache"""
+        explanation = [
+            f"Mediation: {relation.cause} → {relation.mediator} → {relation.effect}",
+            f"",
+            f"  • Indirekter Effekt (über {relation.mediator}): {relation.indirect_effect:.3f}",
+            f"  • Direkter Effekt: {relation.direct_effect:.3f}",
+            f"  • Gesamteffekt: {relation.total_effect:.3f}",
+            f"  • Anteil mediiert: {relation.proportion_mediated:.1%}",
+            f"  • Typ: {relation.mediation_type.value}",
+        ]
+
+        if relation.mediation_type == MediatorType.FULL_MEDIATION:
+            explanation.append(f"  → '{relation.mediator}' erklärt fast den gesamten Effekt!")
+        elif relation.mediation_type == MediatorType.INCONSISTENT:
+            explanation.append(f"  ⚠ Inkonsistente Mediation: Direkter und indirekter Effekt "
+                             f"haben unterschiedliche Richtungen!")
+
+        return "\n".join(explanation)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Moderator-Variablen
+    # =========================================================================
+
+    def add_moderator(self, cause: str, effect: str, moderator: str,
+                       base_strength: float = 0.5,
+                       interaction: float = 0.3) -> Optional[ModeratorRelation]:
+        """
+        Fügt eine Moderator-Beziehung hinzu.
+
+        Ein Moderator verändert die Stärke der Beziehung zwischen
+        Ursache und Effekt, ohne selbst ein Mediator zu sein.
+
+        Args:
+            cause: Ursache
+            effect: Effekt
+            moderator: Moderator-Variable
+            base_strength: Basis-Effektstärke ohne Moderator
+            interaction: Interaktionskoeffizient (positiv = verstärkt, negativ = puffert)
+        """
+        # Variablen erstellen
+        for var in [cause, effect, moderator]:
+            if var not in self.nodes:
+                self.add_variable(var, var.replace("_", " ").title())
+
+        # Basis-Link erstellen
+        self.add_causal_link(cause, effect, self._float_to_causal_strength(base_strength))
+
+        # Berechne modulierte Stärke (bei Moderator = 1)
+        moderated_strength = base_strength + interaction
+        moderated_strength = max(0.0, min(1.0, moderated_strength))
+
+        # Moderator-Effekt bestimmen
+        if interaction > 0.1:
+            mod_effect = ModeratorEffect.ENHANCING
+        elif interaction < -0.1:
+            mod_effect = ModeratorEffect.BUFFERING
+        else:
+            mod_effect = ModeratorEffect.ANTAGONISTIC  # Schwacher oder wechselnder Effekt
+
+        relation = ModeratorRelation(
+            cause=cause,
+            effect=effect,
+            moderator=moderator,
+            moderator_effect=mod_effect,
+            base_strength=base_strength,
+            moderated_strength=moderated_strength,
+            interaction_coefficient=interaction
+        )
+
+        self.moderators.append(relation)
+        logger.debug(f"Moderator hinzugefügt: {moderator} moderiert {cause} → {effect}")
+        return relation
+
+    def find_moderators_for(self, cause: str, effect: str) -> List[ModeratorRelation]:
+        """Findet alle Moderatoren für eine Beziehung"""
+        return [m for m in self.moderators
+                if m.cause == cause and m.effect == effect]
+
+    def explain_moderation(self, relation: ModeratorRelation) -> str:
+        """Erklärt eine Moderations-Beziehung in natürlicher Sprache"""
+        explanation = [
+            f"Moderation: {relation.moderator} beeinflusst {relation.cause} → {relation.effect}",
+            f"",
+            f"  • Basis-Effektstärke: {relation.base_strength:.3f}",
+            f"  • Modulierte Stärke: {relation.moderated_strength:.3f}",
+            f"  • Interaktionskoeffizient: {relation.interaction_coefficient:+.3f}",
+            f"  • Moderationsart: {relation.moderator_effect.value}",
+        ]
+
+        if relation.moderator_effect == ModeratorEffect.ENHANCING:
+            explanation.append(f"  → Wenn '{relation.moderator}' hoch ist, wird der Effekt verstärkt!")
+        elif relation.moderator_effect == ModeratorEffect.BUFFERING:
+            explanation.append(f"  → Wenn '{relation.moderator}' hoch ist, wird der Effekt abgepuffert!")
+
+        return "\n".join(explanation)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Komplexe Kausale Ketten
+    # =========================================================================
+
+    def create_causal_chain(self, chain_id: str, variables: List[str],
+                             domain: CausalDomain = CausalDomain.ALLGEMEIN,
+                             mechanisms: List[str] = None,
+                             time_delays: List[float] = None,
+                             strengths: List[float] = None) -> Optional[CausalChain]:
+        """
+        Erstellt eine vollständige kausale Kette.
+
+        Args:
+            chain_id: Eindeutige ID der Kette
+            variables: Liste der Variablen in Reihenfolge [A, B, C, ...] → A→B→C→...
+            domain: Domäne der Kette
+            mechanisms: Mechanismen für jeden Übergang
+            time_delays: Zeitverzögerungen zwischen Variablen
+            strengths: Stärken der einzelnen Verbindungen
+        """
+        if len(variables) < 2:
+            logger.warning("Kausale Kette benötigt mindestens 2 Variablen")
+            return None
+
+        # Defaults
+        n_links = len(variables) - 1
+        mechanisms = mechanisms or ["" for _ in range(n_links)]
+        time_delays = time_delays or [0.0 for _ in range(n_links)]
+        strengths = strengths or [0.5 for _ in range(n_links)]
+
+        # Variablen und Links erstellen
+        for i, var in enumerate(variables):
+            if var not in self.nodes:
+                self.add_variable_with_domain(var, var.replace("_", " ").title(), domain)
+
+        for i in range(n_links):
+            cause = variables[i]
+            effect = variables[i + 1]
+            strength = self._float_to_causal_strength(strengths[i])
+            mechanism = mechanisms[i] if i < len(mechanisms) else ""
+
+            self.add_causal_link(cause, effect, strength, mechanism)
+
+            # Zeitverzögerung speichern
+            if time_delays and i < len(time_delays):
+                self.temporal_delays[(cause, effect)] = time_delays[i]
+
+        # Gesamtstärke berechnen (Produkt)
+        total_strength = 1.0
+        for s in strengths:
+            total_strength *= s
+
+        chain = CausalChain(
+            chain_id=chain_id,
+            variables=variables,
+            domain=domain,
+            total_strength=total_strength,
+            mechanisms=mechanisms,
+            time_delays=time_delays,
+            is_reversible=False,
+            confidence=0.5 + 0.3 * (1 - abs(total_strength - 0.5))
+        )
+
+        self.causal_chains[chain_id] = chain
+        logger.info(f"Kausale Kette erstellt: {chain_id} mit {len(variables)} Variablen")
+        return chain
+
+    def get_chain_strength(self, start: str, end: str) -> float:
+        """
+        Berechnet die aggregierte kausale Stärke zwischen zwei Variablen.
+        Berücksichtigt alle Pfade und deren Stärken.
+        """
+        paths = self.trace_causal_chain(start, end)
+        if not paths:
+            return 0.0
+
+        # Für jeden Pfad: Produktregel für Stärken
+        path_strengths = []
+        for path in paths:
+            strength = 1.0
+            for i in range(len(path) - 1):
+                cause, effect = path[i], path[i + 1]
+                # Finde die Kante
+                for edge in self.edges:
+                    if edge.cause == cause and edge.effect == effect:
+                        edge_strength = edge.strength.value if isinstance(edge.strength, CausalStrength) else edge.strength
+                        strength *= edge_strength
+                        break
+            path_strengths.append(strength)
+
+        # Aggregation: Maximale Stärke oder gewichtete Summe
+        # Hier: Maximum (stärkster Pfad dominiert)
+        return max(path_strengths) if path_strengths else 0.0
+
+    def get_total_time_delay(self, start: str, end: str) -> Optional[float]:
+        """
+        Berechnet die totale Zeitverzögerung über den kürzesten Pfad.
+        """
+        paths = self.trace_causal_chain(start, end)
+        if not paths:
+            return None
+
+        # Kürzeste Verzögerung
+        min_delay = float('inf')
+
+        for path in paths:
+            delay = 0.0
+            for i in range(len(path) - 1):
+                key = (path[i], path[i + 1])
+                delay += self.temporal_delays.get(key, 0.0)
+            min_delay = min(min_delay, delay)
+
+        return min_delay if min_delay != float('inf') else None
+
+    def explain_causal_chain(self, chain: CausalChain) -> str:
+        """Erklärt eine kausale Kette in natürlicher Sprache"""
+        explanation = [
+            f"Kausale Kette: {chain.chain_id}",
+            f"Domäne: {chain.domain.value}",
+            f"",
+            f"Pfad: {' → '.join(chain.variables)}",
+            f"",
+            f"Mechanismen:",
+        ]
+
+        for i, mechanism in enumerate(chain.mechanisms):
+            if i < len(chain.variables) - 1:
+                explanation.append(f"  {chain.variables[i]} → {chain.variables[i+1]}: {mechanism or '(nicht spezifiziert)'}")
+
+        if chain.time_delays:
+            explanation.append(f"")
+            explanation.append(f"Zeitverzögerungen:")
+            total_delay = 0
+            for i, delay in enumerate(chain.time_delays):
+                if i < len(chain.variables) - 1:
+                    explanation.append(f"  {chain.variables[i]} → {chain.variables[i+1]}: {delay} Einheiten")
+                    total_delay += delay
+            explanation.append(f"  Gesamt: {total_delay} Einheiten")
+
+        explanation.append(f"")
+        explanation.append(f"Gesamtstärke: {chain.total_strength:.3f}")
+        explanation.append(f"Konfidenz: {chain.confidence:.1%}")
+
+        return "\n".join(explanation)
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Feedback-Loops (Zyklische Kausalität)
+    # =========================================================================
+
+    def add_feedback_loop(self, variables: List[str],
+                           strengths: List[float] = None,
+                           loop_type: str = "positive") -> bool:
+        """
+        Fügt einen Feedback-Loop hinzu (zyklische Kausalität).
+
+        A → B → C → A (geschlossener Kreis)
+
+        Args:
+            variables: Liste der Variablen im Loop (letztes Element führt zum ersten)
+            strengths: Stärken der Verbindungen
+            loop_type: "positive" (verstärkend) oder "negative" (stabilisierend)
+        """
+        if len(variables) < 2:
+            return False
+
+        # Defaults
+        strengths = strengths or [0.5 for _ in variables]
+
+        # Variablen erstellen
+        for var in variables:
+            if var not in self.nodes:
+                self.add_variable(var, var.replace("_", " ").title())
+
+        # Temporär Zyklenprüfung deaktivieren für Feedback-Loops
+        # Speichere den Loop und füge Edges manuell hinzu
+        loop_edges = []
+        for i in range(len(variables)):
+            cause = variables[i]
+            effect = variables[(i + 1) % len(variables)]  # Zyklisch
+
+            edge = CausalEdge(
+                cause=cause,
+                effect=effect,
+                strength=self._float_to_causal_strength(strengths[i] if i < len(strengths) else 0.5),
+                mechanism=f"Feedback-Loop ({loop_type})",
+                is_direct=True
+            )
+            loop_edges.append(edge)
+
+        # Edges zum Graphen hinzufügen
+        self.edges.extend(loop_edges)
+
+        # Loop registrieren
+        self.feedback_loops.append(variables)
+
+        logger.info(f"Feedback-Loop hinzugefügt: {' → '.join(variables)} → {variables[0]} ({loop_type})")
+        return True
+
+    def detect_feedback_loops(self) -> List[List[str]]:
+        """
+        Erkennt alle Feedback-Loops im kausalen Graphen.
+
+        Returns:
+            Liste von Zyklen (jeder Zyklus ist eine Liste von Variablen)
+        """
+        detected_loops = []
+        visited = set()
+        rec_stack = []
+
+        def dfs(node: str, path: List[str]) -> bool:
+            visited.add(node)
+            rec_stack.append(node)
+
+            for edge in self.edges:
+                if edge.cause == node:
+                    neighbor = edge.effect
+                    if neighbor in rec_stack:
+                        # Zyklus gefunden
+                        cycle_start = rec_stack.index(neighbor)
+                        cycle = rec_stack[cycle_start:] + [neighbor]
+                        if cycle not in detected_loops:
+                            detected_loops.append(cycle)
+                    elif neighbor not in visited:
+                        dfs(neighbor, path + [neighbor])
+
+            rec_stack.pop()
+            return False
+
+        for node in self.nodes:
+            if node not in visited:
+                dfs(node, [node])
+
+        return detected_loops
+
+    def explain_feedback_loop(self, loop: List[str]) -> str:
+        """Erklärt einen Feedback-Loop in natürlicher Sprache"""
+        # Bestimme Typ (positiv/negativ)
+        total_sign = 1
+        explanations = []
+
+        for i in range(len(loop) - 1):
+            cause = loop[i]
+            effect = loop[i + 1]
+            for edge in self.edges:
+                if edge.cause == cause and edge.effect == effect:
+                    strength = edge.strength.value if isinstance(edge.strength, CausalStrength) else edge.strength
+                    explanations.append(f"  {cause} → {effect} (Stärke: {strength:.2f})")
+                    break
+
+        # Vollständiger Kreis
+        cycle_str = " → ".join(loop)
+
+        loop_type = "positiver (verstärkender)" if total_sign > 0 else "negativer (stabilisierender)"
+
+        return f"""Feedback-Loop ({loop_type} Zyklus):
+{cycle_str}
+
+Verbindungen:
+{chr(10).join(explanations)}
+
+Bedeutung: Änderungen in '{loop[0]}' wirken über den gesamten Zyklus
+auf sich selbst zurück, was zu {"Verstärkung" if total_sign > 0 else "Stabilisierung"} führt."""
+
+    # =========================================================================
+    # NEUE ERWEITERUNGEN: Erweiterte Analyse
+    # =========================================================================
+
+    def identify_key_nodes(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Identifiziert Schlüsselknoten im kausalen Graphen.
+
+        Returns:
+            Dict mit Knotenname und deren Eigenschaften
+        """
+        key_nodes = {}
+
+        for node in self.nodes:
+            # Zähle ein- und ausgehende Kanten
+            incoming = sum(1 for e in self.edges if e.effect == node)
+            outgoing = sum(1 for e in self.edges if e.cause == node)
+
+            # Ist Teil eines Feedback-Loops?
+            in_loop = any(node in loop for loop in self.feedback_loops)
+
+            # Ist Mediator?
+            is_mediator = any(m.mediator == node for m in self.mediators)
+
+            # Ist Moderator?
+            is_moderator = any(m.moderator == node for m in self.moderators)
+
+            # Berechne Zentralität (vereinfacht)
+            centrality = (incoming + outgoing) / max(1, len(self.edges))
+
+            role = "normal"
+            if incoming == 0 and outgoing > 0:
+                role = "root_cause"  # Ursprüngliche Ursache
+            elif outgoing == 0 and incoming > 0:
+                role = "outcome"  # Endpunkt
+            elif incoming > 2 and outgoing > 2:
+                role = "hub"  # Zentraler Knoten
+            elif is_mediator:
+                role = "mediator"
+            elif is_moderator:
+                role = "moderator"
+            elif in_loop:
+                role = "feedback_participant"
+
+            key_nodes[node] = {
+                "incoming_edges": incoming,
+                "outgoing_edges": outgoing,
+                "centrality": centrality,
+                "role": role,
+                "in_feedback_loop": in_loop,
+                "is_mediator": is_mediator,
+                "is_moderator": is_moderator,
+                "domain": self.variable_domains.get(node, CausalDomain.ALLGEMEIN).value
+            }
+
+        return key_nodes
+
+    def get_causal_summary(self) -> str:
+        """Gibt eine umfassende Zusammenfassung des kausalen Modells"""
+        summary = [
+            "=" * 60,
+            "ERWEITERTES KAUSALES MODELL - Zusammenfassung",
+            "=" * 60,
+            f"",
+            f"Variablen: {len(self.nodes)}",
+            f"Kausale Beziehungen: {len(self.edges)}",
+            f"Kausale Ketten: {len(self.causal_chains)}",
+            f"Mediator-Beziehungen: {len(self.mediators)}",
+            f"Moderator-Beziehungen: {len(self.moderators)}",
+            f"Feedback-Loops: {len(self.feedback_loops)}",
+        ]
+
+        # Domänen-Verteilung
+        domain_counts = defaultdict(int)
+        for domain in self.variable_domains.values():
+            domain_counts[domain.value] += 1
+        if domain_counts:
+            summary.append(f"")
+            summary.append(f"Domänen-Verteilung:")
+            for domain, count in sorted(domain_counts.items(), key=lambda x: x[1], reverse=True):
+                summary.append(f"  • {domain}: {count} Variablen")
+
+        # Schlüsselknoten
+        key_nodes = self.identify_key_nodes()
+        roots = [n for n, info in key_nodes.items() if info["role"] == "root_cause"]
+        outcomes = [n for n, info in key_nodes.items() if info["role"] == "outcome"]
+        hubs = [n for n, info in key_nodes.items() if info["role"] == "hub"]
+
+        if roots:
+            summary.append(f"")
+            summary.append(f"Ursprüngliche Ursachen: {', '.join(roots[:5])}")
+        if outcomes:
+            summary.append(f"Endpunkte: {', '.join(outcomes[:5])}")
+        if hubs:
+            summary.append(f"Zentrale Hubs: {', '.join(hubs[:5])}")
+
+        # Feedback-Loops
+        if self.feedback_loops:
+            summary.append(f"")
+            summary.append(f"Feedback-Loops:")
+            for loop in self.feedback_loops[:3]:
+                summary.append(f"  • {' → '.join(loop)} → ...")
+
+        return "\n".join(summary)
+
+    def get_intervention_recommendations(self, target_effect: str) -> List[Dict[str, Any]]:
+        """
+        Gibt Empfehlungen für Interventionen, um einen Zieleffekt zu erreichen.
+
+        Args:
+            target_effect: Die Variable, die beeinflusst werden soll
+
+        Returns:
+            Liste von Interventionsempfehlungen mit erwarteter Wirksamkeit
+        """
+        if target_effect not in self.nodes:
+            return []
+
+        recommendations = []
+
+        # Finde alle Ursachen
+        all_causes = set()
+        ancestors = self._get_ancestors(target_effect)
+
+        for ancestor in ancestors:
+            # Berechne Stärke des Einflusses
+            strength = self.get_chain_strength(ancestor, target_effect)
+
+            # Prüfe ob direkt beeinflussbar (keine eingehenden Kanten = root cause)
+            incoming = sum(1 for e in self.edges if e.effect == ancestor)
+            is_root = incoming == 0
+
+            # Prüfe Zeitverzögerung
+            delay = self.get_total_time_delay(ancestor, target_effect)
+
+            # Prüfe ob über Mediator
+            relevant_mediators = [m for m in self.mediators
+                                 if m.cause == ancestor and m.effect == target_effect]
+
+            recommendations.append({
+                "intervention_point": ancestor,
+                "expected_effect_strength": strength,
+                "is_root_cause": is_root,
+                "time_delay": delay,
+                "has_mediator": len(relevant_mediators) > 0,
+                "mediators": [m.mediator for m in relevant_mediators],
+                "priority": strength * (1.2 if is_root else 1.0) / (1 + (delay or 0) * 0.1)
+            })
+
+        # Nach Priorität sortieren
+        recommendations.sort(key=lambda x: x["priority"], reverse=True)
+
+        return recommendations
 
 
 # =============================================================================
