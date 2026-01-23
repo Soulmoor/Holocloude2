@@ -16788,6 +16788,9 @@ class HoloPersona:
         # 9. Proaktive Message Handler einrichten
         self._setup_proactive_message_handler()
 
+        # 10. 🔗 INTEGRATION LAYER - Verbinde ALLE Module für Synergie
+        self._connect_integration_layer()
+
         # Status ausgeben
         if autonomous_started:
             logger.info(f"🌟 Autonomes Leben aktiv: {', '.join(autonomous_started)}")
@@ -16956,6 +16959,132 @@ class HoloPersona:
         messages = getattr(self, '_pending_proactive_messages', [])
         self._pending_proactive_messages = []
         return messages
+
+    def _connect_integration_layer(self):
+        """
+        Verbindet ALLE Module mit dem Integration Layer für echte Synergie.
+
+        NEU v2.4: Aktiviert die autonome Lebensweise durch vollständige Integration:
+        - Tiefenpsychologie → Dialog (Traumata, Verdrängung färben Antworten)
+        - Real World Sync → Energie/Stimmung (Wetter, Tageszeit beeinflussen Zustand)
+        - Life Phases → Verhalten (Verspieltheit, Weisheit je nach Phase)
+        """
+        if not hasattr(self, 'integration_layer') or not self.integration_layer:
+            logger.warning("⚠️ Integration Layer nicht verfügbar - Module bleiben isoliert")
+            return
+
+        integration_count = 0
+        logger.info("🔗 Verbinde Module mit Integration Layer v2.4...")
+
+        try:
+            # === CORE SYSTEMS ===
+            core_systems = [
+                ("self_awareness", getattr(self, 'self_awareness', None)),
+                ("dialogue_engine", getattr(self, 'dialogue_engine', None)),
+                ("drive_system", getattr(self, 'drive_system', None)),
+                ("learning_system", getattr(self, 'learning_system', None)),
+                ("consciousness", getattr(self, 'consciousness', None)),
+                ("energy_system", getattr(self, 'energy', None)),
+                ("memory_system", getattr(self, 'memory', None)),
+                ("personality", getattr(self, 'personality', None)),
+            ]
+
+            for name, system in core_systems:
+                if system:
+                    self.integration_layer.connect(name, system)
+                    integration_count += 1
+
+            # === ERWEITERTE SYSTEME (v2.1-2.3) ===
+            extended_systems = [
+                ("creative_mind", getattr(self, 'creative_mind', None)),
+                ("autonomous_thinking", getattr(self, 'autonomous_thinking', None)),
+                ("impulse_system", getattr(self, 'impulse_generator', None)),
+                ("inner_life", getattr(self, 'inner_life', None)),
+                ("preferences", getattr(self, 'preferences', None)),
+                ("web_curiosity", getattr(self, 'web_curiosity', None)),
+                ("skill_system", getattr(self, 'skill_bridge', None)),
+                ("meta_cognition", getattr(self, 'meta_observer', None)),
+                ("digital_body", getattr(self, 'digital_body', None)),
+                ("context_mind", getattr(self, 'context_mind', None)),
+                ("self_expression", getattr(self, 'self_expression', None)),
+            ]
+
+            for name, system in extended_systems:
+                if system:
+                    self.integration_layer.connect(name, system)
+                    integration_count += 1
+
+            # === AUTONOME LEBENSWEISE (v2.4) ===
+            autonomous_systems = [
+                ("deep_psychology", getattr(self, 'deep_psychology', None)),
+                ("repression_system", getattr(self, 'repression_system', None)),
+                ("freudian_slips", getattr(self, 'freudian_slips', None)),
+                ("unconscious_processes", getattr(self, 'unconscious_processes', None)),
+                ("trauma_processing", getattr(self, 'trauma_processing', None)),
+                ("redemption_system", getattr(self, 'redemption_system', None)),
+                ("real_world_sync", getattr(self, 'real_world_sync', None)),
+                ("life_phases", getattr(self, 'life_phases', None)),
+                ("message_analyzer", getattr(self, 'message_analyzer', None)),
+                ("sentence_structures", getattr(self, 'sentence_structures', None)),
+                ("synonym_engine", getattr(self, 'synonym_engine', None)),
+                ("empathy_deep", getattr(self, 'empathy_deep', None)),
+            ]
+
+            for name, system in autonomous_systems:
+                if system:
+                    self.integration_layer.connect(name, system)
+                    integration_count += 1
+
+            # === INTER-MODUL-VERBINDUNGEN für autonome Lebensweise ===
+
+            # Deep Psychology bekommt Referenzen zu Subsystemen
+            if hasattr(self, 'deep_psychology') and self.deep_psychology:
+                if hasattr(self, 'repression_system') and self.repression_system:
+                    self.deep_psychology.repression_system = self.repression_system
+                if hasattr(self, 'freudian_slips') and self.freudian_slips:
+                    self.deep_psychology.freudian_slips = self.freudian_slips
+                if hasattr(self, 'unconscious_processes') and self.unconscious_processes:
+                    self.deep_psychology.unconscious_processes = self.unconscious_processes
+                if hasattr(self, 'life_phases') and self.life_phases:
+                    self.deep_psychology.life_phases = self.life_phases
+                logger.info("   ✓ Deep Psychology mit Subsystemen verbunden")
+
+            # Real World Sync bekommt Referenzen
+            if hasattr(self, 'real_world_sync') and self.real_world_sync:
+                if hasattr(self, 'energy') and self.energy:
+                    self.real_world_sync.energy_system = self.energy
+                if hasattr(self, 'inner_life') and self.inner_life:
+                    self.real_world_sync.inner_life = self.inner_life
+                logger.info("   ✓ Real World Sync mit Energie/Stimmung verbunden")
+
+            # Life Phases bekommt Referenzen
+            if hasattr(self, 'life_phases') and self.life_phases:
+                if hasattr(self, 'dialogue_engine') and self.dialogue_engine:
+                    self.life_phases.dialogue_engine = self.dialogue_engine
+                if hasattr(self, 'personality') and self.personality:
+                    self.life_phases.personality = self.personality
+                logger.info("   ✓ Life Phases mit Dialog/Persönlichkeit verbunden")
+
+            # Dialogue Engine bekommt Deep Psychology für authentische Antworten
+            if hasattr(self, 'dialogue_engine') and self.dialogue_engine:
+                if hasattr(self, 'deep_psychology') and self.deep_psychology:
+                    self.dialogue_engine.deep_psychology = self.deep_psychology
+                if hasattr(self, 'life_phases') and self.life_phases:
+                    self.dialogue_engine.life_phases = self.life_phases
+                logger.info("   ✓ Dialogue Engine mit Tiefenpsychologie verbunden")
+
+            logger.info(f"🔗 Integration Layer: {integration_count} Module verbunden")
+
+            # Führe initialen Integration-Tick durch
+            try:
+                result = self.integration_layer.intelligent_integrator.integration_tick()
+                actions = len(result.get("actions", []))
+                logger.info(f"   ✓ Initialer Integration-Tick: {actions} Aktionen")
+            except Exception as e:
+                logger.debug(f"Integration-Tick: {e}")
+
+        except Exception as e:
+            logger.error(f"❌ Integration Layer Verbindungsfehler: {e}")
 
     # =========================================================================
     # 🔧 SKILL SYSTEM METHODEN - Dynamische Fähigkeiten

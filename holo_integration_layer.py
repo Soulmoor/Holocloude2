@@ -1936,6 +1936,20 @@ class SystemIntegrator:
             "skill_system": "skill_system",
             "meta_cognition": "meta_cognition",
             "digital_body": "digital_body",
+            # v2.4 Autonome Lebensweise - VOLLSTÄNDIGE INTEGRATION (NEU!)
+            "deep_psychology": "deep_psychology",
+            "repression_system": "repression_system",
+            "freudian_slips": "freudian_slips",
+            "unconscious_processes": "unconscious_processes",
+            "trauma_processing": "trauma_processing",
+            "redemption_system": "redemption_system",
+            "real_world_sync": "real_world_sync",
+            "life_phases": "life_phases",
+            "message_analyzer": "message_analyzer",
+            "sentence_structures": "sentence_structures",
+            "synonym_engine": "synonym_engine",
+            "empathy_deep": "empathy_deep",
+            "humor_advanced": "humor_advanced",
         }
         if system_name in intelligent_system_mapping:
             target_name = intelligent_system_mapping[system_name]
@@ -2451,6 +2465,21 @@ class IntelligentIntegrator:
         self.meta_cognition = None  # HoloMetaCognition - Selbst-Beobachtung
         self.digital_body = None  # HoloDigitalBody - Hardware → Mentaler Zustand
 
+        # === NEU v2.4: Autonome Lebensweise - Tiefenpsychologie & Real World ===
+        self.deep_psychology = None  # HoloDeepPsychologyEngine - Tiefenpsychologie
+        self.repression_system = None  # HoloRepressionEngine - Verdrängung
+        self.freudian_slips = None  # HoloFreudianSlipEngine - Versprecher
+        self.unconscious_processes = None  # HoloUnconsciousEngine - Unbewusstes
+        self.trauma_processing = None  # HoloTraumaProcessingEngine - Trauma
+        self.redemption_system = None  # HoloRedemptionEngine - Wiedergutmachung
+        self.real_world_sync = None  # HoloRealWorldSync - Wetter, Zeit, Jahreszeit
+        self.life_phases = None  # HoloLifePhases - Lebensphasen
+        self.message_analyzer = None  # HoloMessageAnalyzer - Nachrichtenanalyse
+        self.sentence_structures = None  # HoloSentenceStructures - Satzstrukturen
+        self.synonym_engine = None  # HoloSynonymEngine - Synonyme
+        self.empathy_deep = None  # HoloDeepEmpathy - Tiefe Empathie
+        self.humor_advanced = None  # HoloHumorAdvanced - Fortgeschrittener Humor
+
         # Tracking für Integrations-Entscheidungen
         self.integration_history: deque = deque(maxlen=500)
         self.last_reflection_action: Optional[Dict] = None
@@ -2466,8 +2495,12 @@ class IntelligentIntegrator:
         self._event_cache: Dict[str, Any] = {}
         self._inner_life_cache: Dict[str, Any] = {}
         self._body_state_cache: Dict[str, Any] = {}
+        # v2.4 Caches - Autonome Lebensweise
+        self._psychology_cache: Dict[str, Any] = {}
+        self._real_world_cache: Dict[str, Any] = {}
+        self._life_phase_cache: Dict[str, Any] = {}
 
-        logger.info("🧠 IntelligentIntegrator v2.3 initialisiert")
+        logger.info("🧠 IntelligentIntegrator v2.4 initialisiert (Autonome Lebensweise)")
 
         # Auto-initialisiere EmotionalComplexitySystem
         self._init_emotional_complexity()
@@ -4452,8 +4485,243 @@ class IntelligentIntegrator:
             results["actions"].append("body_sync")
             results["body"] = body_result
 
-        logger.debug(f"🧠 Integration tick v2.3: {len(results['actions'])} Aktionen")
+        # === NEU v2.4: Autonome Lebensweise - Tiefenpsychologie & Real World ===
+
+        # 20. Sync Deep Psychology → Dialog
+        psychology_result = self.sync_psychology_to_dialog()
+        if psychology_result.get("synced"):
+            results["actions"].append("psychology_sync")
+            results["psychology"] = psychology_result
+
+        # 21. Sync Real World → Mood/Energy
+        real_world_result = self.sync_real_world_to_state()
+        if real_world_result.get("synced"):
+            results["actions"].append("real_world_sync")
+            results["real_world"] = real_world_result
+
+        # 22. Sync Life Phases → Dialog/Energy
+        life_phase_result = self.sync_life_phases_to_dialog()
+        if life_phase_result.get("synced"):
+            results["actions"].append("life_phase_sync")
+            results["life_phases"] = life_phase_result
+
+        logger.debug(f"🧠 Integration tick v2.4: {len(results['actions'])} Aktionen")
         return results
+
+    # =========================================================================
+    # NEU v2.4: AUTONOME LEBENSWEISE - TIEFENPSYCHOLOGIE & REAL WORLD
+    # =========================================================================
+
+    def sync_psychology_to_dialog(self) -> Dict[str, Any]:
+        """
+        Synchronisiert Tiefenpsychologie-Zustand mit Dialog-Engine.
+
+        Verdrängung → Beeinflusst Antwort-Verhalten
+        Unbewusste Prozesse → Färben Tonfall
+        Trauma-Status → Sensibilität für Themen
+
+        Returns:
+            Dict mit durchgeführten Änderungen
+        """
+        if not self.deep_psychology:
+            return {"synced": False, "reason": "deep_psychology_not_connected"}
+
+        changes = {}
+
+        # Hole psychologischen Zustand
+        if hasattr(self.deep_psychology, 'get_comprehensive_state'):
+            try:
+                state = self.deep_psychology.get_comprehensive_state()
+                self._psychology_cache = state
+
+                # Aktive Abwehrmechanismen beeinflussen Dialog
+                if "defense_mechanisms" in state:
+                    active_defenses = [d for d in state.get("defense_mechanisms", [])
+                                      if d.get("active")]
+                    if active_defenses:
+                        changes["active_defenses"] = len(active_defenses)
+
+                # Emotionale Tiefe beeinflusst Antwort-Stil
+                if "emotional_depth" in state:
+                    depth = state.get("emotional_depth", 0.5)
+                    if depth > 0.7 and self.dialogue_engine:
+                        if hasattr(self.dialogue_engine, 'adaptive_config'):
+                            self.dialogue_engine.adaptive_config.record_feedback(
+                                was_positive=True, length="long"
+                            )
+                        changes["emotional_depth_influence"] = "deeper_responses"
+
+            except Exception as e:
+                logger.debug(f"Psychology sync error: {e}")
+                return {"synced": False, "reason": str(e)}
+
+        # Verdrängungssystem prüfen
+        if self.repression_system and hasattr(self.repression_system, 'check_breakthroughs'):
+            try:
+                breakthroughs = self.repression_system.check_breakthroughs()
+                if breakthroughs:
+                    changes["pending_breakthroughs"] = len(breakthroughs)
+            except Exception as e:
+                logger.debug(f"Repression check error: {e}")
+
+        # Unbewusste Prozesse integrieren
+        if self.unconscious_processes and hasattr(self.unconscious_processes, 'get_active_patterns'):
+            try:
+                patterns = self.unconscious_processes.get_active_patterns()
+                if patterns:
+                    changes["unconscious_patterns"] = len(patterns)
+            except Exception as e:
+                logger.debug(f"Unconscious patterns error: {e}")
+
+        return {"synced": True, "changes": changes, "cache": self._psychology_cache}
+
+    def sync_real_world_to_state(self) -> Dict[str, Any]:
+        """
+        Synchronisiert Real World Daten mit innerem Zustand.
+
+        Wetter → Stimmung beeinflussen
+        Tageszeit → Energie beeinflussen
+        Jahreszeit → Aktivitäts-Präferenzen
+
+        Returns:
+            Dict mit durchgeführten Änderungen
+        """
+        if not self.real_world_sync:
+            return {"synced": False, "reason": "real_world_sync_not_connected"}
+
+        changes = {}
+
+        # Hole aktuelle Welt-Daten
+        if hasattr(self.real_world_sync, 'get_current_state'):
+            try:
+                world_state = self.real_world_sync.get_current_state()
+                self._real_world_cache = world_state
+
+                # Tagesphase → Energie
+                day_phase = world_state.get("day_phase")
+                if day_phase and self.energy_system:
+                    if hasattr(self.energy_system, 'apply_time_modifier'):
+                        # Nacht = niedrigere Basis-Energie
+                        if day_phase in ["NACHT", "night"]:
+                            self.energy_system.apply_time_modifier(0.7)
+                            changes["energy_modifier"] = "night_reduction"
+                        elif day_phase in ["MORGEN", "morning"]:
+                            self.energy_system.apply_time_modifier(1.2)
+                            changes["energy_modifier"] = "morning_boost"
+
+                # Wetter → Stimmung
+                weather = world_state.get("weather_condition")
+                if weather and self.inner_life:
+                    if hasattr(self.inner_life, 'mood'):
+                        mood = self.inner_life.mood
+                        if hasattr(mood, 'apply_weather_influence'):
+                            mood.apply_weather_influence(weather)
+                            changes["weather_mood"] = weather
+
+                # Jahreszeit → Aktivitäten
+                season = world_state.get("season")
+                if season:
+                    changes["current_season"] = season
+
+            except Exception as e:
+                logger.debug(f"Real world sync error: {e}")
+                return {"synced": False, "reason": str(e)}
+
+        return {"synced": True, "changes": changes, "cache": self._real_world_cache}
+
+    def sync_life_phases_to_dialog(self) -> Dict[str, Any]:
+        """
+        Synchronisiert Lebensphasen mit Dialog-Verhalten.
+
+        Aktuelle Phase → Antwort-Stil (kindlich/reif/weise)
+        Entwicklungsniveau → Tiefe der Antworten
+        Aktuelle Sorgen/Wünsche → Themen-Empfindlichkeit
+
+        Returns:
+            Dict mit durchgeführten Änderungen
+        """
+        if not self.life_phases:
+            return {"synced": False, "reason": "life_phases_not_connected"}
+
+        changes = {}
+
+        # Hole Phasen-Informationen
+        if hasattr(self.life_phases, 'current_phase'):
+            try:
+                phase = self.life_phases.current_phase
+                self._life_phase_cache["current_phase"] = phase.value if hasattr(phase, 'value') else str(phase)
+                changes["current_phase"] = self._life_phase_cache["current_phase"]
+
+                # Modifikatoren holen
+                if hasattr(self.life_phases, 'get_modifier'):
+                    curiosity_mod = self.life_phases.get_modifier("curiosity")
+                    playfulness_mod = self.life_phases.get_modifier("playfulness")
+                    wisdom_mod = self.life_phases.get_modifier("wisdom")
+
+                    self._life_phase_cache["modifiers"] = {
+                        "curiosity": curiosity_mod,
+                        "playfulness": playfulness_mod,
+                        "wisdom": wisdom_mod
+                    }
+
+                    # Anpassen des Dialog-Stils basierend auf Phase
+                    if self.dialogue_engine and hasattr(self.dialogue_engine, 'adaptive_config'):
+                        config = self.dialogue_engine.adaptive_config
+                        # Hohe Verspieltheit → Mehr Fragen, kürzere Antworten
+                        if playfulness_mod > 0.7:
+                            config.record_feedback(was_positive=True, used_question=True)
+                            changes["playfulness_influence"] = "more_playful"
+                        # Hohe Weisheit → Tiefere Antworten
+                        elif wisdom_mod > 0.7:
+                            config.record_feedback(was_positive=True, length="long")
+                            changes["wisdom_influence"] = "deeper_responses"
+
+            except Exception as e:
+                logger.debug(f"Life phases sync error: {e}")
+                return {"synced": False, "reason": str(e)}
+
+        # Aktuelle Sorgen und Wünsche
+        if hasattr(self.life_phases, 'get_current_concerns'):
+            try:
+                concerns = self.life_phases.get_current_concerns()
+                self._life_phase_cache["concerns"] = concerns
+                if concerns:
+                    changes["active_concerns"] = len(concerns)
+            except Exception as e:
+                logger.debug(f"Life phases concerns error: {e}")
+
+        return {"synced": True, "changes": changes, "cache": self._life_phase_cache}
+
+    def get_autonomous_life_context(self) -> Dict[str, Any]:
+        """
+        Holt den vollständigen Kontext für autonome Lebensweise.
+
+        Kombiniert alle v2.4 Module für einen umfassenden Einblick.
+
+        Returns:
+            Dict mit allen autonomen Lebens-Kontexten
+        """
+        context = {
+            "psychology": self._psychology_cache,
+            "real_world": self._real_world_cache,
+            "life_phases": self._life_phase_cache,
+            "connected_systems": {
+                "deep_psychology": self.deep_psychology is not None,
+                "repression_system": self.repression_system is not None,
+                "unconscious_processes": self.unconscious_processes is not None,
+                "real_world_sync": self.real_world_sync is not None,
+                "life_phases": self.life_phases is not None,
+            }
+        }
+
+        # Tiefenpsychologische Färbung
+        if self.deep_psychology and hasattr(self.deep_psychology, 'get_dialog_modifiers'):
+            try:
+                context["dialog_modifiers"] = self.deep_psychology.get_dialog_modifiers()
+            except Exception:
+                pass
+
+        return context
 
     def get_integration_stats(self) -> Dict[str, Any]:
         """Gibt Statistiken über Integration zurück."""
@@ -4484,13 +4752,23 @@ class IntelligentIntegrator:
             "skill_system": self.skill_system is not None,
             "meta_cognition": self.meta_cognition is not None,
             "digital_body": self.digital_body is not None,
+            # Autonome Lebensweise (v2.4) - Tiefenpsychologie & Real World
+            "deep_psychology": self.deep_psychology is not None,
+            "repression_system": self.repression_system is not None,
+            "freudian_slips": self.freudian_slips is not None,
+            "unconscious_processes": self.unconscious_processes is not None,
+            "trauma_processing": self.trauma_processing is not None,
+            "redemption_system": self.redemption_system is not None,
+            "real_world_sync": self.real_world_sync is not None,
+            "life_phases": self.life_phases is not None,
+            "message_analyzer": self.message_analyzer is not None,
         }
 
         connected_count = sum(1 for v in systems_connected.values() if v)
         total_count = len(systems_connected)
 
         return {
-            "version": "2.3",
+            "version": "2.4",
             "history_size": len(self.integration_history),
             "systems_connected": systems_connected,
             "connection_summary": f"{connected_count}/{total_count} Systeme verbunden",
@@ -4504,6 +4782,10 @@ class IntelligentIntegrator:
                 "event_cached": bool(self._event_cache),
                 "inner_life_cached": bool(self._inner_life_cache),
                 "body_state_cached": bool(self._body_state_cache),
+                # v2.4 Autonome Lebensweise
+                "psychology_cached": bool(self._psychology_cache),
+                "real_world_cached": bool(self._real_world_cache),
+                "life_phase_cached": bool(self._life_phase_cache),
             },
         }
 
