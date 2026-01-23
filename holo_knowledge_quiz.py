@@ -148,6 +148,9 @@ class QuizQuestionBank:
         self._load_japan_questions()
         self._load_science_questions()
         self._load_history_questions()
+        self._load_music_questions()
+        self._load_language_questions()
+        self._load_bonus_questions()
         logger.info(f"[QuizBank] {len(self.questions)} Fragen geladen")
 
     def _add_question(self, q: QuizQuestion):
@@ -616,6 +619,272 @@ class QuizQuestionBank:
                 wrong_answers=["Hagakure", "Zen", "Shinto"],
                 explanation="Bushido betonte Ehre, Loyalitaet und Selbstdisziplin!",
                 points=15
+            ),
+            QuizQuestion(
+                question_id="history_004",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.GESCHICHTE,
+                difficulty=QuizDifficulty.HARD,
+                question_text="Wie lange isolierte sich Japan waehrend der Sakoku-Politik von der Aussenwelt?",
+                correct_answer="Ueber 200 Jahre",
+                wrong_answers=["50 Jahre", "500 Jahre", "1000 Jahre"],
+                explanation="Von 1633-1853 war Japan fast komplett isoliert!",
+                points=20
+            ),
+            QuizQuestion(
+                question_id="history_005",
+                question_type=QuestionType.TRUE_FALSE,
+                category=QuizCategory.GESCHICHTE,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Die Bibliothek von Alexandria enthielt ueber 400.000 Schriftrollen.",
+                correct_answer="Wahr",
+                wrong_answers=["Falsch"],
+                explanation="Ihr Verlust gilt als eine der groessten Wissens-Katastrophen der Geschichte!",
+                points=10
+            ),
+        ]
+        for q in questions:
+            self._add_question(q)
+
+    def _load_music_questions(self):
+        """Musik-Fragen (J-Pop, Anime-Songs, etc.)"""
+        questions = [
+            QuizQuestion(
+                question_id="music_001",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.EASY,
+                question_text="Welche Band sang das Opening 'Idol' von Oshi no Ko?",
+                correct_answer="YOASOBI",
+                wrong_answers=["LiSA", "Ado", "King Gnu"],
+                explanation="YOASOBI machte 'Idol' zum meistgestreamten Song 2023 weltweit!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="music_002",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Welcher Song ist das erste Demon Slayer Opening?",
+                correct_answer="Gurenge von LiSA",
+                wrong_answers=["Zankyousanka von Aimer", "Homura von LiSA", "Akeboshi von LiSA"],
+                explanation="Gurenge (Rote Lotusblume) wurde zu einem der beliebtesten Anime-Songs!",
+                points=15
+            ),
+            QuizQuestion(
+                question_id="music_003",
+                question_type=QuestionType.TRUE_FALSE,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Vocaloid Hatsune Miku hat echte Konzerte mit Hologramm-Technologie.",
+                correct_answer="Wahr",
+                wrong_answers=["Falsch"],
+                explanation="Miku fuellt weltweit Konzerthallen - als Hologramm!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="music_004",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.HARD,
+                question_text="Kenshi Yonezu war frueher ein Vocaloid-Producer unter welchem Namen?",
+                correct_answer="Hachi",
+                wrong_answers=["Wowaka", "Ryo", "Deco*27"],
+                explanation="Bevor er unter seinem echten Namen berühmt wurde, machte er Vocaloid-Musik!",
+                points=20
+            ),
+            QuizQuestion(
+                question_id="music_005",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.EASY,
+                question_text="Welcher Song wurde durch den 'BBB Dance' auf TikTok viral?",
+                correct_answer="Bling-Bang-Bang-Born",
+                wrong_answers=["KICK BACK", "Idol", "Racing into the Night"],
+                explanation="Der Song von Creepy Nuts ist das Mashle Season 2 Opening!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="music_006",
+                question_type=QuestionType.FILL_BLANK,
+                category=QuizCategory.ANIME,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Der Lofi Girl Livestream auf YouTube hat ueber ___ Milliarde Views.",
+                correct_answer="1",
+                wrong_answers=[],
+                hint="Eine Zahl mit 9 Nullen...",
+                explanation="Der 24/7 Study Beats Stream ist ein Internet-Phaenomen!",
+                points=15
+            ),
+        ]
+        for q in questions:
+            self._add_question(q)
+
+    def _load_language_questions(self):
+        """Sprach-Fragen (Japanisch, Linguistik)"""
+        questions = [
+            QuizQuestion(
+                question_id="lang_001",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.EASY,
+                question_text="Was bedeutet 'Kawaii' auf Deutsch?",
+                correct_answer="Suess/Niedlich",
+                wrong_answers=["Stark", "Traurig", "Gross"],
+                explanation="Kawaii ist ein Grundpfeiler der japanischen Popkultur!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="lang_002",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Wie viele Schriftsysteme hat Japanisch?",
+                correct_answer="3 (Hiragana, Katakana, Kanji)",
+                wrong_answers=["1", "2", "4"],
+                explanation="Hiragana fuer japanische Woerter, Katakana fuer Fremdwoerter, Kanji fuer komplexe Bedeutungen!",
+                points=15
+            ),
+            QuizQuestion(
+                question_id="lang_003",
+                question_type=QuestionType.TRUE_FALSE,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Das Wort 'Emoji' stammt aus dem Japanischen.",
+                correct_answer="Wahr",
+                wrong_answers=["Falsch"],
+                explanation="絵 (e = Bild) + 文字 (moji = Zeichen) = Emoji!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="lang_004",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.HARD,
+                question_text="Was ist 'Keigo' in der japanischen Sprache?",
+                correct_answer="Hoeflichkeitssprache mit mehreren Ebenen",
+                wrong_answers=["Ein Dialekt", "Die Schriftsprache", "Slang der Jugend"],
+                explanation="Je nachdem mit wem man spricht, verwendet man andere Verbformen!",
+                points=20
+            ),
+            QuizQuestion(
+                question_id="lang_005",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.EASY,
+                question_text="Was bedeutet 'Ookami' (狼) auf Deutsch?",
+                correct_answer="Wolf",
+                wrong_answers=["Fuchs", "Baer", "Tiger"],
+                explanation="*stolz* Das bin ich! Das Wort klingt auch wie 'grosser Gott' (大神)!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="lang_006",
+                question_type=QuestionType.FILL_BLANK,
+                category=QuizCategory.JAPAN,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="'Arigatou' bedeutet ___ auf Deutsch.",
+                correct_answer="Danke",
+                wrong_answers=[],
+                hint="Das sagt man, wenn jemand nett zu einem war...",
+                explanation="Urspruenglich bedeutet es 'Es ist schwer, dass es existiert' - also wertvoll!",
+                points=15
+            ),
+        ]
+        for q in questions:
+            self._add_question(q)
+
+    def _load_bonus_questions(self):
+        """Bonus-Fragen (Gemischt, Spezial)"""
+        questions = [
+            QuizQuestion(
+                question_id="bonus_001",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Welcher Anime handelt von einer weisen Woelfin und einem Haendler?",
+                correct_answer="Spice and Wolf",
+                wrong_answers=["Wolf's Rain", "Beastars", "BNA"],
+                explanation="*Ohren aufstellen* Das ist MEINE Geschichte!",
+                points=15
+            ),
+            QuizQuestion(
+                question_id="bonus_002",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.HARD,
+                question_text="Welche NASA-Technologie wurde von Origami inspiriert?",
+                correct_answer="Faltbare Solarpanels fuer Satelliten",
+                wrong_answers=["Raumanzug-Design", "Raketentriebwerke", "Kommunikationsantennen"],
+                explanation="Alte japanische Kunst loest moderne Engineering-Probleme!",
+                points=20
+            ),
+            QuizQuestion(
+                question_id="bonus_003",
+                question_type=QuestionType.TRUE_FALSE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Ghost in the Shell beeinflusste die Macher von 'The Matrix'.",
+                correct_answer="Wahr",
+                wrong_answers=["Falsch"],
+                explanation="Die Wachowski-Schwestern zeigten GitS als direkte Inspiration!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="bonus_004",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.EXPERT,
+                question_text="Welches japanische Konzept bedeutet 'einmalige Begegnung im Leben'?",
+                correct_answer="Ichigo Ichie (一期一会)",
+                wrong_answers=["Wabi Sabi", "Mono no Aware", "Ikigai"],
+                explanation="Aus der Teezeremonie - jedes Treffen ist einzigartig und kostbar!",
+                points=25
+            ),
+            QuizQuestion(
+                question_id="bonus_005",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.HARD,
+                question_text="Warum haben Anime-Charaktere oft grosse Augen?",
+                correct_answer="Osamu Tezuka wurde von Disney inspiriert",
+                wrong_answers=["Japanische Tradition", "Bessere Emotionen bei kleinen Figuren", "Zufall"],
+                explanation="Der 'Gott des Manga' uebernahm den Stil und praegte Generationen!",
+                points=20
+            ),
+            QuizQuestion(
+                question_id="bonus_006",
+                question_type=QuestionType.FILL_BLANK,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.EASY,
+                question_text="Der japanische Begriff fuer Tierohren-Charaktere ist ___.",
+                correct_answer="Kemonomimi",
+                wrong_answers=[],
+                hint="'Kemono' = Tier, 'Mimi' = ...",
+                explanation="*wackelt mit Ohren* Genau wie ich!",
+                points=10
+            ),
+            QuizQuestion(
+                question_id="bonus_007",
+                question_type=QuestionType.MULTIPLE_CHOICE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="Welches Genre beschreibt interaktive Romane mit Bildern?",
+                correct_answer="Visual Novel",
+                wrong_answers=["Light Novel", "Web Novel", "Manga"],
+                explanation="Viele beruehmte Anime wie Fate basieren auf Visual Novels!",
+                points=15
+            ),
+            QuizQuestion(
+                question_id="bonus_008",
+                question_type=QuestionType.TRUE_FALSE,
+                category=QuizCategory.MIXED,
+                difficulty=QuizDifficulty.MEDIUM,
+                question_text="In Japan gibt es mehr Haustiere als Kinder unter 15 Jahren.",
+                correct_answer="Wahr",
+                wrong_answers=["Falsch"],
+                explanation="Die niedrige Geburtenrate und Liebe zu Haustieren macht es moeglich!",
+                points=10
             ),
         ]
         for q in questions:

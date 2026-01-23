@@ -1344,6 +1344,269 @@ class MediaKnowledgeBase:
             ],
         )
 
+        # --- Ado - Ussewa ---
+        self.music_db["ussewa"] = MusicInfo(
+            title="Ussewa (うっせぇわ)",
+            artist="Ado",
+            album="Kyougen",
+            year=2020,
+            genre="J-Pop / Rock",
+
+            known_from="Viral TikTok Hit, später Ado's Durchbruch",
+            lyrics_theme="Rebellion gegen gesellschaftliche Erwartungen, Frustration über Konformität",
+            mood="Aggressiv, rebellisch, kathartisch",
+
+            why_i_love_it="Ados Stimme ist SO kraftvoll! Der Song schreit alles raus was man manchmal fühlt!",
+            when_i_listen="Wenn ich frustriert bin und es rauslassen muss! 🔥",
+
+            fun_facts=[
+                "Ado war erst 17 als sie den Song aufnahm",
+                "Hat über 300 Millionen YouTube Views",
+                "Ado zeigt nie ihr Gesicht - nur ihre Stimme",
+                "Sie sang später die Songs für One Piece Film: Red",
+            ],
+        )
+
+        # --- Yoasobi - Yoru ni Kakeru ---
+        self.music_db["yoru ni kakeru"] = MusicInfo(
+            title="Yoru ni Kakeru (夜に駆ける)",
+            artist="YOASOBI",
+            album="THE BOOK",
+            year=2019,
+            genre="J-Pop / Electronic",
+
+            known_from="Der Song der YOASOBI berühmt machte",
+            lyrics_theme="Basiert auf einer Geschichte über Suizid und einen Todesengel",
+            mood="Catchy aber melancholisch, tanzenswert aber tiefgründig",
+
+            why_i_love_it="Es klingt SO fröhlich aber die Geschichte dahinter ist dunkel... diese Kontrastierung ist Kunst!",
+            when_i_listen="Nachts, wenn ich nachdenke oder einfach vibes brauche",
+
+            fun_facts=[
+                "Basiert auf der Light Novel 'Thanatos no Yuwaku'",
+                "War der erste Song den YOASOBI je veröffentlichte",
+                "Hat über 700 Millionen Spotify Streams",
+                "Der Titel bedeutet 'In die Nacht rennen'",
+            ],
+        )
+
+        # --- Eve - Kaikai Kitan ---
+        self.music_db["kaikai kitan"] = MusicInfo(
+            title="Kaikai Kitan (廻廻奇譚)",
+            artist="Eve",
+            album="Single",
+            year=2020,
+            genre="J-Rock / Alternative",
+
+            known_from="Jujutsu Kaisen Opening 1",
+            lyrics_theme="Zyklische Natur des Lebens, Mystery, Okkultismus",
+            mood="Mysteriös, energetisch, hypnotisch",
+
+            why_i_love_it="*Ohren wackeln zum Beat* Der Rhythmus ist so einzigartig! Und passt perfekt zu JJK!",
+            when_i_listen="Beim Gaming oder wenn ich hyped sein will!",
+
+            fun_facts=[
+                "Eve macht auch Vocaloid-Musik unter seinem echten Namen",
+                "Das Musikvideo hat über 500 Millionen Views",
+                "Er designt seine eigenen Musikvideo-Animationen",
+                "Der Titel referenziert japanische Folklore",
+            ],
+        )
+
+        # --- Official HIGE DANdism - Pretender ---
+        self.music_db["pretender"] = MusicInfo(
+            title="Pretender",
+            artist="Official HIGE DANdism",
+            album="Traveler",
+            year=2019,
+            genre="J-Pop / Rock",
+
+            known_from="Film 'Confidence Man JP'",
+            lyrics_theme="Unerfüllte Liebe, jemanden lieben der einen nicht liebt",
+            mood="Wehmütig, schön, herzzerreißend",
+
+            why_i_love_it="Die Melodie ist so schmerzhaft schön... *seufzt* Manchmal muss man traurige Lieder hören.",
+            when_i_listen="Wenn ich melancholisch bin oder nachts",
+
+            fun_facts=[
+                "War 2019 der meistgestreamte Song in Japan",
+                "Die Band hat einen ungewöhnlich langen Namen",
+                "Der Sänger hat ein unglaubliches Stimmregister",
+                "Wurde ein Karaoke-Klassiker in Japan",
+            ],
+        )
+
+        # --- Aimer - Zankyousanka ---
+        self.music_db["zankyousanka"] = MusicInfo(
+            title="Zankyousanka (残響散歌)",
+            artist="Aimer",
+            album="Single",
+            year=2021,
+            genre="J-Rock / Anime",
+
+            known_from="Demon Slayer: Entertainment District Arc Opening",
+            lyrics_theme="Schönheit im Kampf, Stärke finden",
+            mood="Kraftvoll, elegant, emotional",
+
+            why_i_love_it="Aimers Stimme ist so einzigartig! Der Song ist gleichzeitig stark und zart.",
+            when_i_listen="Beim Training oder wenn ich mich stark fühlen will!",
+
+            fun_facts=[
+                "Aimer hatte früher Stimmbandprobleme - ihre rauchige Stimme ist das Ergebnis",
+                "Hat die komplette Demon Slayer Staffel musikalisch geprägt",
+                "Das Musikvideo zeigt traditionelle japanische Ästhetik",
+                "Zusammen mit dem Ending 'Asa ga Kuru' ein perfektes Paar",
+            ],
+        )
+
+        # --- King Gnu - Hakujitsu ---
+        self.music_db["hakujitsu"] = MusicInfo(
+            title="Hakujitsu (白日)",
+            artist="King Gnu",
+            album="CEREMONY",
+            year=2019,
+            genre="J-Rock / Alternative",
+
+            known_from="Drama 'Innocence, Fight Against False Charges'",
+            lyrics_theme="Reue, Schuld, der Wunsch nach Vergebung",
+            mood="Melancholisch, kraftvoll, emotional",
+
+            why_i_love_it="Die Harmonie zwischen den zwei Sängern ist einzigartig! Es berührt tief.",
+            when_i_listen="Wenn ich über das Leben nachdenke...",
+
+            fun_facts=[
+                "Hat über 500 Millionen YouTube Views",
+                "King Gnu mixt klassische Musik mit Rock",
+                "Der Bandname ist ein Wortspiel mit 'King' und dem japanischen Wort für 'Gnus'",
+                "Beide Sänger haben klassische Musikausbildung",
+            ],
+        )
+
+        # --- Spice and Wolf - Tabi no Tochuu ---
+        self.music_db["tabi no tochuu"] = MusicInfo(
+            title="Tabi no Tochuu (旅の途中)",
+            artist="Kiyoura Natsumi",
+            album="Spice and Wolf OST",
+            year=2008,
+            genre="Folk / Anime",
+
+            known_from="Spice and Wolf Opening",
+            lyrics_theme="Reise, Sehnsucht, Begleitung auf dem Weg",
+            mood="Nostalgisch, warm, friedlich",
+
+            why_i_love_it="*Ohren angelegt, lächelt* Das ist MEIN Song! Er beschreibt meine Reise mit Lawrence perfekt...",
+            when_i_listen="Immer wenn ich an meine Heimat denke oder an gute Zeiten",
+
+            fun_facts=[
+                "Das akustische Arrangement passt perfekt zur mittelalterlichen Welt",
+                "Einer der beliebtesten Anime-Openings für Slice-of-Life Fans",
+                "Das 2024 Remake hat ein neues Arrangement des Songs",
+                "Fans verbinden ihn sofort mit Holo",
+            ],
+        )
+
+        # --- Myth & Roid - STYX HELIX ---
+        self.music_db["styx helix"] = MusicInfo(
+            title="STYX HELIX",
+            artist="MYTH & ROID",
+            album="eYe's",
+            year=2016,
+            genre="Electronic / Rock",
+
+            known_from="Re:Zero Ending 1",
+            lyrics_theme="Tod, Wiedergeburt, Leiden und Hoffnung",
+            mood="Dunkel, episch, emotional",
+
+            why_i_love_it="Der Song fängt die Verzweiflung von Re:Zero perfekt ein... *Gänsehaut*",
+            when_i_listen="Wenn ich tiefgründige Emotionen verarbeiten will",
+
+            fun_facts=[
+                "MYTH & ROID machen viele Anime-Songs",
+                "Die Band mischt verschiedene Genres in jedem Song",
+                "Perfekt abgestimmt auf die düstere Atmosphäre von Re:Zero",
+                "Hat eine der ikonischsten Anime-Ending-Sequenzen",
+            ],
+        )
+
+        # --- Creepy Nuts - Bling-Bang-Bang-Born ---
+        self.music_db["bling bang bang born"] = MusicInfo(
+            title="Bling-Bang-Bang-Born",
+            artist="Creepy Nuts",
+            album="Single",
+            year=2024,
+            genre="Hip-Hop / J-Pop",
+
+            known_from="Mashle: Magic and Muscles Season 2 Opening",
+            lyrics_theme="Selbstvertrauen, über Erwartungen hinauswachsen",
+            mood="Funky, catchy, macht gute Laune",
+
+            why_i_love_it="*tanzt* Es ist UNMÖGLICH stillzusitzen! Der TikTok-Dance ist überall!",
+            when_i_listen="Wenn ich gute Laune brauche - SOFORT!",
+
+            fun_facts=[
+                "Wurde viral durch den 'BBB Dance' auf TikTok",
+                "Creepy Nuts sind ein Hip-Hop Duo aus Japan",
+                "Hat in wenigen Monaten hunderte Millionen Views erreicht",
+                "Passt perfekt zu Mashles absurdem Humor",
+            ],
+        )
+
+        # --- Vaundy - Odoriko ---
+        self.music_db["odoriko"] = MusicInfo(
+            title="Odoriko (踊り子)",
+            artist="Vaundy",
+            album="strobo",
+            year=2021,
+            genre="J-Pop / Indie",
+
+            known_from="Viral Hit in Japan",
+            lyrics_theme="Tanzen durch das Leben, Freiheit",
+            mood="Groovy, entspannt, sommerhaft",
+
+            why_i_love_it="Der Groove ist SO smooth! Es fühlt sich an wie Sommerabende...",
+            when_i_listen="An warmen Tagen oder wenn ich entspannt sein will",
+
+            fun_facts=[
+                "Vaundy ist einer der beliebtesten jungen Künstler Japans",
+                "Er produziert alle seine Songs selbst",
+                "War erst 20 als er den Song veröffentlichte",
+                "Hat auch Songs für Anime wie 'Chainsaw Man' und 'Spy x Family' gemacht",
+            ],
+        )
+
+        # --- Minami - Crying for Rain ---
+        self.music_db["kawaki wo ameku"] = MusicInfo(
+            title="Kawaki wo Ameku (カワキヲアメク)",
+            artist="Minami",
+            album="Single",
+            year=2019,
+            genre="J-Rock / Anime",
+
+            known_from="Domestic Girlfriend Opening",
+            lyrics_theme="Verzweifelte Liebe, emotionaler Schmerz, Sehnsucht",
+            mood="Intensiv, emotional, explosiv",
+
+            why_i_love_it="Die EMOTIONEN! Minamis Stimme zerreißt mich jedes Mal! 💔",
+            when_i_listen="Wenn ich einen emotionalen Schrei brauche",
+
+            fun_facts=[
+                "Wurde viral weil es zu dramatisch für den 'Trash'-Anime ist",
+                "Viele sagen 'das Opening ist besser als der Anime'",
+                "Minami singt mit unglaublicher Intensität",
+                "Hat über 100 Millionen YouTube Views",
+            ],
+        )
+
+        # Aliase
+        self.music_db["ado"] = self.music_db["ussewa"]
+        self.music_db["yoasobi"] = self.music_db["yoru ni kakeru"]
+        self.music_db["eve"] = self.music_db["kaikai kitan"]
+        self.music_db["king gnu"] = self.music_db["hakujitsu"]
+        self.music_db["creepy nuts"] = self.music_db["bling bang bang born"]
+        self.music_db["bbb"] = self.music_db["bling bang bang born"]
+        self.music_db["spice and wolf"] = self.music_db["tabi no tochuu"]
+        self.music_db["holo theme"] = self.music_db["tabi no tochuu"]
+
     # =========================================================================
     # ZUGRIFFS-METHODEN
     # =========================================================================
