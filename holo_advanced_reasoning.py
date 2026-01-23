@@ -75,7 +75,9 @@ class ReasoningMode(Enum):
     CAUSAL = "causal"
     METACOGNITIVE = "metacognitive"
     DIALECTICAL = "dialectical"
-    COMBINED = "combined"  # Alle Modi zusammen
+    ABDUCTIVE = "abductive"      # NEU: Schluss auf beste Erklärung
+    TEMPORAL = "temporal"        # NEU: Zeitbasiertes Reasoning
+    COMBINED = "combined"        # Alle Modi zusammen
 
 
 class EvidenceType(Enum):
@@ -915,6 +917,55 @@ class CausalDomain(Enum):
     POLITIK = "politik"
     BILDUNG = "bildung"
     ALLGEMEIN = "allgemein"
+    # NEU: Erweiterte Domänen
+    RECHT = "recht"
+    ETHIK = "ethik"
+    KUNST = "kunst"
+    SPORT = "sport"
+    KOMMUNIKATION = "kommunikation"
+    NEUROWISSENSCHAFT = "neurowissenschaft"
+    PHILOSOPHIE = "philosophie"
+    LINGUISTIK = "linguistik"
+
+
+# =============================================================================
+# NEUE ENUMS FÜR ERWEITERTE REASONING-TYPEN
+# =============================================================================
+
+class AbductiveHypothesisType(Enum):
+    """Typen abduktiver Hypothesen"""
+    CAUSAL = "causal"              # Ursache-Erklärung
+    FUNCTIONAL = "functional"      # Funktionale Erklärung
+    INTENTIONAL = "intentional"    # Absichts-basierte Erklärung
+    STRUCTURAL = "structural"      # Struktur-basierte Erklärung
+    TELEOLOGICAL = "teleological"  # Zweck-orientierte Erklärung
+
+
+class TemporalRelation(Enum):
+    """Zeitliche Beziehungen zwischen Ereignissen"""
+    BEFORE = "before"                 # A vor B
+    AFTER = "after"                   # A nach B
+    DURING = "during"                 # A während B
+    OVERLAPS = "overlaps"             # A überlappt mit B
+    MEETS = "meets"                   # A endet wenn B beginnt
+    STARTS = "starts"                 # A beginnt mit B
+    FINISHES = "finishes"             # A endet mit B
+    EQUALS = "equals"                 # A und B sind zeitgleich
+    CAUSES_IMMEDIATELY = "causes_immediately"  # A verursacht B sofort
+    CAUSES_DELAYED = "causes_delayed"          # A verursacht B verzögert
+
+
+class TemporalGranularity(Enum):
+    """Zeitliche Granularität"""
+    MILLISECONDS = "milliseconds"
+    SECONDS = "seconds"
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+    WEEKS = "weeks"
+    MONTHS = "months"
+    YEARS = "years"
+    DECADES = "decades"
 
 
 class MediatorType(Enum):
@@ -942,6 +993,123 @@ class CausalChain:
     time_delays: List[float] = field(default_factory=list)  # In Zeiteinheiten
     is_reversible: bool = False
     confidence: float = 0.5
+
+
+# =============================================================================
+# NEU: DATENSTRUKTUREN FÜR ABDUKTIVES REASONING
+# =============================================================================
+
+@dataclass
+class Observation:
+    """Eine Beobachtung, die erklärt werden soll"""
+    description: str
+    timestamp: datetime = field(default_factory=datetime.now)
+    reliability: float = 0.8  # Wie zuverlässig ist die Beobachtung?
+    context: Dict[str, Any] = field(default_factory=dict)
+    source: str = ""
+
+
+@dataclass
+class AbductiveHypothesis:
+    """Eine abduktive Hypothese (mögliche Erklärung)"""
+    hypothesis_id: str
+    content: str
+    hypothesis_type: AbductiveHypothesisType
+    explains: List[str]  # Welche Beobachtungen erklärt diese Hypothese?
+    plausibility: float  # Wie plausibel ist die Hypothese?
+    simplicity: float  # Ockhams Rasiermesser: einfachere Erklärungen bevorzugt
+    scope: float  # Wie viele Phänomene erklärt sie?
+    coherence: float  # Passt sie zum bestehenden Wissen?
+    testability: float  # Kann sie getestet/falsifiziert werden?
+    supporting_evidence: List[str] = field(default_factory=list)
+    counter_evidence: List[str] = field(default_factory=list)
+    prior_probability: float = 0.5
+
+    def overall_score(self) -> float:
+        """Berechnet Gesamtbewertung der Hypothese"""
+        return (
+            self.plausibility * 0.25 +
+            self.simplicity * 0.15 +
+            self.scope * 0.20 +
+            self.coherence * 0.20 +
+            self.testability * 0.10 +
+            self.prior_probability * 0.10
+        )
+
+
+@dataclass
+class InferenceToTheBestExplanation:
+    """Ergebnis einer Inference to the Best Explanation (IBE)"""
+    observations: List[Observation]
+    hypotheses: List[AbductiveHypothesis]
+    best_hypothesis: Optional[AbductiveHypothesis]
+    ranking: List[Tuple[str, float]]  # (hypothesis_id, score)
+    confidence: float
+    reasoning_trace: List[str]
+
+
+# =============================================================================
+# NEU: DATENSTRUKTUREN FÜR TEMPORALES REASONING
+# =============================================================================
+
+@dataclass
+class TemporalEvent:
+    """Ein zeitliches Ereignis"""
+    event_id: str
+    description: str
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    duration: Optional[float] = None  # In Sekunden
+    granularity: TemporalGranularity = TemporalGranularity.SECONDS
+    is_instantaneous: bool = False
+    properties: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class TemporalConstraint:
+    """Eine zeitliche Einschränkung zwischen Ereignissen"""
+    event_a: str
+    event_b: str
+    relation: TemporalRelation
+    min_gap: Optional[float] = None  # Minimaler zeitlicher Abstand
+    max_gap: Optional[float] = None  # Maximaler zeitlicher Abstand
+    confidence: float = 0.8
+
+
+@dataclass
+class TemporalCausalLink:
+    """Eine zeitlich-kausale Verbindung"""
+    cause_event: str
+    effect_event: str
+    delay: float  # Zeitliche Verzögerung
+    delay_variance: float = 0.0  # Variabilität der Verzögerung
+    strength: float = 0.5
+    mechanism: str = ""
+    is_deterministic: bool = False
+
+
+@dataclass
+class TemporalPattern:
+    """Ein erkanntes zeitliches Muster"""
+    pattern_id: str
+    description: str
+    events_sequence: List[str]  # Reihenfolge der Events
+    typical_intervals: List[float]  # Typische Zeitabstände
+    frequency: int = 0  # Wie oft wurde das Muster beobachtet?
+    confidence: float = 0.5
+    is_periodic: bool = False
+    period: Optional[float] = None  # Periodendauer wenn periodisch
+
+
+@dataclass
+class Timeline:
+    """Eine Zeitleiste mit Ereignissen"""
+    timeline_id: str
+    events: Dict[str, TemporalEvent] = field(default_factory=dict)
+    constraints: List[TemporalConstraint] = field(default_factory=list)
+    causal_links: List[TemporalCausalLink] = field(default_factory=list)
+    start: Optional[datetime] = None
+    end: Optional[datetime] = None
 
 
 @dataclass
@@ -1506,7 +1674,504 @@ class CausalReasoner:
              "mechanism": "Neuronale Verstärkung durch Wiederholung"},
             {"cause": "stress", "effect": "lernbehinderung", "strength": 0.60,
              "mechanism": "Kognitive Ressourcen für Stressbewältigung"},
+            # NEU: Erweiterte Bildungs-Kausalitäten
+            {"cause": "digitalisierung", "effect": "lernzugang", "strength": 0.75,
+             "mechanism": "Ortsunabhängiger Zugang zu Bildungsinhalten"},
+            {"cause": "inklusion", "effect": "chancengleichheit", "strength": 0.65,
+             "mechanism": "Abbau struktureller Barrieren"},
+            {"cause": "sprachförderung", "effect": "lesekompetenz", "strength": 0.80,
+             "mechanism": "Frühe sprachliche Grundlagen"},
+            {"cause": "peer_learning", "effect": "soziale_kompetenz", "strength": 0.70,
+             "mechanism": "Kollaboratives Lernen fördert Sozialkompetenz"},
         ]
+
+        # =================================================================
+        # NEU: ERWEITERTE DOMÄNEN
+        # =================================================================
+
+        # RECHT
+        self.domain_knowledge[CausalDomain.RECHT] = [
+            {"cause": "gesetzgebung", "effect": "verhaltenssteuerung", "strength": 0.70,
+             "mechanism": "Rechtliche Normen setzen Anreize und Sanktionen"},
+            {"cause": "rechtssicherheit", "effect": "investitionsbereitschaft", "strength": 0.75,
+             "mechanism": "Vorhersehbare Rechtsfolgen ermöglichen Planung"},
+            {"cause": "vertragsbruch", "effect": "schadensersatz", "strength": 0.85,
+             "mechanism": "Zivilrechtliche Haftung bei Pflichtverletzung"},
+            {"cause": "straftat", "effect": "sanktion", "strength": 0.90,
+             "mechanism": "Strafrechtliche Konsequenzen bei Normverstößen"},
+            {"cause": "beweislast", "effect": "prozessausgang", "strength": 0.65,
+             "mechanism": "Wer nicht beweist, verliert"},
+            {"cause": "präzedenzfall", "effect": "rechtsentwicklung", "strength": 0.60,
+             "mechanism": "Richterrecht durch Leitentscheidungen"},
+            {"cause": "grundrechte", "effect": "freiheitsschutz", "strength": 0.80,
+             "mechanism": "Verfassungsrechtliche Abwehrrechte"},
+            {"cause": "regulierung", "effect": "marktverhalten", "strength": 0.65,
+             "mechanism": "Wirtschaftsrecht steuert Unternehmen"},
+            {"cause": "datenschutz", "effect": "privatsphäre", "strength": 0.75,
+             "mechanism": "Rechtliche Schranken für Datenverarbeitung"},
+            {"cause": "haftung", "effect": "vorsicht", "strength": 0.70,
+             "mechanism": "Schadensersatzrisiko fördert Sorgfalt"},
+            {"cause": "vertragsfreiheit", "effect": "wirtschaftsverkehr", "strength": 0.80,
+             "mechanism": "Autonome Gestaltung von Rechtsbeziehungen"},
+            {"cause": "rechtsweg", "effect": "konfliktlösung", "strength": 0.75,
+             "mechanism": "Gerichtliche Streitbeilegung"},
+        ]
+
+        # ETHIK
+        self.domain_knowledge[CausalDomain.ETHIK] = [
+            {"cause": "moralische_erziehung", "effect": "charakterbildung", "strength": 0.65,
+             "mechanism": "Internalisierung ethischer Werte"},
+            {"cause": "empathie", "effect": "prosoziales_verhalten", "strength": 0.75,
+             "mechanism": "Einfühlung motiviert Hilfeverhalten"},
+            {"cause": "gewissenskonflikt", "effect": "reflexion", "strength": 0.70,
+             "mechanism": "Moralisches Dilemma erzwingt Nachdenken"},
+            {"cause": "tugend", "effect": "glück", "strength": 0.55,
+             "mechanism": "Eudaimonistische Ethik nach Aristoteles"},
+            {"cause": "pflichtbewusstsein", "effect": "regelkonformität", "strength": 0.70,
+             "mechanism": "Deontologische Motivation"},
+            {"cause": "konsequenzbetrachtung", "effect": "entscheidung", "strength": 0.65,
+             "mechanism": "Utilitaristische Nutzenabwägung"},
+            {"cause": "wertpluralismus", "effect": "toleranz", "strength": 0.60,
+             "mechanism": "Anerkennung unterschiedlicher Wertvorstellungen"},
+            {"cause": "verantwortung", "effect": "nachhaltigkeit", "strength": 0.70,
+             "mechanism": "Generationenübergreifende Ethik"},
+            {"cause": "autonomie", "effect": "würde", "strength": 0.80,
+             "mechanism": "Selbstbestimmung als Grundwert"},
+            {"cause": "gerechtigkeit", "effect": "sozialer_friede", "strength": 0.75,
+             "mechanism": "Faire Verteilung reduziert Konflikte"},
+            {"cause": "integrität", "effect": "vertrauenswürdigkeit", "strength": 0.85,
+             "mechanism": "Konsistenz zwischen Worten und Taten"},
+            {"cause": "moralische_vorbilder", "effect": "verhaltensänderung", "strength": 0.60,
+             "mechanism": "Modelllernen ethischen Verhaltens"},
+        ]
+
+        # KUNST
+        self.domain_knowledge[CausalDomain.KUNST] = [
+            {"cause": "kreativität", "effect": "innovation", "strength": 0.80,
+             "mechanism": "Divergentes Denken erzeugt Neues"},
+            {"cause": "übung", "effect": "kunstfertigkeit", "strength": 0.85,
+             "mechanism": "Deliberate Practice verbessert Technik"},
+            {"cause": "emotion", "effect": "ausdruck", "strength": 0.75,
+             "mechanism": "Gefühle finden künstlerische Form"},
+            {"cause": "kultureller_kontext", "effect": "stilentwicklung", "strength": 0.65,
+             "mechanism": "Zeitgeist prägt künstlerische Strömungen"},
+            {"cause": "patronage", "effect": "kunstproduktion", "strength": 0.70,
+             "mechanism": "Finanzielle Förderung ermöglicht Schaffen"},
+            {"cause": "technologie", "effect": "neue_kunstformen", "strength": 0.75,
+             "mechanism": "Neue Medien eröffnen Ausdrucksmöglichkeiten"},
+            {"cause": "tradition", "effect": "handwerk", "strength": 0.70,
+             "mechanism": "Weitergabe von Techniken und Wissen"},
+            {"cause": "provokation", "effect": "aufmerksamkeit", "strength": 0.60,
+             "mechanism": "Grenzüberschreitung erzeugt Resonanz"},
+            {"cause": "ästhetik", "effect": "wohlbefinden", "strength": 0.65,
+             "mechanism": "Schönes wirkt positiv auf Psyche"},
+            {"cause": "kunstkritik", "effect": "qualitätsbewusstsein", "strength": 0.55,
+             "mechanism": "Diskurs schärft ästhetisches Urteil"},
+            {"cause": "inspiration", "effect": "schaffensprozess", "strength": 0.80,
+             "mechanism": "Anregung initiiert kreatives Handeln"},
+            {"cause": "kunstausbildung", "effect": "professionalisierung", "strength": 0.70,
+             "mechanism": "Systematische Vermittlung von Fähigkeiten"},
+        ]
+
+        # SPORT
+        self.domain_knowledge[CausalDomain.SPORT] = [
+            {"cause": "training", "effect": "leistung", "strength": 0.90,
+             "mechanism": "Physiologische Anpassung durch Belastung"},
+            {"cause": "ernährung", "effect": "regeneration", "strength": 0.75,
+             "mechanism": "Nährstoffe für Muskelreparatur"},
+            {"cause": "motivation", "effect": "trainingsintensität", "strength": 0.80,
+             "mechanism": "Innerer Antrieb steigert Einsatz"},
+            {"cause": "verletzung", "effect": "leistungseinbruch", "strength": 0.85,
+             "mechanism": "Physische Schäden reduzieren Kapazität"},
+            {"cause": "wettkampfdruck", "effect": "nervosität", "strength": 0.65,
+             "mechanism": "Hohe Erwartungen erzeugen Stress"},
+            {"cause": "teamgeist", "effect": "mannschaftsleistung", "strength": 0.70,
+             "mechanism": "Kooperation potenziert Einzelleistungen"},
+            {"cause": "taktik", "effect": "spielergebnis", "strength": 0.60,
+             "mechanism": "Strategische Planung nutzt Stärken"},
+            {"cause": "talent", "effect": "lerngeschwindigkeit", "strength": 0.70,
+             "mechanism": "Genetische Prädisposition erleichtert Anpassung"},
+            {"cause": "coaching", "effect": "technikverbesserung", "strength": 0.75,
+             "mechanism": "Gezielte Anleitung optimiert Bewegungen"},
+            {"cause": "doping", "effect": "kurzfristige_leistungssteigerung", "strength": 0.80,
+             "mechanism": "Pharmakologische Manipulation der Physiologie"},
+            {"cause": "schlaf", "effect": "erholung", "strength": 0.85,
+             "mechanism": "Regenerative Prozesse im Schlaf"},
+            {"cause": "mentales_training", "effect": "fokus", "strength": 0.65,
+             "mechanism": "Visualisierung verbessert Konzentration"},
+        ]
+
+        # KOMMUNIKATION
+        self.domain_knowledge[CausalDomain.KOMMUNIKATION] = [
+            {"cause": "klarheit", "effect": "verständnis", "strength": 0.85,
+             "mechanism": "Eindeutige Botschaften reduzieren Missverständnisse"},
+            {"cause": "aktives_zuhören", "effect": "beziehungsqualität", "strength": 0.75,
+             "mechanism": "Aufmerksamkeit signalisiert Wertschätzung"},
+            {"cause": "nonverbale_signale", "effect": "emotionsübertragung", "strength": 0.70,
+             "mechanism": "Mimik und Gestik transportieren Gefühle"},
+            {"cause": "feedback", "effect": "verhaltensanpassung", "strength": 0.75,
+             "mechanism": "Rückmeldung ermöglicht Korrektur"},
+            {"cause": "medium", "effect": "botschaftswirkung", "strength": 0.60,
+             "mechanism": "Kanal beeinflusst Interpretation (McLuhan)"},
+            {"cause": "rauschen", "effect": "informationsverlust", "strength": 0.70,
+             "mechanism": "Störungen degradieren Signalqualität"},
+            {"cause": "rhetorik", "effect": "überzeugungskraft", "strength": 0.75,
+             "mechanism": "Stilmittel verstärken Argumentwirkung"},
+            {"cause": "kulturelle_unterschiede", "effect": "missverständnisse", "strength": 0.65,
+             "mechanism": "Divergente Interpretationsrahmen"},
+            {"cause": "vertrauen", "effect": "offenheit", "strength": 0.80,
+             "mechanism": "Sicherheit ermöglicht authentische Kommunikation"},
+            {"cause": "konflikt", "effect": "kommunikationsabbruch", "strength": 0.55,
+             "mechanism": "Eskalation behindert Dialog"},
+            {"cause": "empathische_kommunikation", "effect": "kooperation", "strength": 0.75,
+             "mechanism": "Einfühlsame Sprache fördert Zusammenarbeit"},
+            {"cause": "transparenz", "effect": "glaubwürdigkeit", "strength": 0.80,
+             "mechanism": "Offenlegung stärkt Vertrauen"},
+        ]
+
+        # NEUROWISSENSCHAFT
+        self.domain_knowledge[CausalDomain.NEUROWISSENSCHAFT] = [
+            {"cause": "neurotransmitter", "effect": "stimmung", "strength": 0.80,
+             "mechanism": "Chemische Botenstoffe modulieren Emotionen"},
+            {"cause": "synaptische_plastizität", "effect": "lernen", "strength": 0.85,
+             "mechanism": "Verstärkung neuronaler Verbindungen"},
+            {"cause": "stress", "effect": "cortisol", "strength": 0.90,
+             "mechanism": "HPA-Achsen-Aktivierung"},
+            {"cause": "schlafmangel", "effect": "kognitive_defizite", "strength": 0.80,
+             "mechanism": "Gestörte Gedächtniskonsolidierung"},
+            {"cause": "neurodegeneration", "effect": "demenz", "strength": 0.85,
+             "mechanism": "Verlust von Nervenzellen"},
+            {"cause": "dopamin", "effect": "motivation", "strength": 0.75,
+             "mechanism": "Belohnungssystem-Aktivierung"},
+            {"cause": "serotonin", "effect": "wohlbefinden", "strength": 0.70,
+             "mechanism": "Stimmungsregulation"},
+            {"cause": "neuroinflammation", "effect": "kognitive_beeinträchtigung", "strength": 0.65,
+             "mechanism": "Entzündliche Prozesse im Gehirn"},
+            {"cause": "myelinisierung", "effect": "signalgeschwindigkeit", "strength": 0.90,
+             "mechanism": "Isolation beschleunigt Nervenleitung"},
+            {"cause": "neurogenese", "effect": "gehirnplastizität", "strength": 0.70,
+             "mechanism": "Neue Nervenzellen im Hippocampus"},
+            {"cause": "meditation", "effect": "gehirnstruktur", "strength": 0.55,
+             "mechanism": "Strukturelle Veränderungen durch Training"},
+            {"cause": "trauma", "effect": "amygdala_überaktivität", "strength": 0.75,
+             "mechanism": "Sensibilisierung des Angstsystems"},
+        ]
+
+        # PHILOSOPHIE
+        self.domain_knowledge[CausalDomain.PHILOSOPHIE] = [
+            {"cause": "skeptizismus", "effect": "erkenntniskritik", "strength": 0.70,
+             "mechanism": "Zweifel hinterfragt Gewissheiten"},
+            {"cause": "logik", "effect": "argumentationsqualität", "strength": 0.85,
+             "mechanism": "Formale Regeln sichern Gültigkeit"},
+            {"cause": "dialektik", "effect": "synthese", "strength": 0.70,
+             "mechanism": "These-Antithese-Aufhebung"},
+            {"cause": "phänomenologie", "effect": "bewusstseinsanalyse", "strength": 0.65,
+             "mechanism": "Beschreibung der Erscheinungsweisen"},
+            {"cause": "hermeneutik", "effect": "textverständnis", "strength": 0.75,
+             "mechanism": "Interpretationslehre erschließt Sinn"},
+            {"cause": "existenzialismus", "effect": "authentizität", "strength": 0.60,
+             "mechanism": "Selbstentwurf in Freiheit"},
+            {"cause": "rationalismus", "effect": "a_priori_erkenntnis", "strength": 0.65,
+             "mechanism": "Vernunft als Erkenntnisquelle"},
+            {"cause": "empirismus", "effect": "erfahrungsbasiertes_wissen", "strength": 0.70,
+             "mechanism": "Sinneserfahrung als Grundlage"},
+            {"cause": "konstruktivismus", "effect": "realitätskonstruktion", "strength": 0.60,
+             "mechanism": "Wirklichkeit als Konstrukt"},
+            {"cause": "pragmatismus", "effect": "handlungsorientierung", "strength": 0.65,
+             "mechanism": "Wahrheit durch Praxisrelevanz"},
+            {"cause": "analytische_philosophie", "effect": "begriffsklärung", "strength": 0.80,
+             "mechanism": "Sprachanalyse löst Probleme"},
+            {"cause": "kritische_theorie", "effect": "gesellschaftskritik", "strength": 0.70,
+             "mechanism": "Aufklärung über Herrschaftsstrukturen"},
+        ]
+
+        # LINGUISTIK
+        self.domain_knowledge[CausalDomain.LINGUISTIK] = [
+            {"cause": "spracherwerb", "effect": "kommunikationsfähigkeit", "strength": 0.90,
+             "mechanism": "Erlernen sprachlicher Regeln"},
+            {"cause": "input_frequenz", "effect": "wortschatzerwerb", "strength": 0.75,
+             "mechanism": "Häufige Exposition festigt Lexikon"},
+            {"cause": "grammatik", "effect": "satzbildung", "strength": 0.85,
+             "mechanism": "Syntaktische Regeln strukturieren Sprache"},
+            {"cause": "pragmatik", "effect": "kommunikationserfolg", "strength": 0.70,
+             "mechanism": "Kontextangemessene Sprachverwendung"},
+            {"cause": "sprachkontakt", "effect": "sprachwandel", "strength": 0.65,
+             "mechanism": "Entlehnungen und Interferenzen"},
+            {"cause": "schriftlichkeit", "effect": "standardisierung", "strength": 0.70,
+             "mechanism": "Fixierung stabilisiert Normen"},
+            {"cause": "soziolekt", "effect": "gruppenidentität", "strength": 0.60,
+             "mechanism": "Sprachliche Marker signalisieren Zugehörigkeit"},
+            {"cause": "metapher", "effect": "konzeptbildung", "strength": 0.65,
+             "mechanism": "Bildliche Sprache strukturiert Denken"},
+            {"cause": "mehrsprachigkeit", "effect": "kognitive_flexibilität", "strength": 0.60,
+             "mechanism": "Sprachwechsel trainiert exekutive Funktionen"},
+            {"cause": "sprachliche_relativität", "effect": "wahrnehmung", "strength": 0.45,
+             "mechanism": "Sprache beeinflusst Weltsicht (Sapir-Whorf)"},
+            {"cause": "diskurs", "effect": "wissenskonstruktion", "strength": 0.70,
+             "mechanism": "Sprachliche Praktiken formen Wissen"},
+            {"cause": "semantik", "effect": "bedeutungsverstehen", "strength": 0.80,
+             "mechanism": "Lexikalische und kompositionelle Bedeutung"},
+        ]
+
+        # =================================================================
+        # ERWEITERTE BEZIEHUNGEN FÜR BESTEHENDE DOMÄNEN
+        # =================================================================
+
+        # Erweiterte MEDIZIN-Beziehungen
+        self.domain_knowledge[CausalDomain.MEDIZIN].extend([
+            {"cause": "mikrobiom", "effect": "immunsystem", "strength": 0.70,
+             "mechanism": "Darmbakterien trainieren Immunzellen"},
+            {"cause": "entzündung", "effect": "chronische_krankheit", "strength": 0.65,
+             "mechanism": "Persistente Inflammation schädigt Gewebe"},
+            {"cause": "epigenetik", "effect": "genexpression", "strength": 0.75,
+             "mechanism": "Umwelteinflüsse modifizieren Genaktivität"},
+            {"cause": "telemedzin", "effect": "versorgungszugang", "strength": 0.65,
+             "mechanism": "Fernbehandlung überbrückt Distanzen"},
+            {"cause": "personalisierte_medizin", "effect": "therapieerfolg", "strength": 0.70,
+             "mechanism": "Individuelle Behandlung nach Genotyp"},
+        ])
+
+        # Erweiterte PSYCHOLOGIE-Beziehungen
+        self.domain_knowledge[CausalDomain.PSYCHOLOGIE].extend([
+            {"cause": "attachment", "effect": "beziehungsfähigkeit", "strength": 0.75,
+             "mechanism": "Frühe Bindungserfahrungen prägen Muster"},
+            {"cause": "kognitive_umstrukturierung", "effect": "emotionsregulation", "strength": 0.70,
+             "mechanism": "Neue Bewertungen ändern Gefühle"},
+            {"cause": "flow", "effect": "intrinsische_motivation", "strength": 0.75,
+             "mechanism": "Optimale Herausforderung erzeugt Engagement"},
+            {"cause": "resilienzfaktoren", "effect": "stressbewältigung", "strength": 0.70,
+             "mechanism": "Schutzfaktoren puffern Belastungen"},
+            {"cause": "prokrastination", "effect": "leistungsdefizit", "strength": 0.65,
+             "mechanism": "Aufschieben verhindert Zielerreichung"},
+        ])
+
+        # Erweiterte WIRTSCHAFT-Beziehungen
+        self.domain_knowledge[CausalDomain.WIRTSCHAFT].extend([
+            {"cause": "netzwerkeffekte", "effect": "monopolbildung", "strength": 0.70,
+             "mechanism": "Nutzen steigt mit Nutzerzahl"},
+            {"cause": "informationsasymmetrie", "effect": "marktversagen", "strength": 0.65,
+             "mechanism": "Ungleiche Information verzerrt Transaktionen"},
+            {"cause": "disruption", "effect": "branchenwandel", "strength": 0.75,
+             "mechanism": "Radikale Innovation verdrängt Etablierte"},
+            {"cause": "schuldenstand", "effect": "fiskalische_flexibilität", "strength": 0.70,
+             "mechanism": "Hohe Verschuldung begrenzt Handlungsspielraum"},
+            {"cause": "humankapital", "effect": "produktivitätswachstum", "strength": 0.75,
+             "mechanism": "Qualifikation steigert Wertschöpfung"},
+        ])
+
+        # Erweiterte TECHNOLOGIE-Beziehungen
+        self.domain_knowledge[CausalDomain.TECHNOLOGIE].extend([
+            {"cause": "künstliche_intelligenz", "effect": "automatisierung", "strength": 0.80,
+             "mechanism": "Maschinelles Lernen ersetzt Routineaufgaben"},
+            {"cause": "blockchain", "effect": "dezentralisierung", "strength": 0.65,
+             "mechanism": "Verteilte Ledger eliminieren Intermediäre"},
+            {"cause": "quantencomputing", "effect": "kryptographie_wandel", "strength": 0.60,
+             "mechanism": "Neue Rechenkapazitäten brechen Verschlüsselung"},
+            {"cause": "iot", "effect": "datenexplosion", "strength": 0.75,
+             "mechanism": "Vernetzte Geräte generieren Massendaten"},
+            {"cause": "cloud_computing", "effect": "skalierbarkeit", "strength": 0.80,
+             "mechanism": "Elastische Ressourcen on demand"},
+        ])
+
+        # =================================================================
+        # VORDEFINIERTE KAUSALE KETTEN
+        # =================================================================
+        self._initialize_causal_chains()
+
+    def _initialize_causal_chains(self):
+        """Initialisiert vordefinierte komplexe kausale Ketten"""
+
+        # Kette 1: Klimawandel-Kaskade
+        self.causal_chains["climate_cascade"] = CausalChain(
+            chain_id="climate_cascade",
+            variables=["co2_emissionen", "klimawandel", "extremwetter",
+                      "landwirtschaftsschäden", "nahrungsmittelknappheit", "migration"],
+            domain=CausalDomain.UMWELT,
+            total_strength=0.55,
+            mechanisms=[
+                "Treibhauseffekt verstärkt Erwärmung",
+                "Erwärmung destabilisiert Wettersysteme",
+                "Extremwetter zerstört Ernten",
+                "Ernteausfälle reduzieren Nahrungsversorgung",
+                "Mangel treibt Menschen zur Flucht"
+            ],
+            time_delays=[10.0, 5.0, 0.5, 1.0, 2.0],  # In Jahren
+            is_reversible=False,
+            confidence=0.75
+        )
+
+        # Kette 2: Bildungs-Wohlstands-Kette
+        self.causal_chains["education_prosperity"] = CausalChain(
+            chain_id="education_prosperity",
+            variables=["frühförderung", "schulerfolg", "hochschulabschluss",
+                      "qualifizierte_arbeit", "einkommen", "lebensqualität"],
+            domain=CausalDomain.BILDUNG,
+            total_strength=0.60,
+            mechanisms=[
+                "Frühe Förderung legt kognitive Grundlagen",
+                "Schulische Leistungen ermöglichen höhere Bildung",
+                "Akademische Qualifikation öffnet Berufswege",
+                "Qualifizierte Arbeit wird besser entlohnt",
+                "Höheres Einkommen verbessert Lebensstandard"
+            ],
+            time_delays=[5.0, 12.0, 5.0, 2.0, 1.0],
+            is_reversible=False,
+            confidence=0.70
+        )
+
+        # Kette 3: Stress-Krankheits-Spirale
+        self.causal_chains["stress_disease"] = CausalChain(
+            chain_id="stress_disease",
+            variables=["chronischer_stress", "cortisol_erhöhung", "immunsuppression",
+                      "infektanfälligkeit", "krankheit", "arbeitsausfall"],
+            domain=CausalDomain.MEDIZIN,
+            total_strength=0.65,
+            mechanisms=[
+                "Dauerhafte HPA-Achsen-Aktivierung",
+                "Cortisol unterdrückt Immunantwort",
+                "Geschwächte Abwehr erlaubt Infektionen",
+                "Erkrankung beeinträchtigt Arbeitsfähigkeit",
+                "Fehltage belasten Wirtschaft"
+            ],
+            time_delays=[0.5, 0.25, 0.5, 0.25, 0.1],  # In Jahren
+            is_reversible=True,
+            confidence=0.70
+        )
+
+        # Kette 4: Technologie-Disruption
+        self.causal_chains["tech_disruption"] = CausalChain(
+            chain_id="tech_disruption",
+            variables=["innovation", "effizienzsteigerung", "kostensenkung",
+                      "marktdurchdringung", "branchenwandel", "arbeitsmarktveränderung"],
+            domain=CausalDomain.TECHNOLOGIE,
+            total_strength=0.70,
+            mechanisms=[
+                "Neue Technologie verbessert Prozesse",
+                "Effizienz senkt Produktionskosten",
+                "Günstigere Preise erhöhen Nachfrage",
+                "Massenadoption verändert Branche",
+                "Strukturwandel erfordert neue Qualifikationen"
+            ],
+            time_delays=[2.0, 1.0, 2.0, 5.0, 3.0],
+            is_reversible=False,
+            confidence=0.75
+        )
+
+        # Kette 5: Demokratie-Entwicklung
+        self.causal_chains["democracy_development"] = CausalChain(
+            chain_id="democracy_development",
+            variables=["bildung", "politische_partizipation", "demokratie",
+                      "rechtssicherheit", "wirtschaftsentwicklung", "wohlstand"],
+            domain=CausalDomain.POLITIK,
+            total_strength=0.55,
+            mechanisms=[
+                "Gebildete Bürger engagieren sich politisch",
+                "Partizipation stärkt demokratische Institutionen",
+                "Demokratie garantiert Rechtsstaat",
+                "Rechtssicherheit fördert Investitionen",
+                "Wirtschaftswachstum hebt Lebensstandard"
+            ],
+            time_delays=[15.0, 10.0, 5.0, 5.0, 5.0],
+            is_reversible=True,
+            confidence=0.60
+        )
+
+        # Kette 6: Sucht-Spirale
+        self.causal_chains["addiction_spiral"] = CausalChain(
+            chain_id="addiction_spiral",
+            variables=["substanzkonsum", "toleranzentwicklung", "dosissteigerung",
+                      "abhängigkeit", "entzugssymptome", "rückfall"],
+            domain=CausalDomain.PSYCHOLOGIE,
+            total_strength=0.75,
+            mechanisms=[
+                "Regelmäßiger Konsum führt zu Gewöhnung",
+                "Toleranz erfordert höhere Dosen",
+                "Dauerkonsum verändert Hirnchemie",
+                "Neurologische Anpassung erzeugt Entzug",
+                "Entzugsleid motiviert erneuten Konsum"
+            ],
+            time_delays=[0.5, 0.5, 1.0, 0.1, 0.1],
+            is_reversible=True,
+            confidence=0.80
+        )
+
+        # Kette 7: Künstliche Intelligenz Evolution
+        self.causal_chains["ai_evolution"] = CausalChain(
+            chain_id="ai_evolution",
+            variables=["datenmenge", "modelltraining", "leistungssteigerung",
+                      "breitere_anwendung", "mehr_daten", "verbesserte_modelle"],
+            domain=CausalDomain.TECHNOLOGIE,
+            total_strength=0.80,
+            mechanisms=[
+                "Große Datenmengen ermöglichen Training",
+                "Training verbessert Modellgenauigkeit",
+                "Bessere Leistung erweitert Einsatzgebiete",
+                "Mehr Anwendungen generieren neue Daten",
+                "Neue Daten verbessern nächste Generation"
+            ],
+            time_delays=[0.5, 1.0, 0.5, 1.0, 1.0],
+            is_reversible=False,
+            confidence=0.85
+        )
+
+        # Kette 8: Urbanisierung
+        self.causal_chains["urbanization"] = CausalChain(
+            chain_id="urbanization",
+            variables=["industrialisierung", "arbeitsmigration", "urbanisierung",
+                      "infrastrukturausbau", "wirtschaftskonzentration", "landflucht"],
+            domain=CausalDomain.SOZIALES,
+            total_strength=0.70,
+            mechanisms=[
+                "Industriejobs ziehen Arbeitskräfte an",
+                "Zuwanderung lässt Städte wachsen",
+                "Städte bauen Verkehr und Versorgung aus",
+                "Wirtschaftskraft konzentriert sich urban",
+                "Ländliche Gebiete verlieren Bewohner"
+            ],
+            time_delays=[20.0, 10.0, 5.0, 10.0, 15.0],
+            is_reversible=True,
+            confidence=0.75
+        )
+
+        # Kette 9: Wissenschaftlicher Fortschritt
+        self.causal_chains["scientific_progress"] = CausalChain(
+            chain_id="scientific_progress",
+            variables=["neugier", "forschung", "entdeckung", "publikation",
+                      "replikation", "anwendung", "innovation"],
+            domain=CausalDomain.BILDUNG,
+            total_strength=0.65,
+            mechanisms=[
+                "Neugier motiviert systematische Untersuchung",
+                "Forschung erzeugt neue Erkenntnisse",
+                "Entdeckungen werden veröffentlicht",
+                "Andere Forscher prüfen Ergebnisse",
+                "Bestätigtes Wissen wird angewendet",
+                "Anwendung führt zu praktischen Innovationen"
+            ],
+            time_delays=[1.0, 3.0, 0.5, 2.0, 3.0, 5.0],
+            is_reversible=False,
+            confidence=0.70
+        )
+
+        # Kette 10: Neurodegenerative Erkrankung
+        self.causal_chains["neurodegeneration"] = CausalChain(
+            chain_id="neurodegeneration",
+            variables=["proteinaggregation", "zellstress", "neuroinflammation",
+                      "synapsenverlust", "kognitive_beeinträchtigung", "demenz"],
+            domain=CausalDomain.NEUROWISSENSCHAFT,
+            total_strength=0.75,
+            mechanisms=[
+                "Fehlgefaltete Proteine bilden Aggregate",
+                "Aggregate stressen Nervenzellen",
+                "Stress aktiviert Immunzellen im Gehirn",
+                "Entzündung schädigt Synapsen",
+                "Synapsenverlust beeinträchtigt Kognition",
+                "Fortschreitender Verlust führt zu Demenz"
+            ],
+            time_delays=[5.0, 3.0, 2.0, 3.0, 5.0, 10.0],
+            is_reversible=False,
+            confidence=0.70
+        )
 
     def add_variable_with_domain(self, name: str, description: str,
                                    domain: CausalDomain,
@@ -2767,12 +3432,950 @@ class DialecticalReasoner:
 
 
 # =============================================================================
+# 5. ABDUCTIVE REASONING - Schluss auf die beste Erklärung
+# =============================================================================
+
+class AbductiveReasoner:
+    """
+    Abduktives Reasoning - Inference to the Best Explanation (IBE).
+
+    Prozess:
+    1. Beobachtung eines Phänomens
+    2. Generierung möglicher Erklärungen (Hypothesen)
+    3. Bewertung der Hypothesen nach Kriterien
+    4. Auswahl der besten Erklärung
+
+    Bewertungskriterien:
+    - Plausibilität: Passt die Erklärung zum bekannten Wissen?
+    - Einfachheit: Ockhams Rasiermesser
+    - Erklärungsweite: Wie viele Phänomene erklärt die Hypothese?
+    - Kohärenz: Konsistenz mit anderen Überzeugungen
+    - Testbarkeit: Kann die Hypothese falsifiziert werden?
+    """
+
+    def __init__(self):
+        self.observations: List[Observation] = []
+        self.hypotheses: Dict[str, AbductiveHypothesis] = {}
+        self.inference_history: List[InferenceToTheBestExplanation] = []
+        self.domain_priors: Dict[str, float] = {}  # Domänenspezifische Prior-Wahrscheinlichkeiten
+        self._hypothesis_counter = 0
+
+    def add_observation(self, description: str, reliability: float = 0.8,
+                        context: Dict[str, Any] = None, source: str = "") -> Observation:
+        """
+        Fügt eine zu erklärende Beobachtung hinzu.
+
+        Args:
+            description: Beschreibung des beobachteten Phänomens
+            reliability: Zuverlässigkeit der Beobachtung (0-1)
+            context: Zusätzlicher Kontext
+            source: Quelle der Beobachtung
+        """
+        obs = Observation(
+            description=description,
+            reliability=min(1.0, max(0.0, reliability)),
+            context=context or {},
+            source=source
+        )
+        self.observations.append(obs)
+        logger.debug(f"[AbductiveReasoner] Neue Beobachtung: {description[:50]}...")
+        return obs
+
+    def generate_hypothesis(self, content: str,
+                            hypothesis_type: AbductiveHypothesisType = AbductiveHypothesisType.CAUSAL,
+                            explains: List[str] = None,
+                            plausibility: float = 0.5,
+                            simplicity: float = 0.5,
+                            prior: float = 0.5) -> AbductiveHypothesis:
+        """
+        Generiert eine abduktive Hypothese.
+
+        Args:
+            content: Inhalt der Hypothese
+            hypothesis_type: Art der Erklärung
+            explains: Liste von Beobachtungs-Beschreibungen, die erklärt werden
+            plausibility: A-priori Plausibilität
+            simplicity: Einfachheit der Erklärung
+            prior: Prior-Wahrscheinlichkeit
+        """
+        self._hypothesis_counter += 1
+        h_id = f"H{self._hypothesis_counter}"
+
+        # Berechne Scope basierend auf erklärten Beobachtungen
+        explains = explains or []
+        scope = len(explains) / max(len(self.observations), 1) if self.observations else 0.5
+
+        hypothesis = AbductiveHypothesis(
+            hypothesis_id=h_id,
+            content=content,
+            hypothesis_type=hypothesis_type,
+            explains=explains,
+            plausibility=plausibility,
+            simplicity=simplicity,
+            scope=scope,
+            coherence=0.5,  # Wird später berechnet
+            testability=0.5,  # Wird später berechnet
+            prior_probability=prior
+        )
+
+        self.hypotheses[h_id] = hypothesis
+        logger.debug(f"[AbductiveReasoner] Neue Hypothese {h_id}: {content[:50]}...")
+        return hypothesis
+
+    def add_supporting_evidence(self, hypothesis_id: str, evidence: str):
+        """Fügt unterstützende Evidenz für eine Hypothese hinzu"""
+        if hypothesis_id in self.hypotheses:
+            self.hypotheses[hypothesis_id].supporting_evidence.append(evidence)
+            # Erhöhe Plausibilität leicht
+            h = self.hypotheses[hypothesis_id]
+            h.plausibility = min(1.0, h.plausibility + 0.05)
+
+    def add_counter_evidence(self, hypothesis_id: str, evidence: str):
+        """Fügt Gegenbeweise für eine Hypothese hinzu"""
+        if hypothesis_id in self.hypotheses:
+            self.hypotheses[hypothesis_id].counter_evidence.append(evidence)
+            # Senke Plausibilität
+            h = self.hypotheses[hypothesis_id]
+            h.plausibility = max(0.0, h.plausibility - 0.10)
+
+    def evaluate_coherence(self, hypothesis: AbductiveHypothesis,
+                            background_beliefs: List[str] = None) -> float:
+        """
+        Bewertet die Kohärenz einer Hypothese mit Hintergrundwissen.
+
+        Args:
+            hypothesis: Die zu bewertende Hypothese
+            background_beliefs: Liste von Hintergrund-Überzeugungen
+        """
+        if not background_beliefs:
+            return 0.5  # Neutral wenn kein Hintergrundwissen
+
+        # Einfache Wortüberlappung als Proxy für Kohärenz
+        h_words = set(hypothesis.content.lower().split())
+        coherence_scores = []
+
+        for belief in background_beliefs:
+            belief_words = set(belief.lower().split())
+            overlap = len(h_words.intersection(belief_words))
+            total = len(h_words.union(belief_words))
+            if total > 0:
+                coherence_scores.append(overlap / total)
+
+        if coherence_scores:
+            hypothesis.coherence = sum(coherence_scores) / len(coherence_scores)
+        else:
+            hypothesis.coherence = 0.5
+
+        return hypothesis.coherence
+
+    def evaluate_testability(self, hypothesis: AbductiveHypothesis) -> float:
+        """
+        Bewertet die Testbarkeit/Falsifizierbarkeit einer Hypothese.
+
+        Heuristiken:
+        - Spezifische Vorhersagen erhöhen Testbarkeit
+        - Vage Aussagen senken Testbarkeit
+        """
+        content = hypothesis.content.lower()
+
+        # Indikatoren für hohe Testbarkeit
+        testable_indicators = [
+            "wenn", "dann", "führt zu", "verursacht", "resultiert in",
+            "messbar", "beobachtbar", "vorhersagt", "spezifisch"
+        ]
+
+        # Indikatoren für niedrige Testbarkeit
+        vague_indicators = [
+            "vielleicht", "möglicherweise", "irgendwie", "könnte sein",
+            "unbekannt", "mysteriös", "immer", "niemals", "alle"
+        ]
+
+        testable_count = sum(1 for ind in testable_indicators if ind in content)
+        vague_count = sum(1 for ind in vague_indicators if ind in content)
+
+        # Basis-Testbarkeit
+        testability = 0.5
+
+        # Anpassungen
+        testability += testable_count * 0.1
+        testability -= vague_count * 0.1
+
+        # Kausale und strukturelle Hypothesen sind oft besser testbar
+        if hypothesis.hypothesis_type in [AbductiveHypothesisType.CAUSAL,
+                                          AbductiveHypothesisType.STRUCTURAL]:
+            testability += 0.1
+
+        hypothesis.testability = min(1.0, max(0.0, testability))
+        return hypothesis.testability
+
+    def infer_best_explanation(self, observations: List[Observation] = None,
+                                top_n: int = 3) -> InferenceToTheBestExplanation:
+        """
+        Führt Inference to the Best Explanation durch.
+
+        Args:
+            observations: Zu erklärende Beobachtungen (oder alle gespeicherten)
+            top_n: Anzahl der besten Hypothesen im Ranking
+
+        Returns:
+            IBE-Ergebnis mit Ranking der Hypothesen
+        """
+        observations = observations or self.observations
+
+        if not observations:
+            logger.warning("[AbductiveReasoner] Keine Beobachtungen für IBE")
+            return InferenceToTheBestExplanation(
+                observations=[],
+                hypotheses=[],
+                best_hypothesis=None,
+                ranking=[],
+                confidence=0.0,
+                reasoning_trace=["Keine Beobachtungen vorhanden"]
+            )
+
+        if not self.hypotheses:
+            logger.warning("[AbductiveReasoner] Keine Hypothesen für IBE")
+            return InferenceToTheBestExplanation(
+                observations=observations,
+                hypotheses=[],
+                best_hypothesis=None,
+                ranking=[],
+                confidence=0.0,
+                reasoning_trace=["Keine Hypothesen generiert"]
+            )
+
+        reasoning_trace = []
+        reasoning_trace.append(f"Starte IBE mit {len(observations)} Beobachtungen und "
+                              f"{len(self.hypotheses)} Hypothesen")
+
+        # Berechne Scores für alle Hypothesen
+        scores: List[Tuple[str, float]] = []
+
+        for h_id, hypothesis in self.hypotheses.items():
+            # Evaluiere Kohärenz und Testbarkeit
+            self.evaluate_testability(hypothesis)
+
+            # Berechne Gesamtscore
+            score = hypothesis.overall_score()
+
+            # Bonus für Hypothesen, die mehr Beobachtungen erklären
+            obs_explained = 0
+            for obs in observations:
+                if obs.description in hypothesis.explains or \
+                   any(e.lower() in obs.description.lower() for e in hypothesis.explains):
+                    obs_explained += 1
+
+            explanation_bonus = (obs_explained / len(observations)) * 0.2
+            final_score = score + explanation_bonus
+
+            # Malus für Gegenbeweise
+            if hypothesis.counter_evidence:
+                final_score -= len(hypothesis.counter_evidence) * 0.05
+
+            # Bonus für unterstützende Evidenz
+            if hypothesis.supporting_evidence:
+                final_score += len(hypothesis.supporting_evidence) * 0.03
+
+            scores.append((h_id, min(1.0, max(0.0, final_score))))
+            reasoning_trace.append(
+                f"Hypothese {h_id}: Score={final_score:.3f} "
+                f"(Plausibilität={hypothesis.plausibility:.2f}, "
+                f"Einfachheit={hypothesis.simplicity:.2f}, "
+                f"Scope={hypothesis.scope:.2f})"
+            )
+
+        # Sortiere nach Score
+        scores.sort(key=lambda x: x[1], reverse=True)
+        ranking = scores[:top_n]
+
+        # Beste Hypothese
+        best_h_id = scores[0][0] if scores else None
+        best_hypothesis = self.hypotheses.get(best_h_id)
+
+        # Berechne Konfidenz basierend auf Abstand zwischen Top-Hypothesen
+        if len(scores) >= 2:
+            confidence = (scores[0][1] - scores[1][1]) + scores[0][1] * 0.5
+            confidence = min(1.0, max(0.0, confidence))
+        else:
+            confidence = scores[0][1] if scores else 0.0
+
+        reasoning_trace.append(f"Beste Erklärung: {best_h_id} mit Score {scores[0][1]:.3f}")
+        reasoning_trace.append(f"IBE-Konfidenz: {confidence:.2f}")
+
+        result = InferenceToTheBestExplanation(
+            observations=observations,
+            hypotheses=list(self.hypotheses.values()),
+            best_hypothesis=best_hypothesis,
+            ranking=ranking,
+            confidence=confidence,
+            reasoning_trace=reasoning_trace
+        )
+
+        self.inference_history.append(result)
+        return result
+
+    def generate_alternative_hypotheses(self, observation: Observation,
+                                          num_alternatives: int = 3) -> List[AbductiveHypothesis]:
+        """
+        Generiert automatisch alternative Hypothesen für eine Beobachtung.
+
+        Dies ist eine heuristische Methode, die verschiedene Erklärungstypen erzeugt.
+        """
+        alternatives = []
+        obs_desc = observation.description
+
+        # Kausale Hypothese
+        causal_h = self.generate_hypothesis(
+            content=f"Eine unbekannte Ursache führt zu: {obs_desc}",
+            hypothesis_type=AbductiveHypothesisType.CAUSAL,
+            explains=[obs_desc],
+            plausibility=0.4,
+            simplicity=0.6
+        )
+        alternatives.append(causal_h)
+
+        # Funktionale Hypothese
+        functional_h = self.generate_hypothesis(
+            content=f"Das Phänomen dient einem bestimmten Zweck: {obs_desc}",
+            hypothesis_type=AbductiveHypothesisType.FUNCTIONAL,
+            explains=[obs_desc],
+            plausibility=0.3,
+            simplicity=0.5
+        )
+        alternatives.append(functional_h)
+
+        # Strukturelle Hypothese
+        structural_h = self.generate_hypothesis(
+            content=f"Eine zugrundeliegende Struktur erklärt: {obs_desc}",
+            hypothesis_type=AbductiveHypothesisType.STRUCTURAL,
+            explains=[obs_desc],
+            plausibility=0.4,
+            simplicity=0.4
+        )
+        alternatives.append(structural_h)
+
+        return alternatives[:num_alternatives]
+
+    def likelyhood_weighting(self, hypothesis: AbductiveHypothesis,
+                              evidence_strength: float = 0.5) -> float:
+        """
+        Berechnet gewichtete Wahrscheinlichkeit basierend auf Evidenzstärke.
+
+        Verwendet Bayes'sche Intuition ohne vollständiges Update.
+        """
+        prior = hypothesis.prior_probability
+        likelihood = evidence_strength * hypothesis.plausibility
+
+        # Vereinfachtes Bayes-Update
+        posterior = (likelihood * prior) / ((likelihood * prior) + ((1 - likelihood) * (1 - prior)))
+
+        return posterior
+
+    def explain_inference(self, ibe_result: InferenceToTheBestExplanation) -> str:
+        """Gibt eine lesbare Erklärung des IBE-Prozesses"""
+        lines = [
+            "=" * 60,
+            "ABDUKTIVE INFERENZ - Schluss auf die beste Erklärung",
+            "=" * 60,
+            "",
+            f"Beobachtungen ({len(ibe_result.observations)}):"
+        ]
+
+        for i, obs in enumerate(ibe_result.observations[:5]):
+            lines.append(f"  {i+1}. {obs.description[:70]}...")
+
+        lines.append("")
+        lines.append(f"Hypothesen-Ranking ({len(ibe_result.ranking)}):")
+
+        for rank, (h_id, score) in enumerate(ibe_result.ranking, 1):
+            h = self.hypotheses.get(h_id)
+            if h:
+                lines.append(f"  {rank}. [{h_id}] Score: {score:.3f}")
+                lines.append(f"      {h.content[:60]}...")
+                lines.append(f"      Typ: {h.hypothesis_type.value}, "
+                           f"Plausibilität: {h.plausibility:.2f}")
+
+        lines.append("")
+        if ibe_result.best_hypothesis:
+            lines.append(f"BESTE ERKLÄRUNG: {ibe_result.best_hypothesis.content}")
+        lines.append(f"Konfidenz: {ibe_result.confidence:.2f}")
+
+        return "\n".join(lines)
+
+    def get_summary(self) -> str:
+        """Gibt eine Zusammenfassung des abduktiven Reasoners"""
+        return (
+            f"=== Abduktiver Reasoner ===\n"
+            f"Beobachtungen: {len(self.observations)}\n"
+            f"Hypothesen: {len(self.hypotheses)}\n"
+            f"Durchgeführte IBE: {len(self.inference_history)}"
+        )
+
+
+# =============================================================================
+# 6. TEMPORAL REASONING - Zeitbasiertes Schlussfolgern
+# =============================================================================
+
+class TemporalReasoner:
+    """
+    Temporales Reasoning - Zeitbasiertes Schlussfolgern.
+
+    Implementiert:
+    - Allen's Interval Algebra (Zeitintervall-Beziehungen)
+    - Temporale Kausalität mit Verzögerungen
+    - Mustererkennung in Zeitreihen
+    - Vorhersage zukünftiger Ereignisse
+    - Zeitliche Konsistenzprüfung
+
+    Anwendungsfälle:
+    - Sequenzielle Ereignisanalyse
+    - Kausale Zeitreihenanalyse
+    - Planung und Scheduling
+    - Historische Analyse
+    """
+
+    def __init__(self):
+        self.timelines: Dict[str, Timeline] = {}
+        self.events: Dict[str, TemporalEvent] = {}
+        self.constraints: List[TemporalConstraint] = []
+        self.causal_links: List[TemporalCausalLink] = []
+        self.patterns: Dict[str, TemporalPattern] = {}
+        self._default_timeline = Timeline(timeline_id="default")
+        self.timelines["default"] = self._default_timeline
+
+    def add_event(self, event_id: str, description: str,
+                  start_time: datetime = None, end_time: datetime = None,
+                  duration: float = None,
+                  granularity: TemporalGranularity = TemporalGranularity.SECONDS,
+                  is_instantaneous: bool = False,
+                  timeline_id: str = "default") -> TemporalEvent:
+        """
+        Fügt ein zeitliches Ereignis hinzu.
+
+        Args:
+            event_id: Eindeutige ID des Events
+            description: Beschreibung
+            start_time: Startzeit (optional)
+            end_time: Endzeit (optional)
+            duration: Dauer in Sekunden (optional)
+            granularity: Zeitliche Auflösung
+            is_instantaneous: Punktuelles Ereignis?
+            timeline_id: Zugehörige Timeline
+        """
+        event = TemporalEvent(
+            event_id=event_id,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
+            duration=duration,
+            granularity=granularity,
+            is_instantaneous=is_instantaneous
+        )
+
+        self.events[event_id] = event
+
+        # Zu Timeline hinzufügen
+        if timeline_id in self.timelines:
+            self.timelines[timeline_id].events[event_id] = event
+
+        logger.debug(f"[TemporalReasoner] Event hinzugefügt: {event_id}")
+        return event
+
+    def add_constraint(self, event_a: str, event_b: str,
+                       relation: TemporalRelation,
+                       min_gap: float = None, max_gap: float = None,
+                       confidence: float = 0.8) -> TemporalConstraint:
+        """
+        Fügt eine zeitliche Einschränkung zwischen Events hinzu.
+
+        Args:
+            event_a: Erstes Event
+            event_b: Zweites Event
+            relation: Zeitliche Beziehung (Allen's Interval Algebra)
+            min_gap: Minimaler zeitlicher Abstand (Sekunden)
+            max_gap: Maximaler zeitlicher Abstand (Sekunden)
+            confidence: Konfidenz der Einschränkung
+        """
+        constraint = TemporalConstraint(
+            event_a=event_a,
+            event_b=event_b,
+            relation=relation,
+            min_gap=min_gap,
+            max_gap=max_gap,
+            confidence=confidence
+        )
+
+        self.constraints.append(constraint)
+        self._default_timeline.constraints.append(constraint)
+
+        logger.debug(f"[TemporalReasoner] Constraint: {event_a} {relation.value} {event_b}")
+        return constraint
+
+    def add_temporal_causal_link(self, cause_event: str, effect_event: str,
+                                   delay: float, strength: float = 0.5,
+                                   delay_variance: float = 0.0,
+                                   mechanism: str = "",
+                                   is_deterministic: bool = False) -> TemporalCausalLink:
+        """
+        Fügt eine zeitlich-kausale Verbindung hinzu.
+
+        Args:
+            cause_event: Ursache-Event
+            effect_event: Effekt-Event
+            delay: Zeitliche Verzögerung (Sekunden)
+            strength: Kausale Stärke
+            delay_variance: Variabilität der Verzögerung
+            mechanism: Beschreibung des Mechanismus
+            is_deterministic: Ist die Kausalität deterministisch?
+        """
+        link = TemporalCausalLink(
+            cause_event=cause_event,
+            effect_event=effect_event,
+            delay=delay,
+            delay_variance=delay_variance,
+            strength=strength,
+            mechanism=mechanism,
+            is_deterministic=is_deterministic
+        )
+
+        self.causal_links.append(link)
+        self._default_timeline.causal_links.append(link)
+
+        # Implizite Constraint hinzufügen
+        self.add_constraint(
+            cause_event, effect_event,
+            TemporalRelation.CAUSES_DELAYED if delay > 0 else TemporalRelation.CAUSES_IMMEDIATELY,
+            min_gap=delay - delay_variance,
+            max_gap=delay + delay_variance,
+            confidence=strength
+        )
+
+        return link
+
+    def infer_relation(self, event_a: str, event_b: str) -> Optional[TemporalRelation]:
+        """
+        Inferiert die zeitliche Beziehung zwischen zwei Events.
+
+        Basiert auf Allen's Interval Algebra.
+        """
+        if event_a not in self.events or event_b not in self.events:
+            return None
+
+        ea = self.events[event_a]
+        eb = self.events[event_b]
+
+        # Wenn beide Zeitstempel haben
+        if ea.start_time and eb.start_time:
+            if ea.end_time and eb.end_time:
+                # Volle Intervall-Analyse
+                return self._infer_interval_relation(
+                    ea.start_time, ea.end_time,
+                    eb.start_time, eb.end_time
+                )
+            elif ea.is_instantaneous and eb.is_instantaneous:
+                # Punktuelle Events
+                if ea.start_time < eb.start_time:
+                    return TemporalRelation.BEFORE
+                elif ea.start_time > eb.start_time:
+                    return TemporalRelation.AFTER
+                else:
+                    return TemporalRelation.EQUALS
+
+        # Versuche aus Constraints abzuleiten
+        for c in self.constraints:
+            if c.event_a == event_a and c.event_b == event_b:
+                return c.relation
+            elif c.event_a == event_b and c.event_b == event_a:
+                return self._inverse_relation(c.relation)
+
+        return None
+
+    def _infer_interval_relation(self, a_start: datetime, a_end: datetime,
+                                   b_start: datetime, b_end: datetime) -> TemporalRelation:
+        """Inferiert Beziehung basierend auf Intervallen (Allen's Algebra)"""
+
+        # A ends before B starts
+        if a_end < b_start:
+            return TemporalRelation.BEFORE
+
+        # A starts after B ends
+        if a_start > b_end:
+            return TemporalRelation.AFTER
+
+        # A ends exactly when B starts
+        if a_end == b_start:
+            return TemporalRelation.MEETS
+
+        # A and B are identical
+        if a_start == b_start and a_end == b_end:
+            return TemporalRelation.EQUALS
+
+        # A starts with B but ends earlier
+        if a_start == b_start and a_end < b_end:
+            return TemporalRelation.STARTS
+
+        # A ends with B but starts later
+        if a_end == b_end and a_start > b_start:
+            return TemporalRelation.FINISHES
+
+        # A completely during B
+        if a_start > b_start and a_end < b_end:
+            return TemporalRelation.DURING
+
+        # Overlap
+        return TemporalRelation.OVERLAPS
+
+    def _inverse_relation(self, relation: TemporalRelation) -> TemporalRelation:
+        """Gibt die inverse Beziehung zurück"""
+        inverses = {
+            TemporalRelation.BEFORE: TemporalRelation.AFTER,
+            TemporalRelation.AFTER: TemporalRelation.BEFORE,
+            TemporalRelation.MEETS: TemporalRelation.MEETS,
+            TemporalRelation.OVERLAPS: TemporalRelation.OVERLAPS,
+            TemporalRelation.STARTS: TemporalRelation.STARTS,
+            TemporalRelation.FINISHES: TemporalRelation.FINISHES,
+            TemporalRelation.DURING: TemporalRelation.DURING,
+            TemporalRelation.EQUALS: TemporalRelation.EQUALS,
+            TemporalRelation.CAUSES_IMMEDIATELY: TemporalRelation.CAUSES_IMMEDIATELY,
+            TemporalRelation.CAUSES_DELAYED: TemporalRelation.CAUSES_DELAYED,
+        }
+        return inverses.get(relation, relation)
+
+    def check_consistency(self) -> Tuple[bool, List[str]]:
+        """
+        Prüft die temporale Konsistenz aller Constraints.
+
+        Returns:
+            (is_consistent, list_of_violations)
+        """
+        violations = []
+
+        # Prüfe direkte Widersprüche
+        for i, c1 in enumerate(self.constraints):
+            for c2 in self.constraints[i+1:]:
+                if c1.event_a == c2.event_a and c1.event_b == c2.event_b:
+                    if c1.relation != c2.relation:
+                        if not self._relations_compatible(c1.relation, c2.relation):
+                            violations.append(
+                                f"Widerspruch: {c1.event_a} ist sowohl {c1.relation.value} "
+                                f"als auch {c2.relation.value} zu {c1.event_b}"
+                            )
+
+        # Prüfe Transitivität
+        transitivity_violations = self._check_transitivity()
+        violations.extend(transitivity_violations)
+
+        # Prüfe zeitliche Konsistenz mit Timestamps
+        for event_id, event in self.events.items():
+            if event.start_time and event.end_time:
+                if event.start_time > event.end_time:
+                    violations.append(
+                        f"Event {event_id}: Startzeit nach Endzeit"
+                    )
+
+        return len(violations) == 0, violations
+
+    def _relations_compatible(self, r1: TemporalRelation, r2: TemporalRelation) -> bool:
+        """Prüft ob zwei Relationen kompatibel sind"""
+        incompatible = {
+            (TemporalRelation.BEFORE, TemporalRelation.AFTER),
+            (TemporalRelation.AFTER, TemporalRelation.BEFORE),
+            (TemporalRelation.BEFORE, TemporalRelation.EQUALS),
+            (TemporalRelation.AFTER, TemporalRelation.EQUALS),
+        }
+        return (r1, r2) not in incompatible and (r2, r1) not in incompatible
+
+    def _check_transitivity(self) -> List[str]:
+        """Prüft transitive Konsistenz"""
+        violations = []
+
+        # Aufbau eines Graphen
+        edges = {}
+        for c in self.constraints:
+            key = (c.event_a, c.event_b)
+            edges[key] = c.relation
+
+        # Prüfe Transitivität für BEFORE
+        for c1 in self.constraints:
+            if c1.relation == TemporalRelation.BEFORE:
+                for c2 in self.constraints:
+                    if c2.relation == TemporalRelation.BEFORE and c2.event_a == c1.event_b:
+                        # A < B und B < C => A < C
+                        expected = (c1.event_a, c2.event_b)
+                        if expected in edges and edges[expected] == TemporalRelation.AFTER:
+                            violations.append(
+                                f"Transitivitätsverletzung: {c1.event_a} < {c1.event_b} < {c2.event_b}, "
+                                f"aber {c1.event_a} > {c2.event_b}"
+                            )
+
+        return violations
+
+    def detect_pattern(self, event_sequence: List[str],
+                        pattern_id: str = None) -> Optional[TemporalPattern]:
+        """
+        Erkennt ein temporales Muster in einer Event-Sequenz.
+
+        Args:
+            event_sequence: Liste von Event-IDs in Reihenfolge
+            pattern_id: Optionale ID für das Muster
+        """
+        if len(event_sequence) < 2:
+            return None
+
+        # Berechne typische Intervalle
+        intervals = []
+        for i in range(len(event_sequence) - 1):
+            e1 = self.events.get(event_sequence[i])
+            e2 = self.events.get(event_sequence[i + 1])
+
+            if e1 and e2 and e1.start_time and e2.start_time:
+                delta = (e2.start_time - e1.start_time).total_seconds()
+                intervals.append(delta)
+
+        # Prüfe auf Periodizität
+        is_periodic = False
+        period = None
+
+        if len(intervals) >= 2:
+            avg_interval = sum(intervals) / len(intervals)
+            variance = sum((i - avg_interval) ** 2 for i in intervals) / len(intervals)
+
+            # Niedrige Varianz deutet auf Periodizität hin
+            if variance < (avg_interval * 0.1) ** 2:  # 10% Toleranz
+                is_periodic = True
+                period = avg_interval
+
+        pattern = TemporalPattern(
+            pattern_id=pattern_id or f"pattern_{len(self.patterns)}",
+            description=f"Muster: {' -> '.join(event_sequence)}",
+            events_sequence=event_sequence,
+            typical_intervals=intervals,
+            frequency=1,
+            confidence=0.5 + len(event_sequence) * 0.05,
+            is_periodic=is_periodic,
+            period=period
+        )
+
+        self.patterns[pattern.pattern_id] = pattern
+        return pattern
+
+    def predict_next_event(self, current_event: str,
+                            lookahead: float = None) -> List[Tuple[str, float, float]]:
+        """
+        Sagt das nächste wahrscheinliche Event vorher.
+
+        Args:
+            current_event: Aktuelles Event
+            lookahead: Zeitfenster für Vorhersage (Sekunden)
+
+        Returns:
+            Liste von (event_id, probability, expected_delay)
+        """
+        predictions = []
+
+        # Basierend auf kausalen Links
+        for link in self.causal_links:
+            if link.cause_event == current_event:
+                if lookahead is None or link.delay <= lookahead:
+                    predictions.append((
+                        link.effect_event,
+                        link.strength,
+                        link.delay
+                    ))
+
+        # Basierend auf Patterns
+        for pattern in self.patterns.values():
+            if current_event in pattern.events_sequence:
+                idx = pattern.events_sequence.index(current_event)
+                if idx < len(pattern.events_sequence) - 1:
+                    next_event = pattern.events_sequence[idx + 1]
+                    delay = pattern.typical_intervals[idx] if idx < len(pattern.typical_intervals) else 0
+                    if lookahead is None or delay <= lookahead:
+                        predictions.append((
+                            next_event,
+                            pattern.confidence * 0.8,
+                            delay
+                        ))
+
+        # Sortiere nach Wahrscheinlichkeit
+        predictions.sort(key=lambda x: x[1], reverse=True)
+
+        return predictions
+
+    def construct_timeline_from_events(self, event_ids: List[str],
+                                         timeline_id: str = None) -> Timeline:
+        """
+        Konstruiert eine Timeline aus einer Liste von Events.
+        """
+        tl_id = timeline_id or f"timeline_{len(self.timelines)}"
+
+        # Sortiere Events nach Zeit wenn möglich
+        sorted_events = []
+        unsorted = []
+
+        for eid in event_ids:
+            if eid in self.events:
+                event = self.events[eid]
+                if event.start_time:
+                    sorted_events.append((event.start_time, event))
+                else:
+                    unsorted.append(event)
+
+        sorted_events.sort(key=lambda x: x[0])
+
+        timeline = Timeline(
+            timeline_id=tl_id,
+            events={e.event_id: e for _, e in sorted_events},
+            start=sorted_events[0][0] if sorted_events else None,
+            end=sorted_events[-1][0] if sorted_events else None
+        )
+
+        # Füge unsortierte Events hinzu
+        for event in unsorted:
+            timeline.events[event.event_id] = event
+
+        # Relevante Constraints hinzufügen
+        for c in self.constraints:
+            if c.event_a in event_ids and c.event_b in event_ids:
+                timeline.constraints.append(c)
+
+        # Relevante kausale Links
+        for link in self.causal_links:
+            if link.cause_event in event_ids and link.effect_event in event_ids:
+                timeline.causal_links.append(link)
+
+        self.timelines[tl_id] = timeline
+        return timeline
+
+    def reason_about_sequence(self, event_sequence: List[str]) -> Dict[str, Any]:
+        """
+        Analysiert eine Event-Sequenz und zieht Schlussfolgerungen.
+
+        Returns:
+            Analyseergebnis mit Relationen, Mustern und Vorhersagen
+        """
+        analysis = {
+            "sequence": event_sequence,
+            "relations": [],
+            "causal_chains": [],
+            "patterns_found": [],
+            "predictions": [],
+            "consistency": True,
+            "violations": []
+        }
+
+        # Inferiere Relationen zwischen aufeinanderfolgenden Events
+        for i in range(len(event_sequence) - 1):
+            relation = self.infer_relation(event_sequence[i], event_sequence[i + 1])
+            if relation:
+                analysis["relations"].append({
+                    "from": event_sequence[i],
+                    "to": event_sequence[i + 1],
+                    "relation": relation.value
+                })
+
+        # Finde kausale Ketten
+        current_chain = [event_sequence[0]] if event_sequence else []
+        for i in range(len(event_sequence) - 1):
+            is_causal = False
+            for link in self.causal_links:
+                if link.cause_event == event_sequence[i] and \
+                   link.effect_event == event_sequence[i + 1]:
+                    current_chain.append(event_sequence[i + 1])
+                    is_causal = True
+                    break
+
+            if not is_causal and len(current_chain) > 1:
+                analysis["causal_chains"].append(current_chain)
+                current_chain = [event_sequence[i + 1]]
+
+        if len(current_chain) > 1:
+            analysis["causal_chains"].append(current_chain)
+
+        # Mustererkennung
+        pattern = self.detect_pattern(event_sequence)
+        if pattern:
+            analysis["patterns_found"].append({
+                "pattern_id": pattern.pattern_id,
+                "is_periodic": pattern.is_periodic,
+                "period": pattern.period
+            })
+
+        # Vorhersage
+        if event_sequence:
+            predictions = self.predict_next_event(event_sequence[-1])
+            analysis["predictions"] = [
+                {"event": p[0], "probability": p[1], "delay": p[2]}
+                for p in predictions[:3]
+            ]
+
+        # Konsistenzprüfung
+        is_consistent, violations = self.check_consistency()
+        analysis["consistency"] = is_consistent
+        analysis["violations"] = violations
+
+        return analysis
+
+    def get_summary(self) -> str:
+        """Gibt eine Zusammenfassung des temporalen Reasoners"""
+        lines = [
+            "=== Temporaler Reasoner ===",
+            f"Events: {len(self.events)}",
+            f"Constraints: {len(self.constraints)}",
+            f"Kausale Links: {len(self.causal_links)}",
+            f"Patterns: {len(self.patterns)}",
+            f"Timelines: {len(self.timelines)}",
+        ]
+
+        is_consistent, violations = self.check_consistency()
+        lines.append(f"Konsistent: {'Ja' if is_consistent else 'Nein (' + str(len(violations)) + ' Verletzungen)'}")
+
+        return "\n".join(lines)
+
+    def visualize_timeline(self, timeline_id: str = "default") -> str:
+        """Erzeugt eine textuelle Visualisierung einer Timeline"""
+        if timeline_id not in self.timelines:
+            return f"Timeline '{timeline_id}' nicht gefunden"
+
+        tl = self.timelines[timeline_id]
+        lines = [
+            f"Timeline: {timeline_id}",
+            "=" * 50
+        ]
+
+        # Sortiere Events nach Zeit
+        sorted_events = sorted(
+            [(e.start_time or datetime.min, e) for e in tl.events.values()],
+            key=lambda x: x[0]
+        )
+
+        for i, (time, event) in enumerate(sorted_events):
+            time_str = time.strftime("%Y-%m-%d %H:%M:%S") if time != datetime.min else "???"
+            lines.append(f"[{time_str}] {event.event_id}: {event.description[:40]}...")
+
+            # Zeige kausale Links
+            for link in tl.causal_links:
+                if link.cause_event == event.event_id:
+                    lines.append(f"    --> verursacht: {link.effect_event} (Delay: {link.delay}s)")
+
+        return "\n".join(lines)
+
+
+# =============================================================================
 # KOMBINIERTER REASONING-ENGINE
 # =============================================================================
 
 class AdvancedReasoningEngine:
     """
-    Kombiniert alle vier Reasoning-Modi zu einem integrierten System.
+    Kombiniert alle sechs Reasoning-Modi zu einem integrierten System.
+
+    Modi:
+    1. BAYESIAN - Probabilistisches Reasoning mit Prior-Updates
+    2. CAUSAL - Kausalitätsanalyse und Interventionen
+    3. METACOGNITIVE - Denken über das eigene Denken
+    4. DIALECTICAL - These-Antithese-Synthese Prozesse
+    5. ABDUCTIVE - Schluss auf die beste Erklärung (NEU)
+    6. TEMPORAL - Zeitbasiertes Schlussfolgern (NEU)
     """
 
     def __init__(self):
@@ -2780,6 +4383,9 @@ class AdvancedReasoningEngine:
         self.causal = CausalReasoner()
         self.metacognitive = MetacognitiveReasoner()
         self.dialectical = DialecticalReasoner()
+        # NEU: Erweiterte Reasoner
+        self.abductive = AbductiveReasoner()
+        self.temporal = TemporalReasoner()
 
         self.active_modes: Set[ReasoningMode] = set()
         self.reasoning_log: List[Dict] = []
@@ -2833,6 +4439,14 @@ class AdvancedReasoningEngine:
         # Dialektisches Reasoning
         if ReasoningMode.DIALECTICAL in self.active_modes:
             results["results"]["dialectical"] = self._apply_dialectical(question, context)
+
+        # NEU: Abduktives Reasoning
+        if ReasoningMode.ABDUCTIVE in self.active_modes:
+            results["results"]["abductive"] = self._apply_abductive(question, context)
+
+        # NEU: Temporales Reasoning
+        if ReasoningMode.TEMPORAL in self.active_modes:
+            results["results"]["temporal"] = self._apply_temporal(question, context)
 
         # Metakognition: Evaluation
         if ReasoningMode.METACOGNITIVE in self.active_modes:
@@ -2943,6 +4557,101 @@ class AdvancedReasoningEngine:
             "synthesis_strength": synthesis.strength
         }
 
+    def _apply_abductive(self, question: str, context: Dict) -> Dict:
+        """Wendet abduktives Reasoning an (Inference to the Best Explanation)"""
+        # Beobachtung aus Frage erstellen
+        obs = self.abductive.add_observation(
+            description=question,
+            reliability=context.get("observation_reliability", 0.8),
+            source=context.get("source", "user_query")
+        )
+
+        # Hypothesen aus Kontext oder automatisch generieren
+        if "hypotheses" in context:
+            for h in context["hypotheses"]:
+                self.abductive.generate_hypothesis(
+                    content=h.get("content", ""),
+                    hypothesis_type=AbductiveHypothesisType.CAUSAL,
+                    explains=[question],
+                    plausibility=h.get("plausibility", 0.5),
+                    simplicity=h.get("simplicity", 0.5),
+                    prior=h.get("prior", 0.5)
+                )
+        else:
+            # Automatisch alternative Hypothesen generieren
+            self.abductive.generate_alternative_hypotheses(obs, num_alternatives=3)
+
+        # Inferenz durchführen
+        ibe_result = self.abductive.infer_best_explanation()
+
+        return {
+            "observations": len(ibe_result.observations),
+            "hypotheses_evaluated": len(ibe_result.hypotheses),
+            "best_explanation": ibe_result.best_hypothesis.content if ibe_result.best_hypothesis else None,
+            "best_score": ibe_result.ranking[0][1] if ibe_result.ranking else 0,
+            "confidence": ibe_result.confidence,
+            "ranking": [(h_id, score) for h_id, score in ibe_result.ranking[:3]]
+        }
+
+    def _apply_temporal(self, question: str, context: Dict) -> Dict:
+        """Wendet temporales Reasoning an"""
+        results = {
+            "events_analyzed": 0,
+            "constraints_found": 0,
+            "patterns_detected": 0,
+            "predictions": [],
+            "consistency": True
+        }
+
+        # Events aus Kontext hinzufügen
+        if "events" in context:
+            for event in context["events"]:
+                self.temporal.add_event(
+                    event_id=event.get("id", f"event_{len(self.temporal.events)}"),
+                    description=event.get("description", ""),
+                    start_time=event.get("start_time"),
+                    end_time=event.get("end_time"),
+                    is_instantaneous=event.get("instantaneous", True)
+                )
+            results["events_analyzed"] = len(context["events"])
+
+        # Constraints aus Kontext hinzufügen
+        if "temporal_constraints" in context:
+            for tc in context["temporal_constraints"]:
+                self.temporal.add_constraint(
+                    event_a=tc.get("event_a"),
+                    event_b=tc.get("event_b"),
+                    relation=TemporalRelation(tc.get("relation", "before")),
+                    min_gap=tc.get("min_gap"),
+                    max_gap=tc.get("max_gap")
+                )
+            results["constraints_found"] = len(context["temporal_constraints"])
+
+        # Kausale Links aus Kontext
+        if "causal_links" in context:
+            for link in context["causal_links"]:
+                self.temporal.add_temporal_causal_link(
+                    cause_event=link.get("cause"),
+                    effect_event=link.get("effect"),
+                    delay=link.get("delay", 0),
+                    strength=link.get("strength", 0.5),
+                    mechanism=link.get("mechanism", "")
+                )
+
+        # Sequenz analysieren wenn vorhanden
+        if "sequence" in context:
+            sequence_analysis = self.temporal.reason_about_sequence(context["sequence"])
+            results["patterns_detected"] = len(sequence_analysis.get("patterns_found", []))
+            results["predictions"] = sequence_analysis.get("predictions", [])
+
+        # Konsistenz prüfen
+        is_consistent, violations = self.temporal.check_consistency()
+        results["consistency"] = is_consistent
+        if not is_consistent:
+            results["violations"] = violations
+
+        return results
+
     def _calculate_overall_confidence(self, results: Dict) -> float:
         """Berechnet Gesamtkonfidenz aus allen Ergebnissen"""
         confidences = []
@@ -2952,6 +4661,17 @@ class AdvancedReasoningEngine:
 
         if "dialectical" in results.get("results", {}):
             confidences.append(results["results"]["dialectical"].get("synthesis_strength", 0.5))
+
+        # NEU: Abduktive Konfidenz
+        if "abductive" in results.get("results", {}):
+            confidences.append(results["results"]["abductive"].get("confidence", 0.5))
+
+        # NEU: Temporale Konsistenz als Konfidenzindikator
+        if "temporal" in results.get("results", {}):
+            if results["results"]["temporal"].get("consistency", True):
+                confidences.append(0.7)  # Konsistent = höhere Konfidenz
+            else:
+                confidences.append(0.3)  # Inkonsistent = niedrigere Konfidenz
 
         return sum(confidences) / len(confidences) if confidences else 0.5
 
@@ -2975,6 +4695,8 @@ class AdvancedReasoningEngine:
         summary.append(f"\n--- Causal Reasoner ---")
         summary.append(f"Variablen: {len(self.causal.nodes)}")
         summary.append(f"Kausale Links: {len(self.causal.edges)}")
+        summary.append(f"Kausale Ketten: {len(self.causal.causal_chains)}")
+        summary.append(f"Domänen-Wissen: {sum(len(v) for v in self.causal.domain_knowledge.values())} Beziehungen")
 
         # Metacognitive Summary
         summary.append(f"\n--- Metacognitive Reasoner ---")
@@ -2986,6 +4708,19 @@ class AdvancedReasoningEngine:
         summary.append(f"Positionen: {len(self.dialectical.positions)}")
         summary.append(f"Synthesen: {len(self.dialectical.synthesis_history)}")
 
+        # NEU: Abductive Summary
+        summary.append(f"\n--- Abductive Reasoner ---")
+        summary.append(f"Beobachtungen: {len(self.abductive.observations)}")
+        summary.append(f"Hypothesen: {len(self.abductive.hypotheses)}")
+        summary.append(f"Durchgeführte IBE: {len(self.abductive.inference_history)}")
+
+        # NEU: Temporal Summary
+        summary.append(f"\n--- Temporal Reasoner ---")
+        summary.append(f"Events: {len(self.temporal.events)}")
+        summary.append(f"Constraints: {len(self.temporal.constraints)}")
+        summary.append(f"Kausale Links: {len(self.temporal.causal_links)}")
+        summary.append(f"Patterns: {len(self.temporal.patterns)}")
+
         return "\n".join(summary)
 
 
@@ -2993,19 +4728,45 @@ class AdvancedReasoningEngine:
 # FACTORY FUNCTION
 # =============================================================================
 
-def create_advanced_reasoning_engine(modes: List[ReasoningMode] = None) -> AdvancedReasoningEngine:
+def create_advanced_reasoning_engine(modes: List[ReasoningMode] = None,
+                                      include_all: bool = False) -> AdvancedReasoningEngine:
     """
     Erstellt eine Advanced Reasoning Engine mit den gewünschten Modi.
 
     Args:
-        modes: Liste der zu aktivierenden Modi. Default: alle
+        modes: Liste der zu aktivierenden Modi. Default: Basis-Modi
+        include_all: Wenn True, werden alle 6 Modi aktiviert
 
     Returns:
         Konfigurierte AdvancedReasoningEngine
+
+    Beispiel:
+        # Basis-Engine (4 Modi)
+        engine = create_advanced_reasoning_engine()
+
+        # Alle 6 Modi aktivieren
+        engine = create_advanced_reasoning_engine(include_all=True)
+
+        # Spezifische Modi
+        engine = create_advanced_reasoning_engine(modes=[
+            ReasoningMode.CAUSAL,
+            ReasoningMode.ABDUCTIVE,
+            ReasoningMode.TEMPORAL
+        ])
     """
     engine = AdvancedReasoningEngine()
 
-    if modes is None:
+    if include_all:
+        modes = [
+            ReasoningMode.BAYESIAN,
+            ReasoningMode.CAUSAL,
+            ReasoningMode.METACOGNITIVE,
+            ReasoningMode.DIALECTICAL,
+            ReasoningMode.ABDUCTIVE,
+            ReasoningMode.TEMPORAL
+        ]
+    elif modes is None:
+        # Default: Basis-Modi für Rückwärtskompatibilität
         modes = [ReasoningMode.BAYESIAN, ReasoningMode.CAUSAL,
                  ReasoningMode.METACOGNITIVE, ReasoningMode.DIALECTICAL]
 
@@ -3016,35 +4777,82 @@ def create_advanced_reasoning_engine(modes: List[ReasoningMode] = None) -> Advan
 
 
 # =============================================================================
+# HILFS-FUNKTIONEN FÜR REASONING-INTEGRATION
+# =============================================================================
+
+def create_causal_reasoner_with_domain(domain: CausalDomain) -> CausalReasoner:
+    """
+    Erstellt einen CausalReasoner mit vorgeladenem Domänenwissen.
+
+    Args:
+        domain: Die Domäne, deren Wissen geladen werden soll
+
+    Returns:
+        CausalReasoner mit aktiviertem Domänenwissen
+    """
+    reasoner = CausalReasoner()
+    reasoner.apply_domain_knowledge(domain)
+    return reasoner
+
+
+def create_full_reasoning_system() -> Dict[str, Any]:
+    """
+    Erstellt ein vollständiges Reasoning-System mit allen Komponenten.
+
+    Returns:
+        Dictionary mit allen Reasoning-Komponenten
+    """
+    return {
+        "engine": create_advanced_reasoning_engine(include_all=True),
+        "bayesian": BayesianReasoner(),
+        "causal": CausalReasoner(),
+        "metacognitive": MetacognitiveReasoner(),
+        "dialectical": DialecticalReasoner(),
+        "abductive": AbductiveReasoner(),
+        "temporal": TemporalReasoner(),
+    }
+
+
+# =============================================================================
 # BEISPIEL / TEST
 # =============================================================================
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    print("🧠 Advanced Reasoning Engine - Demo\n")
+    print("=" * 70)
+    print("  HOLO ADVANCED REASONING ENGINE - Erweiterte Demo")
+    print("  6 Reasoning-Modi: Bayesian, Causal, Metacognitive,")
+    print("                    Dialectical, Abductive, Temporal")
+    print("=" * 70)
 
-    # Erstelle Engine mit allen Modi
-    engine = create_advanced_reasoning_engine()
+    # Erstelle Engine mit ALLEN Modi (NEU)
+    engine = create_advanced_reasoning_engine(include_all=True)
 
     # Teste Bayesian Reasoning
-    print("--- Bayesian Reasoning ---")
+    print("\n--- 1. Bayesian Reasoning ---")
     engine.bayesian.add_belief("regen_morgen", "Es wird morgen regnen", prior=0.3)
     engine.bayesian.update_belief("regen_morgen", "Dunkle Wolken am Himmel", 0.8, 0.2)
     print(f"P(Regen|Wolken): {engine.bayesian.beliefs['regen_morgen'].posterior:.3f}")
     print(f"Konfidenz: {engine.bayesian.get_confidence_level('regen_morgen')}")
 
-    # Teste Causal Reasoning
-    print("\n--- Causal Reasoning ---")
-    engine.causal.add_variable("rauchen", "Rauchen")
-    engine.causal.add_variable("lungenkrebs", "Lungenkrebs")
-    engine.causal.add_variable("gene", "Genetische Prädisposition")
-    engine.causal.add_causal_link("rauchen", "lungenkrebs", CausalStrength.STRONG)
-    engine.causal.add_causal_link("gene", "lungenkrebs", CausalStrength.MODERATE)
-    print(engine.causal.explain_causal_relationship("rauchen", "lungenkrebs"))
+    # Teste Causal Reasoning mit erweitertem Domänenwissen
+    print("\n--- 2. Causal Reasoning (mit erweiterten Domänen) ---")
+    engine.causal.apply_domain_knowledge(CausalDomain.MEDIZIN)
+    engine.causal.apply_domain_knowledge(CausalDomain.NEUROWISSENSCHAFT)  # NEU
+    print(f"Geladene Variablen: {len(engine.causal.nodes)}")
+    print(f"Kausale Beziehungen: {len(engine.causal.edges)}")
+    print(f"Vordefinierte Ketten: {len(engine.causal.causal_chains)}")
+
+    # Zeige eine kausale Kette
+    if "stress_disease" in engine.causal.causal_chains:
+        chain = engine.causal.causal_chains["stress_disease"]
+        print(f"\nBeispiel Kausalkette '{chain.chain_id}':")
+        print(f"  {' -> '.join(chain.variables)}")
+        print(f"  Gesamtstärke: {chain.total_strength:.2f}")
 
     # Teste Dialectical Reasoning
-    print("\n--- Dialectical Reasoning ---")
+    print("\n--- 3. Dialectical Reasoning ---")
     thesis = engine.dialectical.propose_thesis(
         "KI wird die Menschheit voranbringen",
         ["Effizienzsteigerung", "Medizinische Durchbrüche", "Wissenschaftliche Entdeckungen"]
@@ -3055,22 +4863,123 @@ if __name__ == "__main__":
         ["Arbeitsplatzverlust", "Kontrollverlust", "Missbrauchspotential"]
     )
     synthesis = engine.dialectical.synthesize(thesis, antithesis)
-    print(f"Synthese: {synthesis.content[:200]}...")
+    print(f"Synthese: {synthesis.content[:150]}...")
 
-    # Teste kombiniertes Reasoning
-    print("\n--- Kombiniertes Reasoning ---")
+    # NEU: Teste Abductive Reasoning
+    print("\n--- 4. Abductive Reasoning (NEU) ---")
+    # Beobachtung hinzufügen
+    obs = engine.abductive.add_observation(
+        "Der Patient zeigt Müdigkeit, Konzentrationsschwäche und Gewichtszunahme",
+        reliability=0.9,
+        source="Arztbericht"
+    )
+
+    # Hypothesen generieren
+    h1 = engine.abductive.generate_hypothesis(
+        content="Schilddrüsenunterfunktion (Hypothyreose) verursacht die Symptome",
+        hypothesis_type=AbductiveHypothesisType.CAUSAL,
+        explains=[obs.description],
+        plausibility=0.7,
+        simplicity=0.8,
+        prior=0.3
+    )
+
+    h2 = engine.abductive.generate_hypothesis(
+        content="Depression ist die Ursache der Symptome",
+        hypothesis_type=AbductiveHypothesisType.CAUSAL,
+        explains=[obs.description],
+        plausibility=0.6,
+        simplicity=0.7,
+        prior=0.4
+    )
+
+    h3 = engine.abductive.generate_hypothesis(
+        content="Schlafapnoe verursacht die Beschwerden",
+        hypothesis_type=AbductiveHypothesisType.CAUSAL,
+        explains=[obs.description],
+        plausibility=0.5,
+        simplicity=0.6,
+        prior=0.2
+    )
+
+    # Evidenz hinzufügen
+    engine.abductive.add_supporting_evidence(h1.hypothesis_id, "TSH-Wert erhöht")
+    engine.abductive.add_counter_evidence(h2.hypothesis_id, "Patient zeigt keine Traurigkeit")
+
+    # Inference to the Best Explanation durchführen
+    ibe_result = engine.abductive.infer_best_explanation()
+    print(f"Beste Erklärung: {ibe_result.best_hypothesis.content if ibe_result.best_hypothesis else 'N/A'}")
+    print(f"Konfidenz: {ibe_result.confidence:.2f}")
+    print(f"Ranking: {[(h_id, f'{score:.3f}') for h_id, score in ibe_result.ranking]}")
+
+    # NEU: Teste Temporal Reasoning
+    print("\n--- 5. Temporal Reasoning (NEU) ---")
+    # Events hinzufügen
+    engine.temporal.add_event("infektion", "Virus-Infektion beginnt", is_instantaneous=True)
+    engine.temporal.add_event("inkubation", "Inkubationszeit", is_instantaneous=False)
+    engine.temporal.add_event("symptome", "Erste Symptome erscheinen", is_instantaneous=True)
+    engine.temporal.add_event("höhepunkt", "Krankheitshöhepunkt", is_instantaneous=True)
+    engine.temporal.add_event("genesung", "Genesung", is_instantaneous=False)
+
+    # Temporale Constraints
+    engine.temporal.add_constraint("infektion", "symptome", TemporalRelation.BEFORE, min_gap=86400, max_gap=432000)
+    engine.temporal.add_constraint("symptome", "höhepunkt", TemporalRelation.BEFORE)
+    engine.temporal.add_constraint("höhepunkt", "genesung", TemporalRelation.BEFORE)
+
+    # Kausale Links mit Zeitverzögerung
+    engine.temporal.add_temporal_causal_link(
+        "infektion", "symptome",
+        delay=259200,  # 3 Tage
+        strength=0.9,
+        mechanism="Virusvermehrung erreicht symptomatisches Niveau"
+    )
+
+    # Konsistenz prüfen
+    is_consistent, violations = engine.temporal.check_consistency()
+    print(f"Temporale Konsistenz: {'Ja' if is_consistent else 'Nein'}")
+
+    # Vorhersage
+    predictions = engine.temporal.predict_next_event("symptome")
+    if predictions:
+        print(f"Nächstes erwartetes Event nach 'symptome': {predictions[0][0]} (P={predictions[0][1]:.2f})")
+
+    # Sequenz-Analyse
+    sequence = ["infektion", "inkubation", "symptome", "höhepunkt", "genesung"]
+    analysis = engine.temporal.reason_about_sequence(sequence)
+    print(f"Analysierte Sequenz: {' -> '.join(sequence)}")
+    print(f"Kausale Ketten gefunden: {len(analysis['causal_chains'])}")
+
+    # Teste kombiniertes Reasoning mit ALLEN Modi
+    print("\n--- 6. Kombiniertes Multi-Modal Reasoning ---")
     result = engine.reason(
-        "Sollten wir KI-Entwicklung regulieren?",
+        "Warum steigt die Zahl der Burnout-Fälle?",
         context={
-            "prior_probability": 0.6,
+            "prior_probability": 0.7,
             "evidence": [
-                {"description": "KI-Unfälle nehmen zu", "likelihood_if_true": 0.8, "likelihood_if_false": 0.3}
+                {"description": "Arbeitsdichte nimmt zu", "likelihood_if_true": 0.85, "likelihood_if_false": 0.2},
+                {"description": "Digitalisierung führt zu Always-On-Mentalität", "likelihood_if_true": 0.75, "likelihood_if_false": 0.3}
             ],
-            "thesis_arguments": ["Sicherheit geht vor", "Verantwortungsvolle Innovation"],
-            "antithesis_arguments": ["Innovation wird gebremst", "Internationale Konkurrenz"]
+            "thesis_arguments": ["Arbeitsbelastung", "Gesellschaftlicher Druck", "Mangelnde Work-Life-Balance"],
+            "antithesis_arguments": ["Bessere Diagnosekriterien", "Erhöhte Sensibilisierung", "Mehr Offenheit"],
+            "hypotheses": [
+                {"content": "Strukturelle Arbeitsmarktveränderungen", "plausibility": 0.7},
+                {"content": "Individuelle Stressresistenz sinkt", "plausibility": 0.4}
+            ]
         }
     )
-    print(f"Ergebnis: {result['results'].keys()}")
+    print(f"Verwendete Modi: {result['modes_used']}")
+    print(f"Ergebnis-Kategorien: {list(result['results'].keys())}")
 
     # Gesamtzusammenfassung
     print("\n" + engine.get_reasoning_summary())
+
+    # Zeige Domänen-Statistik
+    print("\n--- Verfügbare Domänen mit Kausalwissen ---")
+    for domain in CausalDomain:
+        knowledge_count = len(engine.causal.domain_knowledge.get(domain, []))
+        if knowledge_count > 0:
+            print(f"  {domain.value}: {knowledge_count} Beziehungen")
+
+    print("\n" + "=" * 70)
+    print("  Demo abgeschlossen!")
+    print("=" * 70)
