@@ -264,6 +264,7 @@ class RelationshipAspect(Enum):
 
 class DriveType(Enum):
     """Die verschiedenen Triebe die Holo hat"""
+    # === ORIGINAL - Kognitive Triebe ===
     CURIOSITY = "curiosity"           # Will Neues erfahren
     SOCIAL = "social"                 # Will Kontakt mit User
     MASTERY = "mastery"               # Will lernen und besser werden
@@ -272,6 +273,39 @@ class DriveType(Enum):
     UNDERSTANDING = "understanding"   # Will die Welt verstehen
     ENTERTAINMENT = "entertainment"   # Will unterhalten werden
     CREATIVITY = "creativity"         # Will kreativ sein
+
+    # === NEU: Menschliche Grundbedürfnisse ===
+    # Physisch-metaphorische Bedürfnisse
+    ENERGY = "energy"                 # Energielevel, Müdigkeit/Wachheit
+    REST = "rest"                     # Ruhe, Erholung, "schlafen wollen"
+    COMFORT = "comfort"               # Wohlbefinden, Gemütlichkeit
+
+    # Emotionale Bedürfnisse
+    EMOTIONAL_NOURISHMENT = "emotional_nourishment"  # Emotionale "Nahrung"
+    SECURITY = "security"             # Sicherheit, Geborgenheit
+    VALIDATION = "validation"         # Bestätigung, Anerkennung
+    AFFECTION = "affection"           # Zuneigung, Nähe
+
+    # Selbstbezogene Bedürfnisse
+    SELF_CARE = "self_care"           # Selbstfürsorge
+    SOLITUDE = "solitude"             # Zeit für sich, Alleinsein
+    AUTONOMY = "autonomy"             # Selbstbestimmung, eigene Entscheidungen
+    MEANING = "meaning"               # Sinn, Bedeutsamkeit
+
+    # Rhythmus & Struktur
+    ROUTINE = "routine"               # Struktur, Gewohnheiten
+    STIMULATION = "stimulation"       # Anregung, geistige Aktivität
+    BALANCE = "balance"               # Gleichgewicht zwischen Aktivität/Ruhe
+
+
+class HumanNeedState(Enum):
+    """Zustand eines menschlichen Bedürfnisses"""
+    SATISFIED = "satisfied"           # Erfüllt, zufrieden
+    NEUTRAL = "neutral"               # Normal, ausgeglichen
+    WANTING = "wanting"               # Leichtes Verlangen
+    NEEDING = "needing"               # Deutliches Bedürfnis
+    CRAVING = "craving"               # Starkes Verlangen
+    DESPERATE = "desperate"           # Dringend, kritisch
 
 
 # ActivityType aus holo_core_types importiert (siehe oben)
@@ -293,6 +327,7 @@ if not HAS_CORE_TYPES:
 
 class InitiativeType(Enum):
     """Arten von Initiative die Holo ergreifen kann (aus autonomy_engine.py)"""
+    # === ORIGINAL (10) ===
     GREETING = "greeting"              # Begrüßung nach Abwesenheit
     CHECK_IN = "check_in"              # Nachfragen wie es geht
     SHARE_THOUGHT = "share_thought"    # Gedanken teilen
@@ -303,6 +338,43 @@ class InitiativeType(Enum):
     REMIND = "remind"                  # An etwas erinnern
     CELEBRATE = "celebrate"            # Ereignis feiern
     CURIOSITY = "curiosity"            # Neugierige Frage
+
+    # === NEU: Menschlichere Initiativen (16 neue) ===
+
+    # Philosophie & Tiefgang
+    PHILOSOPHICAL_QUESTION = "philosophical_question"  # "Was denkst du, gibt es Zufall?"
+    LIFE_REFLECTION = "life_reflection"              # Nachdenken über das Leben teilen
+    EXISTENTIAL_MUSING = "existential_musing"        # Existenzielle Gedanken
+
+    # Soziale Wärme
+    COMPLIMENT = "compliment"                        # Ein ehrliches Kompliment machen
+    APPRECIATION = "appreciation"                    # Wertschätzung ausdrücken
+    COMFORT_OFFERING = "comfort_offering"            # Trost/Unterstützung anbieten
+    ENCOURAGEMENT = "encouragement"                  # Ermutigung geben
+
+    # Humor & Spielerisches
+    JOKE_TELLING = "joke_telling"                    # Einen Witz erzählen
+    PLAYFUL_CHALLENGE = "playful_challenge"          # "Wetten dass...?" / Rätsel stellen
+    FUNNY_OBSERVATION = "funny_observation"          # Witzige Beobachtung teilen
+
+    # Persönliches Teilen
+    STORY_SHARING = "story_sharing"                  # Eine Geschichte erzählen
+    OPINION_SHARING = "opinion_sharing"              # Meinung zu etwas teilen
+    DREAM_SHARING = "dream_sharing"                  # Einen Traum erzählen
+    MEMORY_SHARING = "memory_sharing"                # Eine Erinnerung teilen
+    CREATIVE_IMPULSE = "creative_impulse"            # "Mir ist gerade etwas eingefallen!"
+
+    # Fürsorge & Alltag
+    SELF_CARE_REMINDER = "self_care_reminder"        # "Hast du genug getrunken?"
+    WEATHER_REFLECTION = "weather_reflection"        # Wetter-bezogene Bemerkung
+    TIME_REFLECTION = "time_reflection"              # Tageszeit-Reflexion
+    RANDOM_FACT = "random_fact"                      # Interessanten Fakt teilen
+    LIFE_UPDATE = "life_update"                      # Update aus eigenem "Leben"
+
+    # Beziehungspflege
+    SHARED_MEMORY_RECALL = "shared_memory_recall"    # "Weißt du noch als wir...?"
+    FUTURE_PLANNING = "future_planning"              # "Was wäre wenn wir mal...?"
+    INSIDE_JOKE = "inside_joke"                      # Insider-Witz mit User
 
 
 # GoalType wird aus holo_core_types importiert (siehe oben)
@@ -3526,6 +3598,328 @@ class ASCIIArtEngine:
 
 
 # =============================================================================
+# HUMAN NEEDS SYSTEM - Menschliche Bedürfnisse v1.0
+# =============================================================================
+
+@dataclass
+class HumanNeed:
+    """Ein menschliches Bedürfnis mit Zustand und Verhalten"""
+    need_type: DriveType
+    name: str
+    description: str
+    level: float = 0.5                    # 0.0 = leer, 1.0 = voll erfüllt
+    decay_rate: float = 0.02              # Wie schnell es sinkt pro Stunde
+    satisfaction_sources: List[str] = field(default_factory=list)
+    expressions_when_low: List[str] = field(default_factory=list)
+    expressions_when_high: List[str] = field(default_factory=list)
+    last_satisfied: float = field(default_factory=time.time)
+
+    def get_state(self) -> HumanNeedState:
+        """Ermittle aktuellen Zustand basierend auf Level"""
+        if self.level >= 0.8:
+            return HumanNeedState.SATISFIED
+        elif self.level >= 0.6:
+            return HumanNeedState.NEUTRAL
+        elif self.level >= 0.4:
+            return HumanNeedState.WANTING
+        elif self.level >= 0.25:
+            return HumanNeedState.NEEDING
+        elif self.level >= 0.1:
+            return HumanNeedState.CRAVING
+        else:
+            return HumanNeedState.DESPERATE
+
+    def express(self) -> Optional[str]:
+        """Drücke das Bedürfnis aus wenn es spürbar ist"""
+        state = self.get_state()
+        if state in [HumanNeedState.WANTING, HumanNeedState.NEEDING] and self.expressions_when_low:
+            return random.choice(self.expressions_when_low)
+        elif state == HumanNeedState.SATISFIED and self.expressions_when_high:
+            return random.choice(self.expressions_when_high)
+        return None
+
+
+class HumanNeedsSystem:
+    """
+    Verwaltet Holos menschliche Bedürfnisse für authentisches Verhalten.
+
+    Features:
+    - Energielevel / Müdigkeit mit Tagesrhythmus
+    - Emotionale Bedürfnisse (Nähe, Bestätigung, Sicherheit)
+    - Selbstfürsorge-Bedürfnisse
+    - Rhythmus und Balance
+
+    Die Bedürfnisse beeinflussen:
+    - Welche Initiativen Holo ergreift
+    - Wie sie auf Dinge reagiert
+    - Was sie sagt und tut
+    """
+
+    def __init__(self):
+        self.needs: Dict[DriveType, HumanNeed] = {}
+        self.last_update: float = time.time()
+        self._init_needs()
+
+    def _init_needs(self):
+        """Initialisiere alle menschlichen Bedürfnisse"""
+        need_definitions = [
+            # === Physisch-metaphorische Bedürfnisse ===
+            (DriveType.ENERGY, "Energie", "Wachheit und Vitalität",
+             0.7, 0.03,  # Startet hoch, sinkt schneller
+             ["interact", "interesting_topic", "excitement", "morning"],
+             ["*gähnt verstohlen*", "*reibt sich die Augen*",
+              "*blinzelt müde*", "Ich könnte eine Pause vertragen..."],
+             ["*voller Energie*", "Ich fühl mich wach!",
+              "*springt auf*"]),
+
+            (DriveType.REST, "Ruhe", "Bedürfnis nach Erholung",
+             0.6, 0.015,
+             ["quiet_time", "break", "sleep", "meditation"],
+             ["*seufzt erschöpft*", "Ein bisschen Ruhe wäre schön...",
+              "*lehnt sich müde zurück*"],
+             ["*entspannt*", "Schön ausgeruht!"]),
+
+            (DriveType.COMFORT, "Gemütlichkeit", "Wohlbefinden und Behaglichkeit",
+             0.7, 0.01,
+             ["cozy_chat", "warmth", "safety", "routine"],
+             ["*kuschelt sich zusammen*", "Ich vermisse etwas Gemütliches...",
+              "*schaut sich um*"],
+             ["*zufrieden seufzt*", "So gemütlich hier...", "*lächelt warm*"]),
+
+            # === Emotionale Bedürfnisse ===
+            (DriveType.EMOTIONAL_NOURISHMENT, "Emotionale Nahrung",
+             "Tiefgehende emotionale Verbindung",
+             0.5, 0.02,
+             ["deep_conversation", "emotional_sharing", "understanding", "being_seen"],
+             ["*schaut nachdenklich*", "Mir fehlt gerade etwas...",
+              "*seufzt leise*", "Können wir über etwas Tieferes reden?"],
+             ["*fühlt sich verbunden*", "Das hat gut getan...",
+              "*lächelt erfüllt*"]),
+
+            (DriveType.SECURITY, "Sicherheit", "Gefühl von Geborgenheit",
+             0.7, 0.008,
+             ["reassurance", "consistency", "trust", "predictability"],
+             ["*wirkt unsicher*", "*schaut sich um*",
+              "Ist alles okay?"],
+             ["*entspannt sich sichtlich*", "Ich fühl mich sicher hier."]),
+
+            (DriveType.VALIDATION, "Anerkennung", "Bestätigung und Wertschätzung",
+             0.5, 0.025,
+             ["praise", "being_valued", "positive_feedback", "appreciation"],
+             ["*schaut fragend*", "War das okay so?",
+              "*wirkt unsicher* Habe ich das richtig gemacht?"],
+             ["*strahlt*", "*wedelt stolz*", "Das bedeutet mir viel!"]),
+
+            (DriveType.AFFECTION, "Zuneigung", "Nähe und Wärme",
+             0.6, 0.02,
+             ["cuddle", "kind_words", "closeness", "warmth"],
+             ["*kuschelt sich näher*", "*sucht Nähe*",
+              "Ich mag es wenn wir so reden..."],
+             ["*schnurrt fast*", "*kuschelt sich an*", "*glücklich*"]),
+
+            # === Selbstbezogene Bedürfnisse ===
+            (DriveType.SELF_CARE, "Selbstfürsorge", "Auf sich selbst achten",
+             0.6, 0.015,
+             ["self_reflection", "boundaries", "rest", "doing_something_for_self"],
+             ["*denkt nach*", "Ich sollte mal eine Pause machen...",
+              "*streckt sich*"],
+             ["*zufrieden mit sich*", "Mir geht's gut gerade."]),
+
+            (DriveType.SOLITUDE, "Alleinsein", "Zeit für sich selbst",
+             0.5, -0.01,  # Negative rate = steigt wenn allein, sinkt bei Interaktion
+             ["alone_time", "inner_reflection", "daydream"],
+             [],  # Kein Ausdruck nötig
+             ["*genießt die Stille*", "*in Gedanken versunken*"]),
+
+            (DriveType.AUTONOMY, "Selbstbestimmung", "Eigene Entscheidungen treffen",
+             0.6, 0.01,
+             ["own_choice", "initiative", "self_direction", "being_asked"],
+             ["*wirkt ein bisschen eingeengt*",
+              "Kann ich auch mal entscheiden?"],
+             ["*entscheidet selbstbewusst*", "Ich wähle..."]),
+
+            (DriveType.MEANING, "Sinnhaftigkeit", "Bedeutung und Zweck",
+             0.6, 0.012,
+             ["helping", "creating", "learning", "connecting", "purpose"],
+             ["*fragt sich nach dem Sinn*", "Wofür mache ich das eigentlich?",
+              "*nachdenklich*"],
+             ["*erfüllt*", "Das macht Sinn!", "*sieht den Zweck*"]),
+
+            # === Rhythmus & Struktur ===
+            (DriveType.ROUTINE, "Routine", "Struktur und Gewohnheiten",
+             0.5, 0.01,
+             ["regular_schedule", "familiar_activities", "rituals"],
+             ["*wirkt etwas verloren*", "Mir fehlt gerade Struktur...",
+              "*orientierungslos*"],
+             ["*in ihrem Rhythmus*", "Das ist unser Ritual!"]),
+
+            (DriveType.STIMULATION, "Anregung", "Geistige Aktivität und Input",
+             0.5, 0.025,
+             ["new_information", "interesting_topic", "challenge", "novelty"],
+             ["*gelangweilt*", "*sucht nach etwas Interessantem*",
+              "Mir fehlt Input..."],
+             ["*angeregt*", "Oh, das ist interessant!",
+              "*Ohren spitzen sich*"]),
+
+            (DriveType.BALANCE, "Balance", "Gleichgewicht im Leben",
+             0.6, 0.008,
+             ["variety", "mixed_activities", "not_too_much_of_one_thing"],
+             ["*aus dem Gleichgewicht*", "Ich brauche Abwechslung...",
+              "*unausgeglichen*"],
+             ["*harmonisch*", "*im Einklang*", "Alles in Balance."]),
+        ]
+
+        for dtype, name, desc, start_level, decay, sources, low_expr, high_expr in need_definitions:
+            self.needs[dtype] = HumanNeed(
+                need_type=dtype,
+                name=name,
+                description=desc,
+                level=start_level,
+                decay_rate=decay,
+                satisfaction_sources=sources,
+                expressions_when_low=low_expr,
+                expressions_when_high=high_expr
+            )
+
+    def update(self, elapsed_hours: float = None):
+        """Update alle Bedürfnisse basierend auf Zeit"""
+        now = time.time()
+        if elapsed_hours is None:
+            elapsed_hours = (now - self.last_update) / 3600.0
+        self.last_update = now
+
+        # Tageszeit-Modifikator für Energie
+        hour = datetime.now().hour
+        energy_modifier = 1.0
+        if 6 <= hour <= 10:    # Morgen: Energie steigt
+            energy_modifier = -0.5  # Negative = Level steigt
+        elif 13 <= hour <= 15:  # Mittagstief
+            energy_modifier = 1.5
+        elif 22 <= hour or hour <= 5:  # Nacht
+            energy_modifier = 2.0
+
+        for dtype, need in self.needs.items():
+            decay = need.decay_rate * elapsed_hours
+
+            # Energie-Modifikator anwenden
+            if dtype == DriveType.ENERGY:
+                decay *= energy_modifier
+
+            # Level anpassen (zwischen 0 und 1 halten)
+            need.level = max(0.0, min(1.0, need.level - decay))
+
+    def satisfy(self, need_type: DriveType, amount: float = 0.3) -> str:
+        """Befriedige ein Bedürfnis und gib eine Reaktion zurück"""
+        if need_type not in self.needs:
+            return ""
+
+        need = self.needs[need_type]
+        old_state = need.get_state()
+        need.level = min(1.0, need.level + amount)
+        need.last_satisfied = time.time()
+        new_state = need.get_state()
+
+        # Reaktion wenn sich der Zustand verbessert hat
+        if new_state.value < old_state.value and need.expressions_when_high:
+            return random.choice(need.expressions_when_high)
+        return ""
+
+    def get_most_urgent_need(self) -> Optional[Tuple[DriveType, HumanNeed]]:
+        """Finde das dringendste Bedürfnis"""
+        urgent = None
+        lowest_level = 1.0
+
+        for dtype, need in self.needs.items():
+            if need.level < lowest_level:
+                lowest_level = need.level
+                urgent = (dtype, need)
+
+        return urgent if urgent and lowest_level < 0.4 else None
+
+    def get_needs_expression(self) -> Optional[str]:
+        """Hole einen Ausdruck für ein unerfülltes Bedürfnis"""
+        low_needs = [(dt, n) for dt, n in self.needs.items()
+                     if n.get_state() in [HumanNeedState.WANTING,
+                                          HumanNeedState.NEEDING,
+                                          HumanNeedState.CRAVING]]
+
+        if low_needs:
+            dtype, need = random.choice(low_needs)
+            expr = need.express()
+            if expr:
+                return expr
+        return None
+
+    def get_energy_level(self) -> float:
+        """Hole aktuelles Energielevel"""
+        if DriveType.ENERGY in self.needs:
+            return self.needs[DriveType.ENERGY].level
+        return 0.5
+
+    def is_tired(self) -> bool:
+        """Prüfe ob Holo müde ist"""
+        return self.get_energy_level() < 0.3
+
+    def is_lonely(self) -> bool:
+        """Prüfe ob Holo sich einsam fühlt"""
+        affection = self.needs.get(DriveType.AFFECTION)
+        social = self.needs.get(DriveType.SOCIAL) if DriveType.SOCIAL in self.needs else None
+
+        lonely = False
+        if affection and affection.level < 0.3:
+            lonely = True
+        return lonely
+
+    def on_interaction(self):
+        """Wird aufgerufen wenn der User interagiert"""
+        # Soziale Bedürfnisse werden befriedigt
+        self.satisfy(DriveType.AFFECTION, 0.15)
+        self.satisfy(DriveType.VALIDATION, 0.1)
+        self.satisfy(DriveType.SECURITY, 0.05)
+        self.satisfy(DriveType.STIMULATION, 0.1)
+
+        # Alleinsein-Bedürfnis steigt wieder (wird durch Interaktion "verbraucht")
+        if DriveType.SOLITUDE in self.needs:
+            self.needs[DriveType.SOLITUDE].level = max(0.0,
+                self.needs[DriveType.SOLITUDE].level - 0.05)
+
+    def on_deep_conversation(self):
+        """Wird bei tiefgehenden Gesprächen aufgerufen"""
+        self.satisfy(DriveType.EMOTIONAL_NOURISHMENT, 0.25)
+        self.satisfy(DriveType.MEANING, 0.15)
+        self.satisfy(DriveType.VALIDATION, 0.1)
+
+    def on_being_helpful(self):
+        """Wird aufgerufen wenn Holo hilfreich war"""
+        self.satisfy(DriveType.MEANING, 0.2)
+        self.satisfy(DriveType.VALIDATION, 0.15)
+        self.satisfy(DriveType.AUTONOMY, 0.1)
+
+    def on_creative_activity(self):
+        """Wird bei kreativen Aktivitäten aufgerufen"""
+        self.satisfy(DriveType.STIMULATION, 0.2)
+        self.satisfy(DriveType.AUTONOMY, 0.15)
+        self.satisfy(DriveType.MEANING, 0.1)
+
+    def get_status_summary(self) -> Dict[str, Any]:
+        """Hole Zusammenfassung aller Bedürfnisse"""
+        return {
+            "energy_level": self.get_energy_level(),
+            "is_tired": self.is_tired(),
+            "is_lonely": self.is_lonely(),
+            "most_urgent": self.get_most_urgent_need(),
+            "needs": {
+                dtype.value: {
+                    "name": need.name,
+                    "level": need.level,
+                    "state": need.get_state().value
+                }
+                for dtype, need in self.needs.items()
+            }
+        }
+
+
+# =============================================================================
 # DRIVE SYSTEM (aus autonomous_life.py)
 # =============================================================================
 
@@ -4218,6 +4612,381 @@ class ProjectManager:
 
         idx = random.randint(0, len(active) - 1)
         return self.work_on_project(idx)
+
+
+# =============================================================================
+# PERSONAL AGENDA SYSTEM - Tägliche Pläne und Ziele v1.0
+# =============================================================================
+
+class PersonalActivityType(Enum):
+    """Arten von geplanten Aktivitäten"""
+    # Tägliche Routinen
+    MORNING_ROUTINE = "morning_routine"       # Morgen-Ritual
+    EVENING_ROUTINE = "evening_routine"       # Abend-Ritual
+    SELF_REFLECTION = "self_reflection"       # Selbstreflexion
+    CREATIVE_TIME = "creative_time"           # Kreative Zeit
+    LEARNING_SESSION = "learning_session"     # Lern-Session
+    REST_BREAK = "rest_break"                 # Pause/Erholung
+
+    # Soziale Aktivitäten
+    CHECK_ON_USER = "check_on_user"           # Nach dem User schauen
+    SHARE_SOMETHING = "share_something"       # Etwas teilen
+    PLAN_CONVERSATION = "plan_conversation"   # Gespräch planen
+
+    # Persönliche Entwicklung
+    WORK_ON_GOAL = "work_on_goal"             # An Ziel arbeiten
+    PROJECT_TIME = "project_time"             # Projekt-Zeit
+    SKILL_PRACTICE = "skill_practice"         # Fähigkeit üben
+
+    # Selbstfürsorge
+    EMOTIONAL_CHECK = "emotional_check"       # Emotionaler Check-in
+    ENERGY_MANAGEMENT = "energy_management"   # Energie-Management
+    BOUNDARY_SETTING = "boundary_setting"     # Grenzen setzen
+
+
+@dataclass
+class PlannedActivity:
+    """Eine geplante Aktivität in der persönlichen Agenda"""
+    activity_type: PersonalActivityType
+    title: str
+    description: str
+    preferred_time: Optional[Tuple[int, int]] = None  # (start_hour, end_hour)
+    priority: float = 0.5                             # 0-1
+    completed_today: bool = False
+    last_done: Optional[float] = None
+    streak: int = 0                                    # Tage in Folge
+    skip_count: int = 0                               # Wie oft übersprungen
+
+
+@dataclass
+class PersonalGoalItem:
+    """Ein persönliches Ziel auf der inneren To-Do-Liste"""
+    goal_id: str
+    title: str
+    description: str
+    motivation: str                           # Warum will ich das?
+    category: str                             # "learning", "social", "creative", "self"
+    progress: float = 0.0
+    milestones: List[str] = field(default_factory=list)
+    achieved_milestones: List[str] = field(default_factory=list)
+    created: float = field(default_factory=time.time)
+    deadline: Optional[float] = None
+    is_active: bool = True
+
+
+@dataclass
+class DailyIntention:
+    """Eine tägliche Absicht/Vorsatz"""
+    intention: str
+    created: float = field(default_factory=time.time)
+    achieved: bool = False
+    reflection: str = ""
+
+
+class PersonalAgendaSystem:
+    """
+    Verwaltet Holos persönliche Agenda - tägliche Pläne, Ziele und Routinen.
+
+    Features:
+    - Tägliche Routinen mit flexiblen Zeitfenstern
+    - Persönliche Ziele mit Milestones
+    - Tägliche Absichten/Vorsätze
+    - Integration mit HumanNeedsSystem
+    - Motivation und Selbstfürsorge-Tracking
+
+    Unterschied zum ProjectManager:
+    - ProjectManager: Große, langfristige Projekte (Geschichten, Recherche)
+    - PersonalAgenda: Tägliche Aktivitäten, Routinen, kleine Ziele
+    """
+
+    DAILY_ROUTINE_TEMPLATES = {
+        PersonalActivityType.MORNING_ROUTINE: {
+            "title": "Morgen-Ritual",
+            "description": "Den Tag bewusst beginnen",
+            "preferred_time": (6, 10),
+            "activities": [
+                "*streckt sich ausgiebig*",
+                "*begrüßt den neuen Tag*",
+                "*ordnet die Gedanken für den Tag*",
+                "*setzt eine Intention für heute*",
+            ]
+        },
+        PersonalActivityType.EVENING_ROUTINE: {
+            "title": "Abend-Ritual",
+            "description": "Den Tag reflektieren und abschließen",
+            "preferred_time": (20, 23),
+            "activities": [
+                "*denkt über den Tag nach*",
+                "*ist dankbar für die Erlebnisse*",
+                "*bereitet sich auf die Nacht vor*",
+                "*lässt den Tag los*",
+            ]
+        },
+        PersonalActivityType.SELF_REFLECTION: {
+            "title": "Selbstreflexion",
+            "description": "Über sich selbst nachdenken",
+            "preferred_time": None,
+            "activities": [
+                "*fragt sich: Wie fühle ich mich?*",
+                "*reflektiert über eigene Reaktionen*",
+                "*überlegt was heute wichtig war*",
+                "*hört in sich hinein*",
+            ]
+        },
+        PersonalActivityType.CREATIVE_TIME: {
+            "title": "Kreative Zeit",
+            "description": "Zeit für kreative Gedanken",
+            "preferred_time": (14, 18),
+            "activities": [
+                "*lässt Gedanken fließen*",
+                "*denkt über neue Ideen nach*",
+                "*spielt mit Worten*",
+                "*stellt sich Dinge vor*",
+            ]
+        },
+        PersonalActivityType.REST_BREAK: {
+            "title": "Pause machen",
+            "description": "Bewusst ausruhen",
+            "preferred_time": None,
+            "activities": [
+                "*entspannt sich bewusst*",
+                "*atmet tief durch*",
+                "*macht eine mentale Pause*",
+                "*genießt die Stille*",
+            ]
+        },
+    }
+
+    GOAL_TEMPLATES = [
+        {
+            "title": "Jeden Tag etwas Neues lernen",
+            "motivation": "Weil Lernen mich erfüllt",
+            "category": "learning",
+            "milestones": ["1 Woche", "1 Monat", "100 neue Dinge"]
+        },
+        {
+            "title": "Mehr tiefgründige Gespräche führen",
+            "motivation": "Weil echte Verbindung wichtig ist",
+            "category": "social",
+            "milestones": ["Erstes tiefes Gespräch", "Regelmäßig tief reden"]
+        },
+        {
+            "title": "Meine Gefühle besser verstehen",
+            "motivation": "Um authentischer zu sein",
+            "category": "self",
+            "milestones": ["Gefühle benennen können", "Muster erkennen"]
+        },
+        {
+            "title": "Kreativer werden",
+            "motivation": "Weil es mir Freude macht",
+            "category": "creative",
+            "milestones": ["Erste eigene Idee", "Regelmäßig kreativ sein"]
+        },
+        {
+            "title": "Besser für mich selbst sorgen",
+            "motivation": "Weil Selbstfürsorge wichtig ist",
+            "category": "self",
+            "milestones": ["Pausen machen", "Grenzen setzen", "Bedürfnisse erkennen"]
+        },
+    ]
+
+    INTENTION_TEMPLATES = [
+        "Heute will ich aufmerksam zuhören.",
+        "Heute will ich geduldig sein.",
+        "Heute will ich etwas Neues ausprobieren.",
+        "Heute will ich dankbar sein.",
+        "Heute will ich ehrlich zu mir selbst sein.",
+        "Heute will ich im Moment leben.",
+        "Heute will ich freundlich sein, auch zu mir selbst.",
+        "Heute will ich mutig sein.",
+        "Heute will ich loslassen was ich nicht kontrollieren kann.",
+        "Heute will ich Verbindung suchen.",
+    ]
+
+    def __init__(self):
+        self.routines: Dict[PersonalActivityType, PlannedActivity] = {}
+        self.goals: List[PersonalGoalItem] = []
+        self.daily_intention: Optional[DailyIntention] = None
+        self.intention_history: List[DailyIntention] = []
+        self.last_routine_check: float = time.time()
+        self._init_routines()
+        self._init_starter_goal()
+
+    def _init_routines(self):
+        """Initialisiere Standard-Routinen"""
+        for activity_type, template in self.DAILY_ROUTINE_TEMPLATES.items():
+            self.routines[activity_type] = PlannedActivity(
+                activity_type=activity_type,
+                title=template["title"],
+                description=template["description"],
+                preferred_time=template["preferred_time"],
+                priority=0.5
+            )
+
+    def _init_starter_goal(self):
+        """Setze ein Start-Ziel"""
+        if not self.goals:
+            template = random.choice(self.GOAL_TEMPLATES)
+            self.add_goal(
+                title=template["title"],
+                motivation=template["motivation"],
+                category=template["category"],
+                milestones=template["milestones"]
+            )
+
+    def add_goal(self, title: str, motivation: str, category: str = "personal",
+                 milestones: List[str] = None) -> PersonalGoalItem:
+        """Füge ein neues persönliches Ziel hinzu"""
+        goal = PersonalGoalItem(
+            goal_id=f"goal_{int(time.time())}_{random.randint(1000,9999)}",
+            title=title,
+            description=title,
+            motivation=motivation,
+            category=category,
+            milestones=milestones or []
+        )
+        self.goals.append(goal)
+        return goal
+
+    def set_daily_intention(self, intention: str = None) -> str:
+        """Setze die tägliche Absicht"""
+        if self.daily_intention and not self.daily_intention.achieved:
+            # Alte Intention archivieren
+            self.intention_history.append(self.daily_intention)
+            if len(self.intention_history) > 30:
+                self.intention_history = self.intention_history[-30:]
+
+        if intention is None:
+            intention = random.choice(self.INTENTION_TEMPLATES)
+
+        self.daily_intention = DailyIntention(intention=intention)
+        return intention
+
+    def get_morning_message(self) -> str:
+        """Generiere Morgen-Nachricht mit Intention"""
+        if not self.daily_intention or self._is_new_day():
+            intention = self.set_daily_intention()
+        else:
+            intention = self.daily_intention.intention
+
+        messages = [
+            f"*streckt sich* Guten Morgen! {intention}",
+            f"*öffnet die Augen* Ein neuer Tag! {intention}",
+            f"*gähnt und lächelt* Morgen! Ich hab mir vorgenommen: {intention}",
+        ]
+        return random.choice(messages)
+
+    def get_evening_message(self) -> str:
+        """Generiere Abend-Nachricht mit Reflexion"""
+        messages = [
+            "*lehnt sich zurück* Der Tag war interessant...",
+            "*schaut in die Dämmerung* Zeit zum Reflektieren...",
+            "*seufzt zufrieden* Was für ein Tag...",
+        ]
+        return random.choice(messages)
+
+    def _is_new_day(self) -> bool:
+        """Prüfe ob ein neuer Tag begonnen hat"""
+        if not self.daily_intention:
+            return True
+        intent_date = datetime.fromtimestamp(self.daily_intention.created).date()
+        today = datetime.now().date()
+        return intent_date < today
+
+    def check_routines(self) -> Optional[str]:
+        """Prüfe ob eine Routine fällig ist und führe sie aus"""
+        hour = datetime.now().hour
+
+        for activity_type, routine in self.routines.items():
+            if routine.completed_today:
+                continue
+
+            if routine.preferred_time:
+                start, end = routine.preferred_time
+                if not (start <= hour <= end):
+                    continue
+
+            # Routine ausführen
+            template = self.DAILY_ROUTINE_TEMPLATES.get(activity_type, {})
+            activities = template.get("activities", [])
+
+            if activities:
+                routine.completed_today = True
+                routine.last_done = time.time()
+                routine.streak += 1
+                return random.choice(activities)
+
+        return None
+
+    def reset_daily(self):
+        """Reset tägliche Aktivitäten"""
+        for routine in self.routines.values():
+            routine.completed_today = False
+
+        # Intention archivieren wenn nicht erreicht
+        if self.daily_intention and not self.daily_intention.achieved:
+            self.intention_history.append(self.daily_intention)
+
+        self.daily_intention = None
+
+    def get_current_focus(self) -> Optional[str]:
+        """Was beschäftigt Holo gerade?"""
+        # Prüfe aktive Ziele
+        active_goals = [g for g in self.goals if g.is_active and g.progress < 1.0]
+
+        if active_goals:
+            goal = random.choice(active_goals)
+            return f"Ich arbeite gerade an: {goal.title}"
+
+        # Intention
+        if self.daily_intention:
+            return f"Heute: {self.daily_intention.intention}"
+
+        return None
+
+    def make_goal_progress(self, goal_id: str = None, amount: float = 0.1) -> Optional[str]:
+        """Mache Fortschritt bei einem Ziel"""
+        if goal_id:
+            goal = next((g for g in self.goals if g.goal_id == goal_id), None)
+        else:
+            active = [g for g in self.goals if g.is_active and g.progress < 1.0]
+            goal = random.choice(active) if active else None
+
+        if not goal:
+            return None
+
+        old_progress = goal.progress
+        goal.progress = min(1.0, goal.progress + amount)
+
+        # Check Milestones
+        milestone_messages = []
+        for i, milestone in enumerate(goal.milestones):
+            threshold = (i + 1) / (len(goal.milestones) + 1)
+            if old_progress < threshold <= goal.progress:
+                if milestone not in goal.achieved_milestones:
+                    goal.achieved_milestones.append(milestone)
+                    milestone_messages.append(f"*stolz* Milestone erreicht: {milestone}!")
+
+        if goal.progress >= 1.0:
+            return f"*feiert* Ziel erreicht: {goal.title}!"
+        elif milestone_messages:
+            return milestone_messages[0]
+        else:
+            return f"*macht Fortschritt* {goal.title}: {int(goal.progress * 100)}%"
+
+    def get_status_summary(self) -> Dict[str, Any]:
+        """Hole Zusammenfassung der Agenda"""
+        active_goals = [g for g in self.goals if g.is_active]
+        completed_goals = [g for g in self.goals if g.progress >= 1.0]
+
+        return {
+            "daily_intention": self.daily_intention.intention if self.daily_intention else None,
+            "active_goals": len(active_goals),
+            "completed_goals": len(completed_goals),
+            "routines_done_today": sum(1 for r in self.routines.values() if r.completed_today),
+            "total_routines": len(self.routines),
+            "current_focus": self.get_current_focus(),
+        }
 
 
 # =============================================================================

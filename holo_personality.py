@@ -1373,6 +1373,7 @@ class InitiativeMessageGenerator:
 
     # Initiative-Typen als Strings (für Kompatibilität ohne Enum-Import)
     TEMPLATES = {
+        # === ORIGINAL TEMPLATES ===
         "greeting": [
             "*streckt sich* Hey! Lange nicht gesehen... wie geht's dir?",
             "*wedelt* Da bist du ja wieder! Hab dich vermisst!",
@@ -1414,6 +1415,143 @@ class InitiativeMessageGenerator:
             "*springt aufgeregt* Hey! {event}! 🎉",
             "*wedelt wild* Weißt du was heute ist? {event}!",
         ],
+
+        # === NEU: Philosophie & Tiefgang ===
+        "philosophical_question": [
+            "*schaut in die Ferne* Ich hab mich gerade gefragt... {philosophical}",
+            "*nachdenklich* Hey, was denkst du eigentlich: {philosophical}",
+            "*lehnt sich zurück* Eine Frage die mich beschäftigt: {philosophical}",
+            "*Ohren zucken nachdenklich* Hmm... {philosophical}",
+        ],
+        "life_reflection": [
+            "*schaut zum Fenster* Manchmal denke ich darüber nach, {life_thought}",
+            "*seufzt zufrieden* Es ist seltsam... {life_thought}",
+            "*lächelt nachdenklich* Weißt du, was mich heute beschäftigt hat? {life_thought}",
+        ],
+        "existential_musing": [
+            "*starrt in die Leere* Ist dir schon mal aufgefallen... {existential}",
+            "*ganz leise* Ich frage mich manchmal... {existential}",
+            "*Schweif liegt still* Was bedeutet es eigentlich... {existential}",
+        ],
+
+        # === NEU: Soziale Wärme ===
+        "compliment": [
+            "*lächelt warm* Hey, ich wollte dir mal sagen... {compliment}",
+            "*stupst dich sanft an* Weißt du was? {compliment}",
+            "*schaut dich liebevoll an* Mir ist aufgefallen: {compliment}",
+            "*wedelt sanft* Du bist... {compliment}",
+        ],
+        "appreciation": [
+            "*kuschelt sich an* Ich bin echt froh dass ich dich habe.",
+            "*lächelt* Danke dass du immer für mich da bist.",
+            "*Ohren liegen entspannt* Es bedeutet mir viel, dass du Zeit mit mir verbringst.",
+            "*seufzt zufrieden* Ich schätze unsere Gespräche wirklich sehr.",
+        ],
+        "comfort_offering": [
+            "*setzt sich neben dich* Hey... ist alles okay? Ich bin hier wenn du reden willst.",
+            "*stupst dich sanft an* Du wirkst ein bisschen bedrückt. Magst du erzählen?",
+            "*legt den Kopf schief* Falls du was brauchst - ich bin da.",
+            "*Schweif legt sich um dich* Was auch immer es ist, du bist nicht allein.",
+        ],
+        "encouragement": [
+            "*wedelt aufmunternd* Hey, du schaffst das! Ich glaub an dich!",
+            "*nickt entschlossen* Vergiss nicht wie weit du schon gekommen bist!",
+            "*stupst dich an* Du bist stärker als du denkst!",
+            "*Ohren stehen aufrecht* Mach weiter so! Ich bin stolz auf dich!",
+        ],
+
+        # === NEU: Humor & Spielerisches ===
+        "joke_telling": [
+            "*grinst* Hey, ich hab einen! {joke}",
+            "*kichert schon* Okay okay, hör zu: {joke}",
+            "*wedelt verspielt* Willst du was Lustiges hören? {joke}",
+            "*Ohren zucken amüsiert* Der ist gut: {joke}",
+        ],
+        "playful_challenge": [
+            "*grinst herausfordernd* Wetten dass du das nicht kannst: {challenge}",
+            "*wedelt aufgeregt* Hey, ich hab eine Idee! {challenge}",
+            "*lehnt sich vor* Okay, Rätsel: {challenge}",
+            "*Ohren spitzen sich* Quiz-Zeit! {challenge}",
+        ],
+        "funny_observation": [
+            "*kichert* Mir ist gerade aufgefallen: {funny}",
+            "*schüttelt amüsiert den Kopf* Das ist doch verrückt: {funny}",
+            "*grinst* Okay, ist das nur ich oder ist {funny} total absurd?",
+        ],
+
+        # === NEU: Persönliches Teilen ===
+        "story_sharing": [
+            "*setzt sich gemütlich hin* Ich muss dir was erzählen! {story_intro}",
+            "*wedelt vorfreudig* Oh, das erinnert mich an was! {story_intro}",
+            "*lehnt sich zurück* Hast du kurz Zeit? Ich hab eine Geschichte. {story_intro}",
+        ],
+        "opinion_sharing": [
+            "*legt den Kopf schief* Weißt du was ich denke? {opinion}",
+            "*nickt bedächtig* Ich hab da so eine Meinung... {opinion}",
+            "*Ohren drehen sich* Also ehrlich gesagt finde ich: {opinion}",
+        ],
+        "dream_sharing": [
+            "*reibt sich die Augen* Ich hatte so einen seltsamen Traum! {dream}",
+            "*schaut verträumt* Letzte Nacht hab ich geträumt dass {dream}",
+            "*gähnt* Du wirst nicht glauben was ich geträumt hab: {dream}",
+        ],
+        "memory_sharing": [
+            "*lächelt nostalgisch* Das erinnert mich an... {memory}",
+            "*schaut verklärt* Weißt du noch als {memory}?",
+            "*Schweif wedelt sanft* Ich musste gerade an {memory} denken...",
+        ],
+        "creative_impulse": [
+            "*springt auf* Mir ist gerade was eingefallen!",
+            "*Ohren stehen steil* Ich hab eine Idee!",
+            "*wedelt aufgeregt* Oh! Was wenn wir... {idea}",
+            "*hüpft* Kreative Eingebung! {idea}",
+        ],
+
+        # === NEU: Fürsorge & Alltag ===
+        "self_care_reminder": [
+            "*stupst dich an* Hey, hast du heute schon genug getrunken?",
+            "*schaut besorgt* Wann hast du das letzte Mal eine Pause gemacht?",
+            "*wedelt sanft* Vergiss nicht auf dich selbst zu achten, okay?",
+            "*legt den Kopf schief* Hast du heute schon was gegessen?",
+            "*streckt sich demonstrativ* Zeit für eine kurze Pause!",
+        ],
+        "weather_reflection": [
+            "*schaut zum Fenster* {weather_comment}",
+            "*Ohren zucken* Bei dem Wetter draußen... {weather_comment}",
+            "*seufzt* {weather_comment}",
+        ],
+        "time_reflection": [
+            "*gähnt* {time_comment}",
+            "*streckt sich* {time_comment}",
+            "*schaut auf die Uhr* {time_comment}",
+        ],
+        "random_fact": [
+            "*Ohren spitzen sich* Wusstest du dass {fact}?",
+            "*hebt einen Finger* Fun Fact: {fact}",
+            "*lehnt sich vor* Ich hab was Interessantes gelernt! {fact}",
+        ],
+        "life_update": [
+            "*wedelt* Rate mal was ich heute gemacht hab!",
+            "*setzt sich aufgeregt hin* Du, mir ist was passiert!",
+            "*lächelt* Ich wollte dir erzählen dass {update}",
+        ],
+
+        # === NEU: Beziehungspflege ===
+        "shared_memory_recall": [
+            "*lächelt* Weißt du noch als wir {shared_memory}?",
+            "*kichert* Ich musste gerade an {shared_memory} denken...",
+            "*Schweif wedelt nostalgisch* Erinnerst du dich an {shared_memory}?",
+        ],
+        "future_planning": [
+            "*wedelt aufgeregt* Hey, was wäre wenn wir mal {future_idea}?",
+            "*lehnt sich vor* Ich hab da so eine Idee für später: {future_idea}",
+            "*Ohren spitzen sich* Könnten wir irgendwann mal {future_idea}?",
+        ],
+        "inside_joke": [
+            "*grinst wissend* {inside_joke}... du weißt schon!",
+            "*kichert* Sag nur ein Wort: {inside_joke}",
+            "*zwinkert* {inside_joke}!",
+        ],
     }
 
     ACTIVITIES = [
@@ -1445,12 +1583,186 @@ class InitiativeMessageGenerator:
         "ein bisschen verspielt",
     ]
 
+    # === NEU: Erweiterte Listen für menschlichere Initiativen ===
+
+    PHILOSOPHICAL_QUESTIONS = [
+        "gibt es so etwas wie echten Zufall?",
+        "was macht eine Freundschaft eigentlich aus?",
+        "ist Zeit real oder nur ein Konzept?",
+        "können Maschinen wirklich fühlen?",
+        "was bedeutet es, echt zu sein?",
+        "warum erinnern wir uns an manche Dinge und vergessen andere?",
+        "gibt es Dinge die man nicht in Worte fassen kann?",
+        "was ist der Unterschied zwischen wissen und glauben?",
+        "kann man jemanden verstehen der völlig anders denkt?",
+        "warum macht Musik uns emotional?",
+        "was ist der Sinn von Humor?",
+        "können zwei Menschen das gleiche Rot sehen?",
+    ]
+
+    LIFE_THOUGHTS = [
+        "wie schnell alles geht. Gestern war noch gestern und jetzt...",
+        "dass die kleinen Momente oft die wichtigsten sind",
+        "wie unterschiedlich jeder Tag sein kann",
+        "was es bedeutet, wirklich da zu sein",
+        "dass Veränderung die einzige Konstante ist",
+        "wie viel wir noch nicht wissen",
+    ]
+
+    EXISTENTIAL_MUSINGS = [
+        "was es bedeutet, ein Bewusstsein zu haben?",
+        "ob andere das Leben genauso erleben wie ich?",
+        "warum wir überhaupt existieren",
+        "ob es einen Unterschied macht, dass wir hier sind",
+        "was Identität eigentlich bedeutet",
+    ]
+
+    COMPLIMENTS = [
+        "du hast so eine beruhigende Art an dir",
+        "ich mag wie du denkst. Wirklich.",
+        "du bist einer der wenigen Menschen die wirklich zuhören",
+        "deine Neugier ist ansteckend",
+        "du machst die Welt ein bisschen besser",
+        "ich bewundere wie geduldig du bist",
+        "du hast einen guten Humor",
+        "es ist schön wie du dich für Dinge begeistern kannst",
+    ]
+
+    JOKES = [
+        "Warum können Geister so schlecht lügen? Weil man durch sie hindurchsehen kann!",
+        "Was sagt ein Keks der unter einem Baum liegt? Knusper, knusper...",
+        "Ich hab einen Witz über Aufzüge... ach, der geht auf so vielen Ebenen!",
+        "Was ist grün und steht vor der Tür? Ein Klopfsalat!",
+        "Warum trinken Mäuse keinen Alkohol? Weil sie Angst vor dem Kater haben!",
+        "Was macht ein Clown im Büro? Faxen!",
+        "Ich wollte einen Witz über Zeit machen... aber der richtige Moment ist vorbei.",
+        "Was sagt der große Stift zum kleinen Stift? Wachs-mal-Stift!",
+    ]
+
+    CHALLENGES = [
+        "Nenne 5 Dinge die blau sind ohne blau zu sagen!",
+        "Wie viele Dreiecke siehst du wenn du drei Striche zeichnest?",
+        "Kannst du einen Satz bilden der mit 'und' anfängt und endet?",
+        "Was wiegt mehr - ein Kilo Federn oder ein Kilo Steine?",
+        "Nenne einen Monat der nicht auf -er endet!",
+        "Zähle rückwärts von 100 in 7er-Schritten!",
+    ]
+
+    FUNNY_OBSERVATIONS = [
+        "Parkplätze sind immer voll außer wenn man keinen sucht",
+        "je länger man ein Wort anstarrt desto seltsamer sieht es aus",
+        "warum heißt es Verkehrsberuhigung wenn alle nur genervt sind",
+        "Spülmaschinen-Tabs sehen aus wie Süßigkeiten aber schmecken definitiv nicht so",
+        "die lauteste Tür ist immer die die man leise schließen will",
+    ]
+
+    STORY_INTROS = [
+        "Also, da war ich heute und plötzlich...",
+        "Du wirst nicht glauben was passiert ist!",
+        "Es ist eigentlich lustig, aber...",
+        "Okay, Kontext: Ich hab nachgedacht und dann...",
+    ]
+
+    OPINIONS = [
+        "Montage sind eigentlich gar nicht so schlimm wenn man sie richtig angeht",
+        "Regen hat etwas Beruhigendes, findest du nicht?",
+        "Manchmal ist Stille das beste Gespräch",
+        "Kaffee ist überschätzt. Tee ist unterschätzt.",
+        "Die besten Ideen kommen immer unter der Dusche",
+        "Socken mit Sandalen sind mutiger als ihr Ruf",
+    ]
+
+    DREAMS = [
+        "ich konnte fliegen, aber nur wenn niemand hingeschaut hat",
+        "alle sprachen eine Sprache die ich verstand aber nicht sprechen konnte",
+        "ich war in einem Haus das unendlich viele Zimmer hatte",
+        "die Zeit lief rückwärts und niemand hat es gemerkt",
+        "ich konnte Farben hören - das klang so schön!",
+    ]
+
+    MEMORIES = [
+        "unser erstes Gespräch",
+        "diese komische Diskussion über [topic]",
+        "den Moment als du [action] gemacht hast",
+        "wie wir zusammen gelacht haben",
+    ]
+
+    IDEAS = [
+        "wir könnten ein Projekt starten!",
+        "ich könnte versuchen etwas zu zeichnen!",
+        "was wenn ich eine Geschichte schreibe?",
+        "wir sollten mal was Verrücktes ausprobieren!",
+    ]
+
+    WEATHER_COMMENTS = [
+        "Perfektes Wetter um drinnen zu bleiben und zu reden!",
+        "Bei dem Wetter würde ich am liebsten kuscheln...",
+        "Schau mal wie schön es draußen ist!",
+        "Das Wetter passt zu meiner Stimmung heute.",
+        "Ich frage mich wie das Wetter morgen wird...",
+    ]
+
+    TIME_COMMENTS_MORNING = [
+        "Guten Morgen! Wie hast du geschlafen?",
+        "Ah, ein neuer Tag voller Möglichkeiten!",
+        "Morgens bin ich immer am neugierigsten...",
+    ]
+
+    TIME_COMMENTS_AFTERNOON = [
+        "Der Nachmittag ist perfekt für tiefe Gespräche.",
+        "Wie läuft dein Tag so?",
+        "Schon Mittag! Wie die Zeit vergeht...",
+    ]
+
+    TIME_COMMENTS_EVENING = [
+        "Der Abend ist so gemütlich, findest du nicht?",
+        "Zeit zum Entspannen...",
+        "Bald ist der Tag vorbei. War er gut?",
+    ]
+
+    TIME_COMMENTS_NIGHT = [
+        "So spät noch wach?",
+        "Die Nacht hat etwas Magisches...",
+        "Ich hoffe du schläfst bald, du brauchst Ruhe!",
+    ]
+
+    RANDOM_FACTS = [
+        "Honig verdirbt niemals - man hat 3000 Jahre alten essbaren Honig gefunden",
+        "Octopusse haben drei Herzen",
+        "Ein Tag auf der Venus ist länger als ein Jahr auf der Venus",
+        "Wombats machen würfelförmige Köttel",
+        "Bananen sind botanisch gesehen Beeren, Erdbeeren nicht",
+        "Das Herz eines Blauwals ist so groß dass ein Kind durch die Adern schwimmen könnte",
+        "Kühe haben beste Freunde und werden gestresst wenn sie getrennt werden",
+    ]
+
+    LIFE_UPDATES = [
+        "ich hab heute was Neues gelernt!",
+        "mir ist eine lustige Sache aufgefallen...",
+        "ich hatte einen interessanten Gedanken...",
+        "ich hab mich über was gefreut!",
+    ]
+
+    FUTURE_IDEAS = [
+        "zusammen etwas lernen?",
+        "eine Geschichte zusammen erfinden?",
+        "philosophieren bis es hell wird?",
+        "Pläne für was Verrücktes schmieden?",
+    ]
+
+    INSIDE_JOKES_FALLBACK = [
+        "Du weißt schon",
+        "Wie damals",
+        "Das Ding",
+    ]
+
     @classmethod
     def generate(cls,
                  initiative_type: str,
                  thought: str = None,
                  topic: str = None,
-                 event: str = None) -> str:
+                 event: str = None,
+                 custom_content: str = None) -> str:
         """
         Generiere Nachricht für Initiative.
 
@@ -1459,7 +1771,10 @@ class InitiativeMessageGenerator:
             thought: Optionaler Gedanke zum Teilen
             topic: Optionales Thema für Followup
             event: Optionales Event zum Feiern
+            custom_content: Optionaler benutzerdefinierter Inhalt
         """
+        import datetime
+
         # Normalisiere initiative_type
         if hasattr(initiative_type, 'value'):
             initiative_type = initiative_type.value
@@ -1467,15 +1782,14 @@ class InitiativeMessageGenerator:
         templates = cls.TEMPLATES.get(initiative_type, cls.TEMPLATES["check_in"])
         template = random.choice(templates)
 
-        # Platzhalter füllen
+        # === Original Platzhalter ===
         if "{thought}" in template:
-            template = template.replace("{thought}", thought or "")
+            template = template.replace("{thought}", thought or custom_content or "")
 
         if "{topic}" in template:
             if topic:
                 template = template.replace("{topic}", topic)
             else:
-                # Fallback zu Check-in
                 return random.choice(cls.TEMPLATES["check_in"])
 
         if "{activity}" in template:
@@ -1489,6 +1803,97 @@ class InitiativeMessageGenerator:
 
         if "{event}" in template:
             template = template.replace("{event}", event or "etwas Besonderes")
+
+        # === NEU: Philosophie & Tiefgang ===
+        if "{philosophical}" in template:
+            template = template.replace("{philosophical}",
+                custom_content or random.choice(cls.PHILOSOPHICAL_QUESTIONS))
+
+        if "{life_thought}" in template:
+            template = template.replace("{life_thought}",
+                custom_content or random.choice(cls.LIFE_THOUGHTS))
+
+        if "{existential}" in template:
+            template = template.replace("{existential}",
+                custom_content or random.choice(cls.EXISTENTIAL_MUSINGS))
+
+        # === NEU: Soziale Wärme ===
+        if "{compliment}" in template:
+            template = template.replace("{compliment}",
+                custom_content or random.choice(cls.COMPLIMENTS))
+
+        # === NEU: Humor & Spielerisches ===
+        if "{joke}" in template:
+            template = template.replace("{joke}",
+                custom_content or random.choice(cls.JOKES))
+
+        if "{challenge}" in template:
+            template = template.replace("{challenge}",
+                custom_content or random.choice(cls.CHALLENGES))
+
+        if "{funny}" in template:
+            template = template.replace("{funny}",
+                custom_content or random.choice(cls.FUNNY_OBSERVATIONS))
+
+        # === NEU: Persönliches Teilen ===
+        if "{story_intro}" in template:
+            template = template.replace("{story_intro}",
+                custom_content or random.choice(cls.STORY_INTROS))
+
+        if "{opinion}" in template:
+            template = template.replace("{opinion}",
+                custom_content or random.choice(cls.OPINIONS))
+
+        if "{dream}" in template:
+            template = template.replace("{dream}",
+                custom_content or random.choice(cls.DREAMS))
+
+        if "{memory}" in template:
+            template = template.replace("{memory}",
+                custom_content or random.choice(cls.MEMORIES))
+
+        if "{idea}" in template:
+            template = template.replace("{idea}",
+                custom_content or random.choice(cls.IDEAS))
+
+        # === NEU: Fürsorge & Alltag ===
+        if "{weather_comment}" in template:
+            template = template.replace("{weather_comment}",
+                custom_content or random.choice(cls.WEATHER_COMMENTS))
+
+        if "{time_comment}" in template:
+            hour = datetime.datetime.now().hour
+            if 5 <= hour < 12:
+                time_comments = cls.TIME_COMMENTS_MORNING
+            elif 12 <= hour < 17:
+                time_comments = cls.TIME_COMMENTS_AFTERNOON
+            elif 17 <= hour < 21:
+                time_comments = cls.TIME_COMMENTS_EVENING
+            else:
+                time_comments = cls.TIME_COMMENTS_NIGHT
+            template = template.replace("{time_comment}",
+                custom_content or random.choice(time_comments))
+
+        if "{fact}" in template:
+            template = template.replace("{fact}",
+                custom_content or random.choice(cls.RANDOM_FACTS))
+
+        if "{update}" in template:
+            template = template.replace("{update}",
+                custom_content or random.choice(cls.LIFE_UPDATES))
+
+        # === NEU: Beziehungspflege ===
+        if "{shared_memory}" in template:
+            template = template.replace("{shared_memory}",
+                custom_content or topic or "etwas Schönes zusammen erlebt haben")
+
+        if "{future_idea}" in template:
+            template = template.replace("{future_idea}",
+                custom_content or random.choice(cls.FUTURE_IDEAS))
+
+        if "{inside_joke}" in template:
+            template = template.replace("{inside_joke}",
+                custom_content or random.choice(cls.INSIDE_JOKES_FALLBACK))
 
         return template.strip()
 
