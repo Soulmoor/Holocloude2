@@ -1131,6 +1131,13 @@ AdvancedLearningEngine = safe_import('holo_cognitive_modules', 'AdvancedLearning
 PerceptionLayer = safe_import('holo_cognitive_modules', 'PerceptionLayer', None)
 
 # ============================================================================
+# EXTENDED COGNITION (Bayesian, Kausal, Dialektisch, Analytisch)
+# ============================================================================
+ExtendedCognitionEngine = safe_import('holo_extended_cognition', 'ExtendedCognitionEngine', None)
+get_extended_cognition_engine = safe_import('holo_extended_cognition', 'get_extended_cognition_engine', None)
+EXTENDED_COGNITION_AVAILABLE = ExtendedCognitionEngine is not None
+
+# ============================================================================
 # ORGANIC (KONSOLIDIERT - Intent Detection in holo_context_mind.py)
 # ============================================================================
 # IntentDetector jetzt aus context_mind
@@ -1478,6 +1485,9 @@ __all__ = [
     # Cognitive Engines
     'LoyaltySafetyCore', 'ConsciousnessEngine', 'ReasoningEngine',
     'PerceptionEngine', 'AdvancedLearningEngine', 'PerceptionLayer',
+
+    # Extended Cognition (Bayesian, Kausal, Dialektisch)
+    'ExtendedCognitionEngine', 'get_extended_cognition_engine', 'EXTENDED_COGNITION_AVAILABLE',
 
     # Organic
     'IntentDetector', 'ResponseGenerator', 'ResponseHints',

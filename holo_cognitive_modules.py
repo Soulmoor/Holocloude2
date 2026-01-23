@@ -99,7 +99,9 @@ try:
         InductiveReasoner,
         AnalogicalReasoner,
         ClassicalReasoningEngine,
-        create_classical_reasoning_engine,
+        create_holo_reasoner,  # Korrigierter Funktionsname
+        ExtendedReasoningEngine,
+        create_extended_reasoner,
     )
     HAS_CLASSICAL_REASONING = True
 except ImportError:
@@ -108,6 +110,9 @@ except ImportError:
     InductiveReasoner = None
     AnalogicalReasoner = None
     ClassicalReasoningEngine = None
+    create_holo_reasoner = None
+    ExtendedReasoningEngine = None
+    create_extended_reasoner = None
 
 logger = logging.getLogger("HoloCognitive")
 
@@ -3748,9 +3753,9 @@ class ReasoningEngine:
             except Exception as e:
                 logger.warning(f"[ReasoningEngine] Erweiterte Module nicht vollständig: {e}")
 
-        if HAS_CLASSICAL_REASONING and ClassicalReasoningEngine is not None:
+        if HAS_CLASSICAL_REASONING and create_holo_reasoner is not None:
             try:
-                self.classical_reasoning = create_classical_reasoning_engine()
+                self.classical_reasoning = create_holo_reasoner()
                 logger.info("[ReasoningEngine] ✓ Klassische Reasoning-Module initialisiert "
                            "(Deduktiv, Induktiv, Analog)")
             except Exception as e:
