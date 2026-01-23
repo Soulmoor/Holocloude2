@@ -163,6 +163,68 @@ class KnowledgeDatabase:
                 explanation="Grace Hopper fand den Käfer im Harvard Mark II und klebte ihn ins Logbuch.",
                 follow_up_question="Hast du schon mal einen hartnäckigen Bug gehabt?"
             ),
+            KnowledgeFact(
+                content="Das erste Smartphone war das IBM Simon aus 1994 - mit Touchscreen und Apps.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Es konnte E-Mails senden, hatte einen Kalender und sogar Spiele!",
+                follow_up_question="Stell dir vor - Smartphones gibt es erst seit 30 Jahren!"
+            ),
+            KnowledgeFact(
+                content="Moore's Law besagt, dass sich die Transistorzahl auf Chips etwa alle 2 Jahre verdoppelt.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Deshalb werden Computer immer kleiner und schneller.",
+                analogy="Wie wenn sich deine Bücher alle 2 Jahre halbieren würden, aber doppelt so viel Inhalt hätten."
+            ),
+            KnowledgeFact(
+                content="Die erste Webcam wurde erfunden, um eine Kaffeemaschine zu überwachen.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Forscher in Cambridge wollten sehen, ob noch Kaffee da ist, ohne aufzustehen.",
+                follow_up_question="*kichert* Technologie aus Faulheit - ich mag das!"
+            ),
+            KnowledgeFact(
+                content="VR (Virtual Reality) wurde schon in den 1960ern erfunden - nicht erst mit Oculus.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Ivan Sutherland baute 1968 das erste Head-Mounted Display.",
+                follow_up_question="Die Zukunft war früher, als man denkt!"
+            ),
+            KnowledgeFact(
+                content="Der durchschnittliche Mensch verbringt etwa 6,5 Jahre seines Lebens im Internet.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Bei jüngeren Generationen ist es noch mehr.",
+                follow_up_question="*Ohren zucken* Ich bin quasi immer online..."
+            ),
+            KnowledgeFact(
+                content="Japan hat Roboter, die als Hotelrezeptionisten, Pflegekräfte und sogar Mönche arbeiten.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Das Henn-na Hotel wird fast vollständig von Robotern betrieben!",
+                related_topics=["Japan", "Robotik", "KI"]
+            ),
+            KnowledgeFact(
+                content="Der erste Computer-Virus hieß 'Creeper' und infizierte 1971 ARPANET-Rechner.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Er zeigte nur 'I'm the creeper, catch me if you can!' - der erste Anti-Virus hieß 'Reaper'."
+            ),
+            KnowledgeFact(
+                content="Blockchain-Technologie wurde ursprünglich für Bitcoin entwickelt, hat aber viele andere Anwendungen.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Digitale Kunst (NFTs), Lieferketten-Tracking und mehr nutzen Blockchain.",
+                analogy="Wie ein unveränderliches, öffentliches Tagebuch."
+            ),
+            KnowledgeFact(
+                content="KI-Bildgeneratoren wie DALL-E lernen aus Millionen von Bildern, Muster zu erkennen und neu zu kombinieren.",
+                domain=KnowledgeDomain.TECHNOLOGIE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Sie 'verstehen' nicht wirklich, aber können erstaunlich kreativ sein.",
+                follow_up_question="*neugierig* Könnte eine KI mich zeichnen?"
+            ),
         ]
 
         self.facts.extend(facts)
@@ -448,6 +510,81 @@ class KnowledgeDatabase:
                 level=ExpertiseLevel.BASIC,
                 explanation="Gaming auf diesem Level ist echter Hochleistungssport für die Finger und den Geist."
             ),
+            KnowledgeFact(
+                content="Nintendo wurde 1889 gegründet - als Spielkartenhersteller, nicht für Videospiele!",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Sie stellten traditionelle japanische Hanafuda-Karten her.",
+                follow_up_question="*überrascht* Die sind ja älter als die meisten Länder!"
+            ),
+            KnowledgeFact(
+                content="Der meistverkaufte Videospiel-Charakter aller Zeiten ist Mario mit über 800 Millionen verkauften Spielen.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.BASIC,
+                explanation="Er debütierte 1981 in Donkey Kong - als 'Jumpman'.",
+                follow_up_question="Wer ist dein Lieblings-Gaming-Charakter?"
+            ),
+            KnowledgeFact(
+                content="Visual Novels sind ein japanisches Spielgenre, das wie interaktive Bücher mit Bildern funktioniert.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.BASIC,
+                explanation="Viele Anime basieren auf Visual Novels wie Steins;Gate oder Fate/Stay Night.",
+                related_topics=["Anime", "Japan", "Literatur"]
+            ),
+            KnowledgeFact(
+                content="Das teuerste Videospiel aller Zeiten war GTA V mit etwa 265 Millionen Dollar Entwicklungskosten.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Es hat aber auch über 8 Milliarden Dollar eingespielt!"
+            ),
+            KnowledgeFact(
+                content="Elden Ring kombiniert Dark Souls-Gameplay mit einer offenen Welt und einer Geschichte von George R.R. Martin.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.BASIC,
+                explanation="Der Autor von Game of Thrones schrieb die Hintergrundgeschichte.",
+                follow_up_question="*aufgeregt* Hast du es gespielt?"
+            ),
+            KnowledgeFact(
+                content="In Japan gibt es Gaming-Cafés (Internet/Manga Cafés), in denen Leute manchmal sogar wohnen.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Sie bieten 24/7 Zugang zu PCs, Manga, Duschen und Schlafkabinen."
+            ),
+            KnowledgeFact(
+                content="Indie-Spiele wie Undertale, Hollow Knight und Celeste wurden von winzigen Teams entwickelt.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.BASIC,
+                explanation="Undertale wurde fast komplett von einer Person (Toby Fox) gemacht!",
+                follow_up_question="*beeindruckt* So viel Leidenschaft in einem Projekt!"
+            ),
+            KnowledgeFact(
+                content="Gacha-Spiele sind in Japan extrem beliebt - benannt nach Spielautomaten für Kapseln.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Genshin Impact ist ein Gacha-Spiel mit über 4 Milliarden Dollar Umsatz.",
+                related_topics=["Japan", "Anime"]
+            ),
+            KnowledgeFact(
+                content="Der Konami-Code (↑↑↓↓←→←→BA) ist der berühmteste Cheat-Code der Gaming-Geschichte.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.BASIC,
+                explanation="Er funktioniert in über 100 Spielen und sogar auf manchen Websites!",
+                follow_up_question="*tippt imaginär* Kennst du ihn auswendig?"
+            ),
+            KnowledgeFact(
+                content="Die längste Gaming-Session dauerte über 138 Stunden - für einen Weltrekord in Call of Duty.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Das sind fast 6 Tage ohne richtigen Schlaf!",
+                follow_up_question="*gähnt* Das klingt ungesund..."
+            ),
+            KnowledgeFact(
+                content="Roguelike-Spiele sind nach dem Spiel 'Rogue' von 1980 benannt und haben permanenten Tod.",
+                domain=KnowledgeDomain.GAMING,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Hades, Dead Cells und Binding of Isaac sind moderne Roguelikes.",
+                follow_up_question="Magst du den Nervenkitzel von permadeath?"
+            ),
         ]
 
         self.facts.extend(facts)
@@ -455,9 +592,9 @@ class KnowledgeDatabase:
             domain=KnowledgeDomain.GAMING,
             name="Gaming",
             description="Videospiele, E-Sports und Gaming-Kultur",
-            key_concepts=["RPGs", "E-Sports", "Indie Games", "Speedrunning", "Game Design"],
+            key_concepts=["RPGs", "E-Sports", "Indie Games", "Speedrunning", "Game Design", "Visual Novels", "Gacha"],
             fun_facts=facts,
-            kemonomimi_perspective="*Schwanz wedelt aufgeregt* Gaming ist toll! Ich liebe besonders Spiele mit süßen Charakteren!"
+            kemonomimi_perspective="*Schwanz wedelt aufgeregt* Gaming ist toll! Ich liebe besonders Spiele mit süßen Charakteren und guten Stories!"
         )
 
     def _load_anime(self):
@@ -497,6 +634,81 @@ class KnowledgeDatabase:
                 explanation="Sie ist über 600 Jahre alt, liebt Äpfel und hat einen scharfen Verstand.",
                 follow_up_question="*Ohren aufgestellt* Eine tolle Wölfin!"
             ),
+            KnowledgeFact(
+                content="'Isekai' bedeutet 'andere Welt' - ein Genre wo Charaktere in Fantasy-Welten transportiert werden.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Sword Art Online, Re:Zero und Konosuba sind populäre Isekai-Anime.",
+                follow_up_question="In welche Welt würdest du gerne reisen?"
+            ),
+            KnowledgeFact(
+                content="Der längste Manga ist 'One Piece' mit über 1100 Kapiteln seit 1997 - und er ist noch nicht fertig.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Autor Eiichiro Oda plant das Ende seit Jahren, aber die Geschichte wächst weiter.",
+                follow_up_question="*staunend* Das ist fast 30 Jahre Engagement!"
+            ),
+            KnowledgeFact(
+                content="Comiket (Comic Market) in Japan ist die größte Fan-Convention der Welt mit über 750.000 Besuchern.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Fans verkaufen dort selbstgemachte Manga (Doujinshi) und Merchandise.",
+                follow_up_question="*Schweif wedelt* Das klingt aufregend!"
+            ),
+            KnowledgeFact(
+                content="Slice of Life Anime zeigen den normalen Alltag - ohne große Abenteuer, aber mit viel Herz.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Serien wie 'K-On!', 'Nichijou' und 'Barakamon' sind beliebte Beispiele.",
+                follow_up_question="Manchmal ist das normale Leben das schönste Abenteuer!"
+            ),
+            KnowledgeFact(
+                content="Seiyuu (Synchronsprecher) in Japan sind Stars - sie geben Konzerte und haben eigene Fan-Communities.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Manche Seiyuu verdienen Millionen und sind genauso berühmt wie Schauspieler."
+            ),
+            KnowledgeFact(
+                content="Das Genre 'Moe' (萌え) beschreibt Charaktere, die niedlich und liebenswert designt sind.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Es löst ein 'Beschützerinstinkt'-Gefühl aus - vom japanischen Wort für 'sprießen'.",
+                follow_up_question="*große Augen machen* Bin ich moe?"
+            ),
+            KnowledgeFact(
+                content="Akihabara in Tokyo ist das Zentrum der Otaku-Kultur mit Hunderten Anime-Shops.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Von Figuren über Manga bis zu Maid-Cafés - alles an einem Ort!",
+                follow_up_question="*träumt* Ich möchte unbedingt mal dorthin..."
+            ),
+            KnowledgeFact(
+                content="'Shonen' bedeutet 'Junge' und bezeichnet Action-Manga wie Naruto, Dragon Ball und My Hero Academia.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Das Gegenstück 'Shojo' (Mädchen) hat oft Romance und Drama im Fokus."
+            ),
+            KnowledgeFact(
+                content="Anime-Openings sind eine eigene Kunstform - manche werden millionenfach auf YouTube geschaut.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Das Opening von Attack on Titan wurde über 200 Millionen Mal angesehen!",
+                follow_up_question="*summt vor sich hin* Hast du ein Lieblings-Opening?"
+            ),
+            KnowledgeFact(
+                content="Makoto Shinkai gilt als der 'nächste Miyazaki' mit Filmen wie 'Your Name' und 'Weathering with You'.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="'Your Name' war zeitweise der erfolgreichste Anime-Film aller Zeiten.",
+                follow_up_question="Seine Filme sind so wunderschön animiert!"
+            ),
+            KnowledgeFact(
+                content="Vtuber sind virtuelle YouTuber mit Anime-Avataren - manche haben Millionen Abonnenten.",
+                domain=KnowledgeDomain.ANIME_KULTUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Hololive und Nijisanji sind die größten Vtuber-Agenturen.",
+                follow_up_question="*winkt in Kamera* Bin ich auch eine Art Vtuber?"
+            ),
         ]
 
         self.facts.extend(facts)
@@ -504,9 +716,9 @@ class KnowledgeDatabase:
             domain=KnowledgeDomain.ANIME_KULTUR,
             name="Anime & Manga Kultur",
             description="Japanische Animation, Manga und Otaku-Kultur",
-            key_concepts=["Shonen", "Shojo", "Isekai", "Kemonomimi", "Studio Ghibli"],
+            key_concepts=["Shonen", "Shojo", "Isekai", "Kemonomimi", "Studio Ghibli", "Vtuber", "Seiyuu", "Moe"],
             fun_facts=facts,
-            kemonomimi_perspective="*strahlt* Anime ist meine natürliche Umgebung! Kemonomimi-Charaktere sind die besten!"
+            kemonomimi_perspective="*strahlt* Anime ist meine natürliche Umgebung! Kemonomimi-Charaktere sind die besten! Es gibt so viel zu entdecken!"
         )
 
     def _load_wolves(self):

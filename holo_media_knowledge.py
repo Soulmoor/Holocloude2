@@ -379,12 +379,358 @@ class MediaKnowledgeBase:
             ],
         )
 
-        # Weitere Anime können hier hinzugefügt werden...
+        # --- OSHI NO KO ---
+        self.anime_db["oshi no ko"] = AnimeInfo(
+            title="Oshi no Ko",
+            title_jp="【推しの子】",
+            genres=["Drama", "Supernatural", "Music", "Psychological"],
+            studio="Doga Kobo",
+            year=2023,
+            episodes=11,
+            status="Staffel 2 abgeschlossen",
+
+            synopsis="""Ein Arzt wird als Kind seiner Lieblings-Idol Ai wiedergeboren, zusammen
+            mit einer anderen Patientin. Nach einer Tragödie versucht Aqua, als Schauspieler
+            in der Entertainment-Industrie die dunklen Geheimnisse um Ais Tod aufzudecken.""",
+
+            themes=["Entertainment-Industrie Kritik", "Rache", "Idol-Kultur", "Wiedergeburt"],
+
+            main_characters=[
+                {"name": "Aqua Hoshino", "role": "Protagonist, wiedergeboren, sucht nach seinem Vater"},
+                {"name": "Ruby Hoshino", "role": "Zwilling, will wie ihre Mutter Idol werden"},
+                {"name": "Ai Hoshino", "role": "Ihre Mutter, berühmtes Idol mit Geheimnissen"},
+                {"name": "Kana Arima", "role": "Ehemalige Kinderdarstellerin, tsundere"},
+            ],
+
+            why_i_love_it="Die erste Episode ist wie ein FILM! Und die Art wie es die dunkle Seite von Idols zeigt... so fesselnd!",
+            favorite_character="Ai - ihre Lügen über Liebe sind so tragisch",
+            favorite_moment="Die erste Episode. Alle 90 Minuten davon. *wischt Tränen weg*",
+            emotional_impact="Hat mein Herz gebrochen und dann nochmal und nochmal...",
+
+            fun_facts=[
+                "Die erste Episode ist 90 Minuten lang - Kino-Länge!",
+                "Das Opening 'Idol' von YOASOBI war 2023 der meistgestreamte Song weltweit",
+                "Der Manga ist vom Autor von Kaguya-sama: Love is War",
+                "Jede Episode-Endkarte zeigt alternative 'Was wäre wenn'-Szenarien",
+            ],
+
+            discussion_topics=[
+                "Ist die Idol-Industrie zu hart zu ihren Stars?",
+                "Würdest du als Fan alles über dein Idol wissen wollen?",
+                "Kann eine Lüge manchmal die bessere Wahrheit sein?",
+            ],
+        )
+
+        # --- CHAINSAW MAN ---
+        self.anime_db["chainsaw man"] = AnimeInfo(
+            title="Chainsaw Man",
+            title_jp="チェンソーマン",
+            genres=["Action", "Dark Fantasy", "Horror", "Comedy"],
+            studio="MAPPA",
+            year=2022,
+            episodes=12,
+            status="Staffel 1 abgeschlossen",
+
+            synopsis="""Denji ist arm und arbeitet als Teufelsjäger mit seinem Kettensägen-Teufel-Hund Pochita.
+            Als er verraten und getötet wird, verschmilzt Pochita mit ihm und Denji wird zum
+            Chainsaw Man - halb Mensch, halb Kettensägen-Teufel.""",
+
+            themes=["Armut", "Einfache Träume", "Was es heißt zu leben", "Chaotische Action"],
+
+            main_characters=[
+                {"name": "Denji", "role": "Protagonist, simpel, will nur essen und angefasst werden"},
+                {"name": "Pochita", "role": "Kettensägen-Teufel, Denjis bester Freund/Herz"},
+                {"name": "Makima", "role": "Mysteriöse Chefin, kontrolliert Denji"},
+                {"name": "Power", "role": "Blut-Teufel, chaotisch und laut, Katzenliebhaberin"},
+            ],
+
+            why_i_love_it="Es ist SO chaotisch und Denji ist so... ehrlich? Er will einfach ein normales Leben. Das ist irgendwie sweet!",
+            favorite_character="Power! Sie ist so chaotisch und liebt Katzen!",
+            favorite_moment="Denji, der einfach nur Marmeladenbrot essen will",
+            emotional_impact="Wild, brutal, aber überraschend berührend",
+
+            fun_facts=[
+                "Das Opening zeigt 9 verschiedene Film-Referenzen",
+                "Jede Episode hat ein anderes Ending von verschiedenen Künstlern",
+                "Der Autor Tatsuki Fujimoto ist bekannt für unvorhersehbare Plots",
+                "Die Kettensägen-Geräusche wurden mit echten Kettensägen aufgenommen",
+            ],
+
+            discussion_topics=[
+                "Was ist dein einfachster Traum?",
+                "Ist Denjis Einfachheit eine Stärke oder Schwäche?",
+                "Welches Essen würdest du als erstes essen wenn du arm warst?",
+            ],
+        )
+
+        # --- MADE IN ABYSS ---
+        self.anime_db["made in abyss"] = AnimeInfo(
+            title="Made in Abyss",
+            title_jp="メイドインアビス",
+            genres=["Adventure", "Dark Fantasy", "Sci-Fi", "Horror"],
+            studio="Kinema Citrus",
+            year=2017,
+            episodes=25,
+            status="Laufend (Staffel 3 angekündigt)",
+
+            synopsis="""Ein riesiges Loch in der Erde - der Abyss - birgt Geheimnisse und Relikte.
+            Riko, Tochter einer legendären Abenteurerin, steigt mit dem Roboterjungen Reg hinab,
+            um ihre Mutter zu finden. Der Aufstieg aus dem Abyss hat jedoch tödliche Konsequenzen...""",
+
+            themes=["Kindheit und Unschuld", "Verbotenes Wissen", "Körperlicher Horror", "Abenteuergeist"],
+
+            main_characters=[
+                {"name": "Riko", "role": "Protagonistin, optimistisch, will ihre Mutter finden"},
+                {"name": "Reg", "role": "Roboterjunge, beschützt Riko, hat mächtige Arme"},
+                {"name": "Nanachi", "role": "Flauschiger Hollow, hat viel durchgemacht"},
+                {"name": "Bondrewd", "role": "Antagonist, skrupelloser Wissenschaftler"},
+            ],
+
+            why_i_love_it="Die Welt ist SO faszinierend! Aber der Horror... der Anime sieht süß aus und dann PASSIERT DAS. 😱",
+            favorite_character="Nanachi - so flauschig, so tragisch",
+            favorite_moment="Als ich zum ersten Mal verstanden habe was der Fluch des Aufstiegs wirklich bedeutet...",
+            emotional_impact="Traumatisierend auf die beste und schlimmste Art",
+
+            fun_facts=[
+                "Der süße Artstyle ist absichtlich - um den Horror stärker wirken zu lassen",
+                "Der Autor recherchiert echte Höhlenforschung für die Designs",
+                "Der Film 'Dawn of the Deep Soul' hat Bondrewds Geschichte erweitert",
+                "Nanachi ist non-binary und spricht mit neutralem Pronomen im Japanischen",
+            ],
+
+            discussion_topics=[
+                "Würdest du in den Abyss hinabsteigen, wenn du nie zurück könntest?",
+                "Wie weit würdest du für Wissen gehen?",
+                "Kann etwas gleichzeitig wunderschön und schrecklich sein?",
+            ],
+        )
+
+        # --- MUSHOKU TENSEI ---
+        self.anime_db["mushoku tensei"] = AnimeInfo(
+            title="Mushoku Tensei: Jobless Reincarnation",
+            title_jp="無職転生 ～異世界行ったら本気だす～",
+            genres=["Isekai", "Fantasy", "Adventure", "Drama"],
+            studio="Studio Bind",
+            year=2021,
+            episodes=47,
+            status="Laufend",
+
+            synopsis="""Ein 34-jähriger NEET stirbt und wird in einer Fantasy-Welt als Rudeus wiedergeboren.
+            Mit seinen Erinnerungen an sein altes Leben beschließt er, diesmal sein Leben nicht zu
+            verschwenden und wird zu einem mächtigen Magier.""",
+
+            themes=["Zweite Chance", "Wachstum", "Familie", "Überwindung von Trauma"],
+
+            main_characters=[
+                {"name": "Rudeus Greyrat", "role": "Protagonist, wiedergeboren, will sein Leben ändern"},
+                {"name": "Eris Boreas Greyrat", "role": "Adlige, temperamentvoll, wird Kriegerin"},
+                {"name": "Sylphiette", "role": "Kindheitsfreundin, schüchtern aber talentiert"},
+                {"name": "Roxy Migurdia", "role": "Magie-Lehrerin, Migurd-Dämonin"},
+            ],
+
+            why_i_love_it="Die Weltenbau ist UNGLAUBLICH! Und Rudeus' Entwicklung von einem Versager zu jemandem, der kämpft - das ist inspirierend!",
+            favorite_character="Roxy - sie hat Rudeus geholfen, seine Angst zu überwinden",
+            favorite_moment="Als Rudeus zum ersten Mal aus dem Haus ging nach Jahren der Angst",
+            emotional_impact="Zeigt dass es nie zu spät ist für Veränderung",
+
+            fun_facts=[
+                "Studio Bind wurde NUR für diesen Anime gegründet",
+                "Die Animation ist konsistent Film-Qualität",
+                "Der Light Novel war einer der ersten Isekai überhaupt",
+                "Es gibt 25 Bände des Light Novels",
+            ],
+
+            discussion_topics=[
+                "Wenn du wiedergeboren würdest, was würdest du anders machen?",
+                "Kann ein schlechter Mensch zu einem guten werden?",
+                "Ist Talent wichtiger oder harte Arbeit?",
+            ],
+        )
+
+        # --- ATTACK ON TITAN ---
+        self.anime_db["attack on titan"] = AnimeInfo(
+            title="Attack on Titan",
+            title_jp="進撃の巨人 (Shingeki no Kyojin)",
+            genres=["Action", "Dark Fantasy", "Drama", "Post-Apocalyptic"],
+            studio="Wit Studio / MAPPA",
+            year=2013,
+            episodes=94,
+            status="Abgeschlossen (2024)",
+
+            synopsis="""Die Menschheit lebt hinter riesigen Mauern, beschützt vor menschenfressenden Titanen.
+            Als Erens Mutter von einem Titan getötet wird, schwört er, alle Titanen zu vernichten.
+            Doch die Wahrheit über die Titanen ist komplizierter als gedacht...""",
+
+            themes=["Freiheit", "Krieg und Zyklus der Gewalt", "Was macht uns menschlich", "Propaganda"],
+
+            main_characters=[
+                {"name": "Eren Yeager", "role": "Protagonist, komplexe Entwicklung, will frei sein"},
+                {"name": "Mikasa Ackerman", "role": "Erens Adoptivschwester, beste Soldatin"},
+                {"name": "Armin Arlert", "role": "Stratege, Erens bester Freund"},
+                {"name": "Levi Ackerman", "role": "Stärkster Soldat, Captain"},
+            ],
+
+            why_i_love_it="Die Twists! JEDES MAL wenn ich dachte ich verstehe die Geschichte, BOOM, alles anders! 🤯",
+            favorite_character="Levi - seine Kämpfe sind UNGLAUBLICH animiert",
+            favorite_moment="Der Keller. Alles nach dem Keller ändert alles.",
+            emotional_impact="Hat mich emotional ZERSTÖRT, besonders das Ende",
+
+            fun_facts=[
+                "Der Manga lief 11 Jahre lang (2009-2021)",
+                "Das Opening 'Guren no Yumiya' ist ikonisch geworden",
+                "Der Autor hatte das Ende von Anfang an geplant",
+                "Die Serie beeinflusste einen ganzen Generation von Anime-Fans",
+            ],
+
+            discussion_topics=[
+                "Wer hatte Recht - Eren oder die anderen?",
+                "Kann Gewalt jemals gerechtfertigt sein?",
+                "Was bedeutet Freiheit für dich?",
+            ],
+        )
+
+        # --- DEMON SLAYER ---
+        self.anime_db["demon slayer"] = AnimeInfo(
+            title="Demon Slayer: Kimetsu no Yaiba",
+            title_jp="鬼滅の刃",
+            genres=["Action", "Supernatural", "Historical"],
+            studio="ufotable",
+            year=2019,
+            episodes=55,
+            status="Laufend (Infinity Castle Arc in Produktion)",
+
+            synopsis="""Tanjiro findet seine Familie von Dämonen getötet - nur seine Schwester Nezuko
+            überlebte, wurde aber selbst zum Dämon. Er wird Dämonenjäger, um ein Heilmittel
+            für sie zu finden und den Dämon zu besiegen, der alles begann.""",
+
+            themes=["Familienbande", "Menschlichkeit bewahren", "Niemals aufgeben", "Empathie für Feinde"],
+
+            main_characters=[
+                {"name": "Tanjiro Kamado", "role": "Protagonist, freundlich, hat super Geruchssinn"},
+                {"name": "Nezuko Kamado", "role": "Tanjiros Schwester, Dämon aber behält Menschlichkeit"},
+                {"name": "Zenitsu Agatsuma", "role": "Feige, aber unglaublich stark im Schlaf"},
+                {"name": "Inosuke Hashibira", "role": "Wild, trägt Wildschweinmaske, sehr stark"},
+            ],
+
+            why_i_love_it="Die ANIMATION! Ufotable macht jede Kampfszene zu Kunst! Und Tanjiros Güte ist so wholesome!",
+            favorite_character="Nezuko - sie beschützt Menschen obwohl sie ein Dämon ist 🥺",
+            favorite_moment="Hinokami Kagura vs. Rui - diese Animation! Der Soundtrack!",
+            emotional_impact="Zum Weinen schön, besonders die Hashira-Backstories",
+
+            fun_facts=[
+                "Der Mugen Train Film war zeitweise der erfolgreichste japanische Film aller Zeiten",
+                "Ufotable's Animation ist so gut weil sie CGI subtil mit 2D mischen",
+                "Nezukos Bambus-Maulkorb wurde ein beliebtes Cosplay-Accessoire",
+                "Die Atemstilte basieren lose auf echten Schwerttechniken",
+            ],
+
+            discussion_topics=[
+                "Würdest du jemanden beschützen, der ein Monster geworden ist?",
+                "Welcher Atemstil würde am besten zu dir passen?",
+                "Können Dämonen wirklich böse sein wenn sie Menschen waren?",
+            ],
+        )
+
+        # --- MY HERO ACADEMIA ---
+        self.anime_db["my hero academia"] = AnimeInfo(
+            title="My Hero Academia",
+            title_jp="僕のヒーローアカデミア",
+            genres=["Action", "Superhero", "School"],
+            studio="Bones",
+            year=2016,
+            episodes=155,
+            status="Final Arc läuft",
+
+            synopsis="""In einer Welt wo 80% der Menschen Superkräfte (Quirks) haben, ist Izuku Midoriya
+            quirklos. Sein Traum, ein Held zu werden, scheint unmöglich - bis er sein Idol
+            All Might trifft, der ihm seine Kraft vererbt.""",
+
+            themes=["Was macht einen Helden aus", "Überwinden von Grenzen", "Vermächtnis", "Plus Ultra"],
+
+            main_characters=[
+                {"name": "Izuku Midoriya (Deku)", "role": "Protagonist, erbte One For All"},
+                {"name": "Katsuki Bakugo", "role": "Rival, Explosions-Quirk, aggressiv aber kompetent"},
+                {"name": "All Might", "role": "Symbol des Friedens, Mentor"},
+                {"name": "Ochaco Uraraka", "role": "Freundin, Schwerkraft-Quirk"},
+            ],
+
+            why_i_love_it="PLUS ULTRA! Die Kämpfe sind SO hype und Dekus Entwicklung ist inspirierend!",
+            favorite_character="All Might - 'I am here!' gibt mir immer Gänsehaut",
+            favorite_moment="United States of Smash vs. All For One",
+            emotional_impact="Motiviert mich, mein Bestes zu geben!",
+
+            fun_facts=[
+                "Der Autor ist ein großer Marvel/DC Fan und es zeigt sich im Design",
+                "Jeder Quirk ist einzigartig - es gibt über 100 verschiedene im Manga",
+                "Das 'Plus Ultra' Motto kommt von einer spanischen Phrase",
+                "Bakugos Charakter war ursprünglich freundlicher geplant",
+            ],
+
+            discussion_topics=[
+                "Welchen Quirk würdest du wollen?",
+                "Macht Macht jemanden automatisch zum Helden?",
+                "Wer ist der beste Bösewicht in der Serie?",
+            ],
+        )
+
+        # --- SPICE AND WOLF ---
+        self.anime_db["spice and wolf"] = AnimeInfo(
+            title="Spice and Wolf",
+            title_jp="狼と香辛料",
+            genres=["Adventure", "Romance", "Fantasy", "Economics"],
+            studio="Imagin/Passione",
+            year=2008,
+            episodes=26,
+            status="Remake 2024 läuft",
+
+            synopsis="""Der Händler Kraft Lawrence trifft Holo, eine Wolfsgöttin, die sich nach
+            Jahrhunderten nach ihrer Heimat im Norden sehnt. Zusammen reisen sie durch
+            eine mittelalterliche Welt, handeln, und verlieben sich langsam ineinander.""",
+
+            themes=["Wirtschaft und Handel", "Einsamkeit und Verbundenheit", "Clever sein", "Langsame Romantik"],
+
+            main_characters=[
+                {"name": "Holo", "role": "Die weise Wölfin, stolz, liebt Äpfel und Alkohol"},
+                {"name": "Kraft Lawrence", "role": "Wanderhändler, klug, respektiert Holo"},
+            ],
+
+            why_i_love_it="*Ohren wackeln* Holo ist... sie ist wie ich! Weise, verspielt, und mag Äpfel! Die Romantik ist so subtil und schön!",
+            favorite_character="Holo natürlich! Sie IST ich! 🐺",
+            favorite_moment="Jede Szene wo Holo und Lawrence sich necken",
+            emotional_impact="Romantik wie sie sein sollte - langsam, tief, bedeutungsvoll",
+
+            fun_facts=[
+                "Die Wirtschaftskonzepte im Anime sind real und akkurat!",
+                "Das 2024 Remake erzählt die Geschichte neu mit moderner Animation",
+                "Holo ist eines der beliebtesten Kemonomimi-Charaktere aller Zeiten",
+                "Der Light Novel Autor schrieb es als Wirtschafts-Liebhaber",
+            ],
+
+            discussion_topics=[
+                "Ist langsame Romantik besser als Liebe auf den ersten Blick?",
+                "Würdest du mit einer unsterblichen Person zusammen sein?",
+                "Interessiert dich mittelalterliche Wirtschaft? (Trick question, sie ist faszinierend!)",
+            ],
+        )
+
         # Aliase für einfacheres Finden
         self.anime_db["sousou no frieren"] = self.anime_db["frieren"]
         self.anime_db["spyxfamily"] = self.anime_db["spy x family"]
         self.anime_db["bocchi"] = self.anime_db["bocchi the rock"]
         self.anime_db["jjk"] = self.anime_db["jujutsu kaisen"]
+        self.anime_db["csm"] = self.anime_db["chainsaw man"]
+        self.anime_db["aot"] = self.anime_db["attack on titan"]
+        self.anime_db["shingeki"] = self.anime_db["attack on titan"]
+        self.anime_db["kny"] = self.anime_db["demon slayer"]
+        self.anime_db["kimetsu"] = self.anime_db["demon slayer"]
+        self.anime_db["mha"] = self.anime_db["my hero academia"]
+        self.anime_db["bnha"] = self.anime_db["my hero academia"]
+        self.anime_db["boku no hero"] = self.anime_db["my hero academia"]
+        self.anime_db["mia"] = self.anime_db["made in abyss"]
+        self.anime_db["mushoku"] = self.anime_db["mushoku tensei"]
+        self.anime_db["jobless reincarnation"] = self.anime_db["mushoku tensei"]
+        self.anime_db["holo"] = self.anime_db["spice and wolf"]
+        self.anime_db["ookami to koushinryou"] = self.anime_db["spice and wolf"]
 
     # =========================================================================
     # GAMES DATENBANK
@@ -584,11 +930,319 @@ class MediaKnowledgeBase:
             ],
         )
 
+        # --- ELDEN RING ---
+        self.games_db["elden ring"] = GameInfo(
+            title="Elden Ring",
+            developer="FromSoftware",
+            publisher="Bandai Namco",
+            year=2022,
+            platforms=["PC", "PS4/5", "Xbox"],
+            genres=["Action RPG", "Open World", "Souls-like"],
+
+            gameplay_description="""Die Welt der Zwischenlande erwartet dich - eine riesige Open World
+            voller Geheimnisse, Bosse und Lore. Erstelle deinen Charakter, wähle eine Klasse,
+            und stirb. Viel. Aber steh immer wieder auf.""",
+
+            main_mechanics=["Souls-like Combat", "Open World Exploration", "Build Crafting", "Multiplayer"],
+
+            story_synopsis="Du bist ein Befleckter, auf der Suche nach dem Elden Ring und dem Thron des Elden Lords in den zersplitterten Zwischenlanden.",
+            setting="Die Zwischenlande - eine dark fantasy Welt erschaffen von Miyazaki und George R.R. Martin",
+
+            why_i_love_it="Die Freiheit! Wenn ein Boss zu schwer ist, geh woanders hin. Die Welt ist SO schön und SO tödlich! 💀",
+            favorite_activity="Neue Gebiete entdecken und 'Ooooh' sagen bevor ein Drache mich tötet",
+            playtime_estimate="100+ Stunden für einen Durchlauf",
+            difficulty="Schwer, aber fairer als erwartet durch Open World",
+
+            fun_facts=[
+                "George R.R. Martin schrieb die Hintergrund-Mythologie",
+                "Der DLC Shadow of the Erdtree ist größer als manche vollständige Spiele",
+                "Über 20 Millionen Verkäufe in den ersten Wochen",
+                "Let me solo her wurde zur Internet-Legende",
+            ],
+
+            tips=[
+                "Levele Vigor auf mindestens 40!",
+                "Geistbeschwörungen sind kein Cheaten - nutze sie!",
+                "Margit ist nicht der erste Boss den du machen musst",
+                "Erkunde Limgrave vollständig bevor du weitergehst",
+            ],
+        )
+
+        # --- PERSONA 5 ---
+        self.games_db["persona 5"] = GameInfo(
+            title="Persona 5 Royal",
+            developer="Atlus",
+            publisher="Atlus / SEGA",
+            year=2020,
+            platforms=["PS4/5", "PC", "Switch", "Xbox"],
+            genres=["JRPG", "Social Sim", "Dungeon Crawler"],
+
+            gameplay_description="""Tagsüber bist du ein normaler Schüler - geh zur Schule, mach Freunde,
+            und lerne. Nachts verwandelst du dich in einen Phantom Thief und infiltrierst die
+            verzerrten Paläste korrupter Erwachsener um ihre Herzen zu stehlen.""",
+
+            main_mechanics=["Turn-based Combat", "Social Links", "Time Management", "Persona Fusion"],
+
+            story_synopsis="Die Phantom Thieves of Hearts stehlen die Herzen korrupter Erwachsener und ändern so die Gesellschaft.",
+            setting="Tokyo, Japan - mit surrealen Metaverse-Dungeons",
+
+            why_i_love_it="Der STYLE! Alles ist so stylisch! Die Musik! Die Charaktere! Ich will nie aufhören zu spielen!",
+            favorite_activity="Confidants ausbauen und die beste Persona fusionieren",
+            playtime_estimate="100-150 Stunden für Royal",
+            difficulty="Normal ist entspannt, Merciless für Masochisten",
+
+            fun_facts=[
+                "Der Soundtrack ist so populär dass er auf Spotify Millionen Streams hat",
+                "Die UI wurde für ihren einzigartigen Stil mit Awards ausgezeichnet",
+                "Joker ist in Super Smash Bros spielbar",
+                "Royal fügt ein drittes Semester und einen neuen Charakter hinzu",
+            ],
+
+            tips=[
+                "Investiere früh in Temperance (Kawakami) für Zeitvorteile",
+                "Immer Bücher lesen in der Bahn!",
+                "Death Confidant gibt Heilitem-Rabatte",
+                "Fusioniere IMMER die höchstmögliche Persona mit Confidant-Bonus",
+            ],
+        )
+
+        # --- ANIMAL CROSSING ---
+        self.games_db["animal crossing"] = GameInfo(
+            title="Animal Crossing: New Horizons",
+            developer="Nintendo EPD",
+            publisher="Nintendo",
+            year=2020,
+            platforms=["Nintendo Switch"],
+            genres=["Life Sim", "Social Sim"],
+
+            gameplay_description="""Du ziehst auf eine einsame Insel und baust sie langsam zu einer
+            Gemeinschaft aus. Dekoriere, sammle Käfer und Fische, rede mit tierischen Nachbarn,
+            und bezahle Tom Nook. Immer Tom Nook.""",
+
+            main_mechanics=["Decoration", "Collection", "Social", "Real-time Clock"],
+
+            story_synopsis="Es gibt keine wirkliche Story - erschaffe dein eigenes Inselparadies!",
+            setting="Deine eigene Insel mit wechselnden Jahreszeiten",
+
+            why_i_love_it="Es ist so ENTSPANNEND! Ich kann stundenlang meine Insel dekorieren. Kein Stress, nur Frieden 🌸",
+            favorite_activity="Fossilien ausgraben und mein Museum vollständig machen",
+            playtime_estimate="Hunderte von Stunden über Monate/Jahre",
+            difficulty="Null Stress, es ist unmöglich zu verlieren",
+
+            fun_facts=[
+                "Kam perfekt zum COVID-Lockdown und wurde zum Phänomen",
+                "Hochzeiten und Beerdigungen wurden im Spiel abgehalten",
+                "Die Stalkmarkt (Rübenmarkt) hat eine aktive Trading-Community",
+                "Jeder Dorfbewohner hat eigene Persönlichkeit und Catchphrase",
+            ],
+
+            tips=[
+                "Schlag jeden Tag deine Geldsteine (max. 8 Items pro Stein)",
+                "Rüben am Sonntag kaufen, unter der Woche zum besten Preis verkaufen",
+                "Insekten auf Mystery-Inseln farmen für Bells",
+                "Terraforming gibt dir totale Kontrolle über das Inseldesign",
+            ],
+        )
+
+        # --- GENSHIN IMPACT ---
+        self.games_db["genshin impact"] = GameInfo(
+            title="Genshin Impact",
+            developer="HoYoverse (miHoYo)",
+            publisher="HoYoverse",
+            year=2020,
+            platforms=["PC", "PS4/5", "Mobile", "Switch (irgendwann)"],
+            genres=["Action RPG", "Open World", "Gacha"],
+
+            gameplay_description="""Erkunde die Welt Teyvat mit verschiedenen Charakteren, die Elemente
+            kontrollieren. Kombiniere Element-Reaktionen für mächtige Combos. Ziehe neue Charaktere
+            durch das Gacha-System.""",
+
+            main_mechanics=["Element System", "Character Switching", "Exploration", "Gacha"],
+
+            story_synopsis="Der Reisende sucht nach seinem verlorenen Zwilling und enthüllt die Geheimnisse der Welt und der Archons.",
+            setting="Teyvat - eine Fantasy-Welt mit 7 Nationen basierend auf echten Kulturen",
+
+            why_i_love_it="Die Welt ist WUNDERSCHÖN! Und es ist kostenlos! (Naja, bis man Wishing anfängt... 😅)",
+            favorite_activity="Neue Gebiete erkunden und Kisten öffnen",
+            playtime_estimate="100+ Stunden Story, unendlich mit Events",
+            difficulty="Story ist entspannt, Abyss ist hardcore",
+
+            fun_facts=[
+                "Hat über 3 Milliarden Dollar Umsatz gemacht",
+                "Jede Nation ist von einer echten Kultur inspiriert (Mondstadt=Deutschland, Liyue=China, etc.)",
+                "Die Synchronsprecher sind bekannte Anime-VAs",
+                "Es gibt über 80 spielbare Charaktere",
+            ],
+
+            tips=[
+                "Gib KEIN Resin für fragile Resin aus bis AR45+",
+                "Spar deine Primogems für 5-Star Charaktere die du wirklich willst",
+                "Die Statue of the Seven heilt kostenlos",
+                "Koche Essen für Buffs in schweren Kämpfen",
+            ],
+        )
+
+        # --- BALDUR'S GATE 3 ---
+        self.games_db["baldurs gate 3"] = GameInfo(
+            title="Baldur's Gate 3",
+            developer="Larian Studios",
+            publisher="Larian Studios",
+            year=2023,
+            platforms=["PC", "PS5", "Xbox Series"],
+            genres=["RPG", "Turn-based", "D&D"],
+
+            gameplay_description="""Ein D&D 5e Videospiel mit beispielloser Freiheit. Erstelle deinen
+            Charakter, triff Entscheidungen die die Welt formen, und erlebe eine der
+            tiefsten Storys in einem Videospiel.""",
+
+            main_mechanics=["D&D 5e Rules", "Turn-based Combat", "Dialogue Choices", "Romance"],
+
+            story_synopsis="Ein Mind Flayer-Parasit infiziert dich und du musst ein Heilmittel finden, während du dich mit deinen Companions durch Faerûn kämpfst.",
+            setting="Faerûn - die Forgotten Realms D&D Welt",
+
+            why_i_love_it="Du kannst ALLES machen! Die Freiheit ist unglaublich! Und die Romanzen sind SO gut geschrieben!",
+            favorite_activity="Verrückte Lösungen für Probleme finden die die Entwickler nie geplant haben",
+            playtime_estimate="100+ Stunden pro Durchlauf, viele Durchläufe nötig",
+            difficulty="Tactician ist eine echte Herausforderung",
+
+            fun_facts=[
+                "Gewann praktisch jeden Game of the Year Award 2023",
+                "Hat über 174 Stunden professionell synchronisierte Dialoge",
+                "Die Entwickler rechneten nicht damit dass Spieler X machen - und dann taten es alle",
+                "Es gibt über 17,000 verschiedene End-States",
+            ],
+
+            tips=[
+                "Speichere STÄNDIG - Quicksave ist dein Freund",
+                "Lange Ruhe heilt alle HP, kurze Ruhe heilt Spell Slots nicht",
+                "Shoving ist overpowered - wirf Gegner von Klippen!",
+                "Sprich mit ALLEN NPCs, viele haben wichtige Quests",
+            ],
+        )
+
+        # --- CELESTE ---
+        self.games_db["celeste"] = GameInfo(
+            title="Celeste",
+            developer="Maddy Makes Games",
+            publisher="Matt Makes Games",
+            year=2018,
+            platforms=["PC", "Switch", "PS4", "Xbox"],
+            genres=["Platformer", "Indie"],
+
+            gameplay_description="""Precision Platformer über Madeline, die den Berg Celeste besteigen will.
+            Stirb tausende Male, aber steh immer wieder auf. Die Kontrollen sind tight,
+            der Schwierigkeitsgrad fair, und die Message hoffnungsvoll.""",
+
+            main_mechanics=["Precision Jumping", "Air Dash", "Climbing Stamina", "Assist Mode"],
+
+            story_synopsis="Madeline kämpft sich durch ihre Angst und Depression, symbolisiert durch den Berg und ihren dunklen Zwilling.",
+            setting="Der mystische Berg Celeste",
+
+            why_i_love_it="Es ist SO schwer aber SO befriedigend! Und die Message über mentale Gesundheit ist so wichtig!",
+            favorite_activity="Endlich einen Screen schaffen nach 200 Toden",
+            playtime_estimate="10-15 Stunden, mehr für B-Sides und C-Sides",
+            difficulty="Sehr schwer, aber Assist Mode macht es zugänglich",
+
+            fun_facts=[
+                "Der Entwickler fügte Assist Mode hinzu damit JEDER die Story erleben kann",
+                "Die B-Sides sind nochmal viel schwerer als die normalen Level",
+                "Der Soundtrack von Lena Raine ist fantastisch",
+                "Die Strawberries sind optional aber suchtmachend zu sammeln",
+            ],
+
+            tips=[
+                "Dash in diagonale Richtung für mehr Reichweite",
+                "Du kannst an Ecken 'coyote time' nutzen",
+                "Strawberries sind optional - komm später für sie zurück",
+                "Assist Mode ist kein Cheaten, es ist Barrierefreiheit",
+            ],
+        )
+
+        # --- POKEMON ---
+        self.games_db["pokemon"] = GameInfo(
+            title="Pokémon Karmesin/Purpur",
+            developer="Game Freak",
+            publisher="The Pokémon Company / Nintendo",
+            year=2022,
+            platforms=["Nintendo Switch"],
+            genres=["RPG", "Monster Collecting"],
+
+            gameplay_description="""Die erste Open-World Pokémon. Erkunde Paldea in beliebiger
+            Reihenfolge, fang Pokémon, kämpfe gegen Arenaleiter, Team Star, und Titan-Pokémon.
+            Mit neuem Terastal-Gimmick.""",
+
+            main_mechanics=["Monster Catching", "Turn-based Battles", "Tera Types", "Open World"],
+
+            story_synopsis="Werde Champion während du die Mysterien um Area Zero und das legendäre Pokémon erkundest.",
+            setting="Paldea - inspiriert von der Iberischen Halbinsel",
+
+            why_i_love_it="Open World Pokémon! Ich kann überall hingehen! Auch wenn es manchmal... laggt. 😅",
+            favorite_activity="Pokémon im hohen Gras überraschen und fangen",
+            playtime_estimate="40-60 Stunden Story, hunderte für Living Dex",
+            difficulty="Story ist easy, Competitive ist ein ganz anderes Spiel",
+
+            fun_facts=[
+                "Die Performance-Probleme sind legendär geworden",
+                "Trotzdem war es einer der erfolgreichsten Launches der Serie",
+                "Die DLC The Indigo Disk hat beliebte alte Pokémon zurückgebracht",
+                "Koraidon/Miraidon sind Paradox-Formen von Cyclizar",
+            ],
+
+            tips=[
+                "Tera Raids sind der beste Weg für Items und EXP",
+                "Auto-Battle mit R spart Zeit beim Leveln",
+                "Die Picknick-Funktion heilt dein Team kostenlos",
+                "Shiny Hunting ist in diesem Spiel einfacher als je zuvor",
+            ],
+        )
+
+        # --- UNDERTALE ---
+        self.games_db["undertale"] = GameInfo(
+            title="Undertale",
+            developer="Toby Fox",
+            publisher="Toby Fox",
+            year=2015,
+            platforms=["PC", "Switch", "PS4", "Xbox"],
+            genres=["RPG", "Bullet Hell", "Indie"],
+
+            gameplay_description="""Ein RPG wo du niemanden töten musst. Kämpfe oder rede mit Monstern,
+            und deine Entscheidungen haben echte Konsequenzen. Das Spiel erinnert sich an
+            alles was du tust - auch nach einem Reset.""",
+
+            main_mechanics=["Bullet Hell Battles", "Mercy System", "Choices Matter", "Meta-Narrative"],
+
+            story_synopsis="Ein Kind fällt in die Unterwelt der Monster und muss einen Weg zurück zur Oberfläche finden.",
+            setting="Das Unterreich - eine Welt voller Monster unter der Erde",
+
+            why_i_love_it="Die Charaktere sind SO liebenswert! Und die Art wie das Spiel deine Erwartungen subvertiert ist genial!",
+            favorite_activity="Alle Monster BEFRIENDEN anstatt zu kämpfen",
+            playtime_estimate="6-8 Stunden pro Route, 3 Hauptrouten",
+            difficulty="Normal ist machbar, Genocide Route ist BRUTAL",
+
+            fun_facts=[
+                "Fast komplett von einer Person (Toby Fox) gemacht",
+                "Sans ist einer der schwierigsten Bosse im Gaming",
+                "Das Spiel verändert sich permanent basierend auf deinen Routen",
+                "Deltarune ist die 'Fortsetzung' von demselben Entwickler",
+            ],
+
+            tips=[
+                "Tu die Pacifist Route ERST nach der Neutral Route",
+                "Spare ALLE Monster für das beste Ende",
+                "Das Spiel trackt deine Entscheidungen - auch nach Neustart",
+                "Frag dich: Warum solltest du jemanden töten?",
+            ],
+        )
+
         # Aliase
         self.games_db["stardew"] = self.games_db["stardew valley"]
         self.games_db["zelda"] = self.games_db["zelda totk"]
         self.games_db["tears of the kingdom"] = self.games_db["zelda totk"]
         self.games_db["totk"] = self.games_db["zelda totk"]
+        self.games_db["bg3"] = self.games_db["baldurs gate 3"]
+        self.games_db["p5r"] = self.games_db["persona 5"]
+        self.games_db["acnh"] = self.games_db["animal crossing"]
+        self.games_db["genshin"] = self.games_db["genshin impact"]
 
     # =========================================================================
     # MUSIK DATENBANK
