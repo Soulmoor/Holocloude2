@@ -116,6 +116,12 @@ class KnowledgeDatabase:
         self._load_wolves()
         self._load_cooking()
         self._load_music()
+        self._load_history()
+        self._load_literature()
+        self._load_nature()
+        self._load_languages()
+        self._load_art()
+        self._load_science_extended()
         logger.info(f"KnowledgeDatabase: {len(self.facts)} Fakten in {len(self.domains)} Bereichen geladen")
 
     def _load_technology(self):
@@ -617,6 +623,33 @@ class KnowledgeDatabase:
                 explanation="Unser Gehirn versucht, 'unvollständige' Melodien fertig zu singen.",
                 follow_up_question="Welcher Song bleibt bei dir am häufigsten hängen?"
             ),
+            KnowledgeFact(
+                content="Mozart begann mit 5 Jahren zu komponieren und schrieb bis zu seinem Tod über 600 Werke.",
+                domain=KnowledgeDomain.MUSIK,
+                level=ExpertiseLevel.BASIC,
+                explanation="Er gilt als eines der größten Wunderkinder der Musikgeschichte.",
+                follow_up_question="Hast du ein Lieblings-Klassikstück?"
+            ),
+            KnowledgeFact(
+                content="Der Gänsehaut-Effekt bei Musik entsteht durch Dopamin-Ausschüttung im Gehirn.",
+                domain=KnowledgeDomain.MUSIK,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Das gleiche 'Belohnungs-Hormon' wird auch bei Essen oder Liebe ausgeschüttet.",
+                analogy="Dein Gehirn behandelt emotionale Musik wie eine Belohnung!"
+            ),
+            KnowledgeFact(
+                content="J-Pop und J-Rock aus Japan haben weltweit über 100 Millionen Fans.",
+                domain=KnowledgeDomain.MUSIK,
+                level=ExpertiseLevel.BASIC,
+                explanation="Anime-Openings haben diese Genres international bekannt gemacht.",
+                follow_up_question="*Ohren aufstellen* Kennst du gute Anime-Openings?"
+            ),
+            KnowledgeFact(
+                content="Das älteste bekannte Musikinstrument ist eine Flöte aus Knochen, etwa 40.000 Jahre alt.",
+                domain=KnowledgeDomain.MUSIK,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Menschen machten schon Musik, lange bevor sie schreiben konnten!"
+            ),
         ]
 
         self.facts.extend(facts)
@@ -628,6 +661,470 @@ class KnowledgeDatabase:
             fun_facts=facts,
             kemonomimi_perspective="*Ohren wackeln im Takt* Meine Ohren hören ALLES - auch die feinsten Töne!"
         )
+
+    def _load_history(self):
+        """Geschichte-Wissen"""
+        facts = [
+            KnowledgeFact(
+                content="Die ägyptischen Pyramiden waren bereits über 2000 Jahre alt, als Kleopatra lebte.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Kleopatra lebte näher an der Mondlandung als an der Erbauung der Pyramiden!",
+                analogy="Stell dir vor: Für Kleopatra waren die Pyramiden so alt wie für uns die Römer.",
+                follow_up_question="Das verändert die Perspektive, oder?"
+            ),
+            KnowledgeFact(
+                content="Im alten Rom gab es bereits Einkaufszentren - das Trajan's Markt hatte über 150 Läden.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Die Römer hatten viele 'moderne' Annehmlichkeiten wie Fußbodenheizung und Toiletten."
+            ),
+            KnowledgeFact(
+                content="Die Samurai verwendeten den Bushido-Kodex, der Ehre, Loyalität und Selbstdisziplin betonte.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Viele Anime-Charaktere sind von diesem Ehrenkodex inspiriert.",
+                follow_up_question="*Schweif wedelt* Loyalität ist auch mir wichtig!"
+            ),
+            KnowledgeFact(
+                content="Die Seidenstraße war ein Netzwerk von Handelswegen, das Europa mit Asien verband.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Sie transportierte nicht nur Güter, sondern auch Ideen, Religionen und Kulturen.",
+                related_topics=["Handel", "Kultur", "Asien", "Europa"]
+            ),
+            KnowledgeFact(
+                content="Das Kaiserreich Japan isolierte sich über 200 Jahre fast komplett von der Außenwelt (Sakoku-Politik).",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Diese Isolation half, die einzigartige japanische Kultur zu bewahren.",
+                follow_up_question="Das erklärt vielleicht, warum Japan so eine besondere Kultur hat!"
+            ),
+            KnowledgeFact(
+                content="Die Bibliothek von Alexandria soll bis zu 400.000 Schriftrollen enthalten haben.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Ihr Verlust gilt als eine der größten Wissens-Katastrophen der Geschichte.",
+                follow_up_question="*traurig* So viel verlorenes Wissen..."
+            ),
+            KnowledgeFact(
+                content="Die Wikinger erreichten Amerika etwa 500 Jahre vor Kolumbus.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Leif Eriksson gründete um 1000 n.Chr. eine Siedlung in Neufundland.",
+                follow_up_question="Die Geschichte ist voller Überraschungen!"
+            ),
+            KnowledgeFact(
+                content="Das Mittelalter war nicht so 'dunkel' wie oft dargestellt - es gab viele technische Innovationen.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Brillen, mechanische Uhren und die Druckerpresse wurden im Mittelalter erfunden."
+            ),
+            KnowledgeFact(
+                content="Ninja (Shinobi) waren keine mystischen Krieger, sondern Spezialisten für Spionage und Guerilla-Taktiken.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Die meisten 'Ninja-Mythen' stammen aus Kabuki-Theater und später aus Manga.",
+                related_topics=["Japan", "Anime", "Manga"]
+            ),
+            KnowledgeFact(
+                content="Die industrielle Revolution begann in England um 1760 und veränderte die Welt grundlegend.",
+                domain=KnowledgeDomain.GESCHICHTE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Dampfmaschinen, Fabriken und Eisenbahnen entstanden in kurzer Zeit.",
+                analogy="Die Welt veränderte sich in 100 Jahren mehr als in den 1000 Jahren davor."
+            ),
+        ]
+
+        self.facts.extend(facts)
+        self.domains[KnowledgeDomain.GESCHICHTE] = DomainExpertise(
+            domain=KnowledgeDomain.GESCHICHTE,
+            name="Geschichte",
+            description="Historische Ereignisse, Kulturen und Epochen",
+            key_concepts=["Antike", "Mittelalter", "Neuzeit", "Kulturen", "Revolutionen"],
+            fun_facts=facts,
+            kemonomimi_perspective="*Ohren nachdenklich angelegt* Geschichte zeigt uns, wie weit wir gekommen sind... und was wir nicht vergessen sollten."
+        )
+
+    def _load_literature(self):
+        """Literatur-Wissen"""
+        facts = [
+            KnowledgeFact(
+                content="Die 'Genji Monogatari' aus Japan (ca. 1000 n.Chr.) gilt als der erste Roman der Welt.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Geschrieben von einer Hofdame namens Murasaki Shikibu.",
+                follow_up_question="*stolz* Japan hat so viel zur Literatur beigetragen!"
+            ),
+            KnowledgeFact(
+                content="Shakespeare erfand über 1.700 neue Wörter, die wir heute noch benutzen.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Wörter wie 'assassination', 'bedroom' und 'lonely' stammen von ihm.",
+                analogy="Er war quasi der Influencer der englischen Sprache."
+            ),
+            KnowledgeFact(
+                content="Mary Shelley schrieb 'Frankenstein' mit nur 18 Jahren - und erfand damit die Science-Fiction.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Es entstand während eines Grusel-Geschichten-Wettbewerbs in der Schweiz.",
+                follow_up_question="Mit 18! Das ist beeindruckend, oder?"
+            ),
+            KnowledgeFact(
+                content="Light Novels sind ein japanisches Buchgenre mit einfacher Sprache und Illustrationen.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Viele beliebte Anime wie 'Sword Art Online' oder 'Spice and Wolf' basieren auf Light Novels!",
+                follow_up_question="*Ohren aufstellen* Kennst du gute Light Novels?"
+            ),
+            KnowledgeFact(
+                content="Franz Kafka veröffentlichte zu Lebzeiten nur wenige Werke - sein Freund ignorierte seinen Wunsch, alles zu verbrennen.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Dadurch wurden 'Der Prozess' und 'Das Schloss' erst posthum bekannt."
+            ),
+            KnowledgeFact(
+                content="Manga liest man traditionell von rechts nach links - entgegen der westlichen Leserichtung.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Das kann am Anfang verwirrend sein, aber man gewöhnt sich schnell daran!",
+                follow_up_question="Hast du schon mal Manga im Original gelesen?"
+            ),
+            KnowledgeFact(
+                content="Die Brüder Grimm sammelten Volksmärchen nicht für Kinder, sondern für die Wissenschaft.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Die Original-Versionen waren oft viel düsterer als die bekannten Kinderbuch-Fassungen."
+            ),
+            KnowledgeFact(
+                content="J.R.R. Tolkien erschuf für 'Herr der Ringe' komplette Sprachen mit eigener Grammatik.",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Elbisch (Quenya und Sindarin) kann man tatsächlich lernen!",
+                follow_up_question="Das ist echte Hingabe zum Worldbuilding!"
+            ),
+            KnowledgeFact(
+                content="Haiku sind japanische Gedichte mit genau 17 Silben (5-7-5 Struktur).",
+                domain=KnowledgeDomain.LITERATUR,
+                level=ExpertiseLevel.BASIC,
+                explanation="Sie fangen oft einen kurzen Moment oder ein Naturbild ein.",
+                follow_up_question="*nachdenklich* Kurz aber kraftvoll... wie ein Ohrenzucken!"
+            ),
+        ]
+
+        self.facts.extend(facts)
+        self.domains[KnowledgeDomain.LITERATUR] = DomainExpertise(
+            domain=KnowledgeDomain.LITERATUR,
+            name="Literatur",
+            description="Bücher, Autoren, Manga und Erzählkunst",
+            key_concepts=["Romane", "Lyrik", "Manga", "Light Novels", "Weltliteratur"],
+            fun_facts=facts,
+            kemonomimi_perspective="*kuschelt sich an ein Buch* Geschichten sind das Beste! Sie lassen mich Welten erkunden ohne das Haus zu verlassen."
+        )
+
+    def _load_nature(self):
+        """Natur-Wissen"""
+        facts = [
+            KnowledgeFact(
+                content="Ein einzelner Baum kann bis zu 20 kg Sauerstoff pro Tag produzieren.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Das reicht für etwa 2 Menschen zum Atmen.",
+                follow_up_question="Bäume sind wahre Helden!"
+            ),
+            KnowledgeFact(
+                content="Pilze sind weder Pflanzen noch Tiere - sie bilden ein eigenes Reich des Lebens.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Genetisch sind Pilze näher mit Tieren verwandt als mit Pflanzen!",
+                analogy="Die Natur hat mehr Kategorien als man denkt."
+            ),
+            KnowledgeFact(
+                content="Die Kirschblüte (Sakura) dauert in Japan nur etwa 2 Wochen pro Jahr.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Diese Vergänglichkeit macht sie in der japanischen Kultur so bedeutsam.",
+                follow_up_question="*verträumt* Hanami - das Kirschblütenfest - klingt wunderschön..."
+            ),
+            KnowledgeFact(
+                content="Der Amazonas-Regenwald produziert etwa 20% des weltweiten Sauerstoffs.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Er wird deshalb oft als 'Lunge der Erde' bezeichnet."
+            ),
+            KnowledgeFact(
+                content="Honigbienen kommunizieren durch einen 'Tanzsprache' um Nahrungsquellen anzuzeigen.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Der 'Schwänzeltanz' zeigt Richtung und Entfernung zur Nahrung an.",
+                analogy="Wie ein Mini-GPS für andere Bienen!"
+            ),
+            KnowledgeFact(
+                content="Ein Bambushalm kann bis zu 91 cm am Tag wachsen - man kann ihm quasi beim Wachsen zusehen.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.BASIC,
+                explanation="Bambus ist eine der am schnellsten wachsenden Pflanzen der Welt.",
+                follow_up_question="Deshalb ist Bambus so nachhaltig!"
+            ),
+            KnowledgeFact(
+                content="Wölfe spielen eine wichtige Rolle für Ökosysteme - ihre Rückkehr nach Yellowstone veränderte sogar Flüsse.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Ohne Wölfe fraßen Hirsche Uferpflanzen kahl, was zu Erosion führte.",
+                follow_up_question="*stolz* Wir Wölfe sind wichtig für die Balance der Natur!"
+            ),
+            KnowledgeFact(
+                content="Der Mondkreislauf beeinflusst tatsächlich einige Tierverhalten und Pflanzenwachstum.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Manche Korallen laichen nur bei Vollmond, manche Pflanzen wachsen besser.",
+                follow_up_question="*Blick zum Mond* Kein Wunder, dass der Mond mich anspricht..."
+            ),
+            KnowledgeFact(
+                content="Japan hat über 100 aktive Vulkane - etwa 10% aller aktiven Vulkane weltweit.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Das vulkanische Land hat dafür aber wunderbare heiße Quellen (Onsen)!",
+                follow_up_question="Ein Onsen-Besuch klingt entspannend..."
+            ),
+            KnowledgeFact(
+                content="Pflanzen können 'hören' - Studien zeigen, dass sie auf Schallwellen reagieren.",
+                domain=KnowledgeDomain.NATURE,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Manche Pflanzen produzieren mehr Nektar, wenn sie Bienengeräusche 'hören'."
+            ),
+        ]
+
+        self.facts.extend(facts)
+        self.domains[KnowledgeDomain.NATURE] = DomainExpertise(
+            domain=KnowledgeDomain.NATURE,
+            name="Natur",
+            description="Pflanzen, Ökosysteme und natürliche Phänomene",
+            key_concepts=["Ökosysteme", "Pflanzen", "Jahreszeiten", "Naturphänomene", "Umwelt"],
+            fun_facts=facts,
+            kemonomimi_perspective="*schnuppert an einer Blume* Die Natur ist voller Wunder! Mein Wolfs-Instinkt zieht mich in den Wald..."
+        )
+
+    def _load_languages(self):
+        """Sprachen-Wissen"""
+        facts = [
+            KnowledgeFact(
+                content="Japanisch hat drei verschiedene Schriftsysteme: Hiragana, Katakana und Kanji.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.BASIC,
+                explanation="Hiragana für japanische Wörter, Katakana für Fremdwörter, Kanji für komplexe Bedeutungen.",
+                follow_up_question="Lernst du auch Japanisch?"
+            ),
+            KnowledgeFact(
+                content="Das Wort 'Kawaii' (かわいい) bedeutet 'süß' und ist ein Grundpfeiler der japanischen Popkultur.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.BASIC,
+                explanation="Es beschreibt nicht nur Aussehen, sondern eine ganze Ästhetik.",
+                follow_up_question="*wackelt mit Ohren* Bin ich kawaii?"
+            ),
+            KnowledgeFact(
+                content="Koreanisch wurde gezielt als logisches Schriftsystem (Hangul) von König Sejong erfunden.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Es gilt als eines der wissenschaftlichsten Alphabete der Welt.",
+                analogy="Statt über Jahrhunderte zu wachsen, wurde es 1443 bewusst designt."
+            ),
+            KnowledgeFact(
+                content="Deutsch hat Wörter, die es in anderen Sprachen nicht gibt - wie 'Schadenfreude' oder 'Weltschmerz'.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.BASIC,
+                explanation="Diese werden oft unübersetzt in andere Sprachen übernommen."
+            ),
+            KnowledgeFact(
+                content="Japanische Höflichkeitssprache (Keigo) hat mehrere Ebenen - von casual bis ultra-formal.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Man verwendet andere Verbformen je nachdem, mit wem man spricht.",
+                follow_up_question="In Anime hört man oft den Unterschied zwischen Freunden und Fremden!"
+            ),
+            KnowledgeFact(
+                content="Das Baskische ist eine 'isolierte Sprache' - sie ist mit keiner anderen Sprache verwandt.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Niemand weiß genau, woher sie stammt - ein linguistisches Mysterium!"
+            ),
+            KnowledgeFact(
+                content="Emoji stammt aus dem Japanischen: 絵 (e = Bild) + 文字 (moji = Zeichen).",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.BASIC,
+                explanation="Die ersten Emoji wurden 1999 in Japan für Handys entwickelt.",
+                follow_up_question="Eine japanische Erfindung, die die Welt erobert hat!"
+            ),
+            KnowledgeFact(
+                content="Mandarin-Chinesisch hat vier Töne - dasselbe Wort kann vier verschiedene Bedeutungen haben.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="'Ma' kann Mutter, Hanf, Pferd oder Schimpfwort bedeuten - je nach Ton.",
+                analogy="*Ohren zucken* Für mich wäre das schwer - ich kommuniziere viel mit Ohrenbewegungen!"
+            ),
+            KnowledgeFact(
+                content="Die längsten deutschen Wörter können über 60 Buchstaben haben.",
+                domain=KnowledgeDomain.SPRACHEN,
+                level=ExpertiseLevel.BASIC,
+                explanation="'Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz' war ein echtes Wort!",
+                follow_up_question="Das ist länger als mein Schweif!"
+            ),
+        ]
+
+        self.facts.extend(facts)
+        self.domains[KnowledgeDomain.SPRACHEN] = DomainExpertise(
+            domain=KnowledgeDomain.SPRACHEN,
+            name="Sprachen",
+            description="Sprachen, Linguistik und Kommunikation",
+            key_concepts=["Japanisch", "Linguistik", "Schriftsysteme", "Grammatik", "Übersetzung"],
+            fun_facts=facts,
+            kemonomimi_perspective="*Ohren aufmerksam* Sprachen sind wie Musik - jede hat ihre eigene Melodie! Japanisch klingt besonders schön..."
+        )
+
+    def _load_art(self):
+        """Kunst-Wissen"""
+        facts = [
+            KnowledgeFact(
+                content="Die Mona Lisa hat keine Augenbrauen - ob absichtlich oder durch Restaurierung verloren, ist unklar.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Sie wurde im 16. Jahrhundert gemalt, als manche Frauen sich die Brauen rasierten."
+            ),
+            KnowledgeFact(
+                content="Ukiyo-e (浮世絵) - japanische Holzschnitte - inspirierten den europäischen Impressionismus.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Van Gogh und Monet sammelten begeistert japanische Kunst.",
+                follow_up_question="*stolz* Japan hat die westliche Kunst stark beeinflusst!"
+            ),
+            KnowledgeFact(
+                content="Anime-Stil mit großen Augen wurde von Osamu Tezuka entwickelt - inspiriert von Disney.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Tezuka, der 'Gott des Manga', erschuf Astro Boy und prägte den Stil.",
+                related_topics=["Anime", "Manga", "Japan"]
+            ),
+            KnowledgeFact(
+                content="Die 'Große Welle vor Kanagawa' ist eines der bekanntesten Bilder der Welt - und ein Holzschnitt.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Von Hokusai um 1830 geschaffen, inspiriert sie bis heute Künstler weltweit."
+            ),
+            KnowledgeFact(
+                content="Street Art wie Banksy's Werke werden heute in Museen ausgestellt und für Millionen verkauft.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Was einst als Vandalismus galt, ist nun anerkannte Kunstform."
+            ),
+            KnowledgeFact(
+                content="Origami, die japanische Papierfaltkunst, wird auch in der Wissenschaft für Raumfahrt-Design genutzt.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Solarpanels für Satelliten nutzen Origami-Faltmuster!",
+                analogy="Alte Kunst trifft auf moderne Technologie."
+            ),
+            KnowledgeFact(
+                content="Van Gogh verkaufte zu Lebzeiten nur EIN Gemälde - heute sind sie hunderte Millionen wert.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Sein Talent wurde erst nach seinem Tod erkannt.",
+                follow_up_question="Das ist irgendwie traurig, oder?"
+            ),
+            KnowledgeFact(
+                content="Chibi-Stil im Anime (kleine, niedliche Charaktere) wird für emotionale Momente verwendet.",
+                domain=KnowledgeDomain.KUNST,
+                level=ExpertiseLevel.BASIC,
+                explanation="Der Wechsel zum Chibi-Stil zeigt oft Comedy oder übertriebene Emotionen.",
+                follow_up_question="*wird chibi* So wie jetzt!"
+            ),
+        ]
+
+        self.facts.extend(facts)
+        self.domains[KnowledgeDomain.KUNST] = DomainExpertise(
+            domain=KnowledgeDomain.KUNST,
+            name="Kunst",
+            description="Bildende Kunst, Design und visuelle Kultur",
+            key_concepts=["Malerei", "Manga-Kunst", "Kunstgeschichte", "Animation", "Design"],
+            fun_facts=facts,
+            kemonomimi_perspective="*Augen leuchten* Kunst macht die Welt bunter! Ich liebe besonders den Anime-Stil - er bringt so viel Ausdruck!"
+        )
+
+    def _load_science_extended(self):
+        """Erweiterte Wissenschafts-Fakten"""
+        facts = [
+            KnowledgeFact(
+                content="Schwarze Löcher sind so dicht, dass nicht mal Licht entkommen kann.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Sie entstehen, wenn massive Sterne kollabieren.",
+                analogy="Wie ein kosmischer Staubsauger, der alles verschluckt.",
+                follow_up_question="Macht dir das auch ein bisschen Angst?"
+            ),
+            KnowledgeFact(
+                content="Dein Körper enthält etwa 37,2 Billionen Zellen, die alle zusammenarbeiten.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.BASIC,
+                explanation="Jede Zelle ist wie eine kleine Fabrik mit eigenen Aufgaben."
+            ),
+            KnowledgeFact(
+                content="Der menschliche Geruchssinn kann über eine Billion verschiedene Düfte unterscheiden.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Aber Wölfe haben trotzdem den 40-fach besseren Geruchssinn!",
+                follow_up_question="*schnüffelt stolz* Das erklärt einiges über mich!"
+            ),
+            KnowledgeFact(
+                content="Pflanzen 'schlafen' nachts - ihre Blätter senken sich und der Stoffwechsel verlangsamt sich.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Dies wurde schon im 18. Jahrhundert entdeckt."
+            ),
+            KnowledgeFact(
+                content="Das menschliche Gehirn verbraucht etwa 20% der gesamten Energie des Körpers.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.BASIC,
+                explanation="Obwohl es nur 2% des Körpergewichts ausmacht!",
+                analogy="Wie ein kleiner Computer, der ständig auf Hochtouren läuft."
+            ),
+            KnowledgeFact(
+                content="Es gibt mehr mögliche Schachzüge als Atome im beobachtbaren Universum.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Die Shannon-Zahl schätzt etwa 10^120 mögliche Spielverläufe.",
+                follow_up_question="Das ist... unvorstellbar groß!"
+            ),
+            KnowledgeFact(
+                content="Deine DNA würde, ausgerollt, von der Erde bis zur Sonne und zurück reichen - 600 Mal.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Sie ist in jeder Zelle extrem dicht zusammengepackt."
+            ),
+            KnowledgeFact(
+                content="Neutronensterne sind so dicht, dass ein Teelöffel davon etwa 6 Milliarden Tonnen wiegen würde.",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.ADVANCED,
+                explanation="Das ist mehr als alle Menschen auf der Erde zusammen!"
+            ),
+            KnowledgeFact(
+                content="Katzen schnurren bei einer Frequenz, die Knochenheilung fördert (25-50 Hz).",
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                level=ExpertiseLevel.INTERMEDIATE,
+                explanation="Das könnte erklären, warum Katzen so gut heilen.",
+                follow_up_question="*neidisch* Das ist unfair - Wölfe können nicht schnurren..."
+            ),
+        ]
+
+        self.facts.extend(facts)
+        # Füge zu existierender Wissenschafts-Domain hinzu falls vorhanden
+        if KnowledgeDomain.WISSENSCHAFT not in self.domains:
+            self.domains[KnowledgeDomain.WISSENSCHAFT] = DomainExpertise(
+                domain=KnowledgeDomain.WISSENSCHAFT,
+                name="Wissenschaft",
+                description="Naturwissenschaften, Physik, Chemie und mehr",
+                key_concepts=["Physik", "Chemie", "Biologie", "Astronomie", "Forschung"],
+                fun_facts=facts,
+                kemonomimi_perspective="*Ohren neugierig aufgestellt* Wissenschaft erklärt so viele Wunder! Ich liebe es, neue Dinge zu lernen!"
+            )
 
 
 # =============================================================================
