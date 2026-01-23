@@ -18729,7 +18729,10 @@ class HoloPersona:
             try:
                 self.v15_impulse_generator = HoloImpulseGenerator()
                 self._wire_v15_impulse()
-                logger.info("[v15] ✓ ImpulseGenerator initialisiert")
+                # WICHTIG: Alias für holo_wiring.py Kompatibilität
+                # Das Wiring-System sucht nach 'impulse_generator', nicht 'v15_impulse_generator'
+                self.impulse_generator = self.v15_impulse_generator
+                logger.info("[v15] ✓ ImpulseGenerator initialisiert + Alias erstellt")
             except Exception as e:
                 logger.error(f"[v15] Impulse-Fehler: {e}")
                 self._track_error(e, "holo_brain", "_init_v15_router", "warning",
@@ -18932,7 +18935,17 @@ class HoloPersona:
             if hasattr(self.self_expression, 'events'):
                 self.v15_impulse_generator.events = self.self_expression.events
 
-        logger.debug("[ImpulseGenerator] Verbunden: energy, personality, preferences, reading_engine, proactive")
+        # === KRITISCHE VERBINDUNGEN FÜR AUTONOME LEBENSWEISE ===
+        # life_phases - Für phasenbasierte Impulse (Kindheit, Jugend, Erwachsen)
+        self.v15_impulse_generator.life_phases = getattr(self, 'life_phases', None)
+
+        # emotions - Für emotionsbasierte Impulse
+        self.v15_impulse_generator.emotions = getattr(self, 'emotions', None)
+
+        # memory - Für erinnerungsbasierte Impulse
+        self.v15_impulse_generator.memory = getattr(self, 'memory', None)
+
+        logger.debug("[ImpulseGenerator] Verbunden: energy, personality, preferences, reading_engine, proactive, life_phases, emotions, memory")
 
     def _v15_llm_call(self, prompt: str, context: str = None, minimal_context: bool = False) -> str:
         """
@@ -21811,6 +21824,28 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
                 self.autonomous_life.on_user_interaction(user_input)
             except Exception:
                 pass
+
+        # ========== LEBENSPHASEN UPDATE (KRITISCH FÜR AUTONOME ENTWICKLUNG) ==========
+        # Zeichnet jede Interaktion auf für Phasenübergänge basierend auf Erfahrungen
+        if hasattr(self, 'life_phases') and self.life_phases:
+            try:
+                # Bestimme ob es eine bedeutungsvolle Interaktion ist
+                emotional_depth = 0.5
+                if user_sentiment:
+                    # Starke Emotionen = bedeutungsvoller
+                    emotional_depth = 0.7 if user_sentiment in ['very_positive', 'very_negative', 'strong'] else 0.5
+
+                meaningful = len(user_input) > 100 or emotional_depth > 0.6
+
+                # Interaktion aufzeichnen
+                self.life_phases.record_interaction(
+                    interaction_type="chat",
+                    emotional_depth=emotional_depth,
+                    meaningful=meaningful
+                )
+                logger.debug(f"[LIFE_PHASES] Interaktion aufgezeichnet (meaningful={meaningful})")
+            except Exception as e:
+                logger.debug(f"[LIFE_PHASES] record_interaction Fehler: {e}")
 
         # ========== PREFERENCE QUIRK (NEU) ==========
         quirk = self._get_preference_reaction(user_input)
