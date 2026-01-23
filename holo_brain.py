@@ -17063,7 +17063,18 @@ class HoloPersona:
                     self.life_phases.dialogue_engine = self.dialogue_engine
                 if hasattr(self, 'personality') and self.personality:
                     self.life_phases.personality = self.personality
-                logger.info("   ✓ Life Phases mit Dialog/Persönlichkeit verbunden")
+                # NEU: Vollständige System-Verbindung via connect_systems()
+                if hasattr(self.life_phases, 'connect_systems'):
+                    self.life_phases.connect_systems(
+                        energy=getattr(self, 'energy', None),
+                        emotions=getattr(self, 'emotions', None),
+                        autonomous_life=getattr(self, 'autonomous_life', None),
+                        personality=getattr(self, 'personality', None),
+                        deep_psychology=getattr(self, 'deep_psychology', None),
+                        dialogue_engine=getattr(self, 'dialogue_engine', None),
+                        meta_cognition=getattr(self, 'meta_cognition', None)
+                    )
+                logger.info("   ✓ Life Phases vollständig mit allen Systemen verbunden")
 
             # Dialogue Engine bekommt Deep Psychology für authentische Antworten
             if hasattr(self, 'dialogue_engine') and self.dialogue_engine:

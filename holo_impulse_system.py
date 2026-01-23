@@ -314,8 +314,8 @@ class HoloImpulseGenerator:
                         state["urgent_drive"] = drive_name
                         state["drive_intensity"] = drive_data.get('level', 0)
                         break
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"[ImpulseSystem] autonomous_life Status-Fehler: {e}")
 
         # Emotionen (primär von personality)
         if self.personality and hasattr(self.personality, 'emotions'):
@@ -331,8 +331,8 @@ class HoloImpulseGenerator:
                 if hasattr(self.emotions, 'get_dominant_emotion'):
                     state["dominant_emotion"] = self.emotions.get_dominant_emotion()
                     state["emotion_intensity"] = 0.5
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"[ImpulseSystem] emotions Modul-Fehler: {e}")
 
         # Events
         if self.events:
@@ -343,8 +343,8 @@ class HoloImpulseGenerator:
                         state["current_event"] = upcoming[0].name
                     else:
                         state["upcoming_event"] = (upcoming[0].name, upcoming[0].days_until)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"[ImpulseSystem] Events-Fehler: {e}")
 
         # NEU: Life Phases - Für phasenbasierte Impulse
         if self.life_phases:
@@ -360,8 +360,8 @@ class HoloImpulseGenerator:
                 wisdom = phase_info.get("modifiers", {}).get("wisdom", 0.5)
                 if wisdom > 0.7:
                     state["wisdom_boost"] = True
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"[ImpulseSystem] Life Phases-Fehler: {e}")
 
         return state
     
