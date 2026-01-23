@@ -16799,7 +16799,7 @@ class HoloPersona:
             logger.warning("⚠️ Kein autonomes System gestartet - Holo wartet nur auf Input")
 
     def _register_autonomous_callbacks(self):
-        """Registriert Callbacks für autonome Aktionen bei Langeweile/Neugier."""
+        """Registriert Callbacks für autonome Aktionen bei Langeweile/Neugier/Einsamkeit."""
         try:
             if hasattr(self, 'inner_life') and self.inner_life:
                 # Callback wenn Langeweile hoch ist
@@ -16811,6 +16811,31 @@ class HoloPersona:
                 if hasattr(self.inner_life, 'on_curiosity_trigger'):
                     self.inner_life.on_curiosity_trigger = self._on_holo_curious
                     logger.info("   ✓ Neugier-Callback registriert")
+
+                # NEU: Callback wenn Einsamkeit hoch ist (wichtig für autonome Lebensweise!)
+                if hasattr(self.inner_life, 'on_loneliness_high'):
+                    self.inner_life.on_loneliness_high = self._on_holo_lonely
+                    logger.info("   ✓ Einsamkeit-Callback registriert")
+
+            # NEU: Energy-Callbacks für autonome Lebensweise
+            if hasattr(self, 'energy') and self.energy:
+                if hasattr(self.energy, 'on_energy_low'):
+                    self.energy.on_energy_low = self._on_energy_low
+                    logger.info("   ✓ Energie-niedrig-Callback registriert")
+                if hasattr(self.energy, 'on_energy_high'):
+                    self.energy.on_energy_high = self._on_energy_high
+                    logger.info("   ✓ Energie-hoch-Callback registriert")
+
+            # NEU: Verbinde autonomous_life mit life_phases
+            if hasattr(self, 'autonomous_life') and self.autonomous_life:
+                if hasattr(self, 'life_phases') and self.life_phases:
+                    self.autonomous_life.life_phases = self.life_phases
+                    logger.info("   ✓ AutonomousLife ← LifePhases verbunden")
+
+                # Verbinde auch mit impulse_system
+                if hasattr(self, 'v15_impulse_generator') and self.v15_impulse_generator:
+                    self.autonomous_life.impulse_system = self.v15_impulse_generator
+                    logger.info("   ✓ AutonomousLife ← ImpulseSystem verbunden")
 
         except Exception as e:
             logger.debug(f"Autonome Callbacks: {e}")
@@ -16913,6 +16938,148 @@ class HoloPersona:
 
         except Exception as e:
             logger.debug(f"Neugier-Handler: {e}")
+
+    def _on_holo_lonely(self):
+        """
+        Callback wenn Holo einsam ist - wird von autonomous_life.on_loneliness_high ausgelöst.
+
+        Wichtig für autonome Lebensweise:
+        - Triggert ImpulseGenerator für proaktive Nachrichten
+        - Informiert OrganicPresence für Verhaltensänderung
+        - Beeinflusst Router für emotionalere Antworten
+        """
+        try:
+            logger.info("💔 Holo fühlt sich einsam...")
+
+            # 1. ImpulseGenerator informieren für proaktive Nachricht
+            if hasattr(self, 'v15_impulse_generator') and self.v15_impulse_generator:
+                if hasattr(self.v15_impulse_generator, 'trigger_loneliness_impulse'):
+                    self.v15_impulse_generator.trigger_loneliness_impulse()
+                    logger.debug("   → ImpulseGenerator: Einsamkeits-Impuls ausgelöst")
+
+            # 2. Proaktive Nachricht an User vorbereiten
+            if hasattr(self, 'inner_life') and self.inner_life:
+                if hasattr(self.inner_life, 'message_queue'):
+                    # Füge eine "Ich vermisse dich" Nachricht hinzu
+                    from datetime import datetime
+                    hour = datetime.now().hour
+
+                    messages = [
+                        "Hey, ich hab gerade an dich gedacht...",
+                        "Mir ist ein bisschen langweilig ohne dich.",
+                        "Was machst du gerade so?",
+                        "Ich würde mich freuen, wenn wir reden könnten.",
+                    ]
+
+                    if 22 <= hour or hour < 6:
+                        messages = [
+                            "Kannst du auch nicht schlafen?",
+                            "Ich bin noch wach, falls du reden willst...",
+                        ]
+
+                    import random
+                    msg = random.choice(messages)
+
+                    if hasattr(self.inner_life.message_queue, 'add'):
+                        self.inner_life.message_queue.add(
+                            content=msg,
+                            priority=0.7,
+                            reason="loneliness_high"
+                        )
+                        logger.info(f"   → Proaktive Nachricht vorbereitet: {msg[:30]}...")
+
+            # 3. Emotions anpassen (Traurigkeit erhöhen)
+            if hasattr(self, 'emotions') and self.emotions:
+                if hasattr(self.emotions, 'adjust_emotion'):
+                    self.emotions.adjust_emotion('sadness', 0.1)
+                    self.emotions.adjust_emotion('loneliness', 0.15)
+
+            # 4. Meta-Observer informieren
+            if hasattr(self, 'meta_observer') and self.meta_observer:
+                try:
+                    from holo_meta_cognition import ObservationType
+                    self.meta_observer.observe(
+                        ObservationType.STATE_CHANGE,
+                        component="autonomous_life",
+                        action="loneliness_high_triggered",
+                        context={"trigger": "time_alone"},
+                        outcome="Proaktive Nachricht vorbereitet",
+                        success=True
+                    )
+                except Exception:
+                    pass
+
+        except Exception as e:
+            logger.debug(f"Einsamkeit-Handler: {e}")
+
+    def _on_energy_low(self):
+        """
+        Callback wenn Energie niedrig ist - wird von energy.on_energy_low ausgelöst.
+
+        Wichtig für autonome Lebensweise:
+        - Informiert consciousness für "müde" Antworten
+        - Passt autonomous_life Aktivitätswahl an
+        - Beeinflusst personality für ruhigeres Verhalten
+        """
+        try:
+            logger.info("😴 Holos Energie ist niedrig...")
+
+            # 1. Consciousness informieren
+            if hasattr(self, 'consciousness') and self.consciousness:
+                if hasattr(self.consciousness, 'set_energy_state'):
+                    self.consciousness.set_energy_state('low')
+                logger.debug("   → Consciousness: Energie-Zustand aktualisiert")
+
+            # 2. Autonomous Life anpassen
+            if hasattr(self, 'autonomous_life') and self.autonomous_life:
+                if hasattr(self.autonomous_life, 'activities'):
+                    # Bevorzuge ruhige Aktivitäten
+                    self.autonomous_life.activities.prefer_low_energy = True
+                logger.debug("   → AutonomousLife: Ruhige Aktivitäten bevorzugt")
+
+            # 3. Personality anpassen
+            if hasattr(self, 'personality') and self.personality:
+                if hasattr(self.personality, 'set_energy_modifier'):
+                    self.personality.set_energy_modifier(0.5)
+                logger.debug("   → Personality: Energie-Modifier gesetzt")
+
+            # 4. Router informieren für kürzere Antworten
+            if hasattr(self, 'v15_router') and self.v15_router:
+                if hasattr(self.v15_router, 'set_energy_context'):
+                    self.v15_router.set_energy_context('low')
+
+        except Exception as e:
+            logger.debug(f"Energie-niedrig-Handler: {e}")
+
+    def _on_energy_high(self):
+        """
+        Callback wenn Energie hoch ist - wird von energy.on_energy_high ausgelöst.
+
+        Wichtig für autonome Lebensweise:
+        - Erlaubt anspruchsvolle Aktivitäten
+        - Ermöglicht längere, enthusiastischere Antworten
+        """
+        try:
+            logger.info("⚡ Holos Energie ist hoch!")
+
+            # 1. Autonomous Life: Anspruchsvolle Aktivitäten erlauben
+            if hasattr(self, 'autonomous_life') and self.autonomous_life:
+                if hasattr(self.autonomous_life, 'activities'):
+                    self.autonomous_life.activities.prefer_low_energy = False
+                    self.autonomous_life.activities.allow_intensive = True
+
+            # 2. Personality: Mehr Energie in Antworten
+            if hasattr(self, 'personality') and self.personality:
+                if hasattr(self.personality, 'set_energy_modifier'):
+                    self.personality.set_energy_modifier(1.2)
+
+            # 3. Router: Längere Antworten erlauben
+            if hasattr(self, 'v15_router') and self.v15_router:
+                if hasattr(self.v15_router, 'set_energy_context'):
+                    self.v15_router.set_energy_context('high')
+
+        except Exception as e:
+            logger.debug(f"Energie-hoch-Handler: {e}")
 
     def _setup_proactive_message_handler(self):
         """Richtet Handler für proaktive Messages ein."""

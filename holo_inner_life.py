@@ -6314,6 +6314,12 @@ class HoloAutonomousLife:
         # NEU: MoodEvolution für Entscheidungen
         self.mood = None                # MoodEvolution (aus HoloInnerLife)
 
+        # NEU: LifePhases für phasenabhängiges Verhalten (autonome Lebensweise)
+        self.life_phases = None         # HoloLifePhasesEngine (für Verhaltensmodifikation)
+
+        # NEU: ImpulseSystem für Verhaltensimpulse
+        self.impulse_system = None      # HoloImpulseSystem
+
         # Callbacks
         self.on_want_to_contact: Optional[Callable[[str], None]] = None
         self.on_activity_complete: Optional[Callable[[Dict], None]] = None
@@ -6440,6 +6446,36 @@ class HoloAutonomousLife:
 
             except Exception as e:
                 logger.debug(f"Emotion sync: {e}")
+
+        # === NEU: LIFE PHASES INTEGRATION (für autonome Lebensweise) ===
+        phase_modifiers = {}
+        if self.life_phases:
+            try:
+                phase_info = self.life_phases.get_phase_for_autonomous_life()
+                result["life_phase"] = phase_info.get("phase")
+                result["age_string"] = phase_info.get("age_string")
+                phase_modifiers = phase_info.get("modifiers", {})
+
+                # Phasen-basierte Verhaltensmodifikation
+                playfulness = phase_modifiers.get("playfulness", 1.0)
+                curiosity_mod = phase_modifiers.get("curiosity", 1.0)
+                wisdom_mod = phase_modifiers.get("wisdom", 0.5)
+
+                # Triebe basierend auf Lebensphase anpassen
+                if curiosity_mod > 1.2 and hasattr(self.drives, 'boost'):
+                    self.drives.boost(DriveType.CURIOSITY, 0.1 * (curiosity_mod - 1.0))
+
+                # Bei hoher Verspieltheit: mehr Aktivitätsvariation
+                if playfulness > 1.2:
+                    self.activities.variety_preference = min(1.0,
+                        getattr(self.activities, 'variety_preference', 0.5) + 0.2)
+
+                # Bei hoher Weisheit: tiefgründigere Aktivitäten bevorzugen
+                if wisdom_mod > 0.7:
+                    self.activities.prefer_deep_activities = True
+
+            except Exception as e:
+                logger.debug(f"Life phases sync: {e}")
 
         # === LANGEWEILE UPDATEN ===
         self.boredom.update(elapsed_minutes, had_interaction)
@@ -10087,6 +10123,11 @@ class HoloInnerLife:
         self.last_update: float = time.time()
         self.inner_monologue: List[str] = []
 
+        # === CALLBACKS FÜR AUTONOME LEBENSWEISE (werden von HoloBrain gesetzt) ===
+        self.on_boredom_high: Optional[Callable] = None       # Bei hoher Langeweile
+        self.on_loneliness_high: Optional[Callable] = None    # Bei hoher Einsamkeit
+        self.on_curiosity_trigger: Optional[Callable] = None  # Bei Neugier-Impuls
+
         # === BACKGROUND LOOP (NEU!) ===
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
@@ -10221,6 +10262,47 @@ class HoloInnerLife:
             if hours_since > 24:
                 self.relationship.state.decay(hours_since)
 
+        # === NEU: CALLBACKS FÜR AUTONOME LEBENSWEISE AUSLÖSEN ===
+
+        # 7. Langeweile-Check (ruft on_boredom_high auf)
+        if hasattr(self, 'boredom') and self.boredom:
+            boredom_level = getattr(self.boredom.state, 'level', 0.0)
+            if boredom_level > 0.7 and self.on_boredom_high:
+                try:
+                    self.on_boredom_high()
+                    events.append(("boredom_high", f"Langeweile: {boredom_level:.0%}"))
+                except Exception as e:
+                    logger.debug(f"Boredom callback error: {e}")
+
+        # 8. Einsamkeit-Check (ruft on_loneliness_high auf)
+        hours_since_interaction = (time.time() - self.relationship.state.last_interaction) / 3600
+        loneliness_threshold = 4.0  # Stunden ohne Kontakt
+        if hours_since_interaction > loneliness_threshold and self.on_loneliness_high:
+            # Nicht zu oft auslösen - nur alle 2 Stunden
+            if not hasattr(self, '_last_loneliness_callback'):
+                self._last_loneliness_callback = 0
+            if time.time() - self._last_loneliness_callback > 7200:  # 2 Stunden
+                try:
+                    self.on_loneliness_high()
+                    self._last_loneliness_callback = time.time()
+                    events.append(("loneliness_high", f"Allein seit: {hours_since_interaction:.1f}h"))
+                except Exception as e:
+                    logger.debug(f"Loneliness callback error: {e}")
+
+        # 9. Neugier-Callback (bei starkem Neugier-Trieb)
+        if hasattr(self, 'drives') and self.drives and self.on_curiosity_trigger:
+            curiosity_drive = self.drives.get_drive_level(DriveType.CURIOSITY)
+            if curiosity_drive > 0.8:
+                # Hole aktuelles Quest-Thema
+                active_quest = self.curiosity.get_active_quest() if hasattr(self.curiosity, 'get_active_quest') else None
+                topic = active_quest.question if active_quest else None
+                if topic:
+                    try:
+                        self.on_curiosity_trigger(topic)
+                        events.append(("curiosity_trigger", topic[:30]))
+                    except Exception as e:
+                        logger.debug(f"Curiosity callback error: {e}")
+
         self.last_update = time.time()
 
         return {
@@ -10230,6 +10312,8 @@ class HoloInnerLife:
             "events": events,
             "messages": messages,
             "relationship_level": self.relationship.get_relationship_level(),
+            "boredom_level": getattr(self.boredom.state, 'level', 0.0) if hasattr(self, 'boredom') and self.boredom else 0.0,
+            "hours_since_interaction": hours_since_interaction,
         }
 
     def on_interaction(self,

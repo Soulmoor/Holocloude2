@@ -479,6 +479,11 @@ class HoloEnergySystem:
         self.on_dream_end = None
         self.on_exhausted = None
 
+        # NEU: Callbacks für autonome Lebensweise
+        self.on_energy_low = None      # Wird bei Energie < 0.3 aufgerufen
+        self.on_energy_high = None     # Wird bei Energie > 0.8 aufgerufen
+        self._last_energy_callback = 0  # Verhindert zu häufige Callbacks
+
         # Tracking für Verbindungen
         self._last_consciousness_update = 0
         self._energy_patterns = []
@@ -606,7 +611,25 @@ class HoloEnergySystem:
                     )
             except Exception as e:
                 logger.debug(f"[ENERGY] Consciousness notification failed: {e}")
-        
+
+        # === NEU: ENERGIE-CALLBACKS FÜR AUTONOME LEBENSWEISE ===
+        # Nur alle 10 Minuten Callbacks auslösen, um Spam zu vermeiden
+        if now - self._last_energy_callback > 600:
+            if effective < 0.3 and self.on_energy_low:
+                try:
+                    self.on_energy_low()
+                    self._last_energy_callback = now
+                    logger.debug(f"[ENERGY] on_energy_low callback ausgelöst (Energie: {effective:.0%})")
+                except Exception as e:
+                    logger.debug(f"[ENERGY] on_energy_low callback Fehler: {e}")
+            elif effective > 0.8 and self.on_energy_high:
+                try:
+                    self.on_energy_high()
+                    self._last_energy_callback = now
+                    logger.debug(f"[ENERGY] on_energy_high callback ausgelöst (Energie: {effective:.0%})")
+                except Exception as e:
+                    logger.debug(f"[ENERGY] on_energy_high callback Fehler: {e}")
+
         # === LEARNING ÜBER MUSTER INFORMIEREN ===
         if self.learning and hasattr(self.learning, 'register_learning_opportunity'):
             try:
