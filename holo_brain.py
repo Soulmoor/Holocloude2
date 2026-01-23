@@ -16518,8 +16518,8 @@ class HoloPersona:
 
         if not hasattr(self, 'life_phases') or self.life_phases is None:
             try:
-                from holo_life_phases import HoloLifePhases
-                self.life_phases = HoloLifePhases()
+                from holo_life_phases import HoloLifePhasesEngine
+                self.life_phases = HoloLifePhasesEngine()
                 aliases_created += 1
             except ImportError:
                 self.life_phases = None

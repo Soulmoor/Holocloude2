@@ -38,6 +38,48 @@ except ImportError:
 
 
 # =============================================================================
+# SYSTEM-INTEGRATION - Optionale Verbindungen für autonome Lebensweise
+# =============================================================================
+
+# Energy System - Für Energie-basierte Impulse
+try:
+    from holo_energy_system import HoloEnergySystem
+    ENERGY_AVAILABLE = True
+except ImportError:
+    ENERGY_AVAILABLE = False
+    HoloEnergySystem = None
+
+# Emotional Complexity - Für emotions-basierte Impulse
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
+# Personality - Für persönlichkeitsbasierte Impulse
+try:
+    from holo_personality import HoloPersonality
+    PERSONALITY_AVAILABLE = True
+except ImportError:
+    PERSONALITY_AVAILABLE = False
+    HoloPersonality = None
+
+# Life Phases - Für phasenbasierte Impulse
+try:
+    from holo_life_phases import HoloLifePhasesEngine, LifePhase
+    LIFE_PHASES_AVAILABLE = True
+except ImportError:
+    LIFE_PHASES_AVAILABLE = False
+    HoloLifePhasesEngine = None
+    LifePhase = None
+
+logger.info(f"[ImpulseSystem] Integration: Energy={ENERGY_AVAILABLE}, "
+            f"EmotionalComplexity={EMOTIONAL_COMPLEXITY_AVAILABLE}, "
+            f"Personality={PERSONALITY_AVAILABLE}, LifePhases={LIFE_PHASES_AVAILABLE}")
+
+
+# =============================================================================
 # IMPULS-TYPEN
 # =============================================================================
 
@@ -131,13 +173,56 @@ class HoloImpulseGenerator:
     """
     
     def __init__(self):
-        # Verbindungen zu anderen Modulen
-        self.energy = None
-        self.autonomous_life = None
-        self.personality = None
-        self.events = None
-        self.memory = None
-        
+        # Verbindungen zu anderen Modulen (via holo_wiring.py Dependency Injection)
+        self.energy = None              # HoloEnergySystem
+        self.autonomous_life = None     # HoloAutonomousLife
+        self.personality = None         # HoloPersonality
+        self.events = None              # HoloEvents
+        self.memory = None              # HoloMemory
+        self.life_phases = None         # HoloLifePhasesEngine (NEU)
+        self.emotions = None            # EmotionalComplexity (NEU)
+
+    def connect_systems(self, energy=None, autonomous_life=None, personality=None,
+                       events=None, memory=None, life_phases=None, emotions=None):
+        """
+        Verbindet den ImpulseGenerator mit anderen Modulen.
+
+        Wird von holo_wiring.py oder manuell aufgerufen.
+        """
+        if energy:
+            self.energy = energy
+        if autonomous_life:
+            self.autonomous_life = autonomous_life
+        if personality:
+            self.personality = personality
+        if events:
+            self.events = events
+        if memory:
+            self.memory = memory
+        if life_phases:
+            self.life_phases = life_phases
+        if emotions:
+            self.emotions = emotions
+
+        logger.info("[ImpulseGenerator] System-Verbindungen aktualisiert")
+
+    def get_status(self) -> Dict[str, Any]:
+        """
+        Gibt Status für Monitoring zurück.
+        """
+        return {
+            "connected_systems": {
+                "energy": self.energy is not None,
+                "autonomous_life": self.autonomous_life is not None,
+                "personality": self.personality is not None,
+                "events": self.events is not None,
+                "memory": self.memory is not None,
+                "life_phases": self.life_phases is not None,
+                "emotions": self.emotions is not None,
+            },
+            "inner_state": self._gather_inner_state(),
+        }
+
     def generate_impulse(self, user_input: str, 
                         context: Dict = None) -> HoloImpulse:
         """
@@ -206,20 +291,23 @@ class HoloImpulseGenerator:
             "time_alone": 0.0,
             "current_event": None,
             "upcoming_event": None,
+            # NEU: Life Phases Integration
+            "life_phase": None,
+            "phase_modifiers": {},
         }
-        
+
         # Energie
         if self.energy and hasattr(self.energy, 'state'):
             state["energy_level"] = getattr(self.energy.state, 'effective_energy', 0.5)
             state["energy_state"] = getattr(self.energy.state, 'current_state', 'awake')
-        
+
         # Triebe & Langeweile
         if self.autonomous_life:
             try:
                 al_status = self.autonomous_life.get_status()
                 state["boredom_level"] = al_status.get('boredom', {}).get('level', 0)
                 state["time_alone"] = al_status.get('boredom', {}).get('time_alone_hours', 0)
-                
+
                 # Dringendster Trieb
                 for drive_name, drive_data in al_status.get('drives', {}).items():
                     if drive_data.get('is_urgent'):
@@ -228,15 +316,24 @@ class HoloImpulseGenerator:
                         break
             except Exception:
                 pass
-        
-        # Emotionen
+
+        # Emotionen (primär von personality)
         if self.personality and hasattr(self.personality, 'emotions'):
             emotions = self.personality.emotions
             if emotions:
                 dominant = max(emotions.items(), key=lambda x: x[1])
                 state["dominant_emotion"] = dominant[0]
                 state["emotion_intensity"] = dominant[1]
-        
+
+        # Emotionen (alternativ von emotions Modul)
+        if not state["dominant_emotion"] and self.emotions:
+            try:
+                if hasattr(self.emotions, 'get_dominant_emotion'):
+                    state["dominant_emotion"] = self.emotions.get_dominant_emotion()
+                    state["emotion_intensity"] = 0.5
+            except Exception:
+                pass
+
         # Events
         if self.events:
             try:
@@ -248,7 +345,24 @@ class HoloImpulseGenerator:
                         state["upcoming_event"] = (upcoming[0].name, upcoming[0].days_until)
             except Exception:
                 pass
-        
+
+        # NEU: Life Phases - Für phasenbasierte Impulse
+        if self.life_phases:
+            try:
+                phase_info = self.life_phases.get_phase_for_autonomous_life()
+                state["life_phase"] = phase_info.get("phase")
+                state["phase_modifiers"] = phase_info.get("modifiers", {})
+
+                # Phasen-basierte Modifikationen
+                playfulness = phase_info.get("modifiers", {}).get("playfulness", 1.0)
+                if playfulness > 1.2:
+                    state["playful_boost"] = True
+                wisdom = phase_info.get("modifiers", {}).get("wisdom", 0.5)
+                if wisdom > 0.7:
+                    state["wisdom_boost"] = True
+            except Exception:
+                pass
+
         return state
     
     # =========================================================================

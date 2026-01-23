@@ -30,6 +30,64 @@ logger = logging.getLogger("HoloLifePhases")
 
 
 # =============================================================================
+# SYSTEM-INTEGRATION - Optionale Verbindungen zu anderen Modulen
+# =============================================================================
+
+# Deep Psychology - Für psychologische Einflüsse auf Lebensphasen
+try:
+    from holo_deep_psychology import HoloDeepPsychologyEngine
+    DEEP_PSYCHOLOGY_AVAILABLE = True
+except ImportError:
+    DEEP_PSYCHOLOGY_AVAILABLE = False
+    HoloDeepPsychologyEngine = None
+
+# Energy System - Für Energie-basierte Phasen-Anpassungen
+try:
+    from holo_energy_system import HoloEnergySystem
+    ENERGY_SYSTEM_AVAILABLE = True
+except ImportError:
+    ENERGY_SYSTEM_AVAILABLE = False
+    HoloEnergySystem = None
+
+# Emotional Complexity - Für emotionale Einflüsse
+try:
+    from holo_emotional_complexity import get_emotional_complexity
+    EMOTIONAL_COMPLEXITY_AVAILABLE = True
+except ImportError:
+    EMOTIONAL_COMPLEXITY_AVAILABLE = False
+    get_emotional_complexity = None
+
+# Meta Cognition - Für Selbst-Beobachtung
+try:
+    from holo_meta_cognition import HoloMetaCognition
+    META_COGNITION_AVAILABLE = True
+except ImportError:
+    META_COGNITION_AVAILABLE = False
+    HoloMetaCognition = None
+
+# Safe access helpers für Strict Mode
+try:
+    from holo_error_tracker import safe_list_access, safe_split_access, report_error
+except ImportError:
+    def safe_list_access(lst, index, module, function, default=None, context=""):
+        if not lst or len(lst) <= abs(index):
+            return default
+        return lst[index]
+    def safe_split_access(text, sep, index, module, function, default="", context=""):
+        parts = text.split(sep) if text else []
+        if len(parts) <= abs(index):
+            return default
+        return parts[index]
+    def report_error(e, module="", function="", context="", severity=None, fallback_value=None):
+        logger.warning(f"Error in {module}.{function}: {e}")
+        return fallback_value
+
+logger.info(f"[LifePhases] Integration: DeepPsychology={DEEP_PSYCHOLOGY_AVAILABLE}, "
+            f"Energy={ENERGY_SYSTEM_AVAILABLE}, EmotionalComplexity={EMOTIONAL_COMPLEXITY_AVAILABLE}, "
+            f"MetaCognition={META_COGNITION_AVAILABLE}")
+
+
+# =============================================================================
 # ENUMS - Lebensphasen und Entwicklungsstufen
 # =============================================================================
 
@@ -544,6 +602,21 @@ class HoloLifePhasesEngine:
         # Letzte Retrospektive
         self.last_retrospective: Optional[datetime] = None
         self.last_deep_retrospective: Optional[datetime] = None
+
+        # =================================================================
+        # SYSTEM-VERBINDUNGEN (via Dependency Injection / holo_wiring.py)
+        # =================================================================
+        # Diese werden durch holo_wiring.py zur Laufzeit gesetzt
+        self.energy = None              # HoloEnergySystem
+        self.emotions = None            # EmotionalComplexity
+        self.autonomous_life = None     # HoloAutonomousLife
+        self.personality = None         # HoloPersonality
+        self.deep_psychology = None     # HoloDeepPsychologyEngine
+        self.dialogue_engine = None     # HoloDialogueEngine
+        self.meta_cognition = None      # HoloMetaCognition
+
+        # Callbacks für System-Events
+        self._phase_change_callbacks: List[Any] = []
 
         logger.info(f"[LifePhases] Initialisiert - Geburtsdatum: {self.birth_date}")
 
@@ -1320,6 +1393,186 @@ class HoloLifePhasesEngine:
             base_response = f"*nachdenklich* {base_response}"
 
         return base_response
+
+    # =========================================================================
+    # SYSTEM-INTEGRATION - Verbindung mit autonomer Lebensweise
+    # =========================================================================
+
+    def connect_systems(self, energy=None, emotions=None, autonomous_life=None,
+                       personality=None, deep_psychology=None, dialogue_engine=None,
+                       meta_cognition=None):
+        """
+        Verbindet das Lebensphasen-System mit anderen Modulen.
+
+        Wird von holo_wiring.py oder manuell aufgerufen.
+        """
+        if energy:
+            self.energy = energy
+        if emotions:
+            self.emotions = emotions
+        if autonomous_life:
+            self.autonomous_life = autonomous_life
+        if personality:
+            self.personality = personality
+        if deep_psychology:
+            self.deep_psychology = deep_psychology
+        if dialogue_engine:
+            self.dialogue_engine = dialogue_engine
+        if meta_cognition:
+            self.meta_cognition = meta_cognition
+
+        logger.info("[LifePhases] System-Verbindungen aktualisiert")
+
+    def on_phase_change_callback(self, callback):
+        """Registriert einen Callback der bei Phasenwechsel aufgerufen wird"""
+        self._phase_change_callbacks.append(callback)
+
+    def _notify_phase_change(self, old_phase: LifePhase, new_phase: LifePhase):
+        """Benachrichtigt alle registrierten Callbacks über einen Phasenwechsel"""
+        for callback in self._phase_change_callbacks:
+            try:
+                callback(old_phase, new_phase, self)
+            except Exception as e:
+                logger.warning(f"[LifePhases] Callback-Fehler: {e}")
+
+        # Informiere verbundene Systeme
+        if self.autonomous_life and hasattr(self.autonomous_life, 'handle_phase_change'):
+            try:
+                self.autonomous_life.handle_phase_change(new_phase.value)
+            except Exception as e:
+                logger.debug(f"[LifePhases] autonomous_life Callback: {e}")
+
+        if self.personality and hasattr(self.personality, 'handle_phase_change'):
+            try:
+                self.personality.handle_phase_change(new_phase.value)
+            except Exception as e:
+                logger.debug(f"[LifePhases] personality Callback: {e}")
+
+    def get_energy_modifier(self) -> float:
+        """
+        Holt Energie-Modifikator basierend auf verbundenem Energy-System.
+
+        Returns:
+            Modifikator 0.5-1.5 basierend auf Energie-Level
+        """
+        if self.energy and hasattr(self.energy, 'state'):
+            try:
+                energy_level = getattr(self.energy.state, 'effective_energy', 0.5)
+                # Niedrige Energie = langsamere Entwicklung, hohe = schnellere
+                return 0.5 + energy_level
+            except Exception:
+                pass
+        return 1.0
+
+    def get_emotional_modifier(self) -> float:
+        """
+        Holt Emotions-Modifikator basierend auf emotionalem Zustand.
+
+        Returns:
+            Modifikator 0.8-1.2 basierend auf emotionalem Wohlbefinden
+        """
+        if self.emotions and hasattr(self.emotions, 'get_dominant_emotion'):
+            try:
+                emotion = self.emotions.get_dominant_emotion()
+                # Positive Emotionen fördern Entwicklung
+                positive_emotions = ['joy', 'love', 'curiosity', 'pride', 'contentment']
+                if emotion and emotion.lower() in positive_emotions:
+                    return 1.2
+                negative_emotions = ['sadness', 'fear', 'anger', 'shame']
+                if emotion and emotion.lower() in negative_emotions:
+                    return 0.8
+            except Exception:
+                pass
+        return 1.0
+
+    def get_phase_for_autonomous_life(self) -> Dict[str, Any]:
+        """
+        Gibt Informationen für das autonome Leben zurück.
+
+        Wird von holo_autonomous_life und holo_inner_life genutzt.
+        """
+        chars = self.phase_characteristics
+        return {
+            "phase": self.current_phase.value,
+            "age_string": self.age_string,
+            "age_days": self.age_days,
+            "modifiers": {
+                "curiosity": chars.curiosity_modifier,
+                "playfulness": chars.playfulness_modifier,
+                "wisdom": chars.wisdom_modifier,
+                "emotional_depth": chars.emotional_depth,
+                "independence": chars.independence_modifier,
+            },
+            "behaviors": chars.typical_behaviors,
+            "concerns": chars.typical_concerns,
+            "desires": chars.typical_desires,
+            "emotional_volatility": chars.emotional_volatility,
+            "attachment_seeking": chars.attachment_seeking,
+        }
+
+    def handle_energy_change(self, energy_level: float, energy_state: str):
+        """
+        Callback wenn sich Energie ändert.
+
+        Wird von holo_wiring.py Callbacks aufgerufen.
+        """
+        # Bei sehr niedriger Energie: Entwicklung verlangsamt sich
+        # Bei hoher Energie: Mehr Meilensteine möglich
+        if energy_level < 0.2:
+            logger.debug("[LifePhases] Niedrige Energie - Entwicklung verlangsamt")
+        elif energy_level > 0.8:
+            # Prüfe ob Retrospektive fällig
+            should_retro, reason = self.should_do_retrospective()
+            if should_retro:
+                logger.info(f"[LifePhases] Retrospektive möglich: {reason}")
+
+    def handle_emotion_change(self, emotion: str, intensity: float):
+        """
+        Callback wenn sich Emotionen ändern.
+
+        Starke Emotionen können Meilensteine triggern.
+        """
+        if intensity > 0.8:
+            # Starke Emotion könnte ein prägender Moment sein
+            logger.debug(f"[LifePhases] Starke Emotion erkannt: {emotion} ({intensity:.2f})")
+
+    def get_status(self) -> Dict[str, Any]:
+        """
+        Gibt vollständigen Status für Monitoring zurück.
+        """
+        chars = self.phase_characteristics
+        return {
+            "current_phase": self.current_phase.value,
+            "age": {
+                "days": self.age_days,
+                "months": round(self.age_months, 1),
+                "years": round(self.age_years, 2),
+                "string": self.age_string,
+            },
+            "days_in_phase": self.days_in_current_phase,
+            "milestones_count": len(self.milestones),
+            "transitions_count": len(self.phase_transitions),
+            "experience_count": self.experience_count,
+            "meaningful_interactions": self.meaningful_interactions,
+            "development_levels": {
+                area.value: round(level, 3)
+                for area, level in self.development_levels.items()
+            },
+            "modifiers": self._current_modifiers,
+            "characteristics": {
+                "curiosity": chars.curiosity_modifier,
+                "playfulness": chars.playfulness_modifier,
+                "wisdom": chars.wisdom_modifier,
+                "emotional_depth": chars.emotional_depth,
+            },
+            "connected_systems": {
+                "energy": self.energy is not None,
+                "emotions": self.emotions is not None,
+                "autonomous_life": self.autonomous_life is not None,
+                "personality": self.personality is not None,
+                "deep_psychology": self.deep_psychology is not None,
+            }
+        }
 
     # =========================================================================
     # SERIALISIERUNG

@@ -115,7 +115,13 @@ MODULE_CONNECTIONS: List[ModuleConnection] = [
                     "Impulse basieren auf Emotionen"),
     ModuleConnection("events", "impulse_generator", "events",
                     "Impulse reagieren auf Events"),
-    
+    ModuleConnection("life_phases", "impulse_generator", "life_phases",
+                    "Impulse berücksichtigen Lebensphase für Verhaltensmodifikation"),
+    ModuleConnection("emotions", "impulse_generator", "emotions",
+                    "Impulse reagieren auf emotionalen Zustand"),
+    ModuleConnection("memory", "impulse_generator", "memory",
+                    "Impulse können auf Erinnerungen zugreifen"),
+
     # === CONTEXT COMPRESSOR VERBINDUNGEN ===
     ModuleConnection("memory", "context_compressor", "memory",
                     "Compressor braucht Memory für Entitäten"),
