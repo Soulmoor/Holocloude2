@@ -45,9 +45,10 @@ logger = logging.getLogger("HoloExtendedCognition")
 # IMPORTS - Mit Fallbacks für robuste Integration
 # =============================================================================
 
-# Advanced Reasoning Module
+# Advanced Reasoning Module (erweitert mit neuen Klassen)
 try:
     from holo_advanced_reasoning import (
+        # Haupt-Engines
         AdvancedReasoningEngine,
         BayesianReasoner,
         CausalReasoner,
@@ -55,6 +56,16 @@ try:
         DialecticalReasoner,
         ReasoningMode,
         create_advanced_reasoning_engine,
+        # Neue Enums für Kausales Reasoning
+        CausalDomain,
+        CausalStrength,
+        EvidenceType,
+        MediatorType,
+        ModeratorEffect,
+        # Neue Datenstrukturen
+        CausalChain,
+        MediatorRelation,
+        ModeratorRelation,
     )
     ADVANCED_REASONING_AVAILABLE = True
 except ImportError as e:
@@ -63,6 +74,9 @@ except ImportError as e:
     AdvancedReasoningEngine = None
     create_advanced_reasoning_engine = None
     ReasoningMode = None
+    CausalDomain = None
+    CausalStrength = None
+    EvidenceType = None
 
 # Analytical Strategies Module
 try:
@@ -707,7 +721,12 @@ class ExtendedCognitionEngine:
             "reasoning": {
                 "available": ADVANCED_REASONING_AVAILABLE,
                 "modes": ["bayesian", "causal", "metacognitive", "dialectical"]
-                         if ADVANCED_REASONING_AVAILABLE else []
+                         if ADVANCED_REASONING_AVAILABLE else [],
+                "extended_features": [
+                    "belief_networks", "multi_hypothesis", "sensitivity_analysis",
+                    "causal_domains", "mediators", "moderators", "feedback_loops",
+                    "dialectical_synthesis"
+                ] if ADVANCED_REASONING_AVAILABLE else []
             },
             "analytics": {
                 "available": ANALYTICAL_STRATEGIES_AVAILABLE,
@@ -725,7 +744,210 @@ class ExtendedCognitionEngine:
                               if FORMAL_AXIOMS_AVAILABLE else []
             }
         }
+
+        # Erweiterte Statistiken für Reasoning
+        if ADVANCED_REASONING_AVAILABLE and self.reasoning:
+            capabilities["reasoning"]["statistics"] = {
+                "bayesian_beliefs": len(self.reasoning.bayesian.beliefs),
+                "causal_variables": len(self.reasoning.causal.nodes),
+                "causal_edges": len(self.reasoning.causal.edges),
+                "causal_domains_available": [d.value for d in CausalDomain] if CausalDomain else [],
+                "dialectical_positions": len(self.reasoning.dialectical.positions),
+            }
+
         return capabilities
+
+    # -------------------------------------------------------------------------
+    # ERWEITERTE REASONING-METHODEN
+    # -------------------------------------------------------------------------
+
+    def apply_causal_domain_knowledge(self, domain: str) -> Dict[str, Any]:
+        """
+        Wendet vordefiniertes Domänen-Wissen für kausales Reasoning an.
+
+        Args:
+            domain: Name der Domäne (medizin, psychologie, wirtschaft,
+                    soziales, physik, biologie, technologie, umwelt,
+                    politik, bildung)
+
+        Returns:
+            Info über angewendetes Wissen
+        """
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return {"error": "Advanced Reasoning nicht verfügbar"}
+
+        if CausalDomain is None:
+            return {"error": "CausalDomain nicht verfügbar"}
+
+        try:
+            domain_enum = CausalDomain(domain.lower())
+            added = self.reasoning.causal.apply_domain_knowledge(domain_enum)
+            return {
+                "domain": domain,
+                "relationships_added": added,
+                "total_variables": len(self.reasoning.causal.nodes),
+                "total_edges": len(self.reasoning.causal.edges),
+                "available_domains": [d.value for d in CausalDomain]
+            }
+        except ValueError:
+            return {
+                "error": f"Unbekannte Domäne: {domain}",
+                "available_domains": [d.value for d in CausalDomain]
+            }
+
+    def add_causal_mediator(self, cause: str, mediator: str, effect: str,
+                            a_path: float = 0.5, b_path: float = 0.5,
+                            direct_effect: float = 0.2) -> Dict[str, Any]:
+        """
+        Fügt eine Mediator-Beziehung hinzu.
+
+        Mediator erklärt WIE die Ursache den Effekt beeinflusst.
+        A → M → B (indirekter Pfad über Mediator)
+        A ----→ B (direkter Pfad)
+
+        Args:
+            cause: Ursprüngliche Ursache
+            mediator: Mediator-Variable
+            effect: Endeffekt
+            a_path: Stärke A → M
+            b_path: Stärke M → B
+            direct_effect: Direkter Effekt A → B
+
+        Returns:
+            Mediator-Analyse
+        """
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return {"error": "Advanced Reasoning nicht verfügbar"}
+
+        relation = self.reasoning.causal.add_mediator(
+            cause, mediator, effect, a_path, b_path, direct_effect
+        )
+
+        if relation:
+            return {
+                "cause": cause,
+                "mediator": mediator,
+                "effect": effect,
+                "indirect_effect": relation.indirect_effect,
+                "direct_effect": relation.direct_effect,
+                "total_effect": relation.total_effect,
+                "proportion_mediated": relation.proportion_mediated,
+                "mediation_type": relation.mediation_type.value,
+                "explanation": self.reasoning.causal.explain_mediation(relation)
+            }
+        return {"error": "Mediator konnte nicht hinzugefügt werden"}
+
+    def add_causal_moderator(self, cause: str, effect: str, moderator: str,
+                              base_strength: float = 0.5,
+                              interaction: float = 0.3) -> Dict[str, Any]:
+        """
+        Fügt eine Moderator-Beziehung hinzu.
+
+        Moderator verändert WANN/WIE STARK die Ursache wirkt.
+
+        Args:
+            cause: Ursache
+            effect: Effekt
+            moderator: Moderator-Variable
+            base_strength: Basis-Effektstärke ohne Moderator
+            interaction: Interaktionskoeffizient (+verstärkt, -puffert)
+
+        Returns:
+            Moderator-Analyse
+        """
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return {"error": "Advanced Reasoning nicht verfügbar"}
+
+        relation = self.reasoning.causal.add_moderator(
+            cause, effect, moderator, base_strength, interaction
+        )
+
+        if relation:
+            return {
+                "cause": cause,
+                "effect": effect,
+                "moderator": moderator,
+                "base_strength": relation.base_strength,
+                "moderated_strength": relation.moderated_strength,
+                "interaction": relation.interaction_coefficient,
+                "effect_type": relation.moderator_effect.value,
+                "explanation": self.reasoning.causal.explain_moderation(relation)
+            }
+        return {"error": "Moderator konnte nicht hinzugefügt werden"}
+
+    def create_causal_chain(self, chain_id: str, variables: List[str],
+                            domain: str = "allgemein",
+                            mechanisms: List[str] = None,
+                            time_delays: List[float] = None) -> Dict[str, Any]:
+        """
+        Erstellt eine komplexe kausale Kette.
+
+        Args:
+            chain_id: Eindeutige ID für die Kette
+            variables: Liste der Variablen [A, B, C, ...] → A→B→C→...
+            domain: Domäne der Kette
+            mechanisms: Mechanismen für jeden Übergang
+            time_delays: Zeitverzögerungen zwischen Variablen
+
+        Returns:
+            Ketten-Analyse
+        """
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return {"error": "Advanced Reasoning nicht verfügbar"}
+
+        if CausalDomain is None:
+            return {"error": "CausalDomain nicht verfügbar"}
+
+        try:
+            domain_enum = CausalDomain(domain.lower())
+        except ValueError:
+            domain_enum = CausalDomain.ALLGEMEIN
+
+        chain = self.reasoning.causal.create_causal_chain(
+            chain_id, variables, domain_enum, mechanisms, time_delays
+        )
+
+        if chain:
+            return {
+                "chain_id": chain.chain_id,
+                "variables": chain.variables,
+                "domain": chain.domain.value,
+                "total_strength": chain.total_strength,
+                "mechanisms": chain.mechanisms,
+                "time_delays": chain.time_delays,
+                "confidence": chain.confidence,
+                "explanation": self.reasoning.causal.explain_causal_chain(chain)
+            }
+        return {"error": "Kausale Kette konnte nicht erstellt werden"}
+
+    def get_intervention_recommendations(self, target: str) -> Dict[str, Any]:
+        """
+        Gibt Empfehlungen für Interventionen, um einen Zieleffekt zu erreichen.
+
+        Args:
+            target: Die Variable, die beeinflusst werden soll
+
+        Returns:
+            Priorisierte Interventions-Empfehlungen
+        """
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return {"error": "Advanced Reasoning nicht verfügbar"}
+
+        recommendations = self.reasoning.causal.get_intervention_recommendations(target)
+
+        return {
+            "target": target,
+            "recommendations": recommendations[:5],
+            "total_intervention_points": len(recommendations),
+            "causal_model_summary": self.reasoning.causal.get_causal_summary()
+        }
+
+    def get_causal_model_summary(self) -> str:
+        """Gibt eine Zusammenfassung des kausalen Modells zurück"""
+        if not ADVANCED_REASONING_AVAILABLE or not self.reasoning:
+            return "Advanced Reasoning nicht verfügbar"
+
+        return self.reasoning.causal.get_causal_summary()
 
     def get_summary(self) -> str:
         """Gibt eine Zusammenfassung des Systems"""

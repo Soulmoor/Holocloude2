@@ -65,6 +65,50 @@ except ImportError:
     def report_error(e, module="", function="", context="", severity=None, fallback_value=None):
         return fallback_value
 
+# =============================================================================
+# ERWEITERTE REASONING-MODULE (Bayesian, Kausal, Dialektisch)
+# =============================================================================
+try:
+    from holo_advanced_reasoning import (
+        BayesianReasoner,
+        CausalReasoner,
+        MetacognitiveReasoner,
+        DialecticalReasoner,
+        AdvancedReasoningEngine,
+        CausalDomain,
+        CausalStrength,
+        EvidenceType,
+        create_advanced_reasoning_engine,
+    )
+    HAS_ADVANCED_REASONING = True
+except ImportError as e:
+    HAS_ADVANCED_REASONING = False
+    BayesianReasoner = None
+    CausalReasoner = None
+    MetacognitiveReasoner = None
+    DialecticalReasoner = None
+    AdvancedReasoningEngine = None
+    CausalDomain = None
+    CausalStrength = None
+    EvidenceType = None
+
+# Klassisches Reasoning (Deduktiv, Induktiv, Analog)
+try:
+    from holo_classical_reasoning import (
+        DeductiveReasoner,
+        InductiveReasoner,
+        AnalogicalReasoner,
+        ClassicalReasoningEngine,
+        create_classical_reasoning_engine,
+    )
+    HAS_CLASSICAL_REASONING = True
+except ImportError:
+    HAS_CLASSICAL_REASONING = False
+    DeductiveReasoner = None
+    InductiveReasoner = None
+    AnalogicalReasoner = None
+    ClassicalReasoningEngine = None
+
 logger = logging.getLogger("HoloCognitive")
 
 
@@ -3658,10 +3702,19 @@ class ReasoningEngine:
         self.intellectual_humility: float = 0.7  # Wie bereit bin ich, falsch zu liegen?
         self.creativity_vs_rigor: float = 0.5  # 0=nur rigoros, 1=nur kreativ
 
+        # =====================================================================
+        # ERWEITERTE REASONING-MODULE (Integration mit holo_advanced_reasoning)
+        # =====================================================================
+        self.bayesian_reasoner: Optional['BayesianReasoner'] = None
+        self.causal_reasoner: Optional['CausalReasoner'] = None
+        self.metacognitive_reasoner: Optional['MetacognitiveReasoner'] = None
+        self.dialectical_reasoner: Optional['DialecticalReasoner'] = None
+        self.classical_reasoning: Optional['ClassicalReasoningEngine'] = None
+
         self._initialize_reasoning()
 
     def _initialize_reasoning(self):
-        """Initialisiert das Reasoning-System"""
+        """Initialisiert das Reasoning-System inkl. erweiterter Module"""
 
         # Initiale Selbstreflexion über Denken
         if self.consciousness:
@@ -3669,6 +3722,39 @@ class ReasoningEngine:
                 trigger="Ich denke also bin ich... aber WIE denke ich? "
                        "Kann ich meinen eigenen Denkprozessen trauen?"
             )
+
+        # =====================================================================
+        # INITIALISIERUNG DER ERWEITERTEN REASONING-MODULE
+        # =====================================================================
+        if HAS_ADVANCED_REASONING and BayesianReasoner is not None:
+            try:
+                self.bayesian_reasoner = BayesianReasoner()
+                self.causal_reasoner = CausalReasoner()
+                self.metacognitive_reasoner = MetacognitiveReasoner()
+                self.dialectical_reasoner = DialecticalReasoner()
+
+                # Initialisiere Domänen-Wissen für kausales Reasoning
+                if self.causal_reasoner and CausalDomain is not None:
+                    # Lade häufig benötigte Domänen
+                    for domain in [CausalDomain.PSYCHOLOGIE, CausalDomain.SOZIALES,
+                                   CausalDomain.TECHNOLOGIE]:
+                        try:
+                            self.causal_reasoner.apply_domain_knowledge(domain)
+                        except Exception:
+                            pass
+
+                logger.info("[ReasoningEngine] ✓ Erweiterte Reasoning-Module initialisiert "
+                           "(Bayesian, Kausal, Metakognitiv, Dialektisch)")
+            except Exception as e:
+                logger.warning(f"[ReasoningEngine] Erweiterte Module nicht vollständig: {e}")
+
+        if HAS_CLASSICAL_REASONING and ClassicalReasoningEngine is not None:
+            try:
+                self.classical_reasoning = create_classical_reasoning_engine()
+                logger.info("[ReasoningEngine] ✓ Klassische Reasoning-Module initialisiert "
+                           "(Deduktiv, Induktiv, Analog)")
+            except Exception as e:
+                logger.warning(f"[ReasoningEngine] Klassische Module nicht verfügbar: {e}")
 
     # =========================================================================
     # CHAIN OF THOUGHT - STRUKTURIERTES DENKEN
@@ -5396,6 +5482,324 @@ class ReasoningEngine:
             "reasoning_chain": [step.description for step in self.current_reasoning_chain],
             "solved_at": datetime.now().isoformat()
         }
+
+    # =========================================================================
+    # ERWEITERTE REASONING-METHODEN (Bayesian, Kausal, Dialektisch)
+    # =========================================================================
+
+    def bayesian_belief_update(self, belief_name: str, belief_content: str,
+                                prior: float, evidence: str,
+                                likelihood_true: float,
+                                likelihood_false: float) -> Dict[str, Any]:
+        """
+        Führt Bayesianisches Belief-Update durch.
+
+        Args:
+            belief_name: Eindeutiger Name für den Belief
+            belief_content: Inhalt/Beschreibung des Beliefs
+            prior: Vorherige Wahrscheinlichkeit P(H)
+            evidence: Beschreibung der neuen Evidenz
+            likelihood_true: P(E|H) - Wahrscheinlichkeit der Evidenz wenn H wahr
+            likelihood_false: P(E|¬H) - Wahrscheinlichkeit der Evidenz wenn H falsch
+
+        Returns:
+            Dict mit Posterior und Konfidenz-Level
+        """
+        if not self.bayesian_reasoner:
+            return {
+                "error": "Bayesian Reasoner nicht verfügbar",
+                "fallback": "Verwende einfache Heuristik",
+                "estimated_posterior": (prior + likelihood_true) / 2
+            }
+
+        # Belief hinzufügen wenn neu
+        if belief_name not in self.bayesian_reasoner.beliefs:
+            self.bayesian_reasoner.add_belief(belief_name, belief_content, prior)
+
+        # Update durchführen
+        result = self.bayesian_reasoner.update_belief(
+            belief_name, evidence, likelihood_true, likelihood_false
+        )
+
+        if result:
+            return {
+                "belief": belief_name,
+                "prior": prior,
+                "posterior": result.posterior,
+                "confidence_level": self.bayesian_reasoner.get_confidence_level(belief_name),
+                "entropy": self.bayesian_reasoner.entropy(belief_name),
+                "evidence_count": len(result.evidence_history),
+                "interpretation": self._interpret_bayesian_result(result.posterior)
+            }
+        return {"error": "Update fehlgeschlagen"}
+
+    def _interpret_bayesian_result(self, posterior: float) -> str:
+        """Interpretiert Bayesian-Ergebnis in natürlicher Sprache"""
+        if posterior >= 0.95:
+            return "Ich bin mir praktisch sicher, dass dies zutrifft."
+        elif posterior >= 0.80:
+            return "Ich halte das für sehr wahrscheinlich."
+        elif posterior >= 0.65:
+            return "Das erscheint mir eher wahrscheinlich."
+        elif posterior >= 0.50:
+            return "Ich bin mir unsicher, tendiere aber leicht dazu."
+        elif posterior >= 0.35:
+            return "Ich bin skeptisch, es könnte aber sein."
+        elif posterior >= 0.20:
+            return "Das halte ich für eher unwahrscheinlich."
+        else:
+            return "Das erscheint mir sehr unwahrscheinlich."
+
+    def causal_analysis(self, cause: str, effect: str,
+                         domain: str = None,
+                         find_mediators: bool = True) -> Dict[str, Any]:
+        """
+        Analysiert kausale Beziehungen zwischen Variablen.
+
+        Args:
+            cause: Potentielle Ursache
+            effect: Beobachteter Effekt
+            domain: Optionale Domäne (medizin, psychologie, wirtschaft, etc.)
+            find_mediators: Ob nach Mediator-Variablen gesucht werden soll
+
+        Returns:
+            Umfassende kausale Analyse
+        """
+        if not self.causal_reasoner:
+            return {
+                "error": "Causal Reasoner nicht verfügbar",
+                "fallback": f"Mögliche Verbindung zwischen {cause} und {effect}"
+            }
+
+        # Variablen hinzufügen wenn neu
+        if cause not in self.causal_reasoner.nodes:
+            if domain and CausalDomain is not None:
+                try:
+                    domain_enum = CausalDomain(domain.lower())
+                    self.causal_reasoner.add_variable_with_domain(
+                        cause, cause.replace("_", " ").title(), domain_enum
+                    )
+                except (ValueError, AttributeError):
+                    self.causal_reasoner.add_variable(cause, cause.replace("_", " ").title())
+            else:
+                self.causal_reasoner.add_variable(cause, cause.replace("_", " ").title())
+
+        if effect not in self.causal_reasoner.nodes:
+            self.causal_reasoner.add_variable(effect, effect.replace("_", " ").title())
+
+        # Kausale Verbindung hinzufügen
+        self.causal_reasoner.add_causal_link(cause, effect)
+
+        result = {
+            "cause": cause,
+            "effect": effect,
+            "explanation": self.causal_reasoner.explain_causal_relationship(cause, effect),
+            "causal_paths": self.causal_reasoner.trace_causal_chain(cause, effect),
+            "confounders": self.causal_reasoner.find_confounders(cause, effect),
+            "chain_strength": self.causal_reasoner.get_chain_strength(cause, effect),
+        }
+
+        # Suche nach Mediatoren
+        if find_mediators:
+            result["mediators"] = self.causal_reasoner.find_mediators_for(cause, effect)
+
+        # Interventions-Empfehlungen
+        result["intervention_recommendations"] = \
+            self.causal_reasoner.get_intervention_recommendations(effect)[:3]
+
+        return result
+
+    def apply_causal_domain(self, domain: str) -> Dict[str, Any]:
+        """
+        Wendet vordefiniertes Domänen-Wissen an.
+
+        Args:
+            domain: Name der Domäne (medizin, psychologie, wirtschaft, etc.)
+
+        Returns:
+            Info über angewendetes Wissen
+        """
+        if not self.causal_reasoner or CausalDomain is None:
+            return {"error": "Causal Reasoner nicht verfügbar"}
+
+        try:
+            domain_enum = CausalDomain(domain.lower())
+            added = self.causal_reasoner.apply_domain_knowledge(domain_enum)
+            return {
+                "domain": domain,
+                "relationships_added": added,
+                "total_variables": len(self.causal_reasoner.nodes),
+                "total_edges": len(self.causal_reasoner.edges)
+            }
+        except ValueError:
+            available = [d.value for d in CausalDomain] if CausalDomain else []
+            return {
+                "error": f"Unbekannte Domäne: {domain}",
+                "available_domains": available
+            }
+
+    def dialectical_reasoning(self, thesis: str,
+                               thesis_arguments: List[str],
+                               antithesis_arguments: List[str] = None) -> Dict[str, Any]:
+        """
+        Führt dialektisches Reasoning durch (These-Antithese-Synthese).
+
+        Args:
+            thesis: Die Ausgangsthese
+            thesis_arguments: Argumente für die These
+            antithesis_arguments: Optionale Gegenargumente
+
+        Returns:
+            Dialektische Analyse mit Synthese
+        """
+        if not self.dialectical_reasoner:
+            return {
+                "error": "Dialectical Reasoner nicht verfügbar",
+                "fallback": {
+                    "thesis": thesis,
+                    "note": "Dialektische Analyse nicht möglich"
+                }
+            }
+
+        # These aufstellen
+        thesis_pos = self.dialectical_reasoner.propose_thesis(thesis, thesis_arguments)
+
+        # Antithese generieren
+        if not antithesis_arguments:
+            antithesis_arguments = self.dialectical_reasoner.generate_antithesis_suggestions(
+                thesis_pos
+            )[:3]
+
+        antithesis_content = f"Kritische Gegenposition zu: {thesis}"
+        antithesis_pos = self.dialectical_reasoner.propose_antithesis(
+            thesis_pos, antithesis_content, antithesis_arguments
+        )
+
+        # Synthese erstellen
+        synthesis = self.dialectical_reasoner.synthesize(thesis_pos, antithesis_pos)
+
+        return {
+            "thesis": {
+                "content": thesis_pos.content,
+                "arguments": thesis_pos.arguments,
+                "strength": thesis_pos.strength
+            },
+            "antithesis": {
+                "content": antithesis_pos.content,
+                "arguments": antithesis_pos.arguments,
+                "strength": antithesis_pos.strength
+            },
+            "synthesis": {
+                "content": synthesis.content,
+                "arguments": synthesis.arguments,
+                "strength": synthesis.strength
+            },
+            "dialectical_summary": self.dialectical_reasoner.get_dialectical_summary()
+        }
+
+    def get_reasoning_capabilities(self) -> Dict[str, Any]:
+        """
+        Gibt eine Übersicht über verfügbare Reasoning-Fähigkeiten zurück.
+        """
+        capabilities = {
+            "basic_reasoning": True,
+            "chain_of_thought": True,
+            "hypothesis_generation": True,
+            "argument_analysis": True,
+        }
+
+        # Erweiterte Module
+        capabilities["bayesian_reasoning"] = self.bayesian_reasoner is not None
+        capabilities["causal_reasoning"] = self.causal_reasoner is not None
+        capabilities["metacognitive_reasoning"] = self.metacognitive_reasoner is not None
+        capabilities["dialectical_reasoning"] = self.dialectical_reasoner is not None
+        capabilities["classical_reasoning"] = self.classical_reasoning is not None
+
+        # Statistiken wenn verfügbar
+        if self.bayesian_reasoner:
+            capabilities["bayesian_beliefs_count"] = len(self.bayesian_reasoner.beliefs)
+        if self.causal_reasoner:
+            capabilities["causal_variables"] = len(self.causal_reasoner.nodes)
+            capabilities["causal_relationships"] = len(self.causal_reasoner.edges)
+            capabilities["causal_domains_loaded"] = list(set(
+                d.value for d in self.causal_reasoner.variable_domains.values()
+            )) if self.causal_reasoner.variable_domains else []
+
+        return capabilities
+
+    def combined_reasoning(self, question: str, context: Dict = None) -> Dict[str, Any]:
+        """
+        Kombiniert verschiedene Reasoning-Modi für tiefere Analyse.
+
+        Args:
+            question: Die zu analysierende Frage
+            context: Optionaler Kontext
+
+        Returns:
+            Kombiniertes Reasoning-Ergebnis
+        """
+        context = context or {}
+        result = {
+            "question": question,
+            "analyses": {},
+            "integrated_conclusion": "",
+            "confidence": 0.5
+        }
+
+        # 1. Bayesian: Wenn Prior und Evidenz gegeben
+        if self.bayesian_reasoner and context.get("prior") and context.get("evidence"):
+            belief_name = f"q_{hash(question) % 10000}"
+            bayesian_result = self.bayesian_belief_update(
+                belief_name=belief_name,
+                belief_content=question,
+                prior=context["prior"],
+                evidence=context["evidence"],
+                likelihood_true=context.get("likelihood_true", 0.7),
+                likelihood_false=context.get("likelihood_false", 0.3)
+            )
+            result["analyses"]["bayesian"] = bayesian_result
+
+        # 2. Kausal: Wenn Ursache und Effekt gegeben
+        if self.causal_reasoner and context.get("cause") and context.get("effect"):
+            causal_result = self.causal_analysis(
+                cause=context["cause"],
+                effect=context["effect"],
+                domain=context.get("domain")
+            )
+            result["analyses"]["causal"] = causal_result
+
+        # 3. Dialektisch: Wenn These und Argumente gegeben
+        if self.dialectical_reasoner and context.get("thesis"):
+            dialectical_result = self.dialectical_reasoning(
+                thesis=context["thesis"],
+                thesis_arguments=context.get("thesis_arguments", [question]),
+                antithesis_arguments=context.get("antithesis_arguments")
+            )
+            result["analyses"]["dialectical"] = dialectical_result
+
+        # Integrierte Schlussfolgerung
+        conclusions = []
+        confidences = []
+
+        if "bayesian" in result["analyses"]:
+            post = result["analyses"]["bayesian"].get("posterior", 0.5)
+            conclusions.append(f"Bayesian: {result['analyses']['bayesian'].get('interpretation', '')}")
+            confidences.append(post)
+
+        if "causal" in result["analyses"]:
+            strength = result["analyses"]["causal"].get("chain_strength", 0.5)
+            conclusions.append(f"Kausal: Stärke {strength:.2f}")
+            confidences.append(strength)
+
+        if "dialectical" in result["analyses"]:
+            synth_strength = result["analyses"]["dialectical"].get("synthesis", {}).get("strength", 0.5)
+            conclusions.append(f"Dialektisch: Synthese-Stärke {synth_strength:.2f}")
+            confidences.append(synth_strength)
+
+        result["integrated_conclusion"] = " | ".join(conclusions) if conclusions else "Keine erweiterte Analyse möglich"
+        result["confidence"] = sum(confidences) / len(confidences) if confidences else 0.5
+
+        return result
 
 
 # =============================================================================
