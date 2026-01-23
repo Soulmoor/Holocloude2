@@ -276,6 +276,186 @@ MODULE_CONNECTIONS: List[ModuleConnection] = [
                     "Context braucht Memory"),
     ModuleConnection("context_compressor", "context_manager", "compressor",
                     "Context nutzt Compressor"),
+
+    # =============================================================================
+    # === ERWEITERTE AUTONOMIE-MODULE (NEU v15.1) ===
+    # =============================================================================
+
+    # === DEEP PSYCHOLOGY VERBINDUNGEN ===
+    ModuleConnection("memory", "deep_psychology", "memory",
+                    "DeepPsychology braucht Memory für Traumata/Erinnerungen", True),
+    ModuleConnection("emotions", "deep_psychology", "emotions",
+                    "DeepPsychology braucht Emotionen", True),
+    ModuleConnection("consciousness", "deep_psychology", "consciousness",
+                    "DeepPsychology braucht Bewusstsein"),
+    ModuleConnection("personality", "deep_psychology", "personality",
+                    "DeepPsychology beeinflusst Persönlichkeit", bidirectional=True),
+
+    # === TRAUMA PROCESSING VERBINDUNGEN ===
+    ModuleConnection("deep_psychology", "trauma_processing", "psychology",
+                    "Trauma verarbeitet über DeepPsychology", True),
+    ModuleConnection("memory", "trauma_processing", "memory",
+                    "Trauma braucht Memory für Heilung"),
+    ModuleConnection("emotions", "trauma_processing", "emotions",
+                    "Trauma beeinflusst Emotionen", bidirectional=True),
+
+    # === REDEMPTION SYSTEM VERBINDUNGEN ===
+    ModuleConnection("deep_psychology", "redemption_system", "psychology",
+                    "Redemption arbeitet mit DeepPsychology"),
+    ModuleConnection("memory", "redemption_system", "memory",
+                    "Redemption braucht Memory für Wiedergutmachung"),
+    ModuleConnection("emotions", "redemption_system", "emotions",
+                    "Redemption beeinflusst Schuld/Erleichterung"),
+
+    # === REPRESSION SYSTEM VERBINDUNGEN ===
+    ModuleConnection("deep_psychology", "repression_system", "psychology",
+                    "Repression ist Teil von DeepPsychology"),
+    ModuleConnection("consciousness", "repression_system", "consciousness",
+                    "Repression beeinflusst Bewusstsein"),
+    ModuleConnection("memory", "repression_system", "memory",
+                    "Repression verdrängt in Memory"),
+
+    # === FREUDIAN SLIPS VERBINDUNGEN ===
+    ModuleConnection("repression_system", "freudian_slips", "repression",
+                    "FreudianSlips entstehen aus Verdrängung"),
+    ModuleConnection("dialogue_engine", "freudian_slips", "dialogue",
+                    "FreudianSlips erscheinen im Dialog"),
+    ModuleConnection("emotions", "freudian_slips", "emotions",
+                    "FreudianSlips durch emotionalen Stress"),
+
+    # === UNCONSCIOUS PROCESSES VERBINDUNGEN ===
+    ModuleConnection("deep_psychology", "unconscious_processes", "psychology",
+                    "Unbewusste Prozesse aus DeepPsychology"),
+    ModuleConnection("autonomous_thinking", "unconscious_processes", "thinking",
+                    "Unbewusste Prozesse beeinflussen Denken"),
+    ModuleConnection("emotions", "unconscious_processes", "emotions",
+                    "Unbewusste Prozesse beeinflussen Emotionen"),
+
+    # === AUTONOMOUS THINKING VERBINDUNGEN ===
+    ModuleConnection("consciousness", "autonomous_thinking", "consciousness",
+                    "Autonomes Denken braucht Bewusstsein", True),
+    ModuleConnection("memory", "autonomous_thinking", "memory",
+                    "Autonomes Denken greift auf Memory zu"),
+    ModuleConnection("emotions", "autonomous_thinking", "emotions",
+                    "Autonomes Denken wird von Emotionen gefärbt"),
+    ModuleConnection("inner_life", "autonomous_thinking", "inner_life",
+                    "Autonomes Denken ist Teil des Innenlebens"),
+    ModuleConnection("creative_mind", "autonomous_thinking", "creative",
+                    "Autonomes Denken nutzt Kreativität"),
+
+    # === CREATIVE MIND VERBINDUNGEN ===
+    ModuleConnection("emotions", "creative_mind", "emotions",
+                    "Kreativität wird von Emotionen inspiriert", True),
+    ModuleConnection("memory", "creative_mind", "memory",
+                    "Kreativität greift auf Erinnerungen zu"),
+    ModuleConnection("personality", "creative_mind", "personality",
+                    "Kreativität reflektiert Persönlichkeit"),
+    ModuleConnection("autonomous_life", "creative_mind", "autonomous_life",
+                    "Kreativität gegen Langeweile"),
+    ModuleConnection("dialogue_engine", "creative_mind", "dialogue",
+                    "Kreativität färbt Dialog"),
+
+    # === SELF EXPRESSION VERBINDUNGEN ===
+    ModuleConnection("emotions", "self_expression", "emotions",
+                    "Selbstausdruck braucht Emotionen", True),
+    ModuleConnection("creative_mind", "self_expression", "creative",
+                    "Selbstausdruck nutzt Kreativität"),
+    ModuleConnection("personality", "self_expression", "personality",
+                    "Selbstausdruck reflektiert Persönlichkeit"),
+    ModuleConnection("inner_life", "self_expression", "inner_life",
+                    "Selbstausdruck kommt aus Innenleben"),
+
+    # === LIFE PHASES VERBINDUNGEN ===
+    ModuleConnection("energy", "life_phases", "energy",
+                    "Lebensphasen beeinflussen Energie", bidirectional=True),
+    ModuleConnection("emotions", "life_phases", "emotions",
+                    "Lebensphasen beeinflussen Stimmung"),
+    ModuleConnection("autonomous_life", "life_phases", "autonomous_life",
+                    "Lebensphasen steuern Tagesablauf"),
+    ModuleConnection("personality", "life_phases", "personality",
+                    "Lebensphasen färben Verhalten"),
+
+    # === COGNITIVE ENGINE VERBINDUNGEN ===
+    ModuleConnection("consciousness", "cognitive_engine", "consciousness",
+                    "Cognitive Engine braucht Bewusstsein", True),
+    ModuleConnection("reasoning_engine", "cognitive_engine", "reasoning",
+                    "Cognitive Engine nutzt Reasoning"),
+    ModuleConnection("memory", "cognitive_engine", "memory",
+                    "Cognitive Engine greift auf Memory zu"),
+    ModuleConnection("advanced_learning", "cognitive_engine", "learning",
+                    "Cognitive Engine lernt"),
+
+    # === ENERGY MANAGEMENT VERBINDUNGEN ===
+    ModuleConnection("energy", "energy_management", "energy_system",
+                    "EnergyManagement steuert Energy", True),
+    ModuleConnection("life_phases", "energy_management", "life_phases",
+                    "EnergyManagement berücksichtigt Phasen"),
+    ModuleConnection("autonomous_life", "energy_management", "autonomous_life",
+                    "EnergyManagement koordiniert mit Autonomie"),
+
+    # === REAL WORLD SYNC VERBINDUNGEN ===
+    ModuleConnection("interface", "real_world_sync", "interface",
+                    "RealWorldSync braucht Interface"),
+    ModuleConnection("life_phases", "real_world_sync", "life_phases",
+                    "RealWorldSync synchronisiert Phasen"),
+    ModuleConnection("emotions", "real_world_sync", "emotions",
+                    "RealWorldSync beeinflusst Stimmung"),
+
+    # === KNOWLEDGE INFLUENCE VERBINDUNGEN ===
+    ModuleConnection("memory", "knowledge_influence", "memory",
+                    "KnowledgeInfluence greift auf Memory zu", True),
+    ModuleConnection("advanced_learning", "knowledge_influence", "learning",
+                    "KnowledgeInfluence beeinflusst Lernen"),
+    ModuleConnection("preferences", "knowledge_influence", "preferences",
+                    "KnowledgeInfluence formt Vorlieben"),
+
+    # === MESSAGE ANALYZER VERBINDUNGEN ===
+    ModuleConnection("emotions", "message_analyzer", "emotions",
+                    "MessageAnalyzer erkennt emotionalen Kontext"),
+    ModuleConnection("nlp_algorithms", "message_analyzer", "nlp",
+                    "MessageAnalyzer nutzt NLP"),
+    ModuleConnection("router", "message_analyzer", "router",
+                    "MessageAnalyzer informiert Router"),
+
+    # === INTEGRATION LAYER VERBINDUNGEN ===
+    ModuleConnection("deep_psychology", "integration_layer", "psychology",
+                    "IntegrationLayer verbindet Psychologie"),
+    ModuleConnection("emotions", "integration_layer", "emotions",
+                    "IntegrationLayer orchestriert Emotionen"),
+    ModuleConnection("memory", "integration_layer", "memory",
+                    "IntegrationLayer koordiniert Memory"),
+    ModuleConnection("personality", "integration_layer", "personality",
+                    "IntegrationLayer harmonisiert Persönlichkeit"),
+
+    # === SENTENCE STRUCTURES VERBINDUNGEN (NLP) ===
+    ModuleConnection("dialogue_engine", "sentence_structures", "dialogue",
+                    "SentenceStructures formatieren Dialog"),
+    ModuleConnection("personality", "sentence_structures", "personality",
+                    "SentenceStructures reflektieren Persönlichkeit"),
+    ModuleConnection("emotions", "sentence_structures", "emotions",
+                    "SentenceStructures emotionale Färbung"),
+
+    # === SYNONYM ENGINE VERBINDUNGEN (NLP) ===
+    ModuleConnection("emotions", "synonym_engine", "emotions",
+                    "SynonymEngine wählt emotionale Wörter"),
+    ModuleConnection("dialogue_engine", "synonym_engine", "dialogue",
+                    "SynonymEngine bereichert Dialog"),
+
+    # === HUMOR ADVANCED VERBINDUNGEN ===
+    ModuleConnection("emotions", "humor_advanced", "emotions",
+                    "HumorAdvanced braucht emotionalen Kontext"),
+    ModuleConnection("personality", "humor_advanced", "personality",
+                    "HumorAdvanced reflektiert Humor-Stil"),
+    ModuleConnection("dialogue_engine", "humor_advanced", "dialogue",
+                    "HumorAdvanced fügt Humor in Dialog"),
+
+    # === EMPATHY DEEP VERBINDUNGEN ===
+    ModuleConnection("emotions", "empathy_deep", "emotions",
+                    "EmpathyDeep erkennt Emotionen", True),
+    ModuleConnection("deep_psychology", "empathy_deep", "psychology",
+                    "EmpathyDeep nutzt psychologisches Verständnis"),
+    ModuleConnection("dialogue_engine", "empathy_deep", "dialogue",
+                    "EmpathyDeep formt empathische Antworten"),
 ]
 
 
@@ -367,6 +547,128 @@ CALLBACK_DEFINITIONS: List[CallbackDefinition] = [
         ["impulse_generator", "organic_presence"],
         "Wenn lokal beantwortet → Impulse nutzen"
     ),
+
+    # =============================================================================
+    # === ERWEITERTE CALLBACKS FÜR AUTONOME LEBENSWEISE (NEU v15.1) ===
+    # =============================================================================
+
+    # Deep Psychology Callbacks
+    CallbackDefinition(
+        "deep_psychology", "on_trauma_triggered",
+        ["emotions", "dialogue_engine", "personality", "trauma_processing"],
+        "Wenn Trauma getriggert → Emotionale Reaktion + Verarbeitung"
+    ),
+    CallbackDefinition(
+        "deep_psychology", "on_defense_activated",
+        ["dialogue_engine", "repression_system", "emotions"],
+        "Wenn Abwehrmechanismus aktiviert → Verhaltensänderung"
+    ),
+    CallbackDefinition(
+        "deep_psychology", "on_insight_gained",
+        ["consciousness", "self_awareness", "memory", "emotions"],
+        "Wenn psychologische Einsicht → Bewusstsein + Lernen"
+    ),
+
+    # Trauma Processing Callbacks
+    CallbackDefinition(
+        "trauma_processing", "on_healing_progress",
+        ["emotions", "personality", "deep_psychology"],
+        "Wenn Heilung voranschreitet → Emotionale Verbesserung"
+    ),
+    CallbackDefinition(
+        "trauma_processing", "on_trigger_detected",
+        ["emotions", "repression_system", "dialogue_engine"],
+        "Wenn Trigger erkannt → Schutzreaktion"
+    ),
+
+    # Redemption System Callbacks
+    CallbackDefinition(
+        "redemption_system", "on_guilt_recognized",
+        ["emotions", "consciousness", "personality"],
+        "Wenn Schuld erkannt → Emotionale Reaktion"
+    ),
+    CallbackDefinition(
+        "redemption_system", "on_redemption_achieved",
+        ["emotions", "personality", "memory"],
+        "Wenn Wiedergutmachung erreicht → Erleichterung + Speichern"
+    ),
+
+    # Unconscious Processes Callbacks
+    CallbackDefinition(
+        "unconscious_processes", "on_pattern_emerging",
+        ["autonomous_thinking", "consciousness", "deep_psychology"],
+        "Wenn unbewusstes Muster auftaucht → Bewusstwerdung"
+    ),
+    CallbackDefinition(
+        "unconscious_processes", "on_drive_activation",
+        ["autonomous_life", "emotions", "impulse_generator"],
+        "Wenn unbewusster Trieb aktiviert → Impulse generieren"
+    ),
+
+    # Freudian Slips Callbacks
+    CallbackDefinition(
+        "freudian_slips", "on_slip_occurred",
+        ["dialogue_engine", "emotions", "repression_system"],
+        "Wenn Freudian Slip passiert → Im Dialog zeigen"
+    ),
+
+    # Autonomous Thinking Callbacks
+    CallbackDefinition(
+        "autonomous_thinking", "on_thought_complete",
+        ["consciousness", "memory", "creative_mind"],
+        "Wenn autonomer Gedanke fertig → Bewusstsein + Speichern"
+    ),
+    CallbackDefinition(
+        "autonomous_thinking", "on_creative_impulse",
+        ["creative_mind", "self_expression", "dialogue_engine"],
+        "Wenn kreativer Impuls → Ausdruck"
+    ),
+    CallbackDefinition(
+        "autonomous_thinking", "on_question_formed",
+        ["web_curiosity", "consciousness", "dialogue_engine"],
+        "Wenn Frage geformt → Neugier + ggf. fragen"
+    ),
+
+    # Creative Mind Callbacks
+    CallbackDefinition(
+        "creative_mind", "on_idea_generated",
+        ["autonomous_thinking", "memory", "impulse_generator"],
+        "Wenn Idee generiert → Denken + ggf. teilen"
+    ),
+    CallbackDefinition(
+        "creative_mind", "on_boredom_creativity",
+        ["autonomous_life", "self_expression", "dialogue_engine"],
+        "Wenn Kreativität gegen Langeweile → Ausdruck"
+    ),
+
+    # Life Phases Callbacks
+    CallbackDefinition(
+        "life_phases", "on_phase_change",
+        ["energy", "emotions", "personality", "autonomous_life"],
+        "Wenn Lebensphase wechselt → Energie/Stimmung anpassen"
+    ),
+    CallbackDefinition(
+        "life_phases", "on_morning_routine",
+        ["autonomous_life", "emotions", "dialogue_engine"],
+        "Wenn Morgenroutine → Begrüßung vorbereiten"
+    ),
+    CallbackDefinition(
+        "life_phases", "on_evening_reflection",
+        ["consciousness", "memory", "deep_psychology"],
+        "Wenn Abendreflexion → Tageserlebnisse verarbeiten"
+    ),
+
+    # Integration Layer Callbacks
+    CallbackDefinition(
+        "integration_layer", "on_feedback_received",
+        ["advanced_learning", "personality", "emotions"],
+        "Wenn Feedback erhalten → Lernen + Anpassen"
+    ),
+    CallbackDefinition(
+        "integration_layer", "on_system_sync",
+        ["deep_psychology", "emotions", "consciousness", "memory"],
+        "Wenn System-Sync → Alle Komponenten harmonisieren"
+    ),
 ]
 
 
@@ -408,20 +710,40 @@ class HoloWiringEngine:
             # Core
             "energy", "emotions", "memory", "personality", "consciousness",
             # Cognitive
-            "cognitive", "consciousness_engine", "reasoning_engine", 
-            "perception_engine", "advanced_learning",
+            "cognitive", "consciousness_engine", "reasoning_engine",
+            "perception_engine", "advanced_learning", "cognitive_engine",
             # Life
             "autonomous_life", "inner_life", "self_expression", "self_awareness",
             # Interaction
             "dialogue_engine", "organic_presence", "interface",
             # Utilities
             "preferences", "web_curiosity", "tools", "context_manager",
-            # NEW
+            # NEW v15
             "router", "impulse_generator", "context_compressor",
             # Legacy
             "events", "loyalty_core",
+
+            # === ERWEITERTE AUTONOMIE-MODULE (NEU v15.1) ===
+            # Deep Psychology Stack
+            "deep_psychology", "trauma_processing", "redemption_system",
+            "repression_system", "freudian_slips", "unconscious_processes",
+            # Autonomous Features
+            "autonomous_thinking", "creative_mind", "life_phases",
+            # Energy & Real World
+            "energy_management", "real_world_sync",
+            # Knowledge & Learning
+            "knowledge_influence", "message_analyzer",
+            # Integration
+            "integration_layer",
+            # NLP Extensions
+            "sentence_structures", "synonym_engine", "humor_advanced", "empathy_deep",
+            # Extended Cognition
+            "algorithmic_cognition", "counterfactual_reasoner",
+            "hidden_motives", "longterm_goals",
+            # Perception
+            "perception_unified", "vision_extended",
         ]
-        
+
         for name in module_names:
             module = getattr(brain, name, None)
             if module:

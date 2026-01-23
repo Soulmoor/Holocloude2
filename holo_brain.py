@@ -16392,6 +16392,12 @@ class HoloPersona:
             self.voice_interface = None
 
         # ================================================================
+        # 🔌 MODUL-ALIASE FÜR WIRING (NEU v15.1!)
+        # Stellt sicher, dass alle Module für das Wiring-System erreichbar sind
+        # ================================================================
+        self._create_module_aliases()
+
+        # ================================================================
         # 🔗 VERBINDE ALLE KOGNITIVEN MODULE (NEU v14!)
         # ================================================================
         self._connect_all_cognitive_modules()
@@ -16431,6 +16437,156 @@ class HoloPersona:
             except Exception as track_err:
                 # Error-Tracking selbst fehlgeschlagen - nur loggen
                 logger.warning(f"Error-Tracking fehlgeschlagen: {track_err}")
+
+    def _create_module_aliases(self):
+        """
+        Erstellt Aliase für Module aus Sub-Systemen, damit das Wiring sie finden kann.
+
+        NEU v15.1: Vollständige Integration der psychologischen und autonomen Module
+        für echte autonome Lebensweise.
+        """
+        aliases_created = 0
+
+        # === DEEP PSYCHOLOGY STACK (aus proactive_intelligence) ===
+        if hasattr(self, 'proactive_intelligence') and self.proactive_intelligence:
+            pi = self.proactive_intelligence
+
+            # Deep Psychology Engine
+            if hasattr(pi, 'deep_psychology') and pi.deep_psychology:
+                self.deep_psychology = pi.deep_psychology
+                aliases_created += 1
+
+            # Emotional Engines Dictionary
+            if hasattr(pi, 'emotional_engines') and pi.emotional_engines:
+                self.emotional_engines_dict = pi.emotional_engines
+                aliases_created += 1
+
+            # User State Tracker
+            if hasattr(pi, 'user_state_tracker') and pi.user_state_tracker:
+                self.user_state_tracker = pi.user_state_tracker
+                aliases_created += 1
+
+        # === TRAUMA & REDEMPTION (aus deep_psychology oder direkt laden) ===
+        if not hasattr(self, 'trauma_processing') or self.trauma_processing is None:
+            try:
+                from holo_trauma_processing import HoloTraumaProcessingEngine
+                self.trauma_processing = HoloTraumaProcessingEngine()
+                aliases_created += 1
+            except ImportError:
+                self.trauma_processing = None
+
+        if not hasattr(self, 'redemption_system') or self.redemption_system is None:
+            try:
+                from holo_redemption_system import HoloRedemptionEngine
+                self.redemption_system = HoloRedemptionEngine()
+                aliases_created += 1
+            except ImportError:
+                self.redemption_system = None
+
+        if not hasattr(self, 'repression_system') or self.repression_system is None:
+            try:
+                from holo_repression_system import HoloRepressionEngine
+                self.repression_system = HoloRepressionEngine()
+                aliases_created += 1
+            except ImportError:
+                self.repression_system = None
+
+        if not hasattr(self, 'freudian_slips') or self.freudian_slips is None:
+            try:
+                from holo_freudian_slips import HoloFreudianSlipEngine
+                self.freudian_slips = HoloFreudianSlipEngine()
+                aliases_created += 1
+            except ImportError:
+                self.freudian_slips = None
+
+        if not hasattr(self, 'unconscious_processes') or self.unconscious_processes is None:
+            try:
+                from holo_unconscious_processes import HoloUnconsciousEngine
+                self.unconscious_processes = HoloUnconsciousEngine()
+                aliases_created += 1
+            except ImportError:
+                self.unconscious_processes = None
+
+        # === CREATIVE & LIFE PHASES ===
+        if not hasattr(self, 'creative_mind') or self.creative_mind is None:
+            try:
+                from holo_creative_mind import HoloCreativeMind
+                self.creative_mind = HoloCreativeMind()
+                aliases_created += 1
+            except ImportError:
+                self.creative_mind = None
+
+        if not hasattr(self, 'life_phases') or self.life_phases is None:
+            try:
+                from holo_life_phases import HoloLifePhases
+                self.life_phases = HoloLifePhases()
+                aliases_created += 1
+            except ImportError:
+                self.life_phases = None
+
+        # === REAL WORLD SYNC ===
+        if not hasattr(self, 'real_world_sync') or self.real_world_sync is None:
+            try:
+                from holo_real_world_sync import HoloRealWorldSync
+                self.real_world_sync = HoloRealWorldSync()
+                aliases_created += 1
+            except ImportError:
+                self.real_world_sync = None
+
+        # === INTEGRATION LAYER ===
+        if not hasattr(self, 'integration_layer') or self.integration_layer is None:
+            try:
+                from holo_integration_layer import SystemIntegrator
+                self.integration_layer = SystemIntegrator()
+                aliases_created += 1
+            except ImportError:
+                self.integration_layer = None
+
+        # === NLP EXTENSIONS ===
+        if not hasattr(self, 'sentence_structures') or self.sentence_structures is None:
+            try:
+                from holo_sentence_structures import HoloSentenceStructures
+                self.sentence_structures = HoloSentenceStructures()
+                aliases_created += 1
+            except ImportError:
+                self.sentence_structures = None
+
+        if not hasattr(self, 'synonym_engine') or self.synonym_engine is None:
+            try:
+                from holo_synonym_engine_moods import HoloSynonymEngine
+                self.synonym_engine = HoloSynonymEngine()
+                aliases_created += 1
+            except ImportError:
+                self.synonym_engine = None
+
+        if not hasattr(self, 'empathy_deep') or self.empathy_deep is None:
+            try:
+                from holo_empathy_deep import HoloDeepEmpathy
+                self.empathy_deep = HoloDeepEmpathy()
+                aliases_created += 1
+            except ImportError:
+                self.empathy_deep = None
+
+        # === COGNITIVE ENGINE ===
+        if not hasattr(self, 'cognitive_engine') or self.cognitive_engine is None:
+            try:
+                from holo_cognitive_engine import HoloCognitiveEngine
+                self.cognitive_engine = HoloCognitiveEngine()
+                aliases_created += 1
+            except ImportError:
+                self.cognitive_engine = None
+
+        # === MESSAGE ANALYZER ===
+        if not hasattr(self, 'message_analyzer') or self.message_analyzer is None:
+            try:
+                from holo_message_analyzer import HoloMessageAnalyzer
+                self.message_analyzer = HoloMessageAnalyzer()
+                aliases_created += 1
+            except ImportError:
+                self.message_analyzer = None
+
+        if aliases_created > 0:
+            logger.info(f"🔌 {aliases_created} Modul-Aliase für Wiring erstellt")
 
     def _start_autonomous_life(self):
         """
