@@ -29,6 +29,41 @@ from abc import ABC, abstractmethod
 
 logger = logging.getLogger("HoloAdvancedReasoning")
 
+# =============================================================================
+# IMPORTS VON KONSOLIDIERTEN MODULEN
+# =============================================================================
+
+# Kausalitäts-Komponenten aus holo_counterfactual_reasoning (primäres Modul)
+try:
+    from holo_counterfactual_reasoning import (
+        CausalIntegrator,
+        InterventionalReasoning,
+        CausalDiscovery,
+        ConfoundingDetector,
+        CausalStrengthEstimator,
+        TemporalCausality,
+        CausalChainValidator,
+        CounterfactualReasoningEngine,
+        CausalLink as CounterfactualCausalLink,
+        CausalRelationType,
+    )
+    _HAS_COUNTERFACTUAL = True
+    logger.info("[AdvancedReasoning] Nutzt CausalIntegrator aus holo_counterfactual_reasoning")
+except ImportError:
+    _HAS_COUNTERFACTUAL = False
+    CausalIntegrator = None
+    logger.warning("[AdvancedReasoning] holo_counterfactual_reasoning nicht verfügbar - nutze lokale Implementierung")
+
+# Meta-Cognition für Integration mit MetacognitiveReasoner
+try:
+    from holo_meta_cognition import HoloMetaObserver, ObservationType
+    _HAS_META_COGNITION = True
+    logger.info("[AdvancedReasoning] Nutzt HoloMetaObserver aus holo_meta_cognition")
+except ImportError:
+    _HAS_META_COGNITION = False
+    HoloMetaObserver = None
+    ObservationType = None
+
 
 # =============================================================================
 # ENUMS
@@ -330,22 +365,52 @@ class BayesianReasoner:
 # =============================================================================
 # 2. CAUSAL REASONING - Kausalität verstehen
 # =============================================================================
+#
+# HINWEIS: Für erweiterte Kausalitäts-Funktionen nutze holo_counterfactual_reasoning.py:
+# - CausalIntegrator: Zentraler Hub für alle Kausalitäts-Komponenten
+# - InterventionalReasoning: Do-Calculus und Interventionseffekte
+# - CausalDiscovery: Kausale Struktur-Entdeckung
+# - ConfoundingDetector: Erkennt konfundierende Variablen
+# - CausalStrengthEstimator: Quantifiziert kausale Stärke
+# - TemporalCausality: Zeitbasierte Kausalitätsanalyse
+# - CausalChainValidator: Validiert kausale Ketten
+#
+# Diese Klasse bietet eine einfache Schnittstelle und delegiert an das
+# erweiterte System wenn verfügbar.
+# =============================================================================
 
 class CausalReasoner:
     """
     Kausales Reasoning mit Kausalmodellen.
+
+    KONSOLIDIERT: Delegiert an CausalIntegrator aus holo_counterfactual_reasoning.py
+    wenn verfügbar. Bietet Rückwärtskompatibilität für einfache Anwendungsfälle.
 
     Implementiert:
     - Kausale Graphen (DAGs)
     - Interventionen (do-Operator)
     - Kontrafaktische Fragen
     - Confounder-Erkennung
+
+    Für erweiterte Funktionen (ATE, Granger-Kausalität, etc.) nutze direkt:
+    - holo_counterfactual_reasoning.CausalIntegrator
     """
 
     def __init__(self):
         self.nodes: Dict[str, CausalNode] = {}
         self.edges: List[CausalEdge] = []
         self.observations: List[Dict] = []
+
+        # Integration mit erweitertem Kausalitäts-System
+        self._causal_integrator = None
+        self._confounding_detector = None
+        if _HAS_COUNTERFACTUAL and CausalIntegrator is not None:
+            try:
+                self._causal_integrator = CausalIntegrator()
+                self._confounding_detector = self._causal_integrator.confounding
+                logger.debug("[CausalReasoner] Nutzt CausalIntegrator für erweiterte Analyse")
+            except Exception as e:
+                logger.warning(f"[CausalReasoner] CausalIntegrator nicht verfügbar: {e}")
 
     def add_variable(self, name: str, description: str,
                       is_observable: bool = True) -> CausalNode:
@@ -443,6 +508,8 @@ class CausalReasoner:
         Simuliert eine Intervention (do-Operator).
         do(X=x): Setzt X auf x und entfernt alle eingehenden Kanten.
 
+        KONSOLIDIERT: Nutzt InterventionalReasoning wenn verfügbar.
+
         Returns: Erwartete Auswirkungen auf andere Variablen
         """
         if variable not in self.nodes:
@@ -451,7 +518,22 @@ class CausalReasoner:
         effects = {}
         effects[variable] = value
 
-        # Propagiere Effekte durch den Graph
+        # Nutze erweiterte Interventionsanalyse wenn verfügbar
+        if self._causal_integrator is not None:
+            try:
+                # Registriere Intervention im erweiterten System
+                for node_name in self.nodes:
+                    if node_name != variable:
+                        result = self._causal_integrator.interventional.estimate_do_effect(
+                            variable, node_name
+                        )
+                        if result.get("causal_effect", 0) > 0.1:
+                            effects[node_name] = f"beeinflusst ({result['causal_effect']*100:.0f}%)"
+                return effects
+            except Exception as e:
+                logger.debug(f"[CausalReasoner] Fallback auf lokale Intervention: {e}")
+
+        # Fallback: Lokale Propagation
         visited = {variable}
         queue = [variable]
 
@@ -477,7 +559,19 @@ class CausalReasoner:
         """
         Findet gemeinsame Ursachen (Confounder) zwischen zwei Variablen.
         Confounder: Variable die sowohl Ursache als auch Effekt beeinflusst.
+
+        KONSOLIDIERT: Nutzt ConfoundingDetector wenn verfügbar.
         """
+        # Nutze erweiterten Confounder-Detektor wenn verfügbar
+        if self._confounding_detector is not None:
+            try:
+                is_spurious, confounder_list = self._confounding_detector.is_spurious(cause, effect)
+                if confounder_list:
+                    return confounder_list
+            except Exception as e:
+                logger.debug(f"[CausalReasoner] Fallback auf lokale Confounder-Suche: {e}")
+
+        # Fallback: Lokale Implementierung
         cause_ancestors = self._get_ancestors(cause)
         effect_ancestors = self._get_ancestors(effect)
 
@@ -513,7 +607,27 @@ class CausalReasoner:
         """
         Beantwortet kontrafaktische Fragen.
         "Gegeben X=x wurde beobachtet, was wäre Y gewesen, wenn wir do(Z=z) gemacht hätten?"
+
+        KONSOLIDIERT: Nutzt CounterfactualReasoningEngine für erweiterte Analyse.
+        Siehe auch: holo_counterfactual_reasoning.what_would_happen_if()
         """
+        # Nutze erweiterte kontrafaktische Engine wenn verfügbar
+        if _HAS_COUNTERFACTUAL and CounterfactualReasoningEngine is not None:
+            try:
+                cf_engine = CounterfactualReasoningEngine()
+                # Erstelle Szenario-Beschreibung
+                observed_str = ", ".join(f"{k}={v}" for k, v in observed.items())
+                intervention_str = ", ".join(f"{k}={v}" for k, v in intervention.items())
+
+                result = cf_engine.what_would_happen_if(
+                    f"Beobachtet: {observed_str}",
+                    intervention_str
+                )
+                return f"Kontrafaktisch: Wenn {intervention}, dann wäre {query_variable} = {result.get('predicted_outcome', 'unbestimmt')} (Konfidenz: {result.get('confidence', 0):.0%})"
+            except Exception as e:
+                logger.debug(f"[CausalReasoner] Fallback auf lokale kontrafaktische Analyse: {e}")
+
+        # Fallback: Lokale Implementierung
         # Schritt 1: Abduktion - Finde konsistente Hintergrundvariablen
         background = self._abduce_background(observed)
 
@@ -566,24 +680,49 @@ class CausalReasoner:
 # =============================================================================
 # 3. METACOGNITIVE REASONING - Denken über Denken
 # =============================================================================
+#
+# HINWEIS: Für System-weite Meta-Beobachtung nutze holo_meta_cognition.HoloMetaObserver.
+# Diese Klasse fokussiert auf die Metakognition des Reasoning-Prozesses selbst.
+#
+# Integration:
+# - MetacognitiveReasoner: Überwacht Denkprozesse (Biases, Konfidenz, Strategien)
+# - HoloMetaObserver: Überwacht System-Komponenten (Aufrufe, Muster, Kausalität)
+#
+# Beide können zusammenarbeiten für vollständige Meta-Kognition.
+# =============================================================================
 
 class MetacognitiveReasoner:
     """
     Metakognition - Denken über das eigene Denken.
+
+    KONSOLIDIERT: Integriert mit HoloMetaObserver aus holo_meta_cognition.py
+    für System-weite Meta-Beobachtung.
 
     Implementiert:
     - Monitoring: Beobachten des eigenen Denkprozesses
     - Evaluation: Bewerten der Denkqualität
     - Regulation: Anpassen der Denkstrategie
     - Reflection: Tiefe Selbstreflexion
+
+    Für System-weite Beobachtung siehe:
+    - holo_meta_cognition.HoloMetaObserver
     """
 
-    def __init__(self):
+    def __init__(self, meta_observer: 'HoloMetaObserver' = None):
         self.thinking_traces: List[ThinkingTrace] = []
         self.current_confidence: float = 0.5
         self.known_biases: List[str] = []
         self.strategy_performance: Dict[str, List[float]] = defaultdict(list)
         self.reflection_journal: List[Dict] = []
+
+        # Integration mit HoloMetaObserver
+        self._meta_observer = meta_observer
+        if self._meta_observer is None and _HAS_META_COGNITION and HoloMetaObserver is not None:
+            try:
+                self._meta_observer = HoloMetaObserver()
+                logger.info("[MetacognitiveReasoner] Nutzt HoloMetaObserver für System-Beobachtung")
+            except Exception as e:
+                logger.debug(f"[MetacognitiveReasoner] HoloMetaObserver nicht verfügbar: {e}")
 
     def start_monitoring(self, reasoning_mode: ReasoningMode,
                           input_state: Dict[str, Any]) -> int:
@@ -598,6 +737,19 @@ class MetacognitiveReasoner:
             duration_ms=0.0
         )
         self.thinking_traces.append(trace)
+
+        # Beobachte auch im HoloMetaObserver wenn verfügbar
+        if self._meta_observer is not None and ObservationType is not None:
+            try:
+                self._meta_observer.observe(
+                    observation_type=ObservationType.DECISION,
+                    component="MetacognitiveReasoner",
+                    action=f"start_monitoring:{reasoning_mode.value}",
+                    context={"step_id": step_id, "input_keys": list(input_state.keys())},
+                )
+            except Exception:
+                pass
+
         return step_id
 
     def end_monitoring(self, step_id: int, output_state: Dict[str, Any],
@@ -611,6 +763,21 @@ class MetacognitiveReasoner:
             trace.duration_ms = duration_ms
             trace.notes = notes or []
             self.current_confidence = confidence
+
+            # Beobachte auch im HoloMetaObserver wenn verfügbar
+            if self._meta_observer is not None and ObservationType is not None:
+                try:
+                    self._meta_observer.observe(
+                        observation_type=ObservationType.DECISION,
+                        component="MetacognitiveReasoner",
+                        action=f"end_monitoring:{trace.reasoning_mode.value}",
+                        context={"step_id": step_id, "output_keys": list(output_state.keys())},
+                        outcome=f"confidence={confidence:.2f}",
+                        success=confidence > 0.5,
+                        duration_ms=duration_ms,
+                    )
+                except Exception:
+                    pass
 
     def detect_cognitive_biases(self, thinking_trace: ThinkingTrace) -> List[str]:
         """
@@ -811,6 +978,54 @@ class MetacognitiveReasoner:
             summary.append(f"\nEmpfehlung: {suggestion}")
 
         return "\n".join(summary)
+
+    def get_system_observation_history(self, limit: int = 50) -> List[Dict]:
+        """
+        Gibt System-weite Beobachtungen aus HoloMetaObserver zurück.
+
+        KONSOLIDIERT: Nutzt HoloMetaObserver für System-weite Beobachtungen.
+
+        Args:
+            limit: Maximale Anzahl zurückgegebener Beobachtungen
+
+        Returns:
+            Liste von Beobachtungen aus dem Meta-System
+        """
+        if self._meta_observer is not None:
+            try:
+                return self._meta_observer.get_observation_history(
+                    component="MetacognitiveReasoner",
+                    limit=limit
+                )
+            except Exception as e:
+                logger.debug(f"[MetacognitiveReasoner] Konnte History nicht laden: {e}")
+        return []
+
+    def get_combined_insight(self) -> Dict[str, Any]:
+        """
+        Kombiniert lokale Metakognition mit System-weiter Beobachtung.
+
+        KONSOLIDIERT: Vereint MetacognitiveReasoner und HoloMetaObserver Einsichten.
+        """
+        result = {
+            "reasoning_quality": self.evaluate_reasoning_quality(),
+            "biases_detected": list(set(self.known_biases)),
+            "thinking_steps": len(self.thinking_traces),
+            "strategy_suggestion": self.suggest_strategy_change(),
+        }
+
+        # Füge System-Beobachtungen hinzu wenn verfügbar
+        if self._meta_observer is not None:
+            try:
+                history = self._meta_observer.get_observation_history(limit=10)
+                result["system_observations"] = len(history)
+                result["meta_observer_active"] = True
+            except Exception:
+                result["meta_observer_active"] = False
+        else:
+            result["meta_observer_active"] = False
+
+        return result
 
 
 # =============================================================================

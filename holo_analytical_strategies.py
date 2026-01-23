@@ -27,6 +27,28 @@ import random
 
 logger = logging.getLogger("HoloAnalyticalStrategies")
 
+# =============================================================================
+# IMPORTS VON KONSOLIDIERTEN MODULEN
+# =============================================================================
+
+# Kausalitäts-System für erweiterte Root Cause Analysis
+try:
+    from holo_counterfactual_reasoning import (
+        CausalIntegrator,
+        CausalDiscovery,
+        ConfoundingDetector,
+        CounterfactualReasoningEngine,
+    )
+    _HAS_CAUSAL = True
+    logger.info("[AnalyticalStrategies] Nutzt CausalIntegrator für erweiterte Kausalanalyse")
+except ImportError:
+    _HAS_CAUSAL = False
+    CausalIntegrator = None
+    CausalDiscovery = None
+    ConfoundingDetector = None
+    CounterfactualReasoningEngine = None
+    logger.debug("[AnalyticalStrategies] holo_counterfactual_reasoning nicht verfügbar")
+
 
 # =============================================================================
 # ENUMS
@@ -474,21 +496,47 @@ class MECEAnalyzer:
 # =============================================================================
 # 2. ROOT CAUSE ANALYSIS - Ursachenforschung
 # =============================================================================
+#
+# KONSOLIDIERT: Integriert mit holo_counterfactual_reasoning.py für:
+# - CausalIntegrator: Erweiterte Kausalanalyse
+# - CausalDiscovery: Kausale Struktur-Entdeckung
+# - ConfoundingDetector: Scheinkausalitäten erkennen
+#
+# Diese Klasse bietet strukturierte RCA-Methoden (5-Why, Ishikawa, etc.),
+# während holo_counterfactual_reasoning.py die formale Kausalitätslogik bietet.
+# =============================================================================
 
 class RootCauseAnalyzer:
     """
     Root Cause Analysis Framework.
+
+    KONSOLIDIERT: Integriert mit CausalIntegrator aus holo_counterfactual_reasoning.py.
 
     Methoden:
     - 5-Why: Iteratives "Warum?" fragen
     - Ishikawa: Fishbone/Fischgräten-Diagramm
     - Fault Tree: Fehlerbaum-Analyse
     - Pareto: 80/20-Analyse
+
+    Für formale Kausalitätsanalyse siehe:
+    - holo_counterfactual_reasoning.CausalIntegrator
+    - holo_counterfactual_reasoning.CausalDiscovery
     """
 
     def __init__(self):
         self.analyses: List[RootCauseResult] = []
         self.cause_database: Dict[str, List[str]] = defaultdict(list)
+
+        # Integration mit erweitertem Kausalitäts-System
+        self._causal_integrator = None
+        self._causal_discovery = None
+        if _HAS_CAUSAL and CausalIntegrator is not None:
+            try:
+                self._causal_integrator = CausalIntegrator()
+                self._causal_discovery = self._causal_integrator.discovery
+                logger.debug("[RootCauseAnalyzer] Nutzt CausalIntegrator für erweiterte Analyse")
+            except Exception as e:
+                logger.warning(f"[RootCauseAnalyzer] CausalIntegrator nicht verfügbar: {e}")
 
     # -------------------------------------------------------------------------
     # 5-WHY ANALYSIS
@@ -868,6 +916,100 @@ class RootCauseAnalyzer:
             summary.append(f"  → {action}")
 
         return "\n".join(summary)
+
+    def analyze_with_causal_discovery(self, problem: str,
+                                       events: List[str]) -> Dict[str, Any]:
+        """
+        Führt erweiterte Kausalanalyse mit CausalDiscovery durch.
+
+        KONSOLIDIERT: Nutzt CausalDiscovery aus holo_counterfactual_reasoning.py.
+
+        Args:
+            problem: Das zu analysierende Problem
+            events: Liste von beobachteten Ereignissen
+
+        Returns:
+            Erweiterte Kausalanalyse mit entdeckter Struktur
+        """
+        result = {
+            "problem": problem,
+            "events": events,
+            "causal_structure": None,
+            "likely_causes": [],
+            "confounders": [],
+            "recommendation": "Standardanalyse empfohlen"
+        }
+
+        # Nutze erweiterte Kausalentdeckung wenn verfügbar
+        if self._causal_discovery is not None:
+            try:
+                # Registriere Event-Sequenz
+                self._causal_discovery.observe_sequence(events)
+
+                # Entdecke kausale Struktur
+                structure = self._causal_discovery.discover_structure(min_observations=2)
+                result["causal_structure"] = structure
+
+                # Finde wahrscheinliche Ursachen für das Problem
+                if problem in events:
+                    causes = self._causal_discovery.get_likely_causes(problem)
+                    result["likely_causes"] = [{"cause": c, "strength": s} for c, s in causes]
+
+                # Ergänze mit traditioneller 5-Why-Analyse
+                if result["likely_causes"]:
+                    top_cause = result["likely_causes"][0]["cause"]
+                    result["recommendation"] = f"Fokussiere auf: {top_cause} (Kausalstärke: {result['likely_causes'][0]['strength']:.2f})"
+
+            except Exception as e:
+                logger.debug(f"[RootCauseAnalyzer] Kausalentdeckung fehlgeschlagen: {e}")
+                result["causal_structure"] = {"error": str(e)}
+
+        return result
+
+    def get_integrated_analysis(self, problem: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Kombiniert alle RCA-Methoden mit erweiterter Kausalanalyse.
+
+        KONSOLIDIERT: Vereint RootCauseAnalyzer mit holo_counterfactual_reasoning.
+
+        Args:
+            problem: Das zu analysierende Problem
+            context: Zusätzlicher Kontext (causes, events, etc.)
+
+        Returns:
+            Integrierte Analyse aus allen verfügbaren Systemen
+        """
+        context = context or {}
+
+        result = {
+            "problem": problem,
+            "traditional_rca": None,
+            "causal_analysis": None,
+            "confounders_detected": [],
+            "integration_status": "integrated" if _HAS_CAUSAL else "standalone"
+        }
+
+        # Traditionelle kombinierte RCA
+        if "causes" in context:
+            result["traditional_rca"] = self.combined_analysis(problem, context["causes"])
+
+        # Erweiterte Kausalanalyse
+        if self._causal_integrator is not None:
+            try:
+                events = context.get("events", [problem])
+                result["causal_analysis"] = self.analyze_with_causal_discovery(problem, events)
+
+                # Prüfe auf Scheinkausalitäten
+                if "cause" in context and "effect" in context:
+                    is_spurious, confounders = self._causal_integrator.confounding.is_spurious(
+                        context["cause"], context["effect"]
+                    )
+                    if is_spurious:
+                        result["confounders_detected"] = confounders
+            except Exception as e:
+                logger.debug(f"[RootCauseAnalyzer] Integrierte Analyse fehlgeschlagen: {e}")
+
+        return result
 
 
 # =============================================================================

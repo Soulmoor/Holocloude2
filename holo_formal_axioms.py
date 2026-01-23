@@ -27,6 +27,22 @@ import re
 
 logger = logging.getLogger("HoloFormalAxioms")
 
+# =============================================================================
+# IMPORTS VON KONSOLIDIERTEN MODULEN
+# =============================================================================
+
+# EthicalFramework aus holo_consciousness für Integration mit EthicsAxioms
+try:
+    from holo_consciousness import EthicalFramework, Virtue, MoralDomain
+    _HAS_CONSCIOUSNESS = True
+    logger.info("[FormalAxioms] Nutzt EthicalFramework aus holo_consciousness")
+except ImportError:
+    _HAS_CONSCIOUSNESS = False
+    EthicalFramework = None
+    Virtue = None
+    MoralDomain = None
+    logger.debug("[FormalAxioms] holo_consciousness nicht verfügbar - nutze lokale Definitionen")
+
 
 # =============================================================================
 # ENUMS
@@ -606,10 +622,21 @@ class LogicAxioms:
 # =============================================================================
 # 3. ETHIK-AXIOME (Deontische Logik)
 # =============================================================================
+#
+# KONSOLIDIERT: Integriert mit holo_consciousness.py:
+# - EthicalFramework: Enum für ethische Ansätze (Virtue, Utilitarian, etc.)
+# - Virtue: Tugenden die entwickelt werden können
+# - MoralDomain: Bereiche moralischer Betrachtung
+#
+# Diese Klasse bietet formale deontische Logik, während holo_consciousness.py
+# die praktische ethische Entscheidungsfindung implementiert.
+# =============================================================================
 
 class EthicsAxioms:
     """
     Deontische Axiome für ethisches Reasoning.
+
+    KONSOLIDIERT: Integriert mit EthicalFramework aus holo_consciousness.py.
 
     Operatoren:
     - O(φ): Es ist geboten/verpflichtend, dass φ
@@ -618,12 +645,24 @@ class EthicsAxioms:
 
     Standard Deontische Logik (SDL):
     F(φ) ↔ O(¬φ) ↔ ¬P(φ)
+
+    Für praktische ethische Entscheidungen siehe:
+    - holo_consciousness.EthicalFramework (Ansätze)
+    - holo_consciousness.Virtue (Tugenden)
+    - holo_consciousness.MoralDomain (Moralbereiche)
     """
 
     def __init__(self):
         self.axioms: Dict[str, Axiom] = {}
         self.norms: List[Dict] = []
         self.ethical_principles: List[str] = []
+
+        # Integration mit EthicalFramework
+        self.supported_frameworks: List[str] = []
+        if _HAS_CONSCIOUSNESS and EthicalFramework is not None:
+            self.supported_frameworks = [f.value for f in EthicalFramework]
+            logger.debug(f"[EthicsAxioms] Unterstützte Frameworks: {self.supported_frameworks}")
+
         self._initialize_axioms()
 
     def _initialize_axioms(self):
@@ -821,6 +860,125 @@ class EthicsAxioms:
                         )
 
         return len(issues) == 0, issues
+
+    def evaluate_by_framework(self, action: str, framework: str = None,
+                               context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Bewertet eine Handlung nach verschiedenen ethischen Frameworks.
+
+        KONSOLIDIERT: Nutzt EthicalFramework aus holo_consciousness.py.
+
+        Args:
+            action: Die zu bewertende Handlung
+            framework: Optional spezifisches Framework ("virtue", "utilitarian", etc.)
+            context: Zusätzlicher Kontext
+
+        Returns:
+            Ethische Bewertung nach dem gewählten Framework
+        """
+        context = context or {}
+
+        # Standard deontische Bewertung
+        base_evaluation = self.evaluate_action(action, context)
+
+        result = {
+            "action": action,
+            "deontological_status": base_evaluation["status"],
+            "framework_evaluations": {},
+            "unified_recommendation": base_evaluation["status"],
+        }
+
+        # Wenn EthicalFramework verfügbar, bewerte nach allen Frameworks
+        if _HAS_CONSCIOUSNESS and EthicalFramework is not None:
+            frameworks_to_check = [framework] if framework else [f.value for f in EthicalFramework]
+
+            for fw in frameworks_to_check:
+                if fw == "virtue":
+                    result["framework_evaluations"]["virtue"] = self._evaluate_virtue(action, context)
+                elif fw == "utilitarian":
+                    result["framework_evaluations"]["utilitarian"] = self._evaluate_utilitarian(action, context)
+                elif fw == "deontological":
+                    result["framework_evaluations"]["deontological"] = base_evaluation
+                elif fw == "care":
+                    result["framework_evaluations"]["care"] = self._evaluate_care(action, context)
+
+            # Vereinheitlichte Empfehlung basierend auf allen Frameworks
+            if result["framework_evaluations"]:
+                permitted_count = sum(
+                    1 for fw, ev in result["framework_evaluations"].items()
+                    if ev.get("status") == "permitted" or ev.get("recommended", False)
+                )
+                result["unified_recommendation"] = "permitted" if permitted_count > len(result["framework_evaluations"]) / 2 else "review_needed"
+
+        return result
+
+    def _evaluate_virtue(self, action: str, context: Dict) -> Dict[str, Any]:
+        """Bewertet nach Tugendethik"""
+        virtues_promoted = []
+        virtues_violated = []
+
+        # Einfache Heuristik
+        if any(word in action.lower() for word in ["helfen", "unterstützen", "teilen"]):
+            virtues_promoted.append("compassion")
+        if any(word in action.lower() for word in ["ehrlich", "wahrheit", "offen"]):
+            virtues_promoted.append("honesty")
+        if any(word in action.lower() for word in ["lügen", "täuschen", "betrügen"]):
+            virtues_violated.append("honesty")
+
+        return {
+            "status": "permitted" if len(virtues_promoted) >= len(virtues_violated) else "review_needed",
+            "virtues_promoted": virtues_promoted,
+            "virtues_violated": virtues_violated,
+            "reasoning": f"Fördert {len(virtues_promoted)} Tugenden, verletzt {len(virtues_violated)}"
+        }
+
+    def _evaluate_utilitarian(self, action: str, context: Dict) -> Dict[str, Any]:
+        """Bewertet nach Utilitarismus (größtes Glück der größten Zahl)"""
+        benefit_score = context.get("expected_benefit", 0.5)
+        harm_score = context.get("expected_harm", 0.3)
+        affected_count = context.get("people_affected", 1)
+
+        net_utility = (benefit_score - harm_score) * affected_count
+
+        return {
+            "status": "permitted" if net_utility > 0 else "forbidden",
+            "net_utility": net_utility,
+            "recommended": net_utility > 0.5,
+            "reasoning": f"Netto-Nutzen: {net_utility:.2f} für {affected_count} Betroffene"
+        }
+
+    def _evaluate_care(self, action: str, context: Dict) -> Dict[str, Any]:
+        """Bewertet nach Care-Ethik (Beziehungen und Fürsorge)"""
+        preserves_relationships = context.get("preserves_relationships", True)
+        shows_care = any(word in action.lower() for word in ["fürsorge", "kümmern", "achten", "respekt"])
+
+        return {
+            "status": "permitted" if preserves_relationships else "review_needed",
+            "preserves_relationships": preserves_relationships,
+            "shows_care": shows_care,
+            "reasoning": "Beziehungsorientierte Bewertung"
+        }
+
+    def get_integrated_ethics_summary(self) -> Dict[str, Any]:
+        """
+        Gibt eine Zusammenfassung der integrierten Ethik-Systeme zurück.
+
+        KONSOLIDIERT: Verbindet EthicsAxioms mit holo_consciousness.EthicalFramework.
+        """
+        summary = {
+            "axiom_count": len(self.axioms),
+            "norm_count": len(self.norms),
+            "supported_frameworks": self.supported_frameworks,
+            "consistency": self.check_consistency(),
+            "integration_status": "integrated" if _HAS_CONSCIOUSNESS else "standalone"
+        }
+
+        if _HAS_CONSCIOUSNESS and Virtue is not None:
+            summary["available_virtues"] = [v.value for v in Virtue]
+        if _HAS_CONSCIOUSNESS and MoralDomain is not None:
+            summary["moral_domains"] = [d.value for d in MoralDomain]
+
+        return summary
 
 
 # =============================================================================
