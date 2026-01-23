@@ -15241,6 +15241,102 @@ class HoloPersona:
             except Exception as e:
                 logger.debug(f"CognitiveIntegrator nicht verfügbar: {e}")
 
+        # ================================================================
+        # ERWEITERTE LERN- UND WISSENSSYSTEME (NEU!)
+        # ================================================================
+
+        # Advanced Learning System - Spaced Repetition, Knowledge Graph
+        self.advanced_learning_system = None
+        if ADVANCED_LEARNING_AVAILABLE and AdvancedLearningSystem:
+            try:
+                self.advanced_learning_system = AdvancedLearningSystem()
+                logger.info("📚 AdvancedLearningSystem aktiviert")
+                logger.info("   └─ SpacedRepetition, KnowledgeGraph, MetaCognition")
+            except Exception as e:
+                logger.debug(f"AdvancedLearningSystem nicht verfügbar: {e}")
+
+        # Curiosity Driven Learning - Wolfsjagd-Metapher
+        self.curiosity_learning = None
+        if CURIOSITY_DRIVEN_AVAILABLE and get_curiosity_driven_learning:
+            try:
+                self.curiosity_learning = get_curiosity_driven_learning()
+                logger.info("🐺 CuriosityDrivenLearning aktiviert (Wolfsjagd-Metapher)")
+            except Exception as e:
+                logger.debug(f"CuriosityDrivenLearning nicht verfügbar: {e}")
+
+        # Daily Learning Engine - Tägliches Lernen, Streaks
+        self.daily_learning_engine = None
+        if DAILY_LEARNING_AVAILABLE and get_daily_engine:
+            try:
+                self.daily_learning_engine = get_daily_engine()
+                logger.info("📅 DailyLearningEngine aktiviert (Wort des Tages, Streaks)")
+            except Exception as e:
+                logger.debug(f"DailyLearningEngine nicht verfügbar: {e}")
+
+        # Learning Integration - Lerner-Profile, Empfehlungen
+        self.learning_integration = None
+        if LEARNING_INTEGRATION_AVAILABLE and get_learning_integration:
+            try:
+                self.learning_integration = get_learning_integration()
+                logger.info("🎓 LearningIntegration aktiviert (Profile, Empfehlungen)")
+            except Exception as e:
+                logger.debug(f"LearningIntegration nicht verfügbar: {e}")
+
+        # Knowledge Connections - Wissens-Web, Weisheits-Generator
+        self.knowledge_web = None
+        self.wisdom_generator = None
+        if KNOWLEDGE_CONNECTIONS_AVAILABLE and get_knowledge_web:
+            try:
+                self.knowledge_web = get_knowledge_web()
+                if get_wisdom_generator:
+                    self.wisdom_generator = get_wisdom_generator()
+                logger.info("🕸️ KnowledgeWeb aktiviert (Wissens-Verbindungen)")
+            except Exception as e:
+                logger.debug(f"KnowledgeWeb nicht verfügbar: {e}")
+
+        # ================================================================
+        # ERWEITERTE INTERAKTIONSSYSTEME (NEU!)
+        # ================================================================
+
+        # Humor Advanced Engine - Witze, Wortspiele, Kemonomimi-Humor
+        self.humor_advanced = None
+        if HUMOR_ADVANCED_AVAILABLE and get_humor_engine:
+            try:
+                self.humor_advanced = get_humor_engine()
+                logger.info("😂 HumorAdvancedEngine aktiviert")
+                logger.info("   └─ Witze, Wortspiele, Selbstironie, Kemonomimi-Humor")
+            except Exception as e:
+                logger.debug(f"HumorAdvancedEngine nicht verfügbar: {e}")
+
+        # Deep Empathy Engine - Emotionales Verständnis, Trost
+        self.deep_empathy = None
+        if DEEP_EMPATHY_AVAILABLE and get_empathy_engine:
+            try:
+                self.deep_empathy = get_empathy_engine()
+                logger.info("💗 DeepEmpathyEngine aktiviert (Trost, Unterstützung)")
+            except Exception as e:
+                logger.debug(f"DeepEmpathyEngine nicht verfügbar: {e}")
+
+        # Calendar Awareness - Feiertage, Jahreszeiten, Tageszeit
+        self.calendar_awareness = None
+        if CALENDAR_AWARENESS_AVAILABLE and get_calendar_engine:
+            try:
+                self.calendar_awareness = get_calendar_engine()
+                logger.info("📆 CalendarAwareness aktiviert")
+                logger.info("   └─ Feiertage, Jahreszeiten, Mondphasen, Tageszeit")
+            except Exception as e:
+                logger.debug(f"CalendarAwareness nicht verfügbar: {e}")
+
+        # Extended Cognition Engine - Bayesian, Kausal, Dialektisch
+        self.extended_cognition = None
+        if EXTENDED_COGNITION_AVAILABLE and get_extended_cognition_engine:
+            try:
+                self.extended_cognition = get_extended_cognition_engine()
+                logger.info("🧠 ExtendedCognitionEngine aktiviert")
+                logger.info("   └─ Bayesian, Kausal (10 Domänen), Dialektisch")
+            except Exception as e:
+                logger.debug(f"ExtendedCognitionEngine nicht verfügbar: {e}")
+
         # Perception Unified - Vereinte Wahrnehmung
         self.perception_unified = None
         if PERCEPTION_UNIFIED_AVAILABLE and HoloPerceptionUnified:

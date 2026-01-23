@@ -1138,6 +1138,88 @@ get_extended_cognition_engine = safe_import('holo_extended_cognition', 'get_exte
 EXTENDED_COGNITION_AVAILABLE = ExtendedCognitionEngine is not None
 
 # ============================================================================
+# ADVANCED LEARNING SYSTEM (Spaced Repetition, Knowledge Graph, Meta-Learning)
+# ============================================================================
+AdvancedLearningSystem = safe_import('holo_advanced_learning', 'AdvancedLearningSystem', None)
+SpacedRepetitionSystem = safe_import('holo_advanced_learning', 'SpacedRepetitionSystem', None)
+KnowledgeGraph = safe_import('holo_advanced_learning', 'KnowledgeGraph', None)
+MetaCognitionEngine = safe_import('holo_advanced_learning', 'MetaCognitionEngine', None)
+CuriosityEngine = safe_import('holo_advanced_learning', 'CuriosityEngine', None)
+AdaptiveLearningEngine = safe_import('holo_advanced_learning', 'AdaptiveLearningEngine', None)
+ADVANCED_LEARNING_AVAILABLE = AdvancedLearningSystem is not None
+
+# ============================================================================
+# HUMOR ADVANCED (Witze, Wortspiele, Kemonomimi-Humor, Selbstironie)
+# ============================================================================
+HumorAdvancedEngine = safe_import('holo_humor_advanced', 'HumorAdvancedEngine', None)
+get_humor_engine = safe_import('holo_humor_advanced', 'get_humor_engine', None)
+get_random_joke = safe_import('holo_humor_advanced', 'get_random_joke', None)
+get_pun = safe_import('holo_humor_advanced', 'get_pun', None)
+get_kemonomimi_humor = safe_import('holo_humor_advanced', 'get_kemonomimi_humor', None)
+JokeDatabase = safe_import('holo_humor_advanced', 'JokeDatabase', None)
+TimingAwareHumor = safe_import('holo_humor_advanced', 'TimingAwareHumor', None)
+HUMOR_ADVANCED_AVAILABLE = HumorAdvancedEngine is not None
+
+# ============================================================================
+# CURIOSITY DRIVEN LEARNING (Wolfsjagd-Metapher, Emotionale Neugier)
+# ============================================================================
+CuriosityDrivenLearning = safe_import('holo_curiosity_driven', 'CuriosityDrivenLearning', None)
+get_curiosity_driven_learning = safe_import('holo_curiosity_driven', 'get_curiosity_driven_learning', None)
+WolfKnowledgeHunter = safe_import('holo_curiosity_driven', 'WolfKnowledgeHunter', None)
+EmotionalCuriositySystem = safe_import('holo_curiosity_driven', 'EmotionalCuriositySystem', None)
+InterestExplorer = safe_import('holo_curiosity_driven', 'InterestExplorer', None)
+WisdomCollector = safe_import('holo_curiosity_driven', 'WisdomCollector', None)
+CURIOSITY_DRIVEN_AVAILABLE = CuriosityDrivenLearning is not None
+
+# ============================================================================
+# CALENDAR AWARENESS (Feiertage, Jahreszeiten, Mondphasen, Tageszeit)
+# ============================================================================
+CalendarAwarenessEngine = safe_import('holo_calendar_awareness', 'CalendarAwarenessEngine', None)
+get_calendar_engine = safe_import('holo_calendar_awareness', 'get_calendar_engine', None)
+get_time_greeting = safe_import('holo_calendar_awareness', 'get_time_greeting', None)
+get_todays_special = safe_import('holo_calendar_awareness', 'get_todays_special', None)
+get_daily_awareness = safe_import('holo_calendar_awareness', 'get_daily_awareness', None)
+CalendarDatabase = safe_import('holo_calendar_awareness', 'CalendarDatabase', None)
+CALENDAR_AWARENESS_AVAILABLE = CalendarAwarenessEngine is not None
+
+# ============================================================================
+# DEEP EMPATHY (Emotionales Verständnis, Trost, Unterstützung)
+# ============================================================================
+DeepEmpathyEngine = safe_import('holo_empathy_deep', 'DeepEmpathyEngine', None)
+get_empathy_engine = safe_import('holo_empathy_deep', 'get_empathy_engine', None)
+get_comfort_phrase = safe_import('holo_empathy_deep', 'get_comfort_phrase', None)
+EmpathyDatabase = safe_import('holo_empathy_deep', 'EmpathyDatabase', None)
+DEEP_EMPATHY_AVAILABLE = DeepEmpathyEngine is not None
+
+# ============================================================================
+# DAILY LEARNING (Tägliches Lernen, Wort des Tages, Lern-Streaks)
+# ============================================================================
+DailyLearningEngine = safe_import('holo_daily_learning', 'DailyLearningEngine', None)
+get_daily_engine = safe_import('holo_daily_learning', 'get_daily_engine', None)
+ReflectionEngine = safe_import('holo_daily_learning', 'ReflectionEngine', None)
+get_reflection_engine = safe_import('holo_daily_learning', 'get_reflection_engine', None)
+DAILY_LEARNING_AVAILABLE = DailyLearningEngine is not None
+
+# ============================================================================
+# LEARNING INTEGRATION (Lerner-Profile, Wissens-Graph, Empfehlungen)
+# ============================================================================
+HoloLearningIntegration = safe_import('holo_learning_integration', 'HoloLearningIntegration', None)
+get_learning_integration = safe_import('holo_learning_integration', 'get_learning_integration', None)
+IntegratedKnowledgeGraph = safe_import('holo_learning_integration', 'IntegratedKnowledgeGraph', None)
+LearningRecommendationEngine = safe_import('holo_learning_integration', 'LearningRecommendationEngine', None)
+ProgressTracker = safe_import('holo_learning_integration', 'ProgressTracker', None)
+LEARNING_INTEGRATION_AVAILABLE = HoloLearningIntegration is not None
+
+# ============================================================================
+# KNOWLEDGE CONNECTIONS (Wissens-Web, Weisheits-Generator)
+# ============================================================================
+KnowledgeWeb = safe_import('holo_knowledge_connections', 'KnowledgeWeb', None)
+get_knowledge_web = safe_import('holo_knowledge_connections', 'get_knowledge_web', None)
+WisdomGenerator = safe_import('holo_knowledge_connections', 'WisdomGenerator', None)
+get_wisdom_generator = safe_import('holo_knowledge_connections', 'get_wisdom_generator', None)
+KNOWLEDGE_CONNECTIONS_AVAILABLE = KnowledgeWeb is not None
+
+# ============================================================================
 # ORGANIC (KONSOLIDIERT - Intent Detection in holo_context_mind.py)
 # ============================================================================
 # IntentDetector jetzt aus context_mind
@@ -1488,6 +1570,42 @@ __all__ = [
 
     # Extended Cognition (Bayesian, Kausal, Dialektisch)
     'ExtendedCognitionEngine', 'get_extended_cognition_engine', 'EXTENDED_COGNITION_AVAILABLE',
+
+    # Advanced Learning System
+    'AdvancedLearningSystem', 'SpacedRepetitionSystem', 'KnowledgeGraph',
+    'MetaCognitionEngine', 'CuriosityEngine', 'AdaptiveLearningEngine',
+    'ADVANCED_LEARNING_AVAILABLE',
+
+    # Humor Advanced
+    'HumorAdvancedEngine', 'get_humor_engine', 'get_random_joke', 'get_pun',
+    'get_kemonomimi_humor', 'JokeDatabase', 'TimingAwareHumor',
+    'HUMOR_ADVANCED_AVAILABLE',
+
+    # Curiosity Driven Learning
+    'CuriosityDrivenLearning', 'get_curiosity_driven_learning', 'WolfKnowledgeHunter',
+    'EmotionalCuriositySystem', 'InterestExplorer', 'WisdomCollector',
+    'CURIOSITY_DRIVEN_AVAILABLE',
+
+    # Calendar Awareness
+    'CalendarAwarenessEngine', 'get_calendar_engine', 'get_time_greeting',
+    'get_todays_special', 'get_daily_awareness', 'CalendarDatabase',
+    'CALENDAR_AWARENESS_AVAILABLE',
+
+    # Deep Empathy
+    'DeepEmpathyEngine', 'get_empathy_engine', 'get_comfort_phrase',
+    'EmpathyDatabase', 'DEEP_EMPATHY_AVAILABLE',
+
+    # Daily Learning
+    'DailyLearningEngine', 'get_daily_engine', 'ReflectionEngine',
+    'get_reflection_engine', 'DAILY_LEARNING_AVAILABLE',
+
+    # Learning Integration
+    'HoloLearningIntegration', 'get_learning_integration', 'IntegratedKnowledgeGraph',
+    'LearningRecommendationEngine', 'ProgressTracker', 'LEARNING_INTEGRATION_AVAILABLE',
+
+    # Knowledge Connections
+    'KnowledgeWeb', 'get_knowledge_web', 'WisdomGenerator',
+    'get_wisdom_generator', 'KNOWLEDGE_CONNECTIONS_AVAILABLE',
 
     # Organic
     'IntentDetector', 'ResponseGenerator', 'ResponseHints',
