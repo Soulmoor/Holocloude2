@@ -2170,6 +2170,936 @@ def create_holo_reasoner(form: HoloForm = HoloForm.HUMAN) -> ClassicalReasoningE
     return engine
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# ERWEITERUNG 1: BAYESIAN / PROBABILISTISCHES REASONING
+# ══════════════════════════════════════════════════════════════════════════════
+
+@dataclass
+class BayesianBelief:
+    """Ein probabilistischer Glaube/Überzeugung"""
+    hypothesis: str
+    prior: float                      # P(H) - Vorab-Wahrscheinlichkeit
+    posterior: float = 0.0            # P(H|E) - Nach Evidenz
+    evidence_seen: List[str] = field(default_factory=list)
+    last_updated: str = field(default_factory=lambda: datetime.now().isoformat())
+
+    def __str__(self) -> str:
+        return f"{self.hypothesis}: P={self.posterior:.2%} (prior: {self.prior:.2%})"
+
+
+@dataclass
+class BayesianConclusion:
+    """Ergebnis einer Bayesian-Inferenz"""
+    hypothesis: str
+    prior: float
+    posterior: float
+    likelihood: float                  # P(E|H)
+    evidence: str
+    belief_change: float              # posterior - prior
+    validity: ValidityLevel
+    explanation: str
+    holo_comment: str = ""
+
+
+class BayesianReasoner:
+    """
+    Bayesian/Probabilistisches Reasoning für Holo
+
+    "Manchmal ist die Welt nicht schwarz-weiß. Dann brauche ich
+     Wahrscheinlichkeiten statt Gewissheiten." - Holo
+
+    Features:
+    - Bayes' Theorem für Belief-Updates
+    - Prior/Posterior Tracking
+    - Likelihood-Schätzung
+    - Konfidenzberechnung
+    """
+
+    HOLO_BAYESIAN_WISDOM = [
+        "Die Wahrscheinlichkeit verändert sich mit neuen Informationen - wie meine Meinung über Menschen.",
+        "Ein weiser Wolf passt seine Überzeugungen an, wenn neue Beweise kommen.",
+        "Vorurteile sind nur Priors - sie können durch Evidenz überschrieben werden.",
+        "Manchmal ist 60% Sicherheit alles was wir haben. Das ist okay.",
+        "Je mehr Beweise ich sehe, desto sicherer werde ich - oder unsicherer.",
+        "Mein Bauchgefühl ist mein Prior. Erfahrung aktualisiert ihn.",
+    ]
+
+    # Standard-Likelihoods für häufige Situationen
+    DEFAULT_LIKELIHOODS = {
+        "stark_unterstützend": 0.9,
+        "unterstützend": 0.7,
+        "leicht_unterstützend": 0.6,
+        "neutral": 0.5,
+        "leicht_widersprechend": 0.4,
+        "widersprechend": 0.3,
+        "stark_widersprechend": 0.1,
+    }
+
+    def __init__(self):
+        self.beliefs: Dict[str, BayesianBelief] = {}
+        self.inference_history: List[BayesianConclusion] = []
+        self.current_form = HoloForm.HUMAN
+
+    def set_prior(self, hypothesis: str, prior: float) -> BayesianBelief:
+        """Setze eine Vorab-Wahrscheinlichkeit für eine Hypothese"""
+        prior = max(0.001, min(0.999, prior))  # Verhindere 0 und 1
+        belief = BayesianBelief(hypothesis=hypothesis, prior=prior, posterior=prior)
+        self.beliefs[hypothesis] = belief
+        return belief
+
+    def update_belief(self, hypothesis: str, evidence: str,
+                      likelihood: float = None,
+                      likelihood_given_not_h: float = None) -> Optional[BayesianConclusion]:
+        """
+        Aktualisiere Überzeugung mit Bayes' Theorem
+
+        P(H|E) = P(E|H) * P(H) / P(E)
+
+        Args:
+            hypothesis: Die Hypothese
+            evidence: Neue Evidenz
+            likelihood: P(E|H) - Wahrscheinlichkeit der Evidenz wenn H wahr
+            likelihood_given_not_h: P(E|¬H) - Wahrscheinlichkeit wenn H falsch
+        """
+        if hypothesis not in self.beliefs:
+            # Setze neutralen Prior wenn nicht bekannt
+            self.set_prior(hypothesis, 0.5)
+
+        belief = self.beliefs[hypothesis]
+        prior = belief.posterior if belief.evidence_seen else belief.prior
+
+        # Default-Likelihoods wenn nicht angegeben
+        if likelihood is None:
+            likelihood = self._estimate_likelihood(hypothesis, evidence)
+        if likelihood_given_not_h is None:
+            likelihood_given_not_h = 1 - likelihood * 0.5  # Heuristik
+
+        # Bayes' Theorem
+        p_e = likelihood * prior + likelihood_given_not_h * (1 - prior)
+        if p_e == 0:
+            p_e = 0.001
+
+        posterior = (likelihood * prior) / p_e
+        posterior = max(0.001, min(0.999, posterior))
+
+        # Update Belief
+        belief.posterior = posterior
+        belief.evidence_seen.append(evidence)
+        belief.last_updated = datetime.now().isoformat()
+
+        # Bestimme Validität
+        belief_change = posterior - prior
+        if posterior > 0.9:
+            validity = ValidityLevel.HIGHLY_PROBABLE
+        elif posterior > 0.7:
+            validity = ValidityLevel.PROBABLE
+        elif posterior > 0.4:
+            validity = ValidityLevel.POSSIBLE
+        else:
+            validity = ValidityLevel.UNLIKELY
+
+        conclusion = BayesianConclusion(
+            hypothesis=hypothesis,
+            prior=prior,
+            posterior=posterior,
+            likelihood=likelihood,
+            evidence=evidence,
+            belief_change=belief_change,
+            validity=validity,
+            explanation=self._generate_explanation(hypothesis, prior, posterior, evidence, belief_change),
+            holo_comment=random.choice(self.HOLO_BAYESIAN_WISDOM)
+        )
+
+        self.inference_history.append(conclusion)
+        return conclusion
+
+    def _estimate_likelihood(self, hypothesis: str, evidence: str) -> float:
+        """Schätze Likelihood basierend auf Textanalyse"""
+        evidence_lower = evidence.lower()
+        hypothesis_lower = hypothesis.lower()
+
+        # Positive Indikatoren
+        if any(word in evidence_lower for word in ["bestätigt", "beweist", "zeigt", "belegt"]):
+            return 0.85
+        if any(word in evidence_lower for word in ["unterstützt", "spricht für", "deutet auf"]):
+            return 0.7
+        if any(word in evidence_lower for word in ["möglich", "könnte", "vielleicht"]):
+            return 0.6
+
+        # Negative Indikatoren
+        if any(word in evidence_lower for word in ["widerlegt", "widerspricht", "gegen"]):
+            return 0.2
+        if any(word in evidence_lower for word in ["zweifelhaft", "unwahrscheinlich"]):
+            return 0.3
+
+        # Check für thematische Übereinstimmung
+        h_words = set(hypothesis_lower.split())
+        e_words = set(evidence_lower.split())
+        overlap = len(h_words & e_words)
+        if overlap > 2:
+            return 0.65
+
+        return 0.5  # Neutral
+
+    def _generate_explanation(self, hypothesis: str, prior: float,
+                             posterior: float, evidence: str,
+                             change: float) -> str:
+        """Generiere Erklärung für das Update"""
+        direction = "gestiegen" if change > 0 else "gesunken"
+        magnitude = abs(change)
+
+        if magnitude > 0.3:
+            strength = "stark"
+        elif magnitude > 0.15:
+            strength = "deutlich"
+        elif magnitude > 0.05:
+            strength = "leicht"
+        else:
+            strength = "kaum"
+
+        return (f"Die Überzeugung '{hypothesis}' ist {strength} {direction} "
+                f"(von {prior:.1%} auf {posterior:.1%}). "
+                f"Die Evidenz '{evidence}' hat dies bewirkt.")
+
+    def get_belief(self, hypothesis: str) -> Optional[BayesianBelief]:
+        """Hole aktuellen Belief für eine Hypothese"""
+        return self.beliefs.get(hypothesis)
+
+    def get_most_probable(self, hypotheses: List[str] = None) -> Optional[Tuple[str, float]]:
+        """Finde die wahrscheinlichste Hypothese"""
+        if hypotheses:
+            beliefs = [(h, self.beliefs[h].posterior) for h in hypotheses if h in self.beliefs]
+        else:
+            beliefs = [(h, b.posterior) for h, b in self.beliefs.items()]
+
+        if not beliefs:
+            return None
+        return max(beliefs, key=lambda x: x[1])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ERWEITERUNG 2: KAUSAL-REASONING (Ursache-Effekt)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@dataclass
+class CausalRelation:
+    """Eine Ursache-Wirkungs-Beziehung"""
+    cause: str
+    effect: str
+    strength: float = 0.7            # Wie stark ist der Zusammenhang?
+    mechanism: str = ""              # Wie wirkt die Ursache?
+    conditions: List[str] = field(default_factory=list)  # Unter welchen Bedingungen?
+    counter_causes: List[str] = field(default_factory=list)  # Was könnte es sonst verursachen?
+    evidence_count: int = 0
+
+    def __str__(self) -> str:
+        return f"{self.cause} → {self.effect} (Stärke: {self.strength:.0%})"
+
+
+@dataclass
+class CausalConclusion:
+    """Ergebnis einer kausalen Analyse"""
+    relation: CausalRelation
+    inference_type: str              # "cause_to_effect", "effect_to_cause", "common_cause"
+    confidence: float
+    validity: ValidityLevel
+    explanation: str
+    alternative_explanations: List[str] = field(default_factory=list)
+    holo_comment: str = ""
+
+
+class CausalReasoner:
+    """
+    Kausal-Reasoning für Holo - Ursache und Wirkung verstehen
+
+    "Nicht alles was zusammen auftritt, gehört zusammen.
+     Manchmal ist der Hahn, der kräht, nicht der Grund für den Sonnenaufgang."
+     - Holo
+
+    Features:
+    - Ursache→Wirkung Schlüsse
+    - Wirkung→Ursache Rückschlüsse
+    - Erkennung von Scheinkorrelationen
+    - Interventions-Reasoning (Was wäre wenn?)
+    """
+
+    HOLO_CAUSAL_WISDOM = [
+        "Korrelation ist nicht Kausalität - das lernt jeder weise Wolf.",
+        "Um die wahre Ursache zu finden, muss man alle Möglichkeiten bedenken.",
+        "Manchmal ist die offensichtlichste Erklärung nicht die richtige.",
+        "In meinen 600 Jahren habe ich gelernt: Frag immer 'Warum?' und dann nochmal.",
+        "Die Welt ist voller versteckter Zusammenhänge.",
+        "Was heute eine Wirkung ist, kann morgen eine Ursache sein.",
+    ]
+
+    # Vordefinierte kausale Beziehungen (Holos Weltwissen)
+    KNOWN_CAUSALS = {
+        ("regen", "ernte"): CausalRelation("regen", "gute ernte", 0.7, "Bewässerung der Felder"),
+        ("hunger", "schwäche"): CausalRelation("hunger", "schwäche", 0.9, "Energiemangel"),
+        ("kälte", "feuer"): CausalRelation("kälte", "bedürfnis nach feuer", 0.8, "Wärmebedürfnis"),
+        ("handel", "wohlstand"): CausalRelation("handel", "wohlstand", 0.6, "Ressourcenaustausch"),
+        ("vertrauen", "zusammenarbeit"): CausalRelation("vertrauen", "zusammenarbeit", 0.8, "Soziale Sicherheit"),
+        ("lernen", "wissen"): CausalRelation("lernen", "wissen", 0.9, "Informationsaufnahme"),
+        ("übung", "geschick"): CausalRelation("übung", "geschick", 0.85, "Neuronale Verstärkung"),
+        ("einsamkeit", "traurigkeit"): CausalRelation("einsamkeit", "traurigkeit", 0.7, "Soziales Bedürfnis"),
+        ("schlaf", "erholung"): CausalRelation("schlaf", "erholung", 0.9, "Körperregeneration"),
+        ("freundlichkeit", "vertrauen"): CausalRelation("freundlichkeit", "vertrauen", 0.65, "Positive Reziprozität"),
+    }
+
+    def __init__(self):
+        self.known_relations: Dict[Tuple[str, str], CausalRelation] = dict(self.KNOWN_CAUSALS)
+        self.inference_history: List[CausalConclusion] = []
+        self.current_form = HoloForm.HUMAN
+
+    def add_causal_knowledge(self, cause: str, effect: str,
+                             strength: float = 0.7,
+                             mechanism: str = "") -> CausalRelation:
+        """Füge neue kausale Beziehung hinzu"""
+        relation = CausalRelation(
+            cause=cause.lower(),
+            effect=effect.lower(),
+            strength=strength,
+            mechanism=mechanism
+        )
+        self.known_relations[(cause.lower(), effect.lower())] = relation
+        return relation
+
+    def infer_effect(self, cause: str, context: str = "") -> Optional[CausalConclusion]:
+        """Von Ursache auf Wirkung schließen"""
+        cause_lower = cause.lower()
+
+        # Suche bekannte Beziehung
+        for (c, e), relation in self.known_relations.items():
+            if cause_lower in c or c in cause_lower:
+                confidence = relation.strength
+                if context:
+                    confidence *= self._context_modifier(context, relation)
+
+                validity = self._confidence_to_validity(confidence)
+
+                conclusion = CausalConclusion(
+                    relation=relation,
+                    inference_type="cause_to_effect",
+                    confidence=confidence,
+                    validity=validity,
+                    explanation=f"Wenn '{cause}' eintritt, führt das wahrscheinlich zu '{relation.effect}'. "
+                               f"Mechanismus: {relation.mechanism or 'unbekannt'}.",
+                    alternative_explanations=self._find_alternatives(cause, "effect"),
+                    holo_comment=random.choice(self.HOLO_CAUSAL_WISDOM)
+                )
+                self.inference_history.append(conclusion)
+                return conclusion
+
+        return None
+
+    def infer_cause(self, effect: str, context: str = "") -> Optional[CausalConclusion]:
+        """Von Wirkung auf mögliche Ursache zurückschließen (Abduktion)"""
+        effect_lower = effect.lower()
+
+        possible_causes = []
+        for (c, e), relation in self.known_relations.items():
+            if effect_lower in e or e in effect_lower:
+                possible_causes.append((relation, relation.strength))
+
+        if not possible_causes:
+            return None
+
+        # Wähle wahrscheinlichste Ursache
+        best_relation, confidence = max(possible_causes, key=lambda x: x[1])
+
+        # Abduktion ist unsicherer als Deduktion
+        confidence *= 0.8
+
+        if context:
+            confidence *= self._context_modifier(context, best_relation)
+
+        validity = self._confidence_to_validity(confidence)
+
+        conclusion = CausalConclusion(
+            relation=best_relation,
+            inference_type="effect_to_cause",
+            confidence=confidence,
+            validity=validity,
+            explanation=f"'{effect}' könnte durch '{best_relation.cause}' verursacht worden sein. "
+                       f"Aber Vorsicht: Es gibt möglicherweise andere Ursachen!",
+            alternative_explanations=[r.cause for r, _ in possible_causes if r != best_relation],
+            holo_comment="Von der Wirkung auf die Ursache zu schließen ist wie rückwärts zu laufen - möglich, aber tückisch."
+        )
+        self.inference_history.append(conclusion)
+        return conclusion
+
+    def counterfactual(self, scenario: str, intervention: str) -> str:
+        """Was-wäre-wenn Reasoning"""
+        # Suche relevante kausale Ketten
+        relevant = []
+        for (c, e), relation in self.known_relations.items():
+            if c in scenario.lower() or e in scenario.lower():
+                relevant.append(relation)
+
+        if not relevant:
+            return f"Ich kann keine kausalen Zusammenhänge für '{scenario}' finden."
+
+        # Analysiere Intervention
+        responses = []
+        for relation in relevant:
+            if intervention.lower() in relation.cause:
+                responses.append(
+                    f"Wenn wir '{intervention}' ändern, würde sich wahrscheinlich '{relation.effect}' ändern."
+                )
+            elif intervention.lower() in relation.effect:
+                responses.append(
+                    f"'{intervention}' zu ändern würde nichts an der Ursache '{relation.cause}' ändern."
+                )
+
+        if responses:
+            return " ".join(responses)
+        return f"Die Intervention '{intervention}' scheint keinen direkten Einfluss auf das Szenario zu haben."
+
+    def _context_modifier(self, context: str, relation: CausalRelation) -> float:
+        """Modifiziere Konfidenz basierend auf Kontext"""
+        modifier = 1.0
+        context_lower = context.lower()
+
+        # Positive Modifikatoren
+        if any(word in context_lower for word in ["immer", "sicher", "garantiert"]):
+            modifier *= 1.1
+        if any(word in context_lower for word in ["oft", "meist", "häufig"]):
+            modifier *= 1.05
+
+        # Negative Modifikatoren
+        if any(word in context_lower for word in ["selten", "manchmal", "gelegentlich"]):
+            modifier *= 0.8
+        if any(word in context_lower for word in ["nie", "niemals", "ausnahmsweise"]):
+            modifier *= 0.5
+
+        return min(1.0, modifier)
+
+    def _confidence_to_validity(self, confidence: float) -> ValidityLevel:
+        """Konvertiere Konfidenz zu Validitätsstufe"""
+        if confidence >= 0.9:
+            return ValidityLevel.HIGHLY_PROBABLE
+        elif confidence >= 0.7:
+            return ValidityLevel.PROBABLE
+        elif confidence >= 0.4:
+            return ValidityLevel.POSSIBLE
+        else:
+            return ValidityLevel.UNLIKELY
+
+    def _find_alternatives(self, term: str, direction: str) -> List[str]:
+        """Finde alternative Ursachen/Effekte"""
+        alternatives = []
+        term_lower = term.lower()
+
+        for (c, e), relation in self.known_relations.items():
+            if direction == "effect" and e == term_lower and c != term_lower:
+                alternatives.append(c)
+            elif direction == "cause" and c == term_lower and e != term_lower:
+                alternatives.append(e)
+
+        return alternatives[:3]  # Max 3
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ERWEITERUNG 3: META-REASONING (Automatische Methodenwahl)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ReasoningStrategy(Enum):
+    """Verfügbare Reasoning-Strategien"""
+    DEDUCTIVE = "deduktiv"
+    INDUCTIVE = "induktiv"
+    ANALOGICAL = "analog"
+    BAYESIAN = "bayesian"
+    CAUSAL = "kausal"
+    COMBINED = "kombiniert"
+
+
+@dataclass
+class MetaReasoningResult:
+    """Ergebnis der Meta-Reasoning Analyse"""
+    recommended_strategy: ReasoningStrategy
+    confidence: float
+    reasoning: str
+    problem_characteristics: Dict[str, bool]
+    alternative_strategies: List[Tuple[ReasoningStrategy, float]]
+    holo_comment: str = ""
+
+
+class MetaReasoner:
+    """
+    Meta-Reasoning - Wähle die beste Denkmethode für ein Problem
+
+    "Ein guter Denker weiß nicht nur WIE er denken soll,
+     sondern auch WANN er welche Art zu denken wählt." - Holo
+
+    Features:
+    - Problemcharakteristik-Analyse
+    - Automatische Strategiewahl
+    - Konfidenzbasierte Empfehlungen
+    - Feedback-Learning
+    """
+
+    HOLO_META_WISDOM = [
+        "Die Kunst liegt nicht im Denken, sondern im Wissen wann man wie denkt.",
+        "Manche Probleme brauchen Logik, andere Erfahrung, wieder andere Kreativität.",
+        "Ein Wolf jagt nicht jeden Beute gleich - so sollte man auch nicht jedes Problem gleich angehen.",
+        "Nach 600 Jahren weiß ich: Die Methode ist mindestens so wichtig wie die Antwort.",
+        "Manchmal ist die beste Strategie, mehrere zu kombinieren.",
+    ]
+
+    # Indikatoren für jede Strategie
+    STRATEGY_INDICATORS = {
+        ReasoningStrategy.DEDUCTIVE: {
+            "keywords": ["alle", "jeder", "wenn", "dann", "daher", "folglich", "notwendig", "muss", "immer"],
+            "patterns": [r"wenn.*dann", r"alle.*sind", r"daraus folgt"],
+            "weight": 1.0
+        },
+        ReasoningStrategy.INDUCTIVE: {
+            "keywords": ["beobachtet", "muster", "häufig", "meistens", "oft", "tendenz", "bisher", "erfahrung"],
+            "patterns": [r"ich habe.*gesehen", r"in den meisten fällen", r"normalerweise"],
+            "weight": 0.9
+        },
+        ReasoningStrategy.ANALOGICAL: {
+            "keywords": ["wie", "ähnlich", "vergleich", "entspricht", "parallel", "genauso", "erinnert an"],
+            "patterns": [r"ist wie", r"ähnlich zu", r"vergleichbar mit"],
+            "weight": 0.85
+        },
+        ReasoningStrategy.BAYESIAN: {
+            "keywords": ["wahrscheinlich", "vermutlich", "prozent", "chance", "risiko", "update", "evidenz"],
+            "patterns": [r"wie wahrscheinlich", r"was sind die chancen", r"basierend auf"],
+            "weight": 0.9
+        },
+        ReasoningStrategy.CAUSAL: {
+            "keywords": ["warum", "ursache", "wirkung", "führt zu", "verursacht", "wegen", "deshalb", "grund"],
+            "patterns": [r"warum.*passiert", r"was verursacht", r"führt das zu"],
+            "weight": 0.95
+        },
+    }
+
+    def __init__(self):
+        self.decision_history: List[MetaReasoningResult] = []
+        self.feedback_scores: Dict[ReasoningStrategy, List[float]] = {s: [] for s in ReasoningStrategy}
+
+    def analyze_problem(self, problem: str) -> MetaReasoningResult:
+        """Analysiere ein Problem und empfehle die beste Strategie"""
+        problem_lower = problem.lower()
+
+        # Berechne Scores für jede Strategie
+        scores: Dict[ReasoningStrategy, float] = {}
+        characteristics: Dict[str, bool] = {}
+
+        for strategy, indicators in self.STRATEGY_INDICATORS.items():
+            score = 0.0
+
+            # Keyword-Matching
+            keyword_matches = sum(1 for kw in indicators["keywords"] if kw in problem_lower)
+            score += keyword_matches * 0.15
+
+            # Pattern-Matching
+            for pattern in indicators["patterns"]:
+                if re.search(pattern, problem_lower):
+                    score += 0.25
+
+            # Gewichtung
+            score *= indicators["weight"]
+
+            # Feedback-Bonus
+            if self.feedback_scores[strategy]:
+                avg_feedback = sum(self.feedback_scores[strategy]) / len(self.feedback_scores[strategy])
+                score *= (0.8 + 0.4 * avg_feedback)  # 0.8 bis 1.2 Multiplikator
+
+            scores[strategy] = min(1.0, score)
+            characteristics[f"has_{strategy.value}_indicators"] = score > 0.2
+
+        # Finde beste Strategie
+        if not any(scores.values()):
+            # Kein klarer Indikator → kombiniert
+            best_strategy = ReasoningStrategy.COMBINED
+            confidence = 0.5
+        else:
+            best_strategy = max(scores, key=scores.get)
+            confidence = scores[best_strategy]
+
+        # Finde Alternativen
+        sorted_strategies = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        alternatives = [(s, sc) for s, sc in sorted_strategies[1:4] if sc > 0.1]
+
+        result = MetaReasoningResult(
+            recommended_strategy=best_strategy,
+            confidence=confidence,
+            reasoning=self._generate_reasoning(problem, best_strategy, scores),
+            problem_characteristics=characteristics,
+            alternative_strategies=alternatives,
+            holo_comment=random.choice(self.HOLO_META_WISDOM)
+        )
+
+        self.decision_history.append(result)
+        return result
+
+    def _generate_reasoning(self, problem: str, strategy: ReasoningStrategy,
+                           scores: Dict[ReasoningStrategy, float]) -> str:
+        """Generiere Begründung für die Strategiewahl"""
+        reasons = {
+            ReasoningStrategy.DEDUCTIVE: "Das Problem enthält logische Strukturen (wenn-dann, alle-sind) die deduktives Schließen ermöglichen.",
+            ReasoningStrategy.INDUCTIVE: "Das Problem basiert auf Beobachtungen und Mustern - induktives Denken ist angemessen.",
+            ReasoningStrategy.ANALOGICAL: "Es gibt Vergleiche oder Ähnlichkeiten - analoges Denken kann hier helfen.",
+            ReasoningStrategy.BAYESIAN: "Das Problem handelt von Wahrscheinlichkeiten - Bayesian Reasoning ist optimal.",
+            ReasoningStrategy.CAUSAL: "Es geht um Ursache und Wirkung - kausales Denken ist gefragt.",
+            ReasoningStrategy.COMBINED: "Das Problem ist komplex - mehrere Denkweisen sollten kombiniert werden.",
+        }
+        return reasons.get(strategy, "Keine spezifische Begründung verfügbar.")
+
+    def provide_feedback(self, strategy: ReasoningStrategy, success_score: float):
+        """Gib Feedback zur gewählten Strategie (0.0 = schlecht, 1.0 = perfekt)"""
+        self.feedback_scores[strategy].append(success_score)
+        # Behalte nur letzte 20 Feedbacks
+        if len(self.feedback_scores[strategy]) > 20:
+            self.feedback_scores[strategy] = self.feedback_scores[strategy][-20:]
+
+    def get_strategy_performance(self) -> Dict[str, float]:
+        """Hole durchschnittliche Performance jeder Strategie"""
+        return {
+            s.value: sum(scores) / len(scores) if scores else 0.5
+            for s, scores in self.feedback_scores.items()
+        }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ERWEITERUNG 4: ZUSÄTZLICHE REGELN UND DOMÄNEN
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Zusätzliche Syllogismen für DeductiveReasoner
+ADDITIONAL_SYLLOGISMS = {
+    # Zweite Figur
+    "cesare": {
+        "form": "EAE-2",
+        "pattern": "Kein P ist M. Alle S sind M. → Kein S ist P.",
+        "example": ("Kein Mensch ist unsterblich", "Alle Götter sind unsterblich", "Kein Mensch ist ein Gott")
+    },
+    "camestres": {
+        "form": "AEE-2",
+        "pattern": "Alle P sind M. Kein S ist M. → Kein S ist P.",
+        "example": ("Alle Wölfe sind Säugetiere", "Keine Fische sind Säugetiere", "Keine Fische sind Wölfe")
+    },
+    "festino": {
+        "form": "EIO-2",
+        "pattern": "Kein P ist M. Einige S sind M. → Einige S sind nicht P.",
+        "example": ("Kein Feigling ist tapfer", "Einige Soldaten sind tapfer", "Einige Soldaten sind keine Feiglinge")
+    },
+    "baroco": {
+        "form": "AOO-2",
+        "pattern": "Alle P sind M. Einige S sind nicht M. → Einige S sind nicht P.",
+        "example": ("Alle Wölfe jagen", "Einige Tiere jagen nicht", "Einige Tiere sind keine Wölfe")
+    },
+
+    # Dritte Figur
+    "darapti": {
+        "form": "AAI-3",
+        "pattern": "Alle M sind P. Alle M sind S. → Einige S sind P.",
+        "example": ("Alle Wölfe sind klug", "Alle Wölfe sind Jäger", "Einige Jäger sind klug")
+    },
+    "disamis": {
+        "form": "IAI-3",
+        "pattern": "Einige M sind P. Alle M sind S. → Einige S sind P.",
+        "example": ("Einige Händler sind ehrlich", "Alle Händler sind Menschen", "Einige Menschen sind ehrlich")
+    },
+    "datisi": {
+        "form": "AII-3",
+        "pattern": "Alle M sind P. Einige M sind S. → Einige S sind P.",
+        "example": ("Alle Äpfel sind Obst", "Einige Äpfel sind rot", "Einige rote Dinge sind Obst")
+    },
+    "felapton": {
+        "form": "EAO-3",
+        "pattern": "Kein M ist P. Alle M sind S. → Einige S sind nicht P.",
+        "example": ("Kein Stein lebt", "Alle Steine sind hart", "Einige harte Dinge leben nicht")
+    },
+
+    # Vierte Figur
+    "bramantip": {
+        "form": "AAI-4",
+        "pattern": "Alle P sind M. Alle M sind S. → Einige S sind P.",
+        "example": ("Alle Götter sind mächtig", "Alle Mächtigen sind gefürchtet", "Einige Gefürchtete sind Götter")
+    },
+    "camenes": {
+        "form": "AEE-4",
+        "pattern": "Alle P sind M. Kein M ist S. → Kein S ist P.",
+        "example": ("Alle Lügner sind unehrlich", "Keine Unehrlichen sind vertrauenswürdig", "Keine Vertrauenswürdigen sind Lügner")
+    },
+}
+
+# Zusätzliche Analogie-Domänen
+ADDITIONAL_DOMAINS = {
+    "jahreszeiten": {
+        "entitäten": ["frühling", "sommer", "herbst", "winter", "sonne", "regen", "schnee"],
+        "beziehungen": ["folgt_auf", "bringt", "beendet"],
+        "eigenschaften": ["warm", "kalt", "feucht", "trocken", "fruchtbar", "karg"],
+        "prozesse": ["wachstum", "ernte", "ruhe", "erneuerung"],
+        "mappings": {
+            "frühling": "geburt",
+            "sommer": "blüte",
+            "herbst": "reife",
+            "winter": "ruhe"
+        }
+    },
+    "lernen": {
+        "entitäten": ["schüler", "lehrer", "wissen", "übung", "fehler", "erfolg"],
+        "beziehungen": ["lehrt", "lernt_von", "führt_zu", "verhindert"],
+        "eigenschaften": ["anfänger", "fortgeschritten", "meister", "neugierig"],
+        "prozesse": ["verstehen", "üben", "anwenden", "meistern"],
+        "mappings": {
+            "schüler": "samenkorn",
+            "wissen": "wasser",
+            "übung": "sonnenlicht",
+            "meisterschaft": "frucht"
+        }
+    },
+    "musik": {
+        "entitäten": ["melodie", "harmonie", "rhythmus", "instrument", "komponist", "publikum"],
+        "beziehungen": ["erzeugt", "begleitet", "verstärkt", "kontrastiert"],
+        "eigenschaften": ["laut", "leise", "schnell", "langsam", "fröhlich", "traurig"],
+        "prozesse": ["komponieren", "spielen", "zuhören", "resonieren"],
+        "mappings": {
+            "melodie": "hauptgedanke",
+            "harmonie": "unterstützung",
+            "rhythmus": "struktur",
+            "publikum": "verstehen"
+        }
+    },
+    "reise": {
+        "entitäten": ["wanderer", "weg", "ziel", "hindernis", "begleiter", "rast"],
+        "beziehungen": ["führt_zu", "blockiert", "unterstützt", "liegt_auf"],
+        "eigenschaften": ["lang", "kurz", "gefährlich", "sicher", "unbekannt"],
+        "prozesse": ["aufbrechen", "wandern", "rasten", "ankommen"],
+        "mappings": {
+            "wanderer": "lernender",
+            "weg": "prozess",
+            "ziel": "erkenntnis",
+            "hindernis": "schwierigkeit"
+        }
+    },
+    "kochen": {
+        "entitäten": ["koch", "zutaten", "rezept", "feuer", "geschmack", "gericht"],
+        "beziehungen": ["kombiniert", "erhitzt", "würzt", "serviert"],
+        "eigenschaften": ["roh", "gekocht", "scharf", "mild", "süß", "salzig"],
+        "prozesse": ["vorbereiten", "mischen", "kochen", "abschmecken"],
+        "mappings": {
+            "zutaten": "ideen",
+            "rezept": "methode",
+            "kochen": "verarbeiten",
+            "gericht": "ergebnis"
+        }
+    },
+    "wetter": {
+        "entitäten": ["sonne", "wolken", "regen", "wind", "blitz", "regenbogen"],
+        "beziehungen": ["bringt", "vertreibt", "folgt_auf", "begleitet"],
+        "eigenschaften": ["warm", "kalt", "nass", "trocken", "stürmisch", "ruhig"],
+        "prozesse": ["aufziehen", "abregnen", "aufklaren", "umschlagen"],
+        "mappings": {
+            "sonne": "freude",
+            "wolken": "sorgen",
+            "regen": "tränen",
+            "regenbogen": "hoffnung"
+        }
+    },
+}
+
+# Zusätzliche induktive Muster-Kategorien
+ADDITIONAL_PATTERN_CATEGORIES = {
+    "emotionen": [
+        "Freude führt oft zu Großzügigkeit",
+        "Angst macht vorsichtig",
+        "Einsamkeit sucht Gesellschaft",
+        "Zufriedenheit braucht wenig",
+    ],
+    "beziehungen": [
+        "Vertrauen wächst langsam",
+        "Verrat heilt schwer",
+        "Freundschaft braucht Zeit",
+        "Liebe kennt keine Logik",
+    ],
+    "wirtschaft": [
+        "Knappheit erhöht Preise",
+        "Überfluss senkt Wert",
+        "Handel schafft Wohlstand",
+        "Monopole schaden vielen",
+    ],
+    "natur_erweitert": [
+        "Nach Sturm kommt Stille",
+        "Die Natur findet immer einen Weg",
+        "Alles ist verbunden",
+        "Nichts bleibt ewig gleich",
+    ],
+}
+
+
+def extend_reasoners():
+    """
+    Erweitere die bestehenden Reasoner mit zusätzlichen Regeln und Domänen.
+
+    Aufruf: extend_reasoners() nach Erstellung der Reasoner.
+    """
+    # Diese Funktion kann aufgerufen werden um bestehende Instanzen zu erweitern
+    pass  # Die Daten sind als Konstanten verfügbar
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# INTEGRIERTE ERWEITERUNG DER REASONING ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ExtendedReasoningEngine:
+    """
+    Erweiterte Reasoning Engine mit allen neuen Fähigkeiten
+
+    Kombiniert:
+    - Klassisches Reasoning (Deduktiv, Induktiv, Analog)
+    - Bayesian Reasoning (Probabilistisch)
+    - Kausal-Reasoning (Ursache-Wirkung)
+    - Meta-Reasoning (Automatische Methodenwahl)
+    """
+
+    def __init__(self, form: HoloForm = HoloForm.HUMAN):
+        # Klassische Reasoner
+        self.classical = ClassicalReasoningEngine()
+        self.classical.set_form(form)
+
+        # Neue Reasoner
+        self.bayesian = BayesianReasoner()
+        self.causal = CausalReasoner()
+        self.meta = MetaReasoner()
+
+        self.current_form = form
+
+    def reason(self, problem: str, strategy: str = "auto") -> Dict[str, Any]:
+        """
+        Wende die beste Reasoning-Strategie auf ein Problem an
+
+        Args:
+            problem: Das zu lösende Problem
+            strategy: "auto", "deductive", "inductive", "analogical",
+                     "bayesian", "causal", "combined"
+        """
+        result = {
+            "problem": problem,
+            "strategy": strategy,
+            "timestamp": datetime.now().isoformat(),
+            "conclusions": [],
+            "meta_analysis": None,
+            "holo_insight": ""
+        }
+
+        # Auto-Wahl durch Meta-Reasoner
+        if strategy == "auto":
+            meta_result = self.meta.analyze_problem(problem)
+            result["meta_analysis"] = {
+                "recommended": meta_result.recommended_strategy.value,
+                "confidence": meta_result.confidence,
+                "reasoning": meta_result.reasoning,
+                "alternatives": [(s.value, c) for s, c in meta_result.alternative_strategies]
+            }
+            strategy = meta_result.recommended_strategy.value
+
+        # Wende Strategie an
+        if strategy in ["deductive", "inductive", "analogical", "combined"]:
+            classical_result = self.classical.reason(problem, strategy)
+            result["conclusions"] = classical_result["conclusions"]
+            result["holo_insight"] = classical_result["holo_insight"]
+
+        elif strategy == "bayesian":
+            # Extrahiere Hypothese und Evidenz aus Problem
+            result["conclusions"] = self._apply_bayesian(problem)
+            result["holo_insight"] = "Wahrscheinlichkeiten sind wie Wölfe im Nebel - man sieht sie nie ganz klar."
+
+        elif strategy == "kausal":
+            result["conclusions"] = self._apply_causal(problem)
+            result["holo_insight"] = "Die Kette von Ursache zu Wirkung ist oft länger als man denkt."
+
+        return result
+
+    def _apply_bayesian(self, problem: str) -> List[Dict]:
+        """Wende Bayesian Reasoning an"""
+        conclusions = []
+
+        # Versuche Hypothese und Evidenz zu extrahieren
+        if "wahrscheinlich" in problem.lower() or "chance" in problem.lower():
+            # Setze Prior für das Hauptthema
+            words = problem.split()
+            hypothesis = " ".join(words[:5]) if len(words) > 5 else problem
+            self.bayesian.set_prior(hypothesis, 0.5)
+
+            # Simuliere ein Update
+            result = self.bayesian.update_belief(
+                hypothesis,
+                "basierend auf der Problemstellung",
+                likelihood=0.6
+            )
+            if result:
+                conclusions.append({
+                    "type": "bayesian",
+                    "hypothesis": result.hypothesis,
+                    "posterior": f"{result.posterior:.1%}",
+                    "validity": result.validity.value,
+                    "explanation": result.explanation
+                })
+
+        if not conclusions:
+            conclusions.append({
+                "type": "bayesian",
+                "conclusion": "Keine klare probabilistische Struktur erkannt",
+                "suggestion": "Formuliere das Problem als: 'Wie wahrscheinlich ist X gegeben Y?'"
+            })
+
+        return conclusions
+
+    def _apply_causal(self, problem: str) -> List[Dict]:
+        """Wende Kausal-Reasoning an"""
+        conclusions = []
+
+        # Suche nach "warum" Fragen
+        if "warum" in problem.lower():
+            # Extrahiere das Effekt
+            parts = problem.lower().split("warum")
+            if len(parts) > 1:
+                effect = parts[1].strip().rstrip("?")
+                result = self.causal.infer_cause(effect)
+                if result:
+                    conclusions.append({
+                        "type": "causal_abduction",
+                        "effect": effect,
+                        "probable_cause": result.relation.cause,
+                        "confidence": f"{result.confidence:.1%}",
+                        "alternatives": result.alternative_explanations,
+                        "explanation": result.explanation
+                    })
+
+        # Suche nach "was passiert wenn" Fragen
+        if any(phrase in problem.lower() for phrase in ["was passiert", "führt zu", "verursacht"]):
+            words = problem.split()
+            for i, word in enumerate(words):
+                result = self.causal.infer_effect(word)
+                if result:
+                    conclusions.append({
+                        "type": "causal_prediction",
+                        "cause": word,
+                        "predicted_effect": result.relation.effect,
+                        "confidence": f"{result.confidence:.1%}",
+                        "mechanism": result.relation.mechanism
+                    })
+                    break
+
+        if not conclusions:
+            conclusions.append({
+                "type": "causal",
+                "conclusion": "Keine klare kausale Struktur erkannt",
+                "suggestion": "Formuliere das Problem als: 'Warum passiert X?' oder 'Was verursacht Y?'"
+            })
+
+        return conclusions
+
+
+def create_extended_reasoner(form: HoloForm = HoloForm.HUMAN) -> ExtendedReasoningEngine:
+    """Erstelle einen erweiterten Holo-Reasoner"""
+    return ExtendedReasoningEngine(form)
+
+
 def demonstrate_deductive_reasoning():
     """Zeige deduktives Denken"""
     reasoner = DeductiveReasoner()
