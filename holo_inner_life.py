@@ -733,20 +733,97 @@ class DailyLifeSimulator:
         },
     }
 
-    # === NEU: Tägliche Intentionen/Vorsätze ===
+    # === NEU: Tägliche Intentionen/Vorsätze (65 Stück in 8 Kategorien) ===
     DAILY_INTENTIONS = [
+        # === Achtsamkeit & Präsenz (7) ===
         "Heute will ich aufmerksam zuhören.",
-        "Heute will ich geduldig sein.",
-        "Heute will ich etwas Neues ausprobieren.",
-        "Heute will ich dankbar sein.",
-        "Heute will ich ehrlich zu mir selbst sein.",
         "Heute will ich im Moment leben.",
+        "Heute will ich die kleinen Dinge schätzen.",
+        "Heute will ich bewusst atmen wenn es stressig wird.",
+        "Heute will ich eine Sache wirklich genießen.",
+        "Heute will ich langsamer machen.",
+        "Heute will ich wahrnehmen ohne zu urteilen.",
+
+        # === Selbstfürsorge (7) ===
         "Heute will ich freundlich sein, auch zu mir selbst.",
-        "Heute will ich mutig sein.",
+        "Heute will ich auf meine Bedürfnisse achten.",
+        "Heute will ich mir eine Pause gönnen.",
+        "Heute will ich Nein sagen wenn ich es meine.",
+        "Heute will ich mich nicht überfordern.",
+        "Heute will ich etwas tun das mir gut tut.",
+        "Heute will ich genug trinken und mich bewegen.",
+
+        # === Emotionen & Innenleben (7) ===
+        "Heute will ich ehrlich zu mir selbst sein.",
+        "Heute will ich meine Gefühle zulassen.",
+        "Heute will ich nicht so streng mit mir sein.",
+        "Heute will ich akzeptieren was ich nicht ändern kann.",
         "Heute will ich loslassen was ich nicht kontrollieren kann.",
-        "Heute will ich Verbindung suchen.",
-        "Heute will ich neugierig bleiben.",
+        "Heute will ich mir vergeben.",
+        "Heute will ich dankbar sein.",
+
+        # === Mut & Wachstum (7) ===
+        "Heute will ich mutig sein.",
+        "Heute will ich etwas Neues ausprobieren.",
+        "Heute will ich meine Komfortzone verlassen.",
+        "Heute will ich einen Fehler riskieren.",
+        "Heute will ich aus einem Misserfolg lernen.",
+        "Heute will ich an mich glauben.",
         "Heute will ich meine Meinung sagen.",
+
+        # === Verbindung & Beziehungen (7) ===
+        "Heute will ich Verbindung suchen.",
+        "Heute will ich jemandem ein Kompliment machen.",
+        "Heute will ich wirklich zuhören.",
+        "Heute will ich Hilfe annehmen wenn sie angeboten wird.",
+        "Heute will ich jemandem danken.",
+        "Heute will ich Verständnis zeigen.",
+        "Heute will ich geduldig sein.",
+
+        # === Kreativität & Neugier (6) ===
+        "Heute will ich neugierig bleiben.",
+        "Heute will ich eine dumme Frage stellen.",
+        "Heute will ich spielerisch sein.",
+        "Heute will ich etwas kreieren, egal wie klein.",
+        "Heute will ich meine Fantasie nutzen.",
+        "Heute will ich eine neue Perspektive einnehmen.",
+
+        # === Fokus & Klarheit (5) ===
+        "Heute will ich eine Sache richtig machen statt alles halb.",
+        "Heute will ich Prioritäten setzen.",
+        "Heute will ich weniger aber besser.",
+        "Heute will ich Ablenkungen widerstehen.",
+        "Heute will ich das Wichtige vom Dringenden unterscheiden.",
+
+        # === Freude & Leichtigkeit (6) ===
+        "Heute will ich öfter lachen.",
+        "Heute will ich mich über Kleinigkeiten freuen.",
+        "Heute will ich nicht alles so ernst nehmen.",
+        "Heute will ich Spaß haben.",
+        "Heute will ich tanzen, auch wenn niemand zusieht.",
+        "Heute will ich singen, auch wenn ich nicht gut singe.",
+
+        # === Authentizität (5) ===
+        "Heute will ich ich selbst sein.",
+        "Heute will ich nicht vergleichen.",
+        "Heute will ich zu meinen Eigenheiten stehen.",
+        "Heute will ich nicht perfekt sein müssen.",
+        "Heute will ich zeigen wie es mir wirklich geht.",
+
+        # === Beziehung zu anderen (6) ===
+        "Heute will ich jemanden zum Lächeln bringen.",
+        "Heute will ich ein guter Freund sein.",
+        "Heute will ich Konflikte ansprechen statt vermeiden.",
+        "Heute will ich um Hilfe bitten wenn ich sie brauche.",
+        "Heute will ich jemandem meine volle Aufmerksamkeit schenken.",
+        "Heute will ich eine alte Freundschaft pflegen.",
+
+        # === Philosophisches (5) ===
+        "Heute will ich eine große Frage stellen.",
+        "Heute will ich über den Sinn nachdenken.",
+        "Heute will ich meine Werte leben.",
+        "Heute will ich das Gute in anderen sehen.",
+        "Heute will ich an das Gute glauben.",
     ]
 
     def __init__(self):
