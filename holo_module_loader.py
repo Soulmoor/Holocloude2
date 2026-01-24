@@ -573,7 +573,7 @@ class HoloBootManager:
     # Boot-Reihenfolge: Welche Module zuerst geladen werden
     BOOT_ORDER = [
         # Phase 1: Core (ohne diese geht nichts)
-        ["holo_core_types", "holo_robust_imports"],
+        ["holo_core_types", "holo_robust_imports", "holo_brain_core"],
 
         # Phase 2: Datenbank (braucht Core)
         ["holo_database_system"],

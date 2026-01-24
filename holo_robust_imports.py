@@ -1055,6 +1055,57 @@ class FallbackNaturalLanguageHelper:
 # =============================================================================
 
 # ============================================================================
+# BRAIN CORE (Basis-Konfiguration und Kern-Klassen)
+# ============================================================================
+BRAIN_CORE_AVAILABLE = False
+BrainConfigBase = None
+PiFeedbackBase = None
+ReflectionBase = None
+DreamSummaryBase = None
+WeeklyRecapBase = None
+HoloSuggestionBase = None
+CalendarEventBase = None
+UserActivityPatternBase = None
+LifeLogEntryBase = None
+EmotionalMemoryBase = None
+MoodStateBase = None
+EnergyLevelBase = None
+InteractionTypeBase = None
+TypingSimulatorBase = None
+SeasonalEventsBase = None
+LifeLogBase = None
+MemoryStoreBase = None
+
+try:
+    from holo_brain_core import (
+        # Config
+        BrainConfig as BrainConfigBase,
+        # Dataclasses
+        PiFeedback as PiFeedbackBase,
+        Reflection as ReflectionBase,
+        DreamSummary as DreamSummaryBase,
+        WeeklyRecap as WeeklyRecapBase,
+        HoloSuggestion as HoloSuggestionBase,
+        CalendarEvent as CalendarEventBase,
+        UserActivityPattern as UserActivityPatternBase,
+        LifeLogEntry as LifeLogEntryBase,
+        EmotionalMemory as EmotionalMemoryBase,
+        # Enums
+        MoodState as MoodStateBase,
+        EnergyLevel as EnergyLevelBase,
+        InteractionType as InteractionTypeBase,
+        # Klassen
+        TypingSimulatorBase,
+        SeasonalEventsBase,
+        LifeLog as LifeLogBase,
+        MemoryStoreBase,
+    )
+    BRAIN_CORE_AVAILABLE = True
+    logger.info("[RobustImports] ✓ holo_brain_core (Basis-Konfiguration & Kern-Klassen)")
+except ImportError as e:
+    logger.warning(f"[RobustImports] holo_brain_core: {e}")
+
+# ============================================================================
 # SMART UNDERSTANDING (NEU v3.0!)
 # ============================================================================
 SmartUnderstanding = safe_import('holo_smart_understanding', 'SmartUnderstanding', FallbackSmartUnderstanding)
@@ -1526,7 +1577,15 @@ __all__ = [
     'PERSONALITY_AVAILABLE',
     'CURIOSITY_SYSTEM_AVAILABLE',
     'KEMONOMIMI_AVAILABLE',
+    'BRAIN_CORE_AVAILABLE',
     'get_core_modules_status',
+
+    # Brain Core (Basis-Konfiguration)
+    'BrainConfigBase', 'PiFeedbackBase', 'ReflectionBase', 'DreamSummaryBase',
+    'WeeklyRecapBase', 'HoloSuggestionBase', 'CalendarEventBase',
+    'UserActivityPatternBase', 'LifeLogEntryBase', 'EmotionalMemoryBase',
+    'MoodStateBase', 'EnergyLevelBase', 'InteractionTypeBase',
+    'TypingSimulatorBase', 'SeasonalEventsBase', 'LifeLogBase', 'MemoryStoreBase',
 
     # Kerndateien Klassen
     'HoloConsciousness', 'HoloInnerLife', 'HoloAutonomousLife',
