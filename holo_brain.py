@@ -2124,6 +2124,300 @@ except ImportError as e:
     create_advanced_vision = None
     logger.debug(f"[Brain] VisionAdvanced nicht verfügbar: {e}")
 
+# =============================================================================
+# BISHER VERWAISTE MODULE - JETZT AKTIVIERT
+# =============================================================================
+
+# Core Types - Zentrale Typ-Definitionen (KRITISCH - wird von 13+ Modulen gebraucht!)
+try:
+    from holo_core_types import (
+        MoodScale,
+        EnergyScale,
+        DriveType,
+        NeedType,
+        GoalType,
+        GoalPriority,
+        ThoughtType,
+        ActivityType,
+        InterestLevel,
+        CommandType as CoreCommandType,
+        CommandPriority as CoreCommandPriority,
+        MessageType,
+        EmotionType,
+        RouteType as CoreRouteType,
+        IntentType as CoreIntentType,
+        Opinion as CoreOpinion,
+        EmotionalState as CoreEmotionalState,
+        TrackedTopic as CoreTrackedTopic,
+        InnerThought,
+        DriveState,
+        NeedState,
+        Goal as CoreGoal,
+        validate_mood,
+        validate_energy,
+        clamp,
+    )
+    CORE_TYPES_AVAILABLE = True
+    logger.info("[Brain] ✓ CoreTypes (Zentrale Typ-Definitionen, MoodScale, DriveType) geladen")
+except ImportError as e:
+    CORE_TYPES_AVAILABLE = False
+    MoodScale = None
+    EnergyScale = None
+    DriveType = None
+    NeedType = None
+    GoalType = None
+    GoalPriority = None
+    ThoughtType = None
+    ActivityType = None
+    InterestLevel = None
+    CoreCommandType = None
+    CoreCommandPriority = None
+    MessageType = None
+    EmotionType = None
+    CoreRouteType = None
+    CoreIntentType = None
+    CoreOpinion = None
+    CoreEmotionalState = None
+    CoreTrackedTopic = None
+    InnerThought = None
+    DriveState = None
+    NeedState = None
+    CoreGoal = None
+    validate_mood = None
+    validate_energy = None
+    clamp = None
+    logger.debug(f"[Brain] CoreTypes nicht verfügbar: {e}")
+
+# Event System - Zentrales Event-System (Observer Pattern)
+try:
+    from holo_events import (
+        EventBus,
+        Event,
+        EventHandler,
+        EventPriority,
+    )
+    EVENTS_AVAILABLE = True
+    # Globale Event-Bus Instanz erstellen
+    global_event_bus = EventBus.get_instance()
+    logger.info("[Brain] ✓ EventBus (Observer Pattern, Event-Dispatch) geladen")
+except ImportError as e:
+    EVENTS_AVAILABLE = False
+    EventBus = None
+    Event = None
+    EventHandler = None
+    EventPriority = None
+    global_event_bus = None
+    logger.debug(f"[Brain] EventBus nicht verfügbar: {e}")
+
+# Utils - Zentrale Utility-Funktionen
+try:
+    from holo_utils import (
+        get_iso_timestamp,
+        get_timestamp_compact,
+        get_timestamp_readable,
+        parse_iso_timestamp,
+        time_ago,
+        safe_json_dumps,
+        safe_json_loads,
+        validate_string,
+        safe_get,
+        safe_get_nested,
+        SerializableMixin,
+    )
+    UTILS_AVAILABLE = True
+    logger.info("[Brain] ✓ Utils (Datetime, JSON, String-Funktionen) geladen")
+except ImportError as e:
+    UTILS_AVAILABLE = False
+    get_iso_timestamp = None
+    get_timestamp_compact = None
+    get_timestamp_readable = None
+    parse_iso_timestamp = None
+    time_ago = None
+    safe_json_dumps = None
+    safe_json_loads = None
+    validate_string = None
+    safe_get = None
+    safe_get_nested = None
+    SerializableMixin = None
+    logger.debug(f"[Brain] Utils nicht verfügbar: {e}")
+
+# Health Checks - Kubernetes-kompatible Health Checks
+try:
+    from holo_health_checks import (
+        HealthChecker,
+        HealthStatus,
+        CheckResult,
+        HealthReport,
+    )
+    HEALTH_CHECKS_AVAILABLE = True
+    logger.info("[Brain] ✓ HealthChecker (Liveness, Readiness, Dependencies) geladen")
+except ImportError as e:
+    HEALTH_CHECKS_AVAILABLE = False
+    HealthChecker = None
+    HealthStatus = None
+    CheckResult = None
+    HealthReport = None
+    logger.debug(f"[Brain] HealthChecker nicht verfügbar: {e}")
+
+# Metrics - Prometheus-kompatible Metriken
+try:
+    from holo_metrics import (
+        MetricsRegistry,
+        Counter,
+        Gauge,
+        Histogram,
+        MetricType,
+        MetricValue,
+    )
+    METRICS_AVAILABLE = True
+    # Globale Metrics-Registry erstellen
+    global_metrics_registry = MetricsRegistry()
+    logger.info("[Brain] ✓ Metrics (Prometheus-Export, Counter, Gauge, Histogram) geladen")
+except ImportError as e:
+    METRICS_AVAILABLE = False
+    MetricsRegistry = None
+    Counter = None
+    Gauge = None
+    Histogram = None
+    MetricType = None
+    MetricValue = None
+    global_metrics_registry = None
+    logger.debug(f"[Brain] Metrics nicht verfügbar: {e}")
+
+# Knowledge Connections - Wissensvernetzung
+try:
+    from holo_knowledge_connections import (
+        ConnectionType,
+        KnowledgeNode,
+        KnowledgeConnection,
+        PREDEFINED_CONNECTIONS,
+    )
+    KNOWLEDGE_CONNECTIONS_AVAILABLE = True
+    logger.info("[Brain] ✓ KnowledgeConnections (Wissensvernetzung, Graph) geladen")
+except ImportError as e:
+    KNOWLEDGE_CONNECTIONS_AVAILABLE = False
+    ConnectionType = None
+    KnowledgeNode = None
+    KnowledgeConnection = None
+    PREDEFINED_CONNECTIONS = []
+    logger.debug(f"[Brain] KnowledgeConnections nicht verfügbar: {e}")
+
+# Learning Integration - Zentrales Lern-Integrationssystem
+try:
+    from holo_learning_integration import (
+        LearnerType,
+        InterestLevel as LearningInterestLevel,
+        LearnerProfile,
+    )
+    LEARNING_INTEGRATION_AVAILABLE = True
+    logger.info("[Brain] ✓ LearningIntegration (Lernprofil, Wissens-Graph) geladen")
+except ImportError as e:
+    LEARNING_INTEGRATION_AVAILABLE = False
+    LearnerType = None
+    LearningInterestLevel = None
+    LearnerProfile = None
+    logger.debug(f"[Brain] LearningIntegration nicht verfügbar: {e}")
+
+# Structured Logging - JSON-basiertes Logging
+try:
+    from holo_structured_logging import (
+        setup_logging,
+        get_logger,
+        LogContext,
+        JSONFormatter,
+        get_context,
+        set_context,
+        clear_context,
+    )
+    STRUCTURED_LOGGING_AVAILABLE = True
+    logger.info("[Brain] ✓ StructuredLogging (JSON-Format, Kontext-Tracking) geladen")
+except ImportError as e:
+    STRUCTURED_LOGGING_AVAILABLE = False
+    setup_logging = None
+    get_logger = None
+    LogContext = None
+    JSONFormatter = None
+    get_context = None
+    set_context = None
+    clear_context = None
+    logger.debug(f"[Brain] StructuredLogging nicht verfügbar: {e}")
+
+# DB Migrations - Datenbank-Migrationssystem
+try:
+    from holo_db_migrations import (
+        MigrationManager,
+        Migration,
+        MigrationError,
+    )
+    DB_MIGRATIONS_AVAILABLE = True
+    logger.info("[Brain] ✓ DBMigrations (Schema-Versionierung, Rollback) geladen")
+except ImportError as e:
+    DB_MIGRATIONS_AVAILABLE = False
+    MigrationManager = None
+    Migration = None
+    MigrationError = None
+    logger.debug(f"[Brain] DBMigrations nicht verfügbar: {e}")
+
+# Device Agent - MQTT-basierter Geräte-Agent
+try:
+    from holo_device_agent import CONFIG as DEVICE_AGENT_CONFIG
+    DEVICE_AGENT_AVAILABLE = True
+    logger.info("[Brain] ✓ DeviceAgent (MQTT, System-Monitoring) geladen")
+except ImportError as e:
+    DEVICE_AGENT_AVAILABLE = False
+    DEVICE_AGENT_CONFIG = None
+    logger.debug(f"[Brain] DeviceAgent nicht verfügbar: {e}")
+
+# NLP Context Understanding - Erweiterte Kontextverständnis-Engine
+try:
+    from holo_nlp_context_understanding import (
+        DiscourseTracker,
+        AdvancedCoreferenceResolver,
+        TopicMemory,
+        ContextUnderstandingEngine,
+        DiscourseRelationType,
+        MentionType,
+        TopicRelevance,
+        get_context_understanding_engine,
+    )
+    NLP_CONTEXT_UNDERSTANDING_AVAILABLE = True
+    logger.info("[Brain] ✓ NLPContextUnderstanding (Discourse, Coreference, Topic) geladen")
+except ImportError as e:
+    NLP_CONTEXT_UNDERSTANDING_AVAILABLE = False
+    DiscourseTracker = None
+    AdvancedCoreferenceResolver = None
+    TopicMemory = None
+    ContextUnderstandingEngine = None
+    DiscourseRelationType = None
+    MentionType = None
+    TopicRelevance = None
+    get_context_understanding_engine = None
+    logger.debug(f"[Brain] NLPContextUnderstanding nicht verfügbar: {e}")
+
+# NLP Unified - Zentrales NLP-Modul (Alternative Implementation)
+try:
+    from holo_nlp_unified import (
+        HoloNLP as HoloNLPUnified,
+        FuzzyMatcher,
+        SentimentAnalyzer,
+        SentimentResult,
+        EntityExtractor as UnifiedEntityExtractor,
+        TFIDFVectorizer,
+        TopicModeler,
+    )
+    NLP_UNIFIED_AVAILABLE = True
+    logger.info("[Brain] ✓ NLPUnified (TF-IDF, Fuzzy, Sentiment, NER) geladen")
+except ImportError as e:
+    NLP_UNIFIED_AVAILABLE = False
+    HoloNLPUnified = None
+    FuzzyMatcher = None
+    SentimentAnalyzer = None
+    SentimentResult = None
+    UnifiedEntityExtractor = None
+    TFIDFVectorizer = None
+    TopicModeler = None
+    logger.debug(f"[Brain] NLPUnified nicht verfügbar: {e}")
+
 logger.info("[Brain] === VOLLSTÄNDIGE INTEGRATION v15.2 ABGESCHLOSSEN ===")
 
 # =============================================================================
@@ -16724,6 +17018,124 @@ class HoloPersona:
                 logger.debug(f"AdvancedVisionEngine nicht verfügbar: {e}")
 
         # ================================================================
+        # BISHER VERWAISTE MODULE - JETZT AKTIVIERT (v15.3)
+        # ================================================================
+
+        # Event Bus - Zentrales Event-System (Observer Pattern)
+        self.event_bus = None
+        if EVENTS_AVAILABLE and EventBus:
+            try:
+                self.event_bus = EventBus.get_instance()
+                # Standard-Events registrieren
+                self.event_bus.subscribe("user:message", self._on_user_message_event)
+                self.event_bus.subscribe("emotion:changed", self._on_emotion_changed_event)
+                self.event_bus.subscribe("energy:low", self._on_energy_low_event)
+                self.event_bus.subscribe("system:*", self._on_system_event)
+                logger.info("📡 EventBus aktiviert (Observer Pattern)")
+                logger.info("   └─ Event-Dispatch für user:*, emotion:*, energy:*, system:*")
+            except Exception as e:
+                logger.debug(f"EventBus nicht verfügbar: {e}")
+
+        # Health Checker - Kubernetes-kompatible Checks
+        self.health_checker = None
+        if HEALTH_CHECKS_AVAILABLE and HealthChecker:
+            try:
+                self.health_checker = HealthChecker()
+                logger.info("🏥 HealthChecker aktiviert (Liveness, Readiness)")
+            except Exception as e:
+                logger.debug(f"HealthChecker nicht verfügbar: {e}")
+
+        # Metrics Registry - Prometheus-Export
+        self.metrics_registry = None
+        if METRICS_AVAILABLE and MetricsRegistry:
+            try:
+                self.metrics_registry = MetricsRegistry()
+                # Standard-Metriken registrieren
+                self._setup_default_metrics()
+                logger.info("📈 MetricsRegistry aktiviert (Prometheus-Export)")
+            except Exception as e:
+                logger.debug(f"MetricsRegistry nicht verfügbar: {e}")
+
+        # Knowledge Connections - Wissensvernetzung
+        self.knowledge_connections = None
+        if KNOWLEDGE_CONNECTIONS_AVAILABLE:
+            try:
+                # Nutze vordefinierte Verbindungen
+                self.knowledge_connections = PREDEFINED_CONNECTIONS
+                logger.info(f"🕸️ KnowledgeConnections aktiviert ({len(PREDEFINED_CONNECTIONS)} Verbindungen)")
+            except Exception as e:
+                logger.debug(f"KnowledgeConnections nicht verfügbar: {e}")
+
+        # Learning Integration - Lern-Profile & Empfehlungen
+        self.learner_profile = None
+        if LEARNING_INTEGRATION_AVAILABLE and LearnerProfile:
+            try:
+                self.learner_profile = LearnerProfile(
+                    learner_id="holo",
+                    name="Holo"
+                )
+                logger.info("🎓 LearnerProfile aktiviert (Lerntypen, Interessen)")
+            except Exception as e:
+                logger.debug(f"LearnerProfile nicht verfügbar: {e}")
+
+        # Structured Logging - JSON-Logging
+        self.structured_logger = None
+        if STRUCTURED_LOGGING_AVAILABLE and get_logger:
+            try:
+                self.structured_logger = get_logger("HoloPersona")
+                logger.info("📝 StructuredLogging aktiviert (JSON-Format)")
+            except Exception as e:
+                logger.debug(f"StructuredLogging nicht verfügbar: {e}")
+
+        # DB Migrations - Schema-Versionierung
+        self.migration_manager = None
+        if DB_MIGRATIONS_AVAILABLE and MigrationManager and self.db:
+            try:
+                # Migration für Haupt-Datenbank
+                db_path = str(BrainConfig.DB_FILE)
+                self.migration_manager = MigrationManager(db_path)
+                logger.info("🔄 MigrationManager aktiviert (Schema-Versionierung)")
+            except Exception as e:
+                logger.debug(f"MigrationManager nicht verfügbar: {e}")
+
+        # NLP Context Understanding - Discourse & Coreference
+        self.nlp_context_engine = None
+        if NLP_CONTEXT_UNDERSTANDING_AVAILABLE and get_context_understanding_engine:
+            try:
+                self.nlp_context_engine = get_context_understanding_engine()
+                logger.info("🗣️ NLPContextUnderstanding aktiviert")
+                logger.info("   └─ Discourse Tracking, Coreference, Topic Memory")
+            except Exception as e:
+                logger.debug(f"NLPContextUnderstanding nicht verfügbar: {e}")
+
+        # NLP Unified - Alternative NLP-Implementation
+        self.nlp_unified = None
+        if NLP_UNIFIED_AVAILABLE and HoloNLPUnified:
+            try:
+                self.nlp_unified = HoloNLPUnified()
+                logger.info("🔤 NLPUnified aktiviert (TF-IDF, Fuzzy, Sentiment)")
+            except Exception as e:
+                logger.debug(f"NLPUnified nicht verfügbar: {e}")
+
+        # NLP Style Analysis - Stil- und Persönlichkeitsanalyse
+        self.style_analysis = None
+        if NLP_STYLE_ANALYSIS_AVAILABLE and StyleAnalysisEngine:
+            try:
+                self.style_analysis = StyleAnalysisEngine()
+                logger.info("✍️ StyleAnalysisEngine aktiviert (Stil, Persönlichkeit)")
+            except Exception as e:
+                logger.debug(f"StyleAnalysisEngine nicht verfügbar: {e}")
+
+        # NLP Conversation Intelligence - Flow & Engagement
+        self.conversation_intelligence = None
+        if NLP_CONVERSATION_INTELLIGENCE_AVAILABLE and ConversationIntelligenceEngine:
+            try:
+                self.conversation_intelligence = ConversationIntelligenceEngine()
+                logger.info("💬 ConversationIntelligence aktiviert (Flow, Engagement)")
+            except Exception as e:
+                logger.debug(f"ConversationIntelligence nicht verfügbar: {e}")
+
+        # ================================================================
         # INTEGRATION SUMMARY
         # ================================================================
         integrated_count = sum([
@@ -16746,11 +17158,24 @@ class HoloPersona:
             self.expertise_knowledge is not None,
             self.knowledge_quiz is not None,
             self.vision_advanced is not None,
+            # Neu aktivierte verwaiste Module
+            self.event_bus is not None,
+            self.health_checker is not None,
+            self.metrics_registry is not None,
+            self.knowledge_connections is not None,
+            self.learner_profile is not None,
+            self.structured_logger is not None,
+            self.migration_manager is not None,
+            self.nlp_context_engine is not None,
+            self.nlp_unified is not None,
+            self.style_analysis is not None,
+            self.conversation_intelligence is not None,
         ])
 
         logger.info("=" * 60)
-        logger.info(f"✅ VOLLSTÄNDIGE INTEGRATION v15.2 ABGESCHLOSSEN!")
-        logger.info(f"   {integrated_count}/19 neue Module erfolgreich initialisiert")
+        logger.info(f"✅ VOLLSTÄNDIGE INTEGRATION v15.3 ABGESCHLOSSEN!")
+        logger.info(f"   {integrated_count}/30 Module erfolgreich initialisiert")
+        logger.info("   └─ Inkl. 11 ehemals verwaiste Module aktiviert")
         logger.info("=" * 60)
 
     def _init_extensions(self):
@@ -20589,6 +21014,140 @@ Warmherzig, neugierig, eigene Gefühle. Beginne mit *Aktion*."""
             "estimated_tokens_saved": stats.get("tokens_saved", 0),
             "router_active": bool(self.v15_router),
         }
+
+    # =========================================================================
+    # EVENT HANDLERS (für EventBus)
+    # =========================================================================
+
+    def _on_user_message_event(self, event):
+        """Handler für user:message Events"""
+        try:
+            if hasattr(event, 'data'):
+                message = event.data.get('text', '')
+                user = event.data.get('user', 'unknown')
+                logger.debug(f"[EventBus] User message: {user} - {message[:50]}...")
+                # Kann hier erweitert werden für Event-basierte Verarbeitung
+        except Exception as e:
+            logger.debug(f"Error in user_message_event handler: {e}")
+
+    def _on_emotion_changed_event(self, event):
+        """Handler für emotion:changed Events"""
+        try:
+            if hasattr(event, 'data'):
+                emotion = event.data.get('emotion', 'unknown')
+                intensity = event.data.get('intensity', 0.5)
+                logger.debug(f"[EventBus] Emotion changed: {emotion} ({intensity:.2f})")
+                # Kann hier für Emotion-basierte Reaktionen genutzt werden
+        except Exception as e:
+            logger.debug(f"Error in emotion_changed_event handler: {e}")
+
+    def _on_energy_low_event(self, event):
+        """Handler für energy:low Events"""
+        try:
+            if hasattr(event, 'data'):
+                level = event.data.get('level', 0.0)
+                logger.info(f"[EventBus] Energy low warning: {level:.1%}")
+                # Kann hier für proaktive Mitteilungen genutzt werden
+        except Exception as e:
+            logger.debug(f"Error in energy_low_event handler: {e}")
+
+    def _on_system_event(self, event):
+        """Handler für system:* Events"""
+        try:
+            if hasattr(event, 'name'):
+                logger.debug(f"[EventBus] System event: {event.name}")
+        except Exception as e:
+            logger.debug(f"Error in system_event handler: {e}")
+
+    # =========================================================================
+    # METRICS SETUP
+    # =========================================================================
+
+    def _setup_default_metrics(self):
+        """Richtet Standard-Metriken für Prometheus-Export ein"""
+        try:
+            if self.metrics_registry and Counter and Gauge:
+                # Request Counter
+                self._request_counter = Counter(
+                    "holo_requests_total",
+                    "Total number of requests",
+                    ["type", "status"]
+                )
+                self.metrics_registry.register(self._request_counter)
+
+                # Active sessions
+                self._active_sessions = Gauge(
+                    "holo_active_sessions",
+                    "Number of active sessions"
+                )
+                self.metrics_registry.register(self._active_sessions)
+
+                # Energy level
+                self._energy_gauge = Gauge(
+                    "holo_energy_level",
+                    "Current energy level"
+                )
+                self.metrics_registry.register(self._energy_gauge)
+
+                # Mood level
+                self._mood_gauge = Gauge(
+                    "holo_mood_level",
+                    "Current mood level"
+                )
+                self.metrics_registry.register(self._mood_gauge)
+
+                logger.debug("Default metrics registered")
+        except Exception as e:
+            logger.debug(f"Error setting up metrics: {e}")
+
+    def emit_event(self, event_name: str, data: dict = None, source: str = "HoloPersona"):
+        """
+        Sendet ein Event über den EventBus.
+
+        Args:
+            event_name: Name des Events (z.B. "user:message", "emotion:changed")
+            data: Event-Daten als Dictionary
+            source: Quelle des Events
+        """
+        if self.event_bus:
+            try:
+                self.event_bus.emit(event_name, data or {}, source=source)
+            except Exception as e:
+                logger.debug(f"Error emitting event {event_name}: {e}")
+
+    def get_health_status(self) -> dict:
+        """
+        Gibt den Gesundheitsstatus des Systems zurück.
+
+        Returns:
+            Dictionary mit Health-Check-Ergebnissen
+        """
+        if self.health_checker:
+            try:
+                return self.health_checker.check_all().to_dict()
+            except Exception as e:
+                logger.debug(f"Error getting health status: {e}")
+
+        # Fallback
+        return {
+            "status": "unknown",
+            "message": "HealthChecker nicht verfügbar"
+        }
+
+    def get_metrics(self) -> str:
+        """
+        Gibt Metriken im Prometheus-Format zurück.
+
+        Returns:
+            String im Prometheus-Text-Format
+        """
+        if self.metrics_registry:
+            try:
+                return self.metrics_registry.export()
+            except Exception as e:
+                logger.debug(f"Error exporting metrics: {e}")
+
+        return ""
 
     # =========================================================================
     # SYSTEM STATUS
