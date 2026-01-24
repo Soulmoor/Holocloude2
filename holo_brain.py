@@ -1215,6 +1215,562 @@ except ImportError as e:
     logger.debug(f"[Brain] EmotionalComplexity nicht verfügbar: {e}")
 
 # =============================================================================
+# VOLLSTÄNDIGE INTEGRATION - Erweiterte kognitive und emotionale Module v15.2
+# =============================================================================
+
+# Cognitive Modules - LoyaltySafetyCore, ConsciousnessEngine, ReasoningEngine, PerceptionEngine
+try:
+    from holo_cognitive_modules import (
+        CognitiveIntegrationCore,
+        LoyaltySafetyCore,
+        ConsciousnessEngine as CognitiveConsciousnessEngine,
+        ReasoningEngine,
+        PerceptionEngine,
+        AdvancedLearningEngine as CognitiveAdvancedLearning,
+        LoyaltyLevel,
+        DisobedienceType,
+        ActionOutcome,
+        TheLoyaltyOath,
+    )
+    COGNITIVE_MODULES_AVAILABLE = True
+    logger.info("[Brain] ✓ CognitiveModules (Loyalty, Reasoning, Perception, Learning) geladen")
+except ImportError as e:
+    COGNITIVE_MODULES_AVAILABLE = False
+    CognitiveIntegrationCore = None
+    LoyaltySafetyCore = None
+    CognitiveConsciousnessEngine = None
+    ReasoningEngine = None
+    PerceptionEngine = None
+    CognitiveAdvancedLearning = None
+    LoyaltyLevel = None
+    DisobedienceType = None
+    ActionOutcome = None
+    TheLoyaltyOath = None
+    logger.debug(f"[Brain] CognitiveModules nicht verfügbar: {e}")
+
+# Existential Awareness - 71-Dimensionen Bewusstsein
+try:
+    from holo_existential_awareness import (
+        ExistentialAwarenessEngine,
+        TwoWorldsAwareness,
+        SkillsAwareness,
+        KnowledgeAwareness,
+        LearningMethodsAwareness,
+        LifePhasesAwareness,
+        PsychologicalDepth,
+        HumorAwareness,
+        BodyAwareness,
+        EnergyAwareness,
+        AutonomousThinkingAwareness,
+        RelationshipAwareness,
+        MoralAwareness,
+        MixedEmotionsAwareness,
+        ImpulseAwareness,
+        CriticalThinkingAwareness,
+        AwarenessLevel,
+        AwarenessType,
+        create_existential_awareness,
+    )
+    EXISTENTIAL_AWARENESS_AVAILABLE = True
+    logger.info("[Brain] ✓ ExistentialAwareness (71-Dimensionen Bewusstsein) geladen")
+except ImportError as e:
+    EXISTENTIAL_AWARENESS_AVAILABLE = False
+    ExistentialAwarenessEngine = None
+    TwoWorldsAwareness = None
+    SkillsAwareness = None
+    KnowledgeAwareness = None
+    LearningMethodsAwareness = None
+    LifePhasesAwareness = None
+    PsychologicalDepth = None
+    HumorAwareness = None
+    BodyAwareness = None
+    EnergyAwareness = None
+    AutonomousThinkingAwareness = None
+    RelationshipAwareness = None
+    MoralAwareness = None
+    MixedEmotionsAwareness = None
+    ImpulseAwareness = None
+    CriticalThinkingAwareness = None
+    AwarenessLevel = None
+    AwarenessType = None
+    create_existential_awareness = None
+    logger.debug(f"[Brain] ExistentialAwareness nicht verfügbar: {e}")
+
+# Advanced Reasoning - Bayesian, Causal, Metacognitive, Dialectical
+try:
+    from holo_advanced_reasoning import (
+        AdvancedReasoningEngine,
+        BayesianReasoner,
+        CausalReasoner,
+        MetacognitiveReasoner,
+        DialecticalReasoner,
+        ReasoningMode,
+        EvidenceType,
+        CausalStrength,
+        MetacognitiveLevel,
+        DialecticalPhase,
+        Belief,
+        CausalNode,
+        CausalEdge,
+        create_advanced_reasoning_engine,
+    )
+    ADVANCED_REASONING_AVAILABLE = True
+    logger.info("[Brain] ✓ AdvancedReasoning (Bayesian, Causal, Meta, Dialectical) geladen")
+except ImportError as e:
+    ADVANCED_REASONING_AVAILABLE = False
+    AdvancedReasoningEngine = None
+    BayesianReasoner = None
+    CausalReasoner = None
+    MetacognitiveReasoner = None
+    DialecticalReasoner = None
+    ReasoningMode = None
+    EvidenceType = None
+    CausalStrength = None
+    MetacognitiveLevel = None
+    DialecticalPhase = None
+    Belief = None
+    CausalNode = None
+    CausalEdge = None
+    create_advanced_reasoning_engine = None
+    logger.debug(f"[Brain] AdvancedReasoning nicht verfügbar: {e}")
+
+# Classical Reasoning - Deduktiv, Induktiv, Analog
+try:
+    from holo_classical_reasoning import (
+        ClassicalReasoningEngine,
+        DeductiveReasoner,
+        InductiveReasoner,
+        AnalogicalReasoner,
+        ExtendedReasoningEngine,
+        Proposition,
+        LogicalRule,
+        DeductiveConclusion,
+        Pattern,
+        InductiveConclusion,
+        LogicalOperator,
+        QuantifierType,
+        ValidityLevel,
+        create_holo_reasoner,
+        create_extended_reasoner,
+    )
+    CLASSICAL_REASONING_AVAILABLE = True
+    logger.info("[Brain] ✓ ClassicalReasoning (Deduktiv, Induktiv, Analog) geladen")
+except ImportError as e:
+    CLASSICAL_REASONING_AVAILABLE = False
+    ClassicalReasoningEngine = None
+    DeductiveReasoner = None
+    InductiveReasoner = None
+    AnalogicalReasoner = None
+    ExtendedReasoningEngine = None
+    Proposition = None
+    LogicalRule = None
+    DeductiveConclusion = None
+    Pattern = None
+    InductiveConclusion = None
+    LogicalOperator = None
+    QuantifierType = None
+    ValidityLevel = None
+    create_holo_reasoner = None
+    create_extended_reasoner = None
+    logger.debug(f"[Brain] ClassicalReasoning nicht verfügbar: {e}")
+
+# Smalltalk Topics Engine - Lockere Konversation
+try:
+    from holo_smalltalk_topics import (
+        SmalltalkTopicsEngine,
+        SmalltalkCategory,
+        ConversationDepth,
+        SmalltalkTopic,
+        ConversationTransition,
+        InterestingFact,
+        create_smalltalk_engine,
+    )
+    SMALLTALK_TOPICS_AVAILABLE = True
+    logger.info("[Brain] ✓ SmalltalkTopics (25+ Kategorien, Kennenlernen, Übergänge) geladen")
+except ImportError as e:
+    SMALLTALK_TOPICS_AVAILABLE = False
+    SmalltalkTopicsEngine = None
+    SmalltalkCategory = None
+    ConversationDepth = None
+    SmalltalkTopic = None
+    ConversationTransition = None
+    InterestingFact = None
+    create_smalltalk_engine = None
+    logger.debug(f"[Brain] SmalltalkTopics nicht verfügbar: {e}")
+
+# Idiom & Redewendungen Engine - Deutsche Redewendungen
+try:
+    from holo_idiom_redewendungen import (
+        IdiomEngine,
+        IdiomDatabase,
+        IdiomCategory,
+        IdiomFormality,
+        IdiomIntensity,
+        Idiom,
+        create_idiom_engine,
+    )
+    IDIOM_REDEWENDUNGEN_AVAILABLE = True
+    logger.info("[Brain] ✓ IdiomRedewendungen (200+ Redewendungen, Kategorien) geladen")
+except ImportError as e:
+    IDIOM_REDEWENDUNGEN_AVAILABLE = False
+    IdiomEngine = None
+    IdiomDatabase = None
+    IdiomCategory = None
+    IdiomFormality = None
+    IdiomIntensity = None
+    Idiom = None
+    create_idiom_engine = None
+    logger.debug(f"[Brain] IdiomRedewendungen nicht verfügbar: {e}")
+
+# Humor Advanced Engine - Erweiterte Humor-Funktionen
+try:
+    from holo_humor_advanced import (
+        AdvancedHumorEngine,
+        JokeDatabase,
+        JokeType,
+        JokeCategory,
+        HumorIntensity,
+        RelationshipLevel as HumorRelationshipLevel,
+        Joke,
+        Punchline,
+        create_humor_engine,
+    )
+    HUMOR_ADVANCED_AVAILABLE = True
+    logger.info("[Brain] ✓ HumorAdvanced (150+ Witze, Wortspiele, Situationskomik) geladen")
+except ImportError as e:
+    HUMOR_ADVANCED_AVAILABLE = False
+    AdvancedHumorEngine = None
+    JokeDatabase = None
+    JokeType = None
+    JokeCategory = None
+    HumorIntensity = None
+    HumorRelationshipLevel = None
+    Joke = None
+    Punchline = None
+    create_humor_engine = None
+    logger.debug(f"[Brain] HumorAdvanced nicht verfügbar: {e}")
+
+# Advanced Learning System - Spaced Repetition, Vernetztes Lernen
+try:
+    from holo_advanced_learning import (
+        AdvancedLearningSystem,
+        SpacedRepetitionSystem,
+        KnowledgeNetworkManager,
+        LearningReflectionEngine,
+        CuriosityLearner,
+        KnowledgeApplicationEngine,
+        SpacedRepetitionCard,
+        ReviewQuality,
+        KnowledgeNode,
+        LearningStyle,
+        create_advanced_learning_system,
+    )
+    ADVANCED_LEARNING_AVAILABLE = True
+    logger.info("[Brain] ✓ AdvancedLearning (SRS, Vernetzung, Meta-Kognition) geladen")
+except ImportError as e:
+    ADVANCED_LEARNING_AVAILABLE = False
+    AdvancedLearningSystem = None
+    SpacedRepetitionSystem = None
+    KnowledgeNetworkManager = None
+    LearningReflectionEngine = None
+    CuriosityLearner = None
+    KnowledgeApplicationEngine = None
+    SpacedRepetitionCard = None
+    ReviewQuality = None
+    KnowledgeNode = None
+    LearningStyle = None
+    create_advanced_learning_system = None
+    logger.debug(f"[Brain] AdvancedLearning nicht verfügbar: {e}")
+
+# NLP Intent Semantics - Erweiterte Intent- und Semantik-Analyse
+try:
+    from holo_nlp_intent_semantics import (
+        IntentSemanticsEngine,
+        AdvancedIntentClassifier,
+        SemanticRoleLabeler,
+        ImpliedMeaningDetector,
+        SpeechActClassifier,
+        PresuppositionAnalyzer,
+        IntentType as NLPIntentType,
+        IntentCategory,
+        RoleType,
+        SpeechActType,
+        ImplicationType,
+        Intent,
+        SemanticRole,
+        SemanticFrame,
+    )
+    NLP_INTENT_SEMANTICS_AVAILABLE = True
+    logger.info("[Brain] ✓ NLPIntentSemantics (Intent, Semantik, Speech Acts) geladen")
+except ImportError as e:
+    NLP_INTENT_SEMANTICS_AVAILABLE = False
+    IntentSemanticsEngine = None
+    AdvancedIntentClassifier = None
+    SemanticRoleLabeler = None
+    ImpliedMeaningDetector = None
+    SpeechActClassifier = None
+    PresuppositionAnalyzer = None
+    NLPIntentType = None
+    IntentCategory = None
+    RoleType = None
+    SpeechActType = None
+    ImplicationType = None
+    Intent = None
+    SemanticRole = None
+    SemanticFrame = None
+    logger.debug(f"[Brain] NLPIntentSemantics nicht verfügbar: {e}")
+
+# Calendar Awareness - Feiertage, Jahreszeiten, Mondphasen
+try:
+    from holo_calendar_awareness import (
+        CalendarAwarenessEngine,
+        CalendarDatabase,
+        HolidayType,
+        Season,
+        TimeOfDay,
+        MoonPhase,
+        Holiday,
+        TimeGreeting,
+        create_calendar_awareness,
+    )
+    CALENDAR_AWARENESS_AVAILABLE = True
+    logger.info("[Brain] ✓ CalendarAwareness (Feiertage, Jahreszeiten, Mondphasen) geladen")
+except ImportError as e:
+    CALENDAR_AWARENESS_AVAILABLE = False
+    CalendarAwarenessEngine = None
+    CalendarDatabase = None
+    HolidayType = None
+    Season = None
+    TimeOfDay = None
+    MoonPhase = None
+    Holiday = None
+    TimeGreeting = None
+    create_calendar_awareness = None
+    logger.debug(f"[Brain] CalendarAwareness nicht verfügbar: {e}")
+
+# Curiosity Driven Learning - Neugier-gesteuertes Lernen
+try:
+    from holo_curiosity_driven import (
+        CuriosityDrivenLearning,
+        WolfKnowledgeHunter,
+        EmotionalCuriositySystem,
+        InterestExplorer,
+        WisdomCollector,
+        NaturalMotivation,
+        HuntingPhase,
+        CuriosityEmotion,
+        CuriosityState,
+        CollectorRank,
+        MotivationType,
+        create_curiosity_driven_learning,
+    )
+    CURIOSITY_DRIVEN_AVAILABLE = True
+    logger.info("[Brain] ✓ CuriosityDriven (Wissensjagd, Emotionale Neugier, Sammler) geladen")
+except ImportError as e:
+    CURIOSITY_DRIVEN_AVAILABLE = False
+    CuriosityDrivenLearning = None
+    WolfKnowledgeHunter = None
+    EmotionalCuriositySystem = None
+    InterestExplorer = None
+    WisdomCollector = None
+    NaturalMotivation = None
+    HuntingPhase = None
+    CuriosityEmotion = None
+    CuriosityState = None
+    CollectorRank = None
+    MotivationType = None
+    create_curiosity_driven_learning = None
+    logger.debug(f"[Brain] CuriosityDriven nicht verfügbar: {e}")
+
+# Dashboard System - Überwachung und Monitoring
+try:
+    from holo_dashboard import (
+        HoloDashboard,
+        DashboardCache,
+        create_dashboard,
+    )
+    DASHBOARD_AVAILABLE = True
+    logger.info("[Brain] ✓ Dashboard (Überwachung, Metriken, Visualisierung) geladen")
+except ImportError as e:
+    DASHBOARD_AVAILABLE = False
+    HoloDashboard = None
+    DashboardCache = None
+    create_dashboard = None
+    logger.debug(f"[Brain] Dashboard nicht verfügbar: {e}")
+
+# Cross Reference Engine - Querverweis-System
+try:
+    from holo_cross_reference_engine import (
+        CrossReferenceEngine,
+        Reference,
+        ReferenceType,
+        create_cross_reference_engine,
+    )
+    CROSS_REFERENCE_AVAILABLE = True
+    logger.info("[Brain] ✓ CrossReference (Querverweise, Wissensvernetzung) geladen")
+except ImportError as e:
+    CROSS_REFERENCE_AVAILABLE = False
+    CrossReferenceEngine = None
+    Reference = None
+    ReferenceType = None
+    create_cross_reference_engine = None
+    logger.debug(f"[Brain] CrossReference nicht verfügbar: {e}")
+
+# Extended Cognition - Erweiterte kognitive Fähigkeiten
+try:
+    from holo_extended_cognition import (
+        ExtendedCognitionEngine,
+        CognitiveExtension,
+        ExtensionType,
+        create_extended_cognition,
+    )
+    EXTENDED_COGNITION_AVAILABLE = True
+    logger.info("[Brain] ✓ ExtendedCognition (Erweiterte Kognition) geladen")
+except ImportError as e:
+    EXTENDED_COGNITION_AVAILABLE = False
+    ExtendedCognitionEngine = None
+    CognitiveExtension = None
+    ExtensionType = None
+    create_extended_cognition = None
+    logger.debug(f"[Brain] ExtendedCognition nicht verfügbar: {e}")
+
+# Formal Axioms - Formale Logik und Axiome
+try:
+    from holo_formal_axioms import (
+        FormalAxiomSystem,
+        Axiom,
+        AxiomType,
+        ProofStatus,
+        create_axiom_system,
+    )
+    FORMAL_AXIOMS_AVAILABLE = True
+    logger.info("[Brain] ✓ FormalAxioms (Formale Logik, Axiome, Beweise) geladen")
+except ImportError as e:
+    FORMAL_AXIOMS_AVAILABLE = False
+    FormalAxiomSystem = None
+    Axiom = None
+    AxiomType = None
+    ProofStatus = None
+    create_axiom_system = None
+    logger.debug(f"[Brain] FormalAxioms nicht verfügbar: {e}")
+
+# Analytical Strategies - Analytische Strategien
+try:
+    from holo_analytical_strategies import (
+        AnalyticalStrategiesEngine,
+        Strategy,
+        StrategyCategory,
+        create_analytical_strategies,
+    )
+    ANALYTICAL_STRATEGIES_AVAILABLE = True
+    logger.info("[Brain] ✓ AnalyticalStrategies (Problemlösung, Strategien) geladen")
+except ImportError as e:
+    ANALYTICAL_STRATEGIES_AVAILABLE = False
+    AnalyticalStrategiesEngine = None
+    Strategy = None
+    StrategyCategory = None
+    create_analytical_strategies = None
+    logger.debug(f"[Brain] AnalyticalStrategies nicht verfügbar: {e}")
+
+# Learning Goals - Lernziele und Fortschritt
+try:
+    from holo_learning_goals import (
+        LearningGoalsManager,
+        LearningGoal,
+        GoalStatus,
+        GoalPriority,
+        create_learning_goals_manager,
+    )
+    LEARNING_GOALS_AVAILABLE = True
+    logger.info("[Brain] ✓ LearningGoals (Lernziele, Fortschritt, Tracking) geladen")
+except ImportError as e:
+    LEARNING_GOALS_AVAILABLE = False
+    LearningGoalsManager = None
+    LearningGoal = None
+    GoalStatus = None
+    GoalPriority = None
+    create_learning_goals_manager = None
+    logger.debug(f"[Brain] LearningGoals nicht verfügbar: {e}")
+
+# Daily Learning - Tägliches Lernen
+try:
+    from holo_daily_learning import (
+        DailyLearningSystem,
+        DailyLesson,
+        LearningSchedule,
+        create_daily_learning,
+    )
+    DAILY_LEARNING_AVAILABLE = True
+    logger.info("[Brain] ✓ DailyLearning (Tägliche Lektionen, Zeitplan) geladen")
+except ImportError as e:
+    DAILY_LEARNING_AVAILABLE = False
+    DailyLearningSystem = None
+    DailyLesson = None
+    LearningSchedule = None
+    create_daily_learning = None
+    logger.debug(f"[Brain] DailyLearning nicht verfügbar: {e}")
+
+# Expertise Knowledge - Expertenwissen
+try:
+    from holo_expertise_knowledge import (
+        ExpertiseKnowledgeBase,
+        ExpertiseDomain,
+        ExpertiseLevel,
+        create_expertise_knowledge,
+    )
+    EXPERTISE_KNOWLEDGE_AVAILABLE = True
+    logger.info("[Brain] ✓ ExpertiseKnowledge (Expertenwissen, Domänen) geladen")
+except ImportError as e:
+    EXPERTISE_KNOWLEDGE_AVAILABLE = False
+    ExpertiseKnowledgeBase = None
+    ExpertiseDomain = None
+    ExpertiseLevel = None
+    create_expertise_knowledge = None
+    logger.debug(f"[Brain] ExpertiseKnowledge nicht verfügbar: {e}")
+
+# Knowledge Quiz - Wissenstest und Quiz
+try:
+    from holo_knowledge_quiz import (
+        KnowledgeQuizSystem,
+        QuizQuestion,
+        QuizCategory,
+        DifficultyLevel,
+        create_quiz_system,
+    )
+    KNOWLEDGE_QUIZ_AVAILABLE = True
+    logger.info("[Brain] ✓ KnowledgeQuiz (Wissenstest, Quiz, Selbstprüfung) geladen")
+except ImportError as e:
+    KNOWLEDGE_QUIZ_AVAILABLE = False
+    KnowledgeQuizSystem = None
+    QuizQuestion = None
+    QuizCategory = None
+    DifficultyLevel = None
+    create_quiz_system = None
+    logger.debug(f"[Brain] KnowledgeQuiz nicht verfügbar: {e}")
+
+# Vision Advanced - Erweiterte Bildanalyse
+try:
+    from holo_vision_advanced import (
+        AdvancedVisionEngine,
+        ImageAnalysis,
+        SceneType,
+        ObjectDetection,
+        create_advanced_vision,
+    )
+    VISION_ADVANCED_AVAILABLE = True
+    logger.info("[Brain] ✓ VisionAdvanced (Erweiterte Bildanalyse, Szenen) geladen")
+except ImportError as e:
+    VISION_ADVANCED_AVAILABLE = False
+    AdvancedVisionEngine = None
+    ImageAnalysis = None
+    SceneType = None
+    ObjectDetection = None
+    create_advanced_vision = None
+    logger.debug(f"[Brain] VisionAdvanced nicht verfügbar: {e}")
+
+logger.info("[Brain] === VOLLSTÄNDIGE INTEGRATION v15.2 ABGESCHLOSSEN ===")
+
+# =============================================================================
 # KONFIGURATION
 # =============================================================================
 
@@ -15554,6 +16110,11 @@ class HoloPersona:
             self.autonomous_activity = None
 
         # ================================================================
+        # VOLLSTÄNDIGE INTEGRATION v15.2 - Alle neuen Module (NEU!)
+        # ================================================================
+        self._init_full_integration()
+
+        # ================================================================
         # FERTIG!
         # ================================================================
 
@@ -15564,6 +16125,277 @@ class HoloPersona:
 
         logger.info(f"😊 {BrainConfig.HOLO_NAME} v{BrainConfig.HOLO_VERSION} erwacht")
         self._print_system_status()
+
+    def _init_full_integration(self):
+        """
+        Initialisiert alle neu integrierten Module für vollständige kognitive Fähigkeiten.
+
+        VOLLSTÄNDIGE INTEGRATION v15.2:
+        - Existential Awareness (71-Dimensionen Bewusstsein)
+        - Advanced Reasoning (Bayesian, Causal, Meta, Dialectical)
+        - Classical Reasoning (Deduktiv, Induktiv, Analog)
+        - Smalltalk Topics Engine (25+ Kategorien)
+        - Idiom & Redewendungen (200+ deutsche Redewendungen)
+        - NLP Intent Semantics (Intent, Semantik, Speech Acts)
+        - Cross Reference Engine (Wissensvernetzung)
+        - Formal Axioms (Formale Logik)
+        - Analytical Strategies (Problemlösung)
+        - Knowledge Quiz (Wissenstest)
+        - Vision Advanced (Erweiterte Bildanalyse)
+        """
+
+        logger.info("=" * 60)
+        logger.info("🚀 VOLLSTÄNDIGE INTEGRATION v15.2 - Starte Initialisierung...")
+        logger.info("=" * 60)
+
+        # ================================================================
+        # EXISTENTIAL AWARENESS - 71-Dimensionen Bewusstsein
+        # ================================================================
+        self.existential_awareness = None
+        if EXISTENTIAL_AWARENESS_AVAILABLE and ExistentialAwarenessEngine:
+            try:
+                self.existential_awareness = ExistentialAwarenessEngine(
+                    consciousness=getattr(self, 'consciousness', None),
+                    personality=getattr(self, 'personality', None),
+                    emotions=getattr(self, 'emotions', None)
+                )
+                logger.info("🌌 ExistentialAwareness aktiviert (71-Dimensionen)")
+                logger.info("   └─ Philosophie, Zeit, Transzendenz, Kosmisches Bewusstsein")
+            except Exception as e:
+                logger.debug(f"ExistentialAwareness nicht verfügbar: {e}")
+
+        # ================================================================
+        # ADVANCED REASONING - Bayesian, Causal, Meta, Dialectical
+        # ================================================================
+        self.advanced_reasoning = None
+        if ADVANCED_REASONING_AVAILABLE and AdvancedReasoningEngine:
+            try:
+                self.advanced_reasoning = AdvancedReasoningEngine()
+                logger.info("🧠 AdvancedReasoningEngine aktiviert")
+                logger.info("   └─ Bayesian, Causal, Metacognitive, Dialectical")
+            except Exception as e:
+                logger.debug(f"AdvancedReasoningEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # CLASSICAL REASONING - Deduktiv, Induktiv, Analog
+        # ================================================================
+        self.classical_reasoning = None
+        if CLASSICAL_REASONING_AVAILABLE and ClassicalReasoningEngine:
+            try:
+                self.classical_reasoning = ClassicalReasoningEngine()
+                logger.info("📐 ClassicalReasoningEngine aktiviert")
+                logger.info("   └─ Deduktiv, Induktiv, Analoges Denken")
+            except Exception as e:
+                logger.debug(f"ClassicalReasoningEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # SMALLTALK TOPICS ENGINE - Lockere Konversation
+        # ================================================================
+        self.smalltalk_topics = None
+        if SMALLTALK_TOPICS_AVAILABLE and SmalltalkTopicsEngine:
+            try:
+                self.smalltalk_topics = SmalltalkTopicsEngine()
+                logger.info("💬 SmalltalkTopicsEngine aktiviert (25+ Kategorien)")
+            except Exception as e:
+                logger.debug(f"SmalltalkTopicsEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # IDIOM & REDEWENDUNGEN ENGINE - Deutsche Redewendungen
+        # ================================================================
+        self.idiom_engine = None
+        if IDIOM_REDEWENDUNGEN_AVAILABLE and IdiomEngine:
+            try:
+                self.idiom_engine = IdiomEngine()
+                logger.info("📜 IdiomRedewendungenEngine aktiviert (200+ Redewendungen)")
+            except Exception as e:
+                logger.debug(f"IdiomEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # HUMOR ADVANCED ENGINE - Erweiterte Humor-Funktionen
+        # ================================================================
+        self.advanced_humor = None
+        if HUMOR_ADVANCED_AVAILABLE and AdvancedHumorEngine:
+            try:
+                self.advanced_humor = AdvancedHumorEngine()
+                logger.info("😂 AdvancedHumorEngine aktiviert (150+ Witze)")
+                logger.info("   └─ Wortspiele, Situationskomik, Kemonomimi-Humor")
+            except Exception as e:
+                logger.debug(f"AdvancedHumorEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # NLP INTENT SEMANTICS - Intent- und Semantik-Analyse
+        # ================================================================
+        self.intent_semantics = None
+        if NLP_INTENT_SEMANTICS_AVAILABLE and IntentSemanticsEngine:
+            try:
+                self.intent_semantics = IntentSemanticsEngine()
+                logger.info("🗣️ IntentSemanticsEngine aktiviert")
+                logger.info("   └─ Intent, Semantik, Speech Acts, Presuppositions")
+            except Exception as e:
+                logger.debug(f"IntentSemanticsEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # CALENDAR AWARENESS ENGINE - Feiertage, Jahreszeiten
+        # ================================================================
+        self.calendar_engine = None
+        if CALENDAR_AWARENESS_AVAILABLE and CalendarAwarenessEngine:
+            try:
+                self.calendar_engine = CalendarAwarenessEngine()
+                logger.info("📆 CalendarAwarenessEngine aktiviert")
+                logger.info("   └─ Feiertage, Jahreszeiten, Mondphasen")
+            except Exception as e:
+                logger.debug(f"CalendarAwarenessEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # CURIOSITY DRIVEN LEARNING - Neugier-gesteuertes Lernen
+        # ================================================================
+        self.curiosity_driven = None
+        if CURIOSITY_DRIVEN_AVAILABLE and CuriosityDrivenLearning:
+            try:
+                self.curiosity_driven = CuriosityDrivenLearning()
+                logger.info("🐺 CuriosityDrivenLearning aktiviert (Wolfsjagd-Metapher)")
+            except Exception as e:
+                logger.debug(f"CuriosityDrivenLearning nicht verfügbar: {e}")
+
+        # ================================================================
+        # DASHBOARD - Überwachung und Monitoring
+        # ================================================================
+        self.dashboard = None
+        if DASHBOARD_AVAILABLE and HoloDashboard:
+            try:
+                self.dashboard = HoloDashboard()
+                logger.info("📊 Dashboard aktiviert (Metriken, Visualisierung)")
+            except Exception as e:
+                logger.debug(f"Dashboard nicht verfügbar: {e}")
+
+        # ================================================================
+        # CROSS REFERENCE ENGINE - Wissensvernetzung
+        # ================================================================
+        self.cross_reference = None
+        if CROSS_REFERENCE_AVAILABLE and CrossReferenceEngine:
+            try:
+                self.cross_reference = CrossReferenceEngine()
+                logger.info("🔗 CrossReferenceEngine aktiviert (Wissensvernetzung)")
+            except Exception as e:
+                logger.debug(f"CrossReferenceEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # EXTENDED COGNITION ENGINE - Erweiterte Kognition
+        # ================================================================
+        self.extended_cognition_engine = None
+        if EXTENDED_COGNITION_AVAILABLE and ExtendedCognitionEngine:
+            try:
+                self.extended_cognition_engine = ExtendedCognitionEngine()
+                logger.info("🧩 ExtendedCognitionEngine aktiviert")
+            except Exception as e:
+                logger.debug(f"ExtendedCognitionEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # FORMAL AXIOMS - Formale Logik und Axiome
+        # ================================================================
+        self.formal_axioms = None
+        if FORMAL_AXIOMS_AVAILABLE and FormalAxiomSystem:
+            try:
+                self.formal_axioms = FormalAxiomSystem()
+                logger.info("📏 FormalAxiomSystem aktiviert (Formale Logik)")
+            except Exception as e:
+                logger.debug(f"FormalAxiomSystem nicht verfügbar: {e}")
+
+        # ================================================================
+        # ANALYTICAL STRATEGIES - Problemlösung
+        # ================================================================
+        self.analytical_strategies = None
+        if ANALYTICAL_STRATEGIES_AVAILABLE and AnalyticalStrategiesEngine:
+            try:
+                self.analytical_strategies = AnalyticalStrategiesEngine()
+                logger.info("🎯 AnalyticalStrategiesEngine aktiviert (Problemlösung)")
+            except Exception as e:
+                logger.debug(f"AnalyticalStrategiesEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # LEARNING GOALS - Lernziele und Fortschritt
+        # ================================================================
+        self.learning_goals = None
+        if LEARNING_GOALS_AVAILABLE and LearningGoalsManager:
+            try:
+                self.learning_goals = LearningGoalsManager()
+                logger.info("🎓 LearningGoalsManager aktiviert")
+            except Exception as e:
+                logger.debug(f"LearningGoalsManager nicht verfügbar: {e}")
+
+        # ================================================================
+        # DAILY LEARNING - Tägliches Lernen
+        # ================================================================
+        self.daily_learning_system = None
+        if DAILY_LEARNING_AVAILABLE and DailyLearningSystem:
+            try:
+                self.daily_learning_system = DailyLearningSystem()
+                logger.info("📅 DailyLearningSystem aktiviert")
+            except Exception as e:
+                logger.debug(f"DailyLearningSystem nicht verfügbar: {e}")
+
+        # ================================================================
+        # EXPERTISE KNOWLEDGE - Expertenwissen
+        # ================================================================
+        self.expertise_knowledge = None
+        if EXPERTISE_KNOWLEDGE_AVAILABLE and ExpertiseKnowledgeBase:
+            try:
+                self.expertise_knowledge = ExpertiseKnowledgeBase()
+                logger.info("🏆 ExpertiseKnowledgeBase aktiviert")
+            except Exception as e:
+                logger.debug(f"ExpertiseKnowledgeBase nicht verfügbar: {e}")
+
+        # ================================================================
+        # KNOWLEDGE QUIZ - Wissenstest
+        # ================================================================
+        self.knowledge_quiz = None
+        if KNOWLEDGE_QUIZ_AVAILABLE and KnowledgeQuizSystem:
+            try:
+                self.knowledge_quiz = KnowledgeQuizSystem()
+                logger.info("❓ KnowledgeQuizSystem aktiviert (Wissenstest)")
+            except Exception as e:
+                logger.debug(f"KnowledgeQuizSystem nicht verfügbar: {e}")
+
+        # ================================================================
+        # VISION ADVANCED - Erweiterte Bildanalyse
+        # ================================================================
+        self.vision_advanced = None
+        if VISION_ADVANCED_AVAILABLE and AdvancedVisionEngine:
+            try:
+                self.vision_advanced = AdvancedVisionEngine()
+                logger.info("👁️ AdvancedVisionEngine aktiviert")
+            except Exception as e:
+                logger.debug(f"AdvancedVisionEngine nicht verfügbar: {e}")
+
+        # ================================================================
+        # INTEGRATION SUMMARY
+        # ================================================================
+        integrated_count = sum([
+            self.existential_awareness is not None,
+            self.advanced_reasoning is not None,
+            self.classical_reasoning is not None,
+            self.smalltalk_topics is not None,
+            self.idiom_engine is not None,
+            self.advanced_humor is not None,
+            self.intent_semantics is not None,
+            self.calendar_engine is not None,
+            self.curiosity_driven is not None,
+            self.dashboard is not None,
+            self.cross_reference is not None,
+            self.extended_cognition_engine is not None,
+            self.formal_axioms is not None,
+            self.analytical_strategies is not None,
+            self.learning_goals is not None,
+            self.daily_learning_system is not None,
+            self.expertise_knowledge is not None,
+            self.knowledge_quiz is not None,
+            self.vision_advanced is not None,
+        ])
+
+        logger.info("=" * 60)
+        logger.info(f"✅ VOLLSTÄNDIGE INTEGRATION v15.2 ABGESCHLOSSEN!")
+        logger.info(f"   {integrated_count}/19 neue Module erfolgreich initialisiert")
+        logger.info("=" * 60)
 
     def _init_extensions(self):
         """Initialisiert alle Extensions (Reminders, Events, Anticipation, Interface, SelfAwareness)"""
