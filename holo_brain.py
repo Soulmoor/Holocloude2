@@ -1770,6 +1770,212 @@ except ImportError as e:
     create_analytical_strategies = None
     logger.debug(f"[Brain] AnalyticalStrategies nicht verfügbar: {e}")
 
+# Phenomenology - Phänomenologie, Hermeneutik, Ästhetik, Formale Semantik
+try:
+    from holo_phenomenology import (
+        PhenomenologyEngine,
+        HermeneuticsEngine,
+        AestheticsEngine,
+        FormalSemanticsEngine,
+        PhilosophyOfMindEngine,
+        IntentionalAct,
+        IntentionalityType,
+        ConsciousnessMode,
+        AestheticCategory,
+        AestheticResponse,
+        BeautyType,
+        create_phenomenology_engine,
+        create_hermeneutics_engine,
+        create_aesthetics_engine,
+        create_formal_semantics_engine,
+        get_philosophy_of_mind_engine,
+    )
+    PHENOMENOLOGY_AVAILABLE = True
+    logger.info("[Brain] ✓ Phenomenology (Phänomenologie, Hermeneutik, Ästhetik) geladen")
+except ImportError as e:
+    PHENOMENOLOGY_AVAILABLE = False
+    PhenomenologyEngine = None
+    HermeneuticsEngine = None
+    AestheticsEngine = None
+    FormalSemanticsEngine = None
+    PhilosophyOfMindEngine = None
+    IntentionalAct = None
+    IntentionalityType = None
+    ConsciousnessMode = None
+    AestheticCategory = None
+    AestheticResponse = None
+    BeautyType = None
+    create_phenomenology_engine = None
+    create_hermeneutics_engine = None
+    create_aesthetics_engine = None
+    create_formal_semantics_engine = None
+    get_philosophy_of_mind_engine = None
+    logger.debug(f"[Brain] Phenomenology nicht verfügbar: {e}")
+
+# Game Theory - Spieltheorie, Nash-Gleichgewicht, Verhandlung
+try:
+    from holo_game_theory import (
+        GameTheoryEngine,
+        CooperativeGameEngine,
+        EvolutionaryGameEngine,
+        NegotiationEngine,
+        MechanismDesignEngine,
+        FullGameTheoryEngine,
+        Game,
+        Player,
+        Strategy,
+        PayoffMatrix,
+        NashEquilibrium,
+        Coalition,
+        ShapleyValue,
+        GameType,
+        StrategyType,
+        NegotiationStyle,
+        AuctionType,
+        create_game_theory_engine,
+        create_negotiation_engine,
+        get_full_game_theory_engine,
+    )
+    GAME_THEORY_AVAILABLE = True
+    logger.info("[Brain] ✓ GameTheory (Spieltheorie, Nash, Verhandlung) geladen")
+except ImportError as e:
+    GAME_THEORY_AVAILABLE = False
+    GameTheoryEngine = None
+    CooperativeGameEngine = None
+    EvolutionaryGameEngine = None
+    NegotiationEngine = None
+    MechanismDesignEngine = None
+    FullGameTheoryEngine = None
+    Game = None
+    Player = None
+    Strategy = None
+    PayoffMatrix = None
+    NashEquilibrium = None
+    Coalition = None
+    ShapleyValue = None
+    GameType = None
+    StrategyType = None
+    NegotiationStyle = None
+    AuctionType = None
+    create_game_theory_engine = None
+    create_negotiation_engine = None
+    get_full_game_theory_engine = None
+    logger.debug(f"[Brain] GameTheory nicht verfügbar: {e}")
+
+# Economic Models - Wirtschaftstheorie, Pareto-Optimierung
+try:
+    from holo_economic_models import (
+        EconomicsEngine,
+        MicroeconomicsEngine,
+        ParetoEngine,
+        MarketEngine,
+        DecisionTheoryEngine,
+        ResourceAllocationEngine,
+        SupplyDemand,
+        Elasticity,
+        MarketEquilibrium,
+        ParetoPoint,
+        ParetoFront,
+        Budget,
+        ExpectedUtility,
+        RiskProfile,
+        GoodType,
+        MarketType,
+        RiskAttitude,
+        create_microeconomics_engine,
+        create_pareto_engine,
+        create_market_engine,
+        get_economics_engine,
+    )
+    ECONOMIC_MODELS_AVAILABLE = True
+    logger.info("[Brain] ✓ EconomicModels (Mikroökonomie, Pareto, Markt) geladen")
+except ImportError as e:
+    ECONOMIC_MODELS_AVAILABLE = False
+    EconomicsEngine = None
+    MicroeconomicsEngine = None
+    ParetoEngine = None
+    MarketEngine = None
+    DecisionTheoryEngine = None
+    ResourceAllocationEngine = None
+    SupplyDemand = None
+    Elasticity = None
+    MarketEquilibrium = None
+    ParetoPoint = None
+    ParetoFront = None
+    Budget = None
+    ExpectedUtility = None
+    RiskProfile = None
+    GoodType = None
+    MarketType = None
+    RiskAttitude = None
+    create_microeconomics_engine = None
+    create_pareto_engine = None
+    create_market_engine = None
+    get_economics_engine = None
+    logger.debug(f"[Brain] EconomicModels nicht verfügbar: {e}")
+
+# Advanced MDP - Bellman, Policy Gradient, POMDP
+try:
+    from holo_advanced_mdp import (
+        AdvancedMDPEngine,
+        BellmanEngine,
+        TDLearningEngine,
+        PolicyGradientEngine,
+        POMDPEngine,
+        ModelBasedEngine,
+        MDP,
+        MDPState,
+        MDPAction,
+        ValueFunction,
+        Policy,
+        QLearningAgent,
+        SARSAAgent,
+        TDLambdaAgent,
+        REINFORCEAgent,
+        ActorCriticAgent,
+        DynaQAgent,
+        POMDP,
+        BeliefState,
+        LearningAlgorithm,
+        ExplorationStrategy,
+        create_bellman_engine,
+        create_td_learning_engine,
+        create_policy_gradient_engine,
+        create_pomdp_engine,
+        get_advanced_mdp_engine,
+    )
+    ADVANCED_MDP_AVAILABLE = True
+    logger.info("[Brain] ✓ AdvancedMDP (Bellman, Policy Gradient, POMDP) geladen")
+except ImportError as e:
+    ADVANCED_MDP_AVAILABLE = False
+    AdvancedMDPEngine = None
+    BellmanEngine = None
+    TDLearningEngine = None
+    PolicyGradientEngine = None
+    POMDPEngine = None
+    ModelBasedEngine = None
+    MDP = None
+    MDPState = None
+    MDPAction = None
+    ValueFunction = None
+    Policy = None
+    QLearningAgent = None
+    SARSAAgent = None
+    TDLambdaAgent = None
+    REINFORCEAgent = None
+    ActorCriticAgent = None
+    DynaQAgent = None
+    POMDP = None
+    BeliefState = None
+    LearningAlgorithm = None
+    ExplorationStrategy = None
+    create_bellman_engine = None
+    create_td_learning_engine = None
+    create_policy_gradient_engine = None
+    create_pomdp_engine = None
+    get_advanced_mdp_engine = None
+    logger.debug(f"[Brain] AdvancedMDP nicht verfügbar: {e}")
+
 # Learning Goals - Lernziele und Fortschritt
 try:
     from holo_learning_goals import (
