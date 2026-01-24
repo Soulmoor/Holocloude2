@@ -570,35 +570,103 @@ class HoloBootManager:
     Lädt Module in der richtigen Reihenfolge mit Fehlertoleranz.
     """
 
-    # Boot-Reihenfolge: Welche Module zuerst geladen werden
+    # Boot-Reihenfolge: Welche Module zuerst geladen werden (v15.2 - VOLLSTÄNDIG)
     BOOT_ORDER = [
         # Phase 1: Core (ohne diese geht nichts)
-        ["holo_core_types", "holo_robust_imports", "holo_brain_core"],
+        ["holo_core_types", "holo_robust_imports", "holo_brain_core", "holo_config"],
 
-        # Phase 2: Datenbank (braucht Core)
-        ["holo_database_system"],
+        # Phase 2: Datenbank & Error Handling
+        ["holo_database_system", "holo_db_migrations", "holo_error_handling",
+         "holo_error_tracker", "holo_structured_logging"],
 
-        # Phase 3: Basis-Systeme
-        ["holo_consciousness", "holo_inner_life", "holo_personality", "holo_context_mind"],
+        # Phase 3: Basis-Bewusstsein
+        ["holo_consciousness", "holo_inner_life", "holo_personality", "holo_context_mind",
+         "holo_self_awareness", "holo_existential_awareness"],
 
-        # Phase 4: Kognitive Module
-        ["holo_preferences", "holo_drive_system", "holo_self_awareness",
-         "holo_cognitive_modules", "holo_energy_system"],
+        # Phase 4: Emotionen & Psychologie
+        ["holo_emotional_engines", "holo_emotional_complexity", "holo_emotion_regulation",
+         "holo_mixed_emotions", "holo_deep_psychology", "holo_trauma_processing",
+         "holo_redemption_system", "holo_repression_system", "holo_freudian_slips"],
 
-        # Phase 5: NLP & Dialog
-        ["holo_nlp_algorithms", "holo_text_reader", "holo_dialogue_engine",
-         "holo_message_analyzer"],
+        # Phase 5: Energie & Triebe
+        ["holo_energy_system", "holo_energy_management", "holo_drive_system",
+         "holo_preferences", "holo_life_phases", "holo_autonomous_thinking"],
 
-        # Phase 6: Intelligenz
+        # Phase 6: Kognitive Module
+        ["holo_cognitive_modules", "holo_cognitive_integration", "holo_cognitive_enhancement",
+         "holo_cognitive_engine", "holo_reasoning_engine", "holo_advanced_reasoning",
+         "holo_classical_reasoning", "holo_counterfactual_reasoning"],
+
+        # Phase 7: Meta-Kognition & Problemlösung
+        ["holo_meta_cognition", "holo_phenomenology", "holo_problem_solver",
+         "holo_algorithmic_cognition", "holo_complexity_theory", "holo_formal_axioms",
+         "holo_game_theory", "holo_economic_models", "holo_advanced_mdp"],
+
+        # Phase 8: NLP Basis
+        ["holo_nlp_algorithms", "holo_nlp_enhanced", "holo_nlp_advanced",
+         "holo_nlp_unified", "holo_smart_understanding", "holo_text_reader"],
+
+        # Phase 9: NLP Erweitert
+        ["holo_nlp_context_understanding", "holo_nlp_conversation_intelligence",
+         "holo_nlp_intent_semantics", "holo_nlp_style_analysis",
+         "holo_idiom_redewendungen", "holo_smalltalk_topics", "holo_synonym_engine_moods"],
+
+        # Phase 10: Dialog & Kommunikation
+        ["holo_dialogue_engine", "holo_message_analyzer", "holo_sentence_structures",
+         "holo_creative_mind", "holo_self_expression", "holo_humor_advanced"],
+
+        # Phase 11: Routing & Intelligenz
         ["holo_intelligent_router", "holo_impulse_system", "holo_context_compression",
-         "holo_smart_understanding"],
+         "holo_policy_engine", "holo_local_understanding"],
 
-        # Phase 7: Features
-        ["holo_tools", "holo_learning", "holo_media_knowledge",
-         "holo_media_discovery", "holo_web_curiosity"],
+        # Phase 12: Lernen & Wissen
+        ["holo_learning", "holo_advanced_learning", "holo_learning_goals",
+         "holo_learning_integration", "holo_daily_learning", "holo_curiosity_driven"],
 
-        # Phase 8: Integration
-        ["holo_unified", "holo_depth_system", "holo_wiring", "holo_skill_system"],
+        # Phase 13: Wissens-Management
+        ["holo_knowledge_connections", "holo_knowledge_influence", "holo_knowledge_quiz",
+         "holo_expertise_knowledge", "holo_cross_reference_engine", "holo_markov_training"],
+
+        # Phase 14: Medien Basis
+        ["holo_media_knowledge", "holo_media_discovery", "holo_media_index",
+         "holo_media_integration", "holo_music_experience", "holo_document"],
+
+        # Phase 15: Audio/Video/Vision
+        ["holo_audio", "holo_audio_enhanced", "holo_video",
+         "holo_vision_enhanced", "holo_vision_advanced", "holo_vision_extended",
+         "holo_crossmodal", "holo_perception", "holo_perception_unified"],
+
+        # Phase 16: Web & Neugier
+        ["holo_web_curiosity", "holo_calendar_awareness", "holo_real_world_sync"],
+
+        # Phase 17: Tools & Skills
+        ["holo_tools", "holo_skill_system", "holo_entity_database"],
+
+        # Phase 18: Kommunikations-Interfaces
+        ["holo_speech_engine", "holo_voice_interface", "holo_digital_body",
+         "holo_discord", "holo_websocket_handler"],
+
+        # Phase 19: Device & Hardware
+        ["holo_device_agent", "holo_device_receiver", "holo_control_center"],
+
+        # Phase 20: System-Management
+        ["holo_health_checks", "holo_metrics", "holo_live_monitor",
+         "holo_memory_monitor", "holo_ram_manager", "holo_process_controller",
+         "holo_self_repair", "holo_brain_background", "holo_brain_controller"],
+
+        # Phase 21: Tiefe Kognition
+        ["holo_extended_cognition", "holo_universal_cognition", "holo_analytical_strategies",
+         "holo_approximation_algorithms", "holo_hidden_motives", "holo_unconscious_processes",
+         "holo_deception_detection", "holo_person_opinions", "holo_longterm_goals"],
+
+        # Phase 22: Empathie & Soziales
+        ["holo_empathy_deep", "holo_reader_extended"],
+
+        # Phase 23: Finale Integration
+        ["holo_unified", "holo_depth_system", "holo_integration_layer", "holo_wiring", "holo_events"],
+
+        # Phase 24: Dashboard & Utilities (Optional)
+        ["holo_dashboard", "holo_tester", "holo_utils"],
     ]
 
     def __init__(self, loader: RobustModuleLoader):

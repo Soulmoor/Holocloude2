@@ -1409,6 +1409,429 @@ WebFactsDB = safe_import('holo_web_curiosity', 'WebFactsDB', None)
 
 
 # =============================================================================
+# VOLLSTÄNDIGE MODUL-INTEGRATION (NEU v5.1)
+# =============================================================================
+
+# ============================================================================
+# KOGNITIVE/REASONING MODULE
+# ============================================================================
+HoloAdvancedReasoning = safe_import('holo_advanced_reasoning', 'HoloAdvancedReasoning', None)
+AdvancedReasoningEngine = safe_import('holo_advanced_reasoning', 'AdvancedReasoningEngine', None)
+ADVANCED_REASONING_AVAILABLE = HoloAdvancedReasoning is not None
+
+HoloClassicalReasoning = safe_import('holo_classical_reasoning', 'HoloClassicalReasoning', None)
+ClassicalLogicEngine = safe_import('holo_classical_reasoning', 'ClassicalLogicEngine', None)
+CLASSICAL_REASONING_AVAILABLE = HoloClassicalReasoning is not None
+
+HoloCounterfactualReasoning = safe_import('holo_counterfactual_reasoning', 'HoloCounterfactualReasoning', None)
+CounterfactualEngine = safe_import('holo_counterfactual_reasoning', 'CounterfactualEngine', None)
+COUNTERFACTUAL_REASONING_AVAILABLE = HoloCounterfactualReasoning is not None
+
+HoloMetaCognition = safe_import('holo_meta_cognition', 'HoloMetaCognition', None)
+MetaCognitiveEngine = safe_import('holo_meta_cognition', 'MetaCognitiveEngine', None)
+META_COGNITION_AVAILABLE = HoloMetaCognition is not None
+
+HoloPhenomenology = safe_import('holo_phenomenology', 'HoloPhenomenology', None)
+PhenomenologicalEngine = safe_import('holo_phenomenology', 'PhenomenologicalEngine', None)
+PHENOMENOLOGY_AVAILABLE = HoloPhenomenology is not None
+
+HoloProblemSolver = safe_import('holo_problem_solver', 'HoloProblemSolver', None)
+ProblemSolvingEngine = safe_import('holo_problem_solver', 'ProblemSolvingEngine', None)
+PROBLEM_SOLVER_AVAILABLE = HoloProblemSolver is not None
+
+HoloComplexityTheory = safe_import('holo_complexity_theory', 'HoloComplexityTheory', None)
+ComplexityAnalyzer = safe_import('holo_complexity_theory', 'ComplexityAnalyzer', None)
+COMPLEXITY_THEORY_AVAILABLE = HoloComplexityTheory is not None
+
+HoloFormalAxioms = safe_import('holo_formal_axioms', 'HoloFormalAxioms', None)
+AxiomaticSystem = safe_import('holo_formal_axioms', 'AxiomaticSystem', None)
+FORMAL_AXIOMS_AVAILABLE = HoloFormalAxioms is not None
+
+HoloGameTheory = safe_import('holo_game_theory', 'HoloGameTheory', None)
+GameTheoreticEngine = safe_import('holo_game_theory', 'GameTheoreticEngine', None)
+GAME_THEORY_AVAILABLE = HoloGameTheory is not None
+
+HoloEconomicModels = safe_import('holo_economic_models', 'HoloEconomicModels', None)
+EconomicModelEngine = safe_import('holo_economic_models', 'EconomicModelEngine', None)
+ECONOMIC_MODELS_AVAILABLE = HoloEconomicModels is not None
+
+HoloAdvancedMDP = safe_import('holo_advanced_mdp', 'HoloAdvancedMDP', None)
+MDPEngine = safe_import('holo_advanced_mdp', 'MDPEngine', None)
+ADVANCED_MDP_AVAILABLE = HoloAdvancedMDP is not None
+
+HoloApproximationAlgorithms = safe_import('holo_approximation_algorithms', 'HoloApproximationAlgorithms', None)
+ApproximationEngine = safe_import('holo_approximation_algorithms', 'ApproximationEngine', None)
+APPROXIMATION_ALGORITHMS_AVAILABLE = HoloApproximationAlgorithms is not None
+
+HoloUniversalCognition = safe_import('holo_universal_cognition', 'HoloUniversalCognition', None)
+UniversalCognitionEngine = safe_import('holo_universal_cognition', 'UniversalCognitionEngine', None)
+UNIVERSAL_COGNITION_AVAILABLE = HoloUniversalCognition is not None
+
+HoloCognitiveEnhancement = safe_import('holo_cognitive_enhancement', 'HoloCognitiveEnhancement', None)
+CognitiveEnhancementEngine = safe_import('holo_cognitive_enhancement', 'CognitiveEnhancementEngine', None)
+COGNITIVE_ENHANCEMENT_AVAILABLE = HoloCognitiveEnhancement is not None
+
+HoloCognitiveEngine = safe_import('holo_cognitive_engine', 'HoloCognitiveEngine', None)
+COGNITIVE_ENGINE_AVAILABLE = HoloCognitiveEngine is not None
+
+HoloAnalyticalStrategies = safe_import('holo_analytical_strategies', 'HoloAnalyticalStrategies', None)
+AnalyticalEngine = safe_import('holo_analytical_strategies', 'AnalyticalEngine', None)
+ANALYTICAL_STRATEGIES_AVAILABLE = HoloAnalyticalStrategies is not None
+
+HoloAlgorithmicCognition = safe_import('holo_algorithmic_cognition', 'HoloAlgorithmicCognition', None)
+AlgorithmicEngine = safe_import('holo_algorithmic_cognition', 'AlgorithmicEngine', None)
+ALGORITHMIC_COGNITION_AVAILABLE = HoloAlgorithmicCognition is not None
+
+# ============================================================================
+# NLP ERWEITERTE MODULE
+# ============================================================================
+HoloNLPAdvanced = safe_import('holo_nlp_advanced', 'HoloNLPAdvanced', None)
+NLP_ADVANCED_AVAILABLE = HoloNLPAdvanced is not None
+
+HoloNLPEnhanced = safe_import('holo_nlp_enhanced', 'HoloNLPEnhanced', None)
+NLP_ENHANCED_AVAILABLE = HoloNLPEnhanced is not None
+
+HoloNLPUnified = safe_import('holo_nlp_unified', 'HoloNLPUnified', None)
+NLP_UNIFIED_AVAILABLE = HoloNLPUnified is not None
+
+HoloNLPContextUnderstanding = safe_import('holo_nlp_context_understanding', 'HoloNLPContextUnderstanding', None)
+NLP_CONTEXT_UNDERSTANDING_AVAILABLE = HoloNLPContextUnderstanding is not None
+
+HoloNLPConversationIntelligence = safe_import('holo_nlp_conversation_intelligence', 'HoloNLPConversationIntelligence', None)
+NLP_CONVERSATION_INTELLIGENCE_AVAILABLE = HoloNLPConversationIntelligence is not None
+
+HoloNLPIntentSemantics = safe_import('holo_nlp_intent_semantics', 'HoloNLPIntentSemantics', None)
+NLP_INTENT_SEMANTICS_AVAILABLE = HoloNLPIntentSemantics is not None
+
+HoloNLPStyleAnalysis = safe_import('holo_nlp_style_analysis', 'HoloNLPStyleAnalysis', None)
+NLP_STYLE_ANALYSIS_AVAILABLE = HoloNLPStyleAnalysis is not None
+
+HoloIdiomRedewendungen = safe_import('holo_idiom_redewendungen', 'HoloIdiomRedewendungen', None)
+IdiomDatabase = safe_import('holo_idiom_redewendungen', 'IdiomDatabase', None)
+IDIOM_REDEWENDUNGEN_AVAILABLE = HoloIdiomRedewendungen is not None
+
+HoloSmalltalkTopics = safe_import('holo_smalltalk_topics', 'HoloSmalltalkTopics', None)
+SmalltalkDatabase = safe_import('holo_smalltalk_topics', 'SmalltalkDatabase', None)
+SMALLTALK_TOPICS_AVAILABLE = HoloSmalltalkTopics is not None
+
+HoloSynonymEngineMoods = safe_import('holo_synonym_engine_moods', 'HoloSynonymEngineMoods', None)
+MoodSynonymEngine = safe_import('holo_synonym_engine_moods', 'MoodSynonymEngine', None)
+SYNONYM_ENGINE_MOODS_AVAILABLE = HoloSynonymEngineMoods is not None
+
+HoloReaderExtended = safe_import('holo_reader_extended', 'HoloReaderExtended', None)
+READER_EXTENDED_AVAILABLE = HoloReaderExtended is not None
+
+# ============================================================================
+# MEDIA/AUDIO/VIDEO MODULE
+# ============================================================================
+HoloAudio = safe_import('holo_audio', 'HoloAudio', None)
+AudioProcessor = safe_import('holo_audio', 'AudioProcessor', None)
+AUDIO_AVAILABLE = HoloAudio is not None
+
+HoloAudioEnhanced = safe_import('holo_audio_enhanced', 'HoloAudioEnhanced', None)
+AUDIO_ENHANCED_AVAILABLE = HoloAudioEnhanced is not None
+
+HoloVideo = safe_import('holo_video', 'HoloVideo', None)
+VideoProcessor = safe_import('holo_video', 'VideoProcessor', None)
+VIDEO_AVAILABLE = HoloVideo is not None
+
+HoloVisionEnhanced = safe_import('holo_vision_enhanced', 'HoloVisionEnhanced', None)
+VISION_ENHANCED_AVAILABLE = HoloVisionEnhanced is not None
+
+HoloVisionAdvanced = safe_import('holo_vision_advanced', 'HoloVisionAdvanced', None)
+VISION_ADVANCED_AVAILABLE = HoloVisionAdvanced is not None
+
+HoloVisionExtended = safe_import('holo_vision_extended', 'HoloVisionExtended', None)
+VISION_EXTENDED_AVAILABLE = HoloVisionExtended is not None
+
+HoloMusicExperience = safe_import('holo_music_experience', 'HoloMusicExperience', None)
+MusicEngine = safe_import('holo_music_experience', 'MusicEngine', None)
+MUSIC_EXPERIENCE_AVAILABLE = HoloMusicExperience is not None
+
+HoloMediaIndex = safe_import('holo_media_index', 'HoloMediaIndex', None)
+MediaIndexer = safe_import('holo_media_index', 'MediaIndexer', None)
+MEDIA_INDEX_AVAILABLE = HoloMediaIndex is not None
+
+HoloMediaIntegration = safe_import('holo_media_integration', 'HoloMediaIntegration', None)
+MEDIA_INTEGRATION_AVAILABLE = HoloMediaIntegration is not None
+
+HoloCrossmodal = safe_import('holo_crossmodal', 'HoloCrossmodal', None)
+CrossmodalEngine = safe_import('holo_crossmodal', 'CrossmodalEngine', None)
+CROSSMODAL_AVAILABLE = HoloCrossmodal is not None
+
+HoloDocument = safe_import('holo_document', 'HoloDocument', None)
+DocumentProcessor = safe_import('holo_document', 'DocumentProcessor', None)
+DOCUMENT_AVAILABLE = HoloDocument is not None
+
+HoloPerception = safe_import('holo_perception', 'HoloPerception', None)
+PerceptionEngine = safe_import('holo_perception', 'PerceptionEngine', None)
+PERCEPTION_AVAILABLE = HoloPerception is not None
+
+HoloPerceptionUnified = safe_import('holo_perception_unified', 'HoloPerceptionUnified', None)
+PERCEPTION_UNIFIED_AVAILABLE = HoloPerceptionUnified is not None
+
+# ============================================================================
+# KOMMUNIKATION MODULE
+# ============================================================================
+HoloDiscord = safe_import('holo_discord', 'HoloDiscord', None)
+DiscordBot = safe_import('holo_discord', 'DiscordBot', None)
+DISCORD_AVAILABLE = HoloDiscord is not None
+
+HoloWebsocketHandler = safe_import('holo_websocket_handler', 'HoloWebsocketHandler', None)
+WebsocketServer = safe_import('holo_websocket_handler', 'WebsocketServer', None)
+WEBSOCKET_HANDLER_AVAILABLE = HoloWebsocketHandler is not None
+
+HoloVoiceInterface = safe_import('holo_voice_interface', 'HoloVoiceInterface', None)
+VoiceEngine = safe_import('holo_voice_interface', 'VoiceEngine', None)
+VOICE_INTERFACE_AVAILABLE = HoloVoiceInterface is not None
+
+HoloSpeechEngine = safe_import('holo_speech_engine', 'HoloSpeechEngine', None)
+SpeechSynthesizer = safe_import('holo_speech_engine', 'SpeechSynthesizer', None)
+SPEECH_ENGINE_AVAILABLE = HoloSpeechEngine is not None
+
+HoloDigitalBody = safe_import('holo_digital_body', 'HoloDigitalBody', None)
+DigitalBodyEngine = safe_import('holo_digital_body', 'DigitalBodyEngine', None)
+DIGITAL_BODY_AVAILABLE = HoloDigitalBody is not None
+
+HoloDeviceAgent = safe_import('holo_device_agent', 'HoloDeviceAgent', None)
+DeviceAgentEngine = safe_import('holo_device_agent', 'DeviceAgentEngine', None)
+DEVICE_AGENT_AVAILABLE = HoloDeviceAgent is not None
+
+HoloDeviceReceiver = safe_import('holo_device_receiver', 'HoloDeviceReceiver', None)
+DEVICE_RECEIVER_AVAILABLE = HoloDeviceReceiver is not None
+
+# ============================================================================
+# SYSTEM/INFRASTRUKTUR MODULE
+# ============================================================================
+HoloConfig = safe_import('holo_config', 'HoloConfig', None)
+ConfigManager = safe_import('holo_config', 'ConfigManager', None)
+CONFIG_AVAILABLE = HoloConfig is not None
+
+HoloBrainCore = safe_import('holo_brain_core', 'HoloBrainCore', None)
+BrainCoreEngine = safe_import('holo_brain_core', 'BrainCoreEngine', None)
+
+HoloBrainBackground = safe_import('holo_brain_background', 'HoloBrainBackground', None)
+BackgroundProcessor = safe_import('holo_brain_background', 'BackgroundProcessor', None)
+BRAIN_BACKGROUND_AVAILABLE = HoloBrainBackground is not None
+
+HoloBrainController = safe_import('holo_brain_controller', 'HoloBrainController', None)
+BRAIN_CONTROLLER_AVAILABLE = HoloBrainController is not None
+
+HoloControlCenter = safe_import('holo_control_center', 'HoloControlCenter', None)
+ControlCenterEngine = safe_import('holo_control_center', 'ControlCenterEngine', None)
+CONTROL_CENTER_AVAILABLE = HoloControlCenter is not None
+
+HoloErrorHandling = safe_import('holo_error_handling', 'HoloErrorHandling', None)
+ErrorHandler = safe_import('holo_error_handling', 'ErrorHandler', None)
+ERROR_HANDLING_AVAILABLE = HoloErrorHandling is not None
+
+HoloErrorTracker = safe_import('holo_error_tracker', 'HoloErrorTracker', None)
+ErrorTrackerEngine = safe_import('holo_error_tracker', 'ErrorTrackerEngine', None)
+ERROR_TRACKER_AVAILABLE = HoloErrorTracker is not None
+
+HoloHealthChecks = safe_import('holo_health_checks', 'HoloHealthChecks', None)
+HealthCheckEngine = safe_import('holo_health_checks', 'HealthCheckEngine', None)
+HEALTH_CHECKS_AVAILABLE = HoloHealthChecks is not None
+
+HoloMetrics = safe_import('holo_metrics', 'HoloMetrics', None)
+MetricsCollector = safe_import('holo_metrics', 'MetricsCollector', None)
+METRICS_AVAILABLE = HoloMetrics is not None
+
+HoloLiveMonitor = safe_import('holo_live_monitor', 'HoloLiveMonitor', None)
+LiveMonitorEngine = safe_import('holo_live_monitor', 'LiveMonitorEngine', None)
+LIVE_MONITOR_AVAILABLE = HoloLiveMonitor is not None
+
+HoloMemoryMonitor = safe_import('holo_memory_monitor', 'HoloMemoryMonitor', None)
+MemoryMonitorEngine = safe_import('holo_memory_monitor', 'MemoryMonitorEngine', None)
+MEMORY_MONITOR_AVAILABLE = HoloMemoryMonitor is not None
+
+HoloRAMManager = safe_import('holo_ram_manager', 'HoloRAMManager', None)
+RAMManagerEngine = safe_import('holo_ram_manager', 'RAMManagerEngine', None)
+RAM_MANAGER_AVAILABLE = HoloRAMManager is not None
+
+HoloProcessController = safe_import('holo_process_controller', 'HoloProcessController', None)
+ProcessControllerEngine = safe_import('holo_process_controller', 'ProcessControllerEngine', None)
+PROCESS_CONTROLLER_AVAILABLE = HoloProcessController is not None
+
+HoloSelfRepair = safe_import('holo_self_repair', 'HoloSelfRepair', None)
+SelfRepairEngine = safe_import('holo_self_repair', 'SelfRepairEngine', None)
+SELF_REPAIR_AVAILABLE = HoloSelfRepair is not None
+
+HoloStructuredLogging = safe_import('holo_structured_logging', 'HoloStructuredLogging', None)
+StructuredLogger = safe_import('holo_structured_logging', 'StructuredLogger', None)
+STRUCTURED_LOGGING_AVAILABLE = HoloStructuredLogging is not None
+
+HoloUtils = safe_import('holo_utils', 'HoloUtils', None)
+UTILS_AVAILABLE = HoloUtils is not None
+
+HoloDashboard = safe_import('holo_dashboard', 'HoloDashboard', None)
+DashboardEngine = safe_import('holo_dashboard', 'DashboardEngine', None)
+DASHBOARD_AVAILABLE = HoloDashboard is not None
+
+HoloDBMigrations = safe_import('holo_db_migrations', 'HoloDBMigrations', None)
+MigrationEngine = safe_import('holo_db_migrations', 'MigrationEngine', None)
+DB_MIGRATIONS_AVAILABLE = HoloDBMigrations is not None
+
+# ============================================================================
+# ROUTING/INTEGRATION MODULE
+# ============================================================================
+HoloIntelligentRouter = safe_import('holo_intelligent_router', 'HoloIntelligentRouter', None)
+IntelligentRouterEngine = safe_import('holo_intelligent_router', 'IntelligentRouterEngine', None)
+INTELLIGENT_ROUTER_AVAILABLE = HoloIntelligentRouter is not None
+
+HoloImpulseSystem = safe_import('holo_impulse_system', 'HoloImpulseSystem', None)
+ImpulseGenerator = safe_import('holo_impulse_system', 'ImpulseGenerator', None)
+IMPULSE_SYSTEM_AVAILABLE = HoloImpulseSystem is not None
+
+HoloContextMind = safe_import('holo_context_mind', 'HoloContextMind', None)
+CONTEXT_MIND_ENGINE_AVAILABLE = HoloContextMind is not None
+
+HoloDepthSystem = safe_import('holo_depth_system', 'HoloDepthSystem', None)
+DepthEngine = safe_import('holo_depth_system', 'DepthEngine', None)
+DEPTH_SYSTEM_AVAILABLE = HoloDepthSystem is not None
+
+HoloSkillSystem = safe_import('holo_skill_system', 'HoloSkillSystem', None)
+SkillEngine = safe_import('holo_skill_system', 'SkillEngine', None)
+SKILL_SYSTEM_AVAILABLE = HoloSkillSystem is not None
+
+HoloUnified = safe_import('holo_unified', 'HoloUnified', None)
+UnifiedEngine = safe_import('holo_unified', 'UnifiedEngine', None)
+UNIFIED_AVAILABLE = HoloUnified is not None
+
+HoloPolicyEngine = safe_import('holo_policy_engine', 'HoloPolicyEngine', None)
+PolicyEngine = safe_import('holo_policy_engine', 'PolicyEngine', None)
+POLICY_ENGINE_AVAILABLE = HoloPolicyEngine is not None
+
+HoloLocalUnderstanding = safe_import('holo_local_understanding', 'HoloLocalUnderstanding', None)
+LOCAL_UNDERSTANDING_AVAILABLE = HoloLocalUnderstanding is not None
+
+HoloIntegrationLayer = safe_import('holo_integration_layer', 'HoloIntegrationLayer', None)
+IntegrationLayerEngine = safe_import('holo_integration_layer', 'IntegrationLayerEngine', None)
+INTEGRATION_LAYER_AVAILABLE = HoloIntegrationLayer is not None
+
+# ============================================================================
+# SPEZIAL MODULE
+# ============================================================================
+HoloExistentialAwareness = safe_import('holo_existential_awareness', 'HoloExistentialAwareness', None)
+ExistentialEngine = safe_import('holo_existential_awareness', 'ExistentialEngine', None)
+EXISTENTIAL_AWARENESS_AVAILABLE = HoloExistentialAwareness is not None
+
+HoloLifePhases = safe_import('holo_life_phases', 'HoloLifePhases', None)
+LifePhasesEngine = safe_import('holo_life_phases', 'LifePhasesEngine', None)
+LIFE_PHASES_AVAILABLE = HoloLifePhases is not None
+
+HoloRealWorldSync = safe_import('holo_real_world_sync', 'HoloRealWorldSync', None)
+RealWorldSyncEngine = safe_import('holo_real_world_sync', 'RealWorldSyncEngine', None)
+REAL_WORLD_SYNC_AVAILABLE = HoloRealWorldSync is not None
+
+HoloEvents = safe_import('holo_events', 'HoloEvents', None)
+EventsEngine = safe_import('holo_events', 'EventsEngine', None)
+EVENTS_AVAILABLE = HoloEvents is not None
+
+HoloAutonomousThinking = safe_import('holo_autonomous_thinking', 'HoloAutonomousThinking', None)
+AutonomousThinkingEngine = safe_import('holo_autonomous_thinking', 'AutonomousThinkingEngine', None)
+AUTONOMOUS_THINKING_AVAILABLE = HoloAutonomousThinking is not None
+
+HoloCreativeMind = safe_import('holo_creative_mind', 'HoloCreativeMind', None)
+CreativeMindEngine = safe_import('holo_creative_mind', 'CreativeMindEngine', None)
+CREATIVE_MIND_AVAILABLE = HoloCreativeMind is not None
+
+HoloSelfExpression = safe_import('holo_self_expression', 'HoloSelfExpression', None)
+SelfExpressionEngine = safe_import('holo_self_expression', 'SelfExpressionEngine', None)
+SELF_EXPRESSION_AVAILABLE = HoloSelfExpression is not None
+
+HoloDialogueEngine = safe_import('holo_dialogue_engine', 'HoloDialogueEngine', None)
+DialogueEngine = safe_import('holo_dialogue_engine', 'DialogueEngine', None)
+DIALOGUE_ENGINE_AVAILABLE = HoloDialogueEngine is not None
+
+HoloSentenceStructures = safe_import('holo_sentence_structures', 'HoloSentenceStructures', None)
+SentenceStructureEngine = safe_import('holo_sentence_structures', 'SentenceStructureEngine', None)
+SENTENCE_STRUCTURES_AVAILABLE = HoloSentenceStructures is not None
+
+HoloMessageAnalyzer = safe_import('holo_message_analyzer', 'HoloMessageAnalyzer', None)
+MessageAnalyzerEngine = safe_import('holo_message_analyzer', 'MessageAnalyzerEngine', None)
+MESSAGE_ANALYZER_AVAILABLE = HoloMessageAnalyzer is not None
+
+# ============================================================================
+# LERNEN/WISSEN MODULE
+# ============================================================================
+HoloLearningGoals = safe_import('holo_learning_goals', 'HoloLearningGoals', None)
+LearningGoalsEngine = safe_import('holo_learning_goals', 'LearningGoalsEngine', None)
+LEARNING_GOALS_AVAILABLE = HoloLearningGoals is not None
+
+HoloKnowledgeQuiz = safe_import('holo_knowledge_quiz', 'HoloKnowledgeQuiz', None)
+KnowledgeQuizEngine = safe_import('holo_knowledge_quiz', 'KnowledgeQuizEngine', None)
+KNOWLEDGE_QUIZ_AVAILABLE = HoloKnowledgeQuiz is not None
+
+HoloExpertiseKnowledge = safe_import('holo_expertise_knowledge', 'HoloExpertiseKnowledge', None)
+ExpertiseKnowledgeEngine = safe_import('holo_expertise_knowledge', 'ExpertiseKnowledgeEngine', None)
+EXPERTISE_KNOWLEDGE_AVAILABLE = HoloExpertiseKnowledge is not None
+
+HoloCrossReferenceEngine = safe_import('holo_cross_reference_engine', 'HoloCrossReferenceEngine', None)
+CrossReferenceEngine = safe_import('holo_cross_reference_engine', 'CrossReferenceEngine', None)
+CROSS_REFERENCE_ENGINE_AVAILABLE = HoloCrossReferenceEngine is not None
+
+HoloLongtermGoals = safe_import('holo_longterm_goals', 'HoloLongtermGoals', None)
+LongtermGoalsEngine = safe_import('holo_longterm_goals', 'LongtermGoalsEngine', None)
+LONGTERM_GOALS_AVAILABLE = HoloLongtermGoals is not None
+
+# ============================================================================
+# EMOTIONEN ERWEITERTE MODULE
+# ============================================================================
+HoloEmotionRegulation = safe_import('holo_emotion_regulation', 'HoloEmotionRegulation', None)
+EmotionRegulationEngine = safe_import('holo_emotion_regulation', 'EmotionRegulationEngine', None)
+EMOTION_REGULATION_AVAILABLE = HoloEmotionRegulation is not None
+
+HoloMixedEmotions = safe_import('holo_mixed_emotions', 'HoloMixedEmotions', None)
+MixedEmotionsEngine = safe_import('holo_mixed_emotions', 'MixedEmotionsEngine', None)
+MIXED_EMOTIONS_AVAILABLE = HoloMixedEmotions is not None
+
+HoloDeceptionDetection = safe_import('holo_deception_detection', 'HoloDeceptionDetection', None)
+DeceptionDetectionEngine = safe_import('holo_deception_detection', 'DeceptionDetectionEngine', None)
+DECEPTION_DETECTION_AVAILABLE = HoloDeceptionDetection is not None
+
+HoloHiddenMotives = safe_import('holo_hidden_motives', 'HoloHiddenMotives', None)
+HiddenMotivesEngine = safe_import('holo_hidden_motives', 'HiddenMotivesEngine', None)
+HIDDEN_MOTIVES_AVAILABLE = HoloHiddenMotives is not None
+
+HoloPersonOpinions = safe_import('holo_person_opinions', 'HoloPersonOpinions', None)
+PersonOpinionsEngine = safe_import('holo_person_opinions', 'PersonOpinionsEngine', None)
+PERSON_OPINIONS_AVAILABLE = HoloPersonOpinions is not None
+
+HoloUnconsciousProcesses = safe_import('holo_unconscious_processes', 'HoloUnconsciousProcesses', None)
+UnconsciousProcessesEngine = safe_import('holo_unconscious_processes', 'UnconsciousProcessesEngine', None)
+UNCONSCIOUS_PROCESSES_AVAILABLE = HoloUnconsciousProcesses is not None
+
+HoloTraumaProcessing = safe_import('holo_trauma_processing', 'HoloTraumaProcessing', None)
+TraumaProcessingEngine = safe_import('holo_trauma_processing', 'TraumaProcessingEngine', None)
+TRAUMA_PROCESSING_AVAILABLE = HoloTraumaProcessing is not None
+
+HoloRedemptionSystem = safe_import('holo_redemption_system', 'HoloRedemptionSystem', None)
+RedemptionEngine = safe_import('holo_redemption_system', 'RedemptionEngine', None)
+REDEMPTION_SYSTEM_AVAILABLE = HoloRedemptionSystem is not None
+
+HoloRepressionSystem = safe_import('holo_repression_system', 'HoloRepressionSystem', None)
+RepressionEngine = safe_import('holo_repression_system', 'RepressionEngine', None)
+REPRESSION_SYSTEM_AVAILABLE = HoloRepressionSystem is not None
+
+HoloFreudianSlips = safe_import('holo_freudian_slips', 'HoloFreudianSlips', None)
+FreudianSlipsEngine = safe_import('holo_freudian_slips', 'FreudianSlipsEngine', None)
+FREUDIAN_SLIPS_AVAILABLE = HoloFreudianSlips is not None
+
+HoloDeepPsychology = safe_import('holo_deep_psychology', 'HoloDeepPsychology', None)
+DeepPsychologyEngine = safe_import('holo_deep_psychology', 'DeepPsychologyEngine', None)
+DEEP_PSYCHOLOGY_AVAILABLE = HoloDeepPsychology is not None
+
+HoloEnergyManagement = safe_import('holo_energy_management', 'HoloEnergyManagement', None)
+EnergyManagementEngine = safe_import('holo_energy_management', 'EnergyManagementEngine', None)
+ENERGY_MANAGEMENT_AVAILABLE = HoloEnergyManagement is not None
+
+HoloDriveSystem = safe_import('holo_drive_system', 'HoloDriveSystem', None)
+DriveSystemEngine = safe_import('holo_drive_system', 'DriveSystemEngine', None)
+DRIVE_SYSTEM_AVAILABLE = HoloDriveSystem is not None
+
+
+# =============================================================================
 # LOAD ALL MODULES FUNCTION
 # =============================================================================
 
