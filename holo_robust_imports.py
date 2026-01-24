@@ -1798,36 +1798,44 @@ HoloPersonOpinions = safe_import('holo_person_opinions', 'HoloPersonOpinions', N
 PersonOpinionsEngine = safe_import('holo_person_opinions', 'PersonOpinionsEngine', None)
 PERSON_OPINIONS_AVAILABLE = HoloPersonOpinions is not None
 
-HoloUnconsciousProcesses = safe_import('holo_unconscious_processes', 'HoloUnconsciousProcesses', None)
-UnconsciousProcessesEngine = safe_import('holo_unconscious_processes', 'UnconsciousProcessesEngine', None)
-UNCONSCIOUS_PROCESSES_AVAILABLE = HoloUnconsciousProcesses is not None
+# Unconscious Processes (Korrekter Klassenname)
+RecurringDreamEngine = safe_import('holo_unconscious_processes', 'RecurringDreamEngine', None)
+PersonalValueHierarchy = safe_import('holo_unconscious_processes', 'PersonalValueHierarchy', None)
+UNCONSCIOUS_PROCESSES_AVAILABLE = RecurringDreamEngine is not None
 
-HoloTraumaProcessing = safe_import('holo_trauma_processing', 'HoloTraumaProcessing', None)
-TraumaProcessingEngine = safe_import('holo_trauma_processing', 'TraumaProcessingEngine', None)
-TRAUMA_PROCESSING_AVAILABLE = HoloTraumaProcessing is not None
+# Trauma Processing (Korrekter Klassenname)
+HoloTraumaProcessingEngine = safe_import('holo_trauma_processing', 'HoloTraumaProcessingEngine', None)
+TraumaticExperience = safe_import('holo_trauma_processing', 'TraumaticExperience', None)
+TRAUMA_PROCESSING_AVAILABLE = HoloTraumaProcessingEngine is not None or TraumaticExperience is not None
 
-HoloRedemptionSystem = safe_import('holo_redemption_system', 'HoloRedemptionSystem', None)
-RedemptionEngine = safe_import('holo_redemption_system', 'RedemptionEngine', None)
-REDEMPTION_SYSTEM_AVAILABLE = HoloRedemptionSystem is not None
+# Redemption System (Korrekter Klassenname)
+RedemptionArc = safe_import('holo_redemption_system', 'RedemptionArc', None)
+Conscience = safe_import('holo_redemption_system', 'Conscience', None)
+REDEMPTION_SYSTEM_AVAILABLE = RedemptionArc is not None
 
-HoloRepressionSystem = safe_import('holo_repression_system', 'HoloRepressionSystem', None)
-RepressionEngine = safe_import('holo_repression_system', 'RepressionEngine', None)
-REPRESSION_SYSTEM_AVAILABLE = HoloRepressionSystem is not None
+# Repression System (Korrekter Klassenname)
+HoloRepressionEngine = safe_import('holo_repression_system', 'HoloRepressionEngine', None)
+RepressedContent = safe_import('holo_repression_system', 'RepressedContent', None)
+REPRESSION_SYSTEM_AVAILABLE = HoloRepressionEngine is not None
 
-HoloFreudianSlips = safe_import('holo_freudian_slips', 'HoloFreudianSlips', None)
-FreudianSlipsEngine = safe_import('holo_freudian_slips', 'FreudianSlipsEngine', None)
-FREUDIAN_SLIPS_AVAILABLE = HoloFreudianSlips is not None
+# Freudian Slips (Korrekter Klassenname)
+HoloFreudianSlipsEngine = safe_import('holo_freudian_slips', 'HoloFreudianSlipsEngine', None)
+FreudianSlip = safe_import('holo_freudian_slips', 'FreudianSlip', None)
+FREUDIAN_SLIPS_AVAILABLE = HoloFreudianSlipsEngine is not None
 
-HoloDeepPsychology = safe_import('holo_deep_psychology', 'HoloDeepPsychology', None)
-DeepPsychologyEngine = safe_import('holo_deep_psychology', 'DeepPsychologyEngine', None)
-DEEP_PSYCHOLOGY_AVAILABLE = HoloDeepPsychology is not None
+# Deep Psychology (Korrekter Klassenname)
+HoloDeepPsychologyEngine = safe_import('holo_deep_psychology', 'HoloDeepPsychologyEngine', None)
+DeepPsychologyConfig = safe_import('holo_deep_psychology', 'DeepPsychologyConfig', None)
+DEEP_PSYCHOLOGY_AVAILABLE = HoloDeepPsychologyEngine is not None
 
+# Energy Management (OK - Klassenname existiert)
 HoloEnergyManagement = safe_import('holo_energy_management', 'HoloEnergyManagement', None)
-EnergyManagementEngine = safe_import('holo_energy_management', 'EnergyManagementEngine', None)
+EnergyState = safe_import('holo_energy_management', 'EnergyState', None)
 ENERGY_MANAGEMENT_AVAILABLE = HoloEnergyManagement is not None
 
+# Drive System (OK - Klassenname existiert)
 HoloDriveSystem = safe_import('holo_drive_system', 'HoloDriveSystem', None)
-DriveSystemEngine = safe_import('holo_drive_system', 'DriveSystemEngine', None)
+DriveState = safe_import('holo_drive_system', 'DriveState', None)
 DRIVE_SYSTEM_AVAILABLE = HoloDriveSystem is not None
 
 
@@ -1835,55 +1843,45 @@ DRIVE_SYSTEM_AVAILABLE = HoloDriveSystem is not None
 # KERN-MODULE (Ergänzung v5.2)
 # =============================================================================
 
-# Consciousness
-HoloConsciousness = safe_import('holo_consciousness', 'HoloConsciousness', None)
-ConsciousnessManager = safe_import('holo_consciousness', 'ConsciousnessManager', None)
-CONSCIOUSNESS_AVAILABLE = HoloConsciousness is not None
+# Consciousness - NICHT überschreiben, bereits oben korrekt importiert!
+# HoloConsciousness ist bereits verfügbar (Zeile 118-134)
 
-# Inner Life
-HoloInnerLife = safe_import('holo_inner_life', 'HoloInnerLife', None)
-InnerLifeEngine = safe_import('holo_inner_life', 'InnerLifeEngine', None)
-INNER_LIFE_AVAILABLE = HoloInnerLife is not None
+# Inner Life - NICHT überschreiben, bereits oben korrekt importiert!
+# HoloInnerLife, HoloAutonomousLife sind bereits verfügbar (Zeile 157-195)
 
-# Self Awareness
+# Self Awareness (NEU - nicht vorher importiert)
 HoloSelfAwareness = safe_import('holo_self_awareness', 'HoloSelfAwareness', None)
-SelfAwarenessEngine = safe_import('holo_self_awareness', 'SelfAwarenessEngine', None)
+SelfAwarenessCore = safe_import('holo_self_awareness', 'SelfAwarenessCore', None)
 SELF_AWARENESS_AVAILABLE = HoloSelfAwareness is not None
 
-# Database System
-HoloDatabaseSystem = safe_import('holo_database_system', 'HoloDatabaseSystem', None)
-DatabaseManager = safe_import('holo_database_system', 'DatabaseManager', None)
-DATABASE_SYSTEM_AVAILABLE = HoloDatabaseSystem is not None
+# Database System (Korrekter Klassenname)
+HoloDatabaseManager = safe_import('holo_database_system', 'HoloDatabaseManager', None)
+BaseDatabase = safe_import('holo_database_system', 'BaseDatabase', None)
+DATABASE_SYSTEM_AVAILABLE = HoloDatabaseManager is not None or BaseDatabase is not None
 
-# Emotional Engines
-HoloEmotionalEngines = safe_import('holo_emotional_engines', 'HoloEmotionalEngines', None)
-EmotionalEnginesManager = safe_import('holo_emotional_engines', 'EmotionalEnginesManager', None)
-EMOTIONAL_ENGINES_AVAILABLE = HoloEmotionalEngines is not None
+# Emotional Engines - NICHT überschreiben! Bereits oben korrekt (Zeile 278-306)
+# EmotionalResponseSystem, HumorEngine etc. sind bereits verfügbar
 
-# Emotional Complexity
-HoloEmotionalComplexity = safe_import('holo_emotional_complexity', 'HoloEmotionalComplexity', None)
-EmotionalComplexityEngine = safe_import('holo_emotional_complexity', 'EmotionalComplexityEngine', None)
-EMOTIONAL_COMPLEXITY_AVAILABLE = HoloEmotionalComplexity is not None
+# Emotional Complexity - NICHT überschreiben! Bereits oben korrekt (Zeile 319-339)
+# EmotionalComplexitySystem, NegativeBehaviorSystem sind bereits verfügbar
 
-# Knowledge Influence
-HoloKnowledgeInfluence = safe_import('holo_knowledge_influence', 'HoloKnowledgeInfluence', None)
-KnowledgeInfluenceEngine = safe_import('holo_knowledge_influence', 'KnowledgeInfluenceEngine', None)
-KNOWLEDGE_INFLUENCE_AVAILABLE = HoloKnowledgeInfluence is not None
+# Knowledge Influence (Korrekter Klassenname)
+KnowledgeInfluenceSystem = safe_import('holo_knowledge_influence', 'KnowledgeInfluenceSystem', None)
+EnhancedKnowledgeInfluenceSystem = safe_import('holo_knowledge_influence', 'EnhancedKnowledgeInfluenceSystem', None)
+KNOWLEDGE_INFLUENCE_AVAILABLE = KnowledgeInfluenceSystem is not None
 
-# Markov Training
-HoloMarkovTraining = safe_import('holo_markov_training', 'HoloMarkovTraining', None)
-MarkovTrainingEngine = safe_import('holo_markov_training', 'MarkovTrainingEngine', None)
-MARKOV_TRAINING_AVAILABLE = HoloMarkovTraining is not None
+# Markov Training - NICHT überschreiben! Bereits oben korrekt (Zeile 358-394)
+# HoloIntelligenceEngine, MarkovTrainer sind bereits verfügbar
 
-# Media Discovery
-HoloMediaDiscovery = safe_import('holo_media_discovery', 'HoloMediaDiscovery', None)
-MediaDiscoveryEngine = safe_import('holo_media_discovery', 'MediaDiscoveryEngine', None)
-MEDIA_DISCOVERY_AVAILABLE = HoloMediaDiscovery is not None
+# Media Discovery (Korrekter Klassenname)
+MediaDiscoverySystem = safe_import('holo_media_discovery', 'MediaDiscoverySystem', None)
+PreferenceAdapter = safe_import('holo_media_discovery', 'PreferenceAdapter', None)
+MEDIA_DISCOVERY_AVAILABLE = MediaDiscoverySystem is not None
 
-# Media Knowledge
-HoloMediaKnowledge = safe_import('holo_media_knowledge', 'HoloMediaKnowledge', None)
-MediaKnowledgeEngine = safe_import('holo_media_knowledge', 'MediaKnowledgeEngine', None)
-MEDIA_KNOWLEDGE_AVAILABLE = HoloMediaKnowledge is not None
+# Media Knowledge (Korrekter Klassenname)
+MediaKnowledgeBase = safe_import('holo_media_knowledge', 'MediaKnowledgeBase', None)
+AnimeInfo = safe_import('holo_media_knowledge', 'AnimeInfo', None)
+MEDIA_KNOWLEDGE_AVAILABLE = MediaKnowledgeBase is not None
 
 # ============================================================================
 # MODULE LOADER (Robustes Modul-Laden & Überwachung) - NEU v5.3
@@ -2259,4 +2257,19 @@ __all__ = [
 
     # NEU v5.3: Tester
     'HoloTester', 'TestResult', 'TESTER_AVAILABLE',
+
+    # NEU v5.4: Korrigierte Module-Importe
+    'HoloSelfAwareness', 'SelfAwarenessCore', 'SELF_AWARENESS_AVAILABLE',
+    'HoloDatabaseManager', 'BaseDatabase', 'DATABASE_SYSTEM_AVAILABLE',
+    'KnowledgeInfluenceSystem', 'EnhancedKnowledgeInfluenceSystem', 'KNOWLEDGE_INFLUENCE_AVAILABLE',
+    'MediaDiscoverySystem', 'PreferenceAdapter', 'MEDIA_DISCOVERY_AVAILABLE',
+    'MediaKnowledgeBase', 'AnimeInfo', 'MEDIA_KNOWLEDGE_AVAILABLE',
+    'RecurringDreamEngine', 'PersonalValueHierarchy', 'UNCONSCIOUS_PROCESSES_AVAILABLE',
+    'HoloTraumaProcessingEngine', 'TraumaticExperience', 'TRAUMA_PROCESSING_AVAILABLE',
+    'RedemptionArc', 'REDEMPTION_SYSTEM_AVAILABLE',
+    'HoloRepressionEngine', 'RepressedContent', 'REPRESSION_SYSTEM_AVAILABLE',
+    'HoloFreudianSlipsEngine', 'FreudianSlip', 'FREUDIAN_SLIPS_AVAILABLE',
+    'HoloDeepPsychologyEngine', 'DeepPsychologyConfig', 'DEEP_PSYCHOLOGY_AVAILABLE',
+    'HoloEnergyManagement', 'EnergyState', 'ENERGY_MANAGEMENT_AVAILABLE',
+    'HoloDriveSystem', 'DriveState', 'DRIVE_SYSTEM_AVAILABLE',
 ]
