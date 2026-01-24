@@ -30,3 +30,12 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime data and caches
+.holo_backups/
+holo_config.json
+holo_settings.json
+holo_creative_learning/
+holo_skills.db
+state/
+*.db
