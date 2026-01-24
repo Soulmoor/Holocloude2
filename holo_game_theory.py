@@ -72,8 +72,6 @@ __all__ = [
 
     # Evolutionäre Spieltheorie
     "EvolutionaryGameEngine",
-    "Population",
-    "ESS",
 
     # Verhandlung
     "NegotiationEngine",
@@ -82,8 +80,6 @@ __all__ = [
 
     # Mechanismus-Design
     "MechanismDesignEngine",
-    "Auction",
-    "SocialChoice",
 
     # Enums
     "GameType",
@@ -95,6 +91,26 @@ __all__ = [
     "create_game_theory_engine",
     "create_negotiation_engine",
     "get_full_game_theory_engine",
+
+    # Erweiterung: Bayesian Games
+    "BayesianGameEngine",
+    "PlayerType",
+    "BayesianStrategy",
+    "BayesianEquilibrium",
+    "BeliefType",
+    "create_bayesian_game_engine",
+
+    # Erweiterung: Stochastic Games
+    "StochasticGameEngine",
+    "StochasticGameState",
+    "MarkovStrategy",
+    "GameState",
+    "create_stochastic_game_engine",
+
+    # Erweiterung: Repeated Games
+    "RepeatedGameEngine",
+    "ReputationState",
+    "create_repeated_game_engine",
 ]
 
 
@@ -1072,6 +1088,492 @@ def get_full_game_theory_engine() -> FullGameTheoryEngine:
     if _full_engine is None:
         _full_engine = FullGameTheoryEngine()
     return _full_engine
+
+
+# =============================================================================
+# ERWEITERUNG: BAYESIAN GAMES (SPIELE MIT UNVOLLSTÄNDIGER INFORMATION)
+# =============================================================================
+
+class BeliefType(Enum):
+    """Typen von Überzeugungen in Bayesianischen Spielen"""
+    UNIFORM = auto()  # Gleichverteilung
+    COMMON_PRIOR = auto()  # Gemeinsame Prioren
+    PRIVATE_INFO = auto()  # Private Information
+    CORRELATED = auto()  # Korrelierte Typen
+
+
+@dataclass
+class PlayerType:
+    """Spielertyp in einem Bayesianischen Spiel"""
+    player_id: str
+    type_name: str
+    probability: float
+    private_value: float
+    beliefs: Dict[str, float]  # Überzeugungen über andere Typen
+
+
+@dataclass
+class BayesianStrategy:
+    """Strategie in einem Bayesianischen Spiel"""
+    player_id: str
+    type_to_action: Dict[str, str]  # Typ -> Aktion Mapping
+    expected_utility: float
+
+
+@dataclass
+class BayesianEquilibrium:
+    """Bayesianisches Nash-Gleichgewicht"""
+    strategies: Dict[str, BayesianStrategy]
+    interim_utilities: Dict[str, float]
+    ex_ante_utilities: Dict[str, float]
+    is_efficient: bool
+
+
+class BayesianGameEngine:
+    """
+    Bayesianische Spieltheorie
+
+    Spiele mit unvollständiger Information:
+    - Typen und private Information
+    - Gemeinsame Prioren (Harsanyi)
+    - Bayesianisches Nash-Gleichgewicht
+    - Signaling und Screening
+    """
+
+    def __init__(self):
+        self.games: Dict[str, Any] = {}
+
+    def create_bayesian_game(
+        self,
+        players: List[str],
+        types: Dict[str, List[PlayerType]],
+        actions: Dict[str, List[str]],
+        payoffs: Callable[[str, str, str, str], float]
+    ) -> Dict[str, Any]:
+        """
+        Erstellt ein Bayesianisches Spiel
+
+        Args:
+            players: Liste der Spieler
+            types: Mögliche Typen für jeden Spieler
+            actions: Verfügbare Aktionen
+            payoffs: Auszahlungsfunktion (spieler, typ, aktion, gegner_aktion) -> payoff
+        """
+        return {
+            "players": players,
+            "types": types,
+            "actions": actions,
+            "payoffs": payoffs,
+            "type": "bayesian_game",
+            "common_prior": True
+        }
+
+    def compute_expected_utility(
+        self,
+        game: Dict[str, Any],
+        player: str,
+        player_type: PlayerType,
+        action: str,
+        opponent_strategy: Dict[str, str]
+    ) -> float:
+        """Berechnet erwarteten Nutzen gegeben Überzeugungen"""
+        expected = 0.0
+        opponent = [p for p in game["players"] if p != player][0]
+
+        for opp_type in game["types"].get(opponent, []):
+            opp_action = opponent_strategy.get(opp_type.type_name, "")
+            prob = player_type.beliefs.get(opp_type.type_name, 0)
+            payoff = game["payoffs"](player, player_type.type_name, action, opp_action)
+            expected += prob * payoff
+
+        return expected
+
+    def find_bayesian_equilibrium(
+        self,
+        game: Dict[str, Any]
+    ) -> BayesianEquilibrium:
+        """
+        Findet Bayesianisches Nash-Gleichgewicht
+        Vereinfachte Version für 2-Spieler-Spiele
+        """
+        strategies = {}
+        interim_utilities = {}
+
+        for player in game["players"]:
+            best_responses = {}
+            total_utility = 0.0
+
+            for ptype in game["types"].get(player, []):
+                # Beste Antwort für jeden Typ finden
+                best_action = None
+                best_utility = float('-inf')
+
+                for action in game["actions"].get(player, []):
+                    # Vereinfachte Berechnung
+                    utility = ptype.private_value * (1 if "kooperieren" in action.lower() else 0.5)
+                    if utility > best_utility:
+                        best_utility = utility
+                        best_action = action
+
+                best_responses[ptype.type_name] = best_action
+                total_utility += ptype.probability * best_utility
+
+            strategies[player] = BayesianStrategy(
+                player_id=player,
+                type_to_action=best_responses,
+                expected_utility=total_utility
+            )
+            interim_utilities[player] = total_utility
+
+        return BayesianEquilibrium(
+            strategies=strategies,
+            interim_utilities=interim_utilities,
+            ex_ante_utilities=interim_utilities,
+            is_efficient=True
+        )
+
+    def analyze_signaling_game(
+        self,
+        sender_types: List[str],
+        signals: List[str],
+        receiver_actions: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Analysiert ein Signaling-Spiel
+        Sender sendet Signal basierend auf Typ
+        Empfänger wählt Aktion basierend auf Signal
+        """
+        return {
+            "sender_types": sender_types,
+            "signals": signals,
+            "receiver_actions": receiver_actions,
+            "equilibrium_types": {
+                "separating": "Verschiedene Typen senden verschiedene Signale",
+                "pooling": "Alle Typen senden gleiches Signal",
+                "semi_separating": "Teilweise Trennung der Typen"
+            },
+            "key_concepts": [
+                "Glaubwürdige Signale (costly signaling)",
+                "Überzeugungsaktualisierung (Bayes)",
+                "Spence's Arbeitsmarkt-Signaling"
+            ]
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: STOCHASTIC GAMES
+# =============================================================================
+
+class GameState(Enum):
+    """Zustände in einem stochastischen Spiel"""
+    COOPERATION = auto()
+    COMPETITION = auto()
+    MIXED = auto()
+    TERMINAL = auto()
+
+
+@dataclass
+class StochasticGameState:
+    """Zustand in einem stochastischen Spiel"""
+    state_id: str
+    payoff_matrix: Dict[Tuple[str, str], Tuple[float, float]]
+    transition_probs: Dict[Tuple[str, str], Dict[str, float]]
+    is_terminal: bool = False
+
+
+@dataclass
+class MarkovStrategy:
+    """Markov-perfekte Strategie"""
+    player_id: str
+    state_to_action: Dict[str, str]
+    state_to_mixed: Dict[str, Dict[str, float]]  # Zustand -> Aktionswahrscheinlichkeiten
+    value_function: Dict[str, float]
+
+
+class StochasticGameEngine:
+    """
+    Stochastische Spiele (Shapley 1953)
+
+    Wiederholte Spiele mit zustandsabhängigen Auszahlungen:
+    - Markov-perfekte Gleichgewichte
+    - Diskontierte Auszahlungen
+    - Zustandsübergänge
+    """
+
+    def __init__(self):
+        self.games: Dict[str, List[StochasticGameState]] = {}
+        self.discount_factor: float = 0.95
+
+    def create_stochastic_game(
+        self,
+        states: List[StochasticGameState],
+        players: List[str],
+        discount: float = 0.95
+    ) -> Dict[str, Any]:
+        """Erstellt ein stochastisches Spiel"""
+        self.discount_factor = discount
+        game_id = f"stochastic_{len(self.games)}"
+        self.games[game_id] = states
+        return {
+            "game_id": game_id,
+            "states": states,
+            "players": players,
+            "discount_factor": discount
+        }
+
+    def compute_stage_payoffs(
+        self,
+        state: StochasticGameState,
+        actions: Tuple[str, str]
+    ) -> Tuple[float, float]:
+        """Berechnet Stufenauszahlungen"""
+        return state.payoff_matrix.get(actions, (0.0, 0.0))
+
+    def value_iteration(
+        self,
+        game: Dict[str, Any],
+        max_iterations: int = 100,
+        tolerance: float = 1e-6
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Value Iteration für stochastische Spiele
+        Findet approximative Wertfunktionen
+        """
+        states = game["states"]
+        players = game["players"]
+        gamma = game["discount_factor"]
+
+        # Initialisiere Wertfunktionen
+        values = {p: {s.state_id: 0.0 for s in states} for p in players}
+
+        for _ in range(max_iterations):
+            old_values = {p: dict(v) for p, v in values.items()}
+            max_change = 0.0
+
+            for state in states:
+                if state.is_terminal:
+                    continue
+
+                # Finde Nash-Gleichgewicht für diesen Zustand
+                # Vereinfacht: Erste Aktion als beste Antwort
+                best_actions = list(state.payoff_matrix.keys())[0] if state.payoff_matrix else ("", "")
+                payoffs = self.compute_stage_payoffs(state, best_actions)
+
+                for i, player in enumerate(players):
+                    # Berechne erwarteten zukünftigen Wert
+                    future_value = 0.0
+                    trans = state.transition_probs.get(best_actions, {})
+                    for next_state_id, prob in trans.items():
+                        future_value += prob * old_values[player].get(next_state_id, 0)
+
+                    new_value = payoffs[i] + gamma * future_value
+                    values[player][state.state_id] = new_value
+                    max_change = max(max_change, abs(new_value - old_values[player][state.state_id]))
+
+            if max_change < tolerance:
+                break
+
+        return values
+
+    def find_markov_perfect_equilibrium(
+        self,
+        game: Dict[str, Any]
+    ) -> Dict[str, MarkovStrategy]:
+        """
+        Findet Markov-perfektes Gleichgewicht
+        Strategie hängt nur vom aktuellen Zustand ab
+        """
+        values = self.value_iteration(game)
+        strategies = {}
+
+        for player in game["players"]:
+            state_actions = {}
+            for state in game["states"]:
+                # Vereinfacht: Wähle erste verfügbare Aktion
+                actions = list(state.payoff_matrix.keys())
+                state_actions[state.state_id] = actions[0][0] if actions else ""
+
+            strategies[player] = MarkovStrategy(
+                player_id=player,
+                state_to_action=state_actions,
+                state_to_mixed={},
+                value_function=values[player]
+            )
+
+        return strategies
+
+
+# =============================================================================
+# ERWEITERUNG: REPEATED GAMES & FOLK THEOREM
+# =============================================================================
+
+@dataclass
+class ReputationState:
+    """Reputationszustand in wiederholten Spielen"""
+    player_id: str
+    cooperation_rate: float
+    defection_count: int
+    trust_level: float
+
+
+class RepeatedGameEngine:
+    """
+    Wiederholte Spiele und Folk Theorem
+
+    Konzepte:
+    - Endlich vs. unendlich wiederholte Spiele
+    - Folk Theorem: Kooperation durch Zukunftsdrohung
+    - Trigger-Strategien
+    - Reputationseffekte
+    """
+
+    def __init__(self):
+        self.history: List[Tuple[str, str]] = []
+        self.reputations: Dict[str, ReputationState] = {}
+
+    def analyze_folk_theorem(
+        self,
+        stage_game_payoffs: Dict[Tuple[str, str], Tuple[float, float]],
+        discount_factor: float
+    ) -> Dict[str, Any]:
+        """
+        Analysiert Folk Theorem Anwendbarkeit
+
+        Folk Theorem: In unendlich wiederholten Spielen mit ausreichendem
+        Diskontfaktor kann jede individuell rationale Auszahlung als
+        Nash-Gleichgewicht erreicht werden.
+        """
+        # Finde Minimax-Werte
+        minimax_1 = min(max(p[0] for a, p in stage_game_payoffs.items() if a[0] == a1)
+                        for a1 in set(a[0] for a in stage_game_payoffs.keys()))
+        minimax_2 = min(max(p[1] for a, p in stage_game_payoffs.items() if a[1] == a2)
+                        for a2 in set(a[1] for a in stage_game_payoffs.keys()))
+
+        # Finde Kooperationsauszahlung
+        coop_payoff = stage_game_payoffs.get(("kooperieren", "kooperieren"), (0, 0))
+
+        # Kritischer Diskontfaktor
+        defect_payoff = stage_game_payoffs.get(("defektieren", "kooperieren"), (0, 0))
+        if defect_payoff[0] > coop_payoff[0]:
+            critical_delta = (defect_payoff[0] - coop_payoff[0]) / (defect_payoff[0] - minimax_1)
+        else:
+            critical_delta = 0
+
+        return {
+            "folk_theorem_applicable": discount_factor >= critical_delta,
+            "minimax_values": {"player1": minimax_1, "player2": minimax_2},
+            "cooperation_sustainable": discount_factor >= critical_delta,
+            "critical_discount_factor": critical_delta,
+            "individually_rational_set": f"Alle Auszahlungen >= ({minimax_1}, {minimax_2})",
+            "feasible_set": "Konvexe Hülle der Stufenauszahlungen",
+            "interpretation": [
+                "Bei hohem Diskontfaktor ist Zukunft wichtig",
+                "Drohung zukünftiger Bestrafung ermöglicht Kooperation",
+                "Trigger-Strategien (Grim Trigger, Tit-for-Tat) unterstützen dies"
+            ]
+        }
+
+    def grim_trigger_strategy(
+        self,
+        history: List[Tuple[str, str]],
+        player_index: int
+    ) -> str:
+        """
+        Grim Trigger Strategie
+        Kooperiere, bis Gegner defektiert, dann defektiere für immer
+        """
+        other_index = 1 - player_index
+        for round_actions in history:
+            if round_actions[other_index] == "defektieren":
+                return "defektieren"
+        return "kooperieren"
+
+    def tit_for_tat_strategy(
+        self,
+        history: List[Tuple[str, str]],
+        player_index: int
+    ) -> str:
+        """Tit-for-Tat: Spiele, was Gegner zuletzt spielte"""
+        if not history:
+            return "kooperieren"
+        other_index = 1 - player_index
+        return history[-1][other_index]
+
+    def pavlov_strategy(
+        self,
+        history: List[Tuple[str, str]],
+        player_index: int,
+        payoffs: Dict[Tuple[str, str], Tuple[float, float]]
+    ) -> str:
+        """
+        Pavlov/Win-Stay-Lose-Shift
+        Wiederhole, wenn gut gelaufen; ändere, wenn schlecht
+        """
+        if not history:
+            return "kooperieren"
+
+        last_actions = history[-1]
+        last_payoff = payoffs.get(last_actions, (0, 0))[player_index]
+        coop_payoff = payoffs.get(("kooperieren", "kooperieren"), (0, 0))[player_index]
+
+        if last_payoff >= coop_payoff:
+            return last_actions[player_index]  # Win-Stay
+        else:
+            return "kooperieren" if last_actions[player_index] == "defektieren" else "defektieren"
+
+    def analyze_reputation_effect(
+        self,
+        player: str,
+        history: List[str]
+    ) -> ReputationState:
+        """Analysiert Reputationseffekte"""
+        coop_count = sum(1 for a in history if a == "kooperieren")
+        defect_count = len(history) - coop_count
+        coop_rate = coop_count / len(history) if history else 0.5
+
+        trust = coop_rate * 0.7 + (1 - defect_count / max(len(history), 1)) * 0.3
+
+        state = ReputationState(
+            player_id=player,
+            cooperation_rate=coop_rate,
+            defection_count=defect_count,
+            trust_level=trust
+        )
+        self.reputations[player] = state
+        return state
+
+
+# =============================================================================
+# ERWEITERUNG: FACTORY FUNCTIONS
+# =============================================================================
+
+_bayesian_engine: Optional[BayesianGameEngine] = None
+_stochastic_engine: Optional[StochasticGameEngine] = None
+_repeated_engine: Optional[RepeatedGameEngine] = None
+
+
+def create_bayesian_game_engine() -> BayesianGameEngine:
+    """Factory: Erstellt BayesianGameEngine"""
+    global _bayesian_engine
+    if _bayesian_engine is None:
+        _bayesian_engine = BayesianGameEngine()
+    return _bayesian_engine
+
+
+def create_stochastic_game_engine() -> StochasticGameEngine:
+    """Factory: Erstellt StochasticGameEngine"""
+    global _stochastic_engine
+    if _stochastic_engine is None:
+        _stochastic_engine = StochasticGameEngine()
+    return _stochastic_engine
+
+
+def create_repeated_game_engine() -> RepeatedGameEngine:
+    """Factory: Erstellt RepeatedGameEngine"""
+    global _repeated_engine
+    if _repeated_engine is None:
+        _repeated_engine = RepeatedGameEngine()
+    return _repeated_engine
 
 
 # =============================================================================

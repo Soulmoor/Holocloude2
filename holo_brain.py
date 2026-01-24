@@ -1976,6 +1976,58 @@ except ImportError as e:
     get_advanced_mdp_engine = None
     logger.debug(f"[Brain] AdvancedMDP nicht verfügbar: {e}")
 
+# Complexity Theory - Komplexitätstheorie und Berechenbarkeit
+try:
+    from holo_complexity_theory import (
+        ComplexityTheoryEngine,
+        BigOEngine,
+        ComplexityHierarchy,
+        ReductionEngine,
+        ComputabilityEngine,
+        ApproximationEngine,
+        ComplexityClassification,
+        AsymptoticBound,
+        ComplexityFunction,
+        Reduction,
+        NPCompleteProblem,
+        TuringMachine,
+        DecidabilityResult,
+        ApproximationScheme,
+        ComplexityType,
+        ReductionType,
+        GrowthRate,
+        create_complexity_engine,
+        create_bigo_engine,
+        create_reduction_engine,
+        get_complexity_theory_engine,
+    )
+    COMPLEXITY_THEORY_AVAILABLE = True
+    logger.info("[Brain] ✓ ComplexityTheory (P/NP, Big-O, Reduktionen, Berechenbarkeit) geladen")
+except ImportError as e:
+    COMPLEXITY_THEORY_AVAILABLE = False
+    ComplexityTheoryEngine = None
+    BigOEngine = None
+    ComplexityHierarchy = None
+    ReductionEngine = None
+    ComputabilityEngine = None
+    ApproximationEngine = None
+    ComplexityClassification = None
+    AsymptoticBound = None
+    ComplexityFunction = None
+    Reduction = None
+    NPCompleteProblem = None
+    TuringMachine = None
+    DecidabilityResult = None
+    ApproximationScheme = None
+    ComplexityType = None
+    ReductionType = None
+    GrowthRate = None
+    create_complexity_engine = None
+    create_bigo_engine = None
+    create_reduction_engine = None
+    get_complexity_theory_engine = None
+    logger.debug(f"[Brain] ComplexityTheory nicht verfügbar: {e}")
+
 # Learning Goals - Lernziele und Fortschritt
 try:
     from holo_learning_goals import (

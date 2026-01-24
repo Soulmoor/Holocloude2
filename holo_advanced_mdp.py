@@ -103,6 +103,27 @@ __all__ = [
     "create_policy_gradient_engine",
     "create_pomdp_engine",
     "get_advanced_mdp_engine",
+
+    # Erweiterung: Hierarchical RL
+    "HierarchicalRLEngine",
+    "Option",
+    "SubgoalDiscovery",
+    "OptionTermination",
+    "create_hierarchical_rl_engine",
+
+    # Erweiterung: Inverse RL
+    "InverseRLEngine",
+    "DemonstrationTrajectory",
+    "LearnedReward",
+    "create_inverse_rl_engine",
+
+    # Erweiterung: Multi-Agent RL
+    "MultiAgentRLEngine",
+    "MultiAgentState",
+    "JointAction",
+    "MAPolicy",
+    "MACoordinationType",
+    "create_multi_agent_rl_engine",
 ]
 
 
@@ -1417,6 +1438,625 @@ def get_advanced_mdp_engine() -> AdvancedMDPEngine:
     if _advanced_mdp_engine is None:
         _advanced_mdp_engine = AdvancedMDPEngine()
     return _advanced_mdp_engine
+
+
+# =============================================================================
+# ERWEITERUNG: HIERARCHICAL REINFORCEMENT LEARNING
+# =============================================================================
+
+class OptionTermination(Enum):
+    """Terminierungsbedingungen für Optionen"""
+    GOAL_REACHED = auto()
+    TIME_LIMIT = auto()
+    STOCHASTIC = auto()
+    CONDITION_MET = auto()
+
+
+@dataclass
+class Option:
+    """Option im Options Framework (Sutton et al. 1999)"""
+    name: str
+    initiation_set: Set[str]  # Zustände wo Option starten kann
+    termination_condition: Callable[[str], float]  # β(s): Terminierungswahrscheinlichkeit
+    internal_policy: Dict[str, str]  # π_ω: Interne Policy
+    primitive: bool = False
+
+
+@dataclass
+class SubgoalDiscovery:
+    """Entdecktes Subziel für hierarchisches Lernen"""
+    state: str
+    frequency: int
+    betweenness_centrality: float
+    is_bottleneck: bool
+
+
+class HierarchicalRLEngine:
+    """
+    Hierarchisches Reinforcement Learning
+
+    Konzepte:
+    - Options Framework (Sutton, Precup, Singh)
+    - MAXQ Dekomposition
+    - Feudal Networks
+    - Goal-Conditioned RL
+    """
+
+    def __init__(self):
+        self.options: Dict[str, Option] = {}
+        self.option_values: Dict[str, Dict[str, float]] = {}
+        self.subgoals: List[SubgoalDiscovery] = []
+
+    def create_option(
+        self,
+        name: str,
+        initiation_states: Set[str],
+        goal_states: Set[str],
+        base_policy: Dict[str, str]
+    ) -> Option:
+        """Erstellt eine Option (temporally extended action)"""
+        def termination(state: str) -> float:
+            return 1.0 if state in goal_states else 0.0
+
+        option = Option(
+            name=name,
+            initiation_set=initiation_states,
+            termination_condition=termination,
+            internal_policy=base_policy,
+            primitive=False
+        )
+        self.options[name] = option
+        return option
+
+    def create_primitive_option(self, action: str, all_states: Set[str]) -> Option:
+        """Erstellt primitive Option (einzelne Aktion)"""
+        option = Option(
+            name=f"primitive_{action}",
+            initiation_set=all_states,
+            termination_condition=lambda s: 1.0,  # Terminiert sofort
+            internal_policy={s: action for s in all_states},
+            primitive=True
+        )
+        self.options[option.name] = option
+        return option
+
+    def execute_option(
+        self,
+        option: Option,
+        start_state: str,
+        mdp_transition: Callable[[str, str], Tuple[str, float]],
+        max_steps: int = 100
+    ) -> Tuple[str, float, int]:
+        """
+        Führt Option aus bis Terminierung
+
+        Returns: (end_state, cumulative_reward, steps)
+        """
+        current_state = start_state
+        total_reward = 0.0
+        steps = 0
+        gamma = 0.99
+
+        while steps < max_steps:
+            # Prüfe Terminierung
+            if random.random() < option.termination_condition(current_state):
+                break
+
+            # Wähle Aktion aus interner Policy
+            action = option.internal_policy.get(current_state, "")
+            if not action:
+                break
+
+            # Führe Aktion aus
+            next_state, reward = mdp_transition(current_state, action)
+            total_reward += (gamma ** steps) * reward
+            current_state = next_state
+            steps += 1
+
+        return current_state, total_reward, steps
+
+    def smdp_value_iteration(
+        self,
+        states: List[str],
+        options: List[Option],
+        mdp_transition: Callable[[str, str], Tuple[str, float]],
+        gamma: float = 0.99,
+        max_iterations: int = 100
+    ) -> Dict[str, float]:
+        """
+        Value Iteration für Semi-MDPs mit Optionen
+        Erweitert Standard-VI für temporale Abstraktion
+        """
+        values = {s: 0.0 for s in states}
+
+        for _ in range(max_iterations):
+            new_values = {}
+            for state in states:
+                option_values = []
+                for option in options:
+                    if state not in option.initiation_set:
+                        continue
+
+                    # Simuliere Option (vereinfacht)
+                    end_state, reward, steps = self.execute_option(
+                        option, state, mdp_transition, max_steps=10
+                    )
+                    option_value = reward + (gamma ** steps) * values.get(end_state, 0)
+                    option_values.append(option_value)
+
+                new_values[state] = max(option_values) if option_values else 0.0
+
+            values = new_values
+
+        return values
+
+    def discover_subgoals(
+        self,
+        trajectories: List[List[str]],
+        threshold: float = 0.5
+    ) -> List[SubgoalDiscovery]:
+        """
+        Entdeckt Subziele aus Trajektorien
+        Basierend auf Zustandsfrequenz und Engstellen
+        """
+        state_counts = defaultdict(int)
+        transition_counts = defaultdict(int)
+
+        for traj in trajectories:
+            for state in traj:
+                state_counts[state] += 1
+            for i in range(len(traj) - 1):
+                transition_counts[(traj[i], traj[i + 1])] += 1
+
+        # Identifiziere Engstellen
+        subgoals = []
+        total_visits = sum(state_counts.values())
+
+        for state, count in state_counts.items():
+            freq = count / total_visits
+
+            # Berechne vereinfachte Betweenness
+            incoming = sum(1 for (s, t) in transition_counts if t == state)
+            outgoing = sum(1 for (s, t) in transition_counts if s == state)
+            betweenness = incoming * outgoing / max(total_visits, 1)
+
+            is_bottleneck = freq > threshold / len(state_counts) and incoming > 1
+
+            subgoals.append(SubgoalDiscovery(
+                state=state,
+                frequency=count,
+                betweenness_centrality=betweenness,
+                is_bottleneck=is_bottleneck
+            ))
+
+        self.subgoals = sorted(subgoals, key=lambda x: -x.betweenness_centrality)
+        return self.subgoals
+
+
+# =============================================================================
+# ERWEITERUNG: INVERSE REINFORCEMENT LEARNING
+# =============================================================================
+
+@dataclass
+class DemonstrationTrajectory:
+    """Demonstrationstrajektorie für IRL"""
+    states: List[str]
+    actions: List[str]
+    expert_id: str
+
+
+@dataclass
+class LearnedReward:
+    """Gelernte Belohnungsfunktion"""
+    feature_weights: Dict[str, float]
+    state_rewards: Dict[str, float]
+    confidence: float
+
+
+class InverseRLEngine:
+    """
+    Inverse Reinforcement Learning
+
+    Konzepte:
+    - Lernen der Belohnungsfunktion aus Demonstrationen
+    - Maximum Entropy IRL (Ziebart)
+    - Bayesian IRL
+    - Apprenticeship Learning
+    """
+
+    def __init__(self):
+        self.demonstrations: List[DemonstrationTrajectory] = []
+        self.learned_rewards: Dict[str, LearnedReward] = {}
+
+    def add_demonstration(
+        self,
+        states: List[str],
+        actions: List[str],
+        expert_id: str = "expert"
+    ) -> DemonstrationTrajectory:
+        """Fügt Demonstrationstrajektorie hinzu"""
+        demo = DemonstrationTrajectory(
+            states=states,
+            actions=actions,
+            expert_id=expert_id
+        )
+        self.demonstrations.append(demo)
+        return demo
+
+    def compute_feature_expectations(
+        self,
+        trajectories: List[DemonstrationTrajectory],
+        feature_extractor: Callable[[str], Dict[str, float]]
+    ) -> Dict[str, float]:
+        """Berechnet Feature-Erwartungen aus Demonstrationen"""
+        feature_sums = defaultdict(float)
+        total_states = 0
+
+        for traj in trajectories:
+            for state in traj.states:
+                features = feature_extractor(state)
+                for feat, val in features.items():
+                    feature_sums[feat] += val
+                total_states += 1
+
+        return {k: v / max(total_states, 1) for k, v in feature_sums.items()}
+
+    def max_entropy_irl(
+        self,
+        demonstrations: List[DemonstrationTrajectory],
+        feature_extractor: Callable[[str], Dict[str, float]],
+        states: List[str],
+        learning_rate: float = 0.1,
+        iterations: int = 100
+    ) -> LearnedReward:
+        """
+        Maximum Entropy IRL (Ziebart et al. 2008)
+        Findet Belohnungsfunktion die Demonstrationen erklärt
+        """
+        # Initialisiere Gewichte
+        weights = defaultdict(float)
+
+        # Feature-Erwartungen des Experten
+        expert_features = self.compute_feature_expectations(
+            demonstrations, feature_extractor
+        )
+
+        for _ in range(iterations):
+            # Berechne aktuelle Belohnungen
+            state_rewards = {}
+            for state in states:
+                features = feature_extractor(state)
+                reward = sum(weights[f] * v for f, v in features.items())
+                state_rewards[state] = reward
+
+            # Gradient Descent (vereinfacht)
+            for feat in expert_features:
+                # Gradient = expert_expectation - model_expectation
+                model_exp = sum(feature_extractor(s).get(feat, 0) for s in states) / len(states)
+                gradient = expert_features[feat] - model_exp
+                weights[feat] += learning_rate * gradient
+
+        # Finale Belohnungen
+        final_rewards = {}
+        for state in states:
+            features = feature_extractor(state)
+            final_rewards[state] = sum(weights[f] * v for f, v in features.items())
+
+        learned = LearnedReward(
+            feature_weights=dict(weights),
+            state_rewards=final_rewards,
+            confidence=0.8
+        )
+        self.learned_rewards["max_entropy"] = learned
+        return learned
+
+    def behavioral_cloning(
+        self,
+        demonstrations: List[DemonstrationTrajectory]
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Behavioral Cloning (Imitation Learning)
+        Lernt Policy direkt aus Demonstrationen
+        """
+        state_action_counts = defaultdict(lambda: defaultdict(int))
+
+        for demo in demonstrations:
+            for state, action in zip(demo.states[:-1], demo.actions):
+                state_action_counts[state][action] += 1
+
+        # Normalisiere zu Wahrscheinlichkeiten
+        policy = {}
+        for state, actions in state_action_counts.items():
+            total = sum(actions.values())
+            policy[state] = {a: c / total for a, c in actions.items()}
+
+        return policy
+
+    def apprenticeship_learning(
+        self,
+        demonstrations: List[DemonstrationTrajectory],
+        feature_extractor: Callable[[str], Dict[str, float]],
+        mdp_solver: Callable[[Dict[str, float]], Dict[str, str]],
+        epsilon: float = 0.1,
+        max_iterations: int = 10
+    ) -> Dict[str, str]:
+        """
+        Apprenticeship Learning (Abbeel & Ng 2004)
+        Iteratives Lernen bis Policy Experten-ähnlich
+        """
+        expert_features = self.compute_feature_expectations(
+            demonstrations, feature_extractor
+        )
+
+        # Initialisiere mit zufälligen Gewichten
+        weights = {f: random.random() for f in expert_features}
+
+        for _ in range(max_iterations):
+            # Löse MDP mit aktuellen Gewichten
+            rewards = {}
+            for demo in demonstrations:
+                for state in demo.states:
+                    features = feature_extractor(state)
+                    rewards[state] = sum(weights[f] * v for f, v in features.items())
+
+            policy = mdp_solver(rewards)
+
+            # Berechne Feature-Erwartungen der gelernten Policy
+            # (Vereinfacht - würde eigentlich Policy-Rollouts erfordern)
+            # Hier: Prüfe Konvergenz
+
+            # Update Gewichte in Richtung Expert-Policy
+            for feat in expert_features:
+                weights[feat] += 0.1 * expert_features[feat]
+
+        return policy
+
+
+# =============================================================================
+# ERWEITERUNG: MULTI-AGENT REINFORCEMENT LEARNING
+# =============================================================================
+
+class MACoordinationType(Enum):
+    """Koordinationstypen im Multi-Agent Setting"""
+    INDEPENDENT = auto()  # Unabhängiges Lernen
+    CENTRALIZED = auto()  # Zentralisiertes Training
+    COOPERATIVE = auto()  # Kooperativ
+    COMPETITIVE = auto()  # Kompetitiv
+    MIXED = auto()  # Mixed-Motive
+
+
+@dataclass
+class MultiAgentState:
+    """Zustand im Multi-Agent MDP"""
+    state_id: str
+    agent_positions: Dict[str, str]
+    shared_resources: Dict[str, float]
+
+
+@dataclass
+class JointAction:
+    """Gemeinsame Aktion aller Agenten"""
+    actions: Dict[str, str]  # agent_id -> action
+
+
+@dataclass
+class MAPolicy:
+    """Multi-Agent Policy"""
+    agent_id: str
+    policy_type: MACoordinationType
+    action_distribution: Dict[str, Dict[str, float]]  # state -> action probs
+
+
+class MultiAgentRLEngine:
+    """
+    Multi-Agent Reinforcement Learning
+
+    Konzepte:
+    - Independent Q-Learning
+    - Centralized Training Decentralized Execution (CTDE)
+    - Nash Q-Learning
+    - Team Q-Learning
+    """
+
+    def __init__(self):
+        self.agents: Dict[str, MAPolicy] = {}
+        self.joint_q_values: Dict[Tuple[str, str], float] = {}
+        self.coordination_type: MACoordinationType = MACoordinationType.INDEPENDENT
+
+    def create_agent(
+        self,
+        agent_id: str,
+        states: List[str],
+        actions: List[str],
+        coordination: MACoordinationType = MACoordinationType.INDEPENDENT
+    ) -> MAPolicy:
+        """Erstellt einen Agenten im Multi-Agent System"""
+        # Initialisiere uniformen Policy
+        policy = MAPolicy(
+            agent_id=agent_id,
+            policy_type=coordination,
+            action_distribution={
+                s: {a: 1.0 / len(actions) for a in actions}
+                for s in states
+            }
+        )
+        self.agents[agent_id] = policy
+        return policy
+
+    def independent_q_learning_update(
+        self,
+        agent_id: str,
+        state: str,
+        action: str,
+        reward: float,
+        next_state: str,
+        alpha: float = 0.1,
+        gamma: float = 0.99
+    ) -> float:
+        """
+        Independent Q-Learning Update
+        Jeder Agent lernt unabhängig (ignoriert andere Agenten)
+        """
+        key = (agent_id, state, action)
+        current_q = self.joint_q_values.get(key, 0.0)
+
+        # Max Q-Wert für nächsten Zustand
+        policy = self.agents.get(agent_id)
+        if policy:
+            max_q_next = max(
+                self.joint_q_values.get((agent_id, next_state, a), 0.0)
+                for a in policy.action_distribution.get(next_state, {}).keys()
+            )
+        else:
+            max_q_next = 0.0
+
+        # TD Update
+        new_q = current_q + alpha * (reward + gamma * max_q_next - current_q)
+        self.joint_q_values[key] = new_q
+
+        return new_q
+
+    def compute_nash_equilibrium(
+        self,
+        state: str,
+        agents: List[str],
+        payoff_matrix: Dict[Tuple[str, str], Tuple[float, float]]
+    ) -> Dict[str, str]:
+        """
+        Berechnet Nash-Gleichgewicht für gegebenen Zustand
+        Vereinfacht für 2 Agenten
+        """
+        if len(agents) != 2:
+            return {}
+
+        # Finde beste Antworten (vereinfacht)
+        best_responses = {}
+
+        # Für jeden Agenten, finde beste Aktion gegeben andere
+        for i, agent in enumerate(agents):
+            other_agent = agents[1 - i]
+            other_policy = self.agents.get(other_agent)
+
+            if not other_policy:
+                continue
+
+            # Annahme: Andere spielt uniform
+            other_actions = list(other_policy.action_distribution.get(state, {}).keys())
+            if not other_actions:
+                continue
+
+            my_policy = self.agents.get(agent)
+            if not my_policy:
+                continue
+
+            my_actions = list(my_policy.action_distribution.get(state, {}).keys())
+
+            best_action = None
+            best_value = float('-inf')
+
+            for my_action in my_actions:
+                expected_value = 0.0
+                for other_action in other_actions:
+                    payoff = payoff_matrix.get((my_action, other_action), (0, 0))
+                    expected_value += payoff[i] / len(other_actions)
+
+                if expected_value > best_value:
+                    best_value = expected_value
+                    best_action = my_action
+
+            best_responses[agent] = best_action
+
+        return best_responses
+
+    def team_reward_sharing(
+        self,
+        individual_rewards: Dict[str, float],
+        sharing_type: str = "equal"
+    ) -> Dict[str, float]:
+        """
+        Teilt Teambelohnung zwischen Agenten auf
+
+        sharing_type:
+        - "equal": Gleiche Aufteilung
+        - "proportional": Proportional zu Einzelleistung
+        - "shapley": Shapley-Wert basiert
+        """
+        total = sum(individual_rewards.values())
+        n = len(individual_rewards)
+
+        if sharing_type == "equal":
+            shared = total / n
+            return {agent: shared for agent in individual_rewards}
+
+        elif sharing_type == "proportional":
+            if total == 0:
+                return {agent: 0 for agent in individual_rewards}
+            return {
+                agent: (r / total) * total
+                for agent, r in individual_rewards.items()
+            }
+
+        elif sharing_type == "shapley":
+            # Vereinfachter Shapley für additive Beiträge
+            return individual_rewards
+
+        return individual_rewards
+
+    def analyze_coordination_problem(
+        self,
+        states: List[str],
+        agents: List[str]
+    ) -> Dict[str, Any]:
+        """Analysiert Koordinationsprobleme im Multi-Agent Setting"""
+        return {
+            "num_agents": len(agents),
+            "joint_state_space": len(states) ** len(agents),
+            "coordination_challenges": [
+                "Non-Stationarity: Andere Agenten lernen gleichzeitig",
+                "Credit Assignment: Wer hat zum Erfolg beigetragen?",
+                "Exploration vs Exploitation: Koordiniertes Erkunden",
+                "Equilibrium Selection: Welches Gleichgewicht?"
+            ],
+            "solution_approaches": {
+                "independent_learning": "Einfach, aber ignoriert Interaktionen",
+                "centralized_training": "Berücksichtigt alle, aber skaliert schlecht",
+                "communication": "Expliziter Informationsaustausch",
+                "opponent_modeling": "Modellierung anderer Agenten"
+            }
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: FACTORY FUNCTIONS
+# =============================================================================
+
+_hierarchical_engine: Optional[HierarchicalRLEngine] = None
+_inverse_rl_engine: Optional[InverseRLEngine] = None
+_multi_agent_engine: Optional[MultiAgentRLEngine] = None
+
+
+def create_hierarchical_rl_engine() -> HierarchicalRLEngine:
+    """Factory: Erstellt HierarchicalRLEngine"""
+    global _hierarchical_engine
+    if _hierarchical_engine is None:
+        _hierarchical_engine = HierarchicalRLEngine()
+    return _hierarchical_engine
+
+
+def create_inverse_rl_engine() -> InverseRLEngine:
+    """Factory: Erstellt InverseRLEngine"""
+    global _inverse_rl_engine
+    if _inverse_rl_engine is None:
+        _inverse_rl_engine = InverseRLEngine()
+    return _inverse_rl_engine
+
+
+def create_multi_agent_rl_engine() -> MultiAgentRLEngine:
+    """Factory: Erstellt MultiAgentRLEngine"""
+    global _multi_agent_engine
+    if _multi_agent_engine is None:
+        _multi_agent_engine = MultiAgentRLEngine()
+    return _multi_agent_engine
 
 
 # =============================================================================

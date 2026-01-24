@@ -99,6 +99,27 @@ __all__ = [
     "create_aesthetics_engine",
     "create_formal_semantics_engine",
     "get_philosophy_of_mind_engine",
+
+    # Erweiterung: Embodied Phenomenology
+    "EmbodiedPhenomenologyEngine",
+    "BodySchema",
+    "EmbodiedPerception",
+    "BodySchemaType",
+    "PerceptionMode",
+    "create_embodied_phenomenology_engine",
+
+    # Erweiterung: Heideggerian Existentials
+    "HeideggereusExistentialEngine",
+    "ExistentialAnalysis",
+    "ExistentialMode",
+    "create_existential_engine",
+
+    # Erweiterung: Time-Consciousness
+    "TimeConsciousnessEngine",
+    "TemporalFlow",
+    "TimePhase",
+    "TimeConsciousnessMode",
+    "create_time_consciousness_engine",
 ]
 
 
@@ -1393,6 +1414,485 @@ def get_philosophy_of_mind_engine() -> PhilosophyOfMindEngine:
     if _philosophy_of_mind_engine is None:
         _philosophy_of_mind_engine = PhilosophyOfMindEngine()
     return _philosophy_of_mind_engine
+
+
+# =============================================================================
+# ERWEITERUNG: EMBODIED PHENOMENOLOGY (MERLEAU-PONTY)
+# =============================================================================
+
+class BodySchemaType(Enum):
+    """Typen des Leibschemas nach Merleau-Ponty"""
+    MOTOR_INTENTIONALITY = auto()  # Bewegungsintentionalität
+    HABITUAL_BODY = auto()  # Gewohnheitsleib
+    ACTUAL_BODY = auto()  # Aktueller Leib
+    BODY_IMAGE = auto()  # Körperbild
+    INTERCORPOREALITY = auto()  # Zwischenleiblichkeit
+
+
+class PerceptionMode(Enum):
+    """Modi der leiblichen Wahrnehmung"""
+    SYNESTHESIA = auto()  # Überkreuzung der Sinne
+    MOTOR_PERCEPTION = auto()  # Bewegungswahrnehmung
+    TACTILE = auto()  # Taktil
+    PROPRIOCEPTIVE = auto()  # Eigenwahrnehmung
+    KINESTHETIC = auto()  # Bewegungsempfindung
+
+
+@dataclass
+class BodySchema:
+    """Leibschema nach Merleau-Ponty"""
+    schema_type: BodySchemaType
+    motor_habits: List[str]
+    spatial_orientation: Dict[str, float]
+    body_awareness: float  # 0-1
+    implicit_knowledge: List[str]
+
+
+@dataclass
+class EmbodiedPerception:
+    """Leibliche Wahrnehmung"""
+    content: str
+    mode: PerceptionMode
+    motor_component: str
+    affective_tone: float  # -1 bis 1
+    gestalt_structure: Dict[str, Any]
+    figure_ground: Tuple[str, str]
+
+
+class EmbodiedPhenomenologyEngine:
+    """
+    Verkörperte Phänomenologie nach Merleau-Ponty
+
+    Konzepte:
+    - Leiblichkeit als primärer Zugang zur Welt
+    - Motor-Intentionalität
+    - Gewohnheitsleib vs. Aktueller Leib
+    - Zwischenleiblichkeit (Intersubjektivität)
+    """
+
+    def __init__(self):
+        self.body_schemas: List[BodySchema] = []
+        self.motor_habits: Dict[str, List[str]] = defaultdict(list)
+        self.perceptions: List[EmbodiedPerception] = []
+
+    def create_body_schema(
+        self,
+        motor_habits: List[str],
+        spatial_awareness: Dict[str, float]
+    ) -> BodySchema:
+        """Erstellt ein Leibschema"""
+        schema = BodySchema(
+            schema_type=BodySchemaType.HABITUAL_BODY,
+            motor_habits=motor_habits,
+            spatial_orientation=spatial_awareness,
+            body_awareness=0.7,
+            implicit_knowledge=[
+                f"Gewohnheitswissen: {habit}" for habit in motor_habits[:3]
+            ]
+        )
+        self.body_schemas.append(schema)
+        return schema
+
+    def analyze_motor_intentionality(
+        self,
+        action: str,
+        goal: str
+    ) -> Dict[str, Any]:
+        """
+        Analysiert Motor-Intentionalität
+        Der Leib 'versteht' die Welt durch Bewegung
+        """
+        return {
+            "action": action,
+            "goal": goal,
+            "motor_meaning": f"Der Leib 'versteht' {goal} durch die Bewegung '{action}'",
+            "pre_reflective": True,
+            "body_knowledge": "Implizites Können, nicht explizites Wissen",
+            "motor_project": f"Leiblicher Entwurf auf {goal}",
+            "gestalt_completion": "Das Ziel zieht die Bewegung an"
+        }
+
+    def perceive_embodied(
+        self,
+        content: str,
+        mode: PerceptionMode = PerceptionMode.SYNESTHESIA
+    ) -> EmbodiedPerception:
+        """Leibliche Wahrnehmung eines Phänomens"""
+        perception = EmbodiedPerception(
+            content=content,
+            mode=mode,
+            motor_component=f"Leibliche Hinwendung zu '{content}'",
+            affective_tone=0.5,
+            gestalt_structure={
+                "figure": content,
+                "ground": "Wahrnehmungsfeld",
+                "horizon": "Implizite Verweisungen"
+            },
+            figure_ground=(content, "umgebender Kontext")
+        )
+        self.perceptions.append(perception)
+        return perception
+
+    def analyze_intercorporeality(
+        self,
+        self_action: str,
+        other_response: str
+    ) -> Dict[str, Any]:
+        """
+        Analysiert Zwischenleiblichkeit
+        Intersubjektivität auf leiblicher Ebene
+        """
+        return {
+            "self_action": self_action,
+            "other_response": other_response,
+            "intercorporeal_bond": "Leibliche Resonanz zwischen Subjekten",
+            "empathy_basis": "Vor-prädikatives Verstehen durch leibliche Ähnlichkeit",
+            "mirroring": "Der andere Leib spiegelt meine Möglichkeiten",
+            "shared_motor_space": "Gemeinsamer Handlungsraum"
+        }
+
+    def analyze_habit_acquisition(
+        self,
+        skill: str,
+        practice_description: str
+    ) -> Dict[str, Any]:
+        """
+        Analysiert Gewohnheitserwerb
+        Wie der Leib neue Fähigkeiten 'einleibt'
+        """
+        return {
+            "skill": skill,
+            "practice": practice_description,
+            "sedimentation": f"'{skill}' wird in den Gewohnheitsleib eingelagert",
+            "motor_schema": f"Neues Bewegungsschema für {skill}",
+            "body_extension": "Das Werkzeug wird Teil des Leibes",
+            "tacit_knowledge": "Explizites wird implizit durch Übung",
+            "phases": [
+                "1. Explizite Aufmerksamkeit auf Teilbewegungen",
+                "2. Integration zu fließender Bewegung",
+                "3. Automatisierung im Leibschema",
+                "4. Verfügbarkeit ohne Reflexion"
+            ]
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: HEIDEGGERIAN EXISTENZIALIEN
+# =============================================================================
+
+class ExistentialMode(Enum):
+    """Heideggerian Existenzialien"""
+    SORGE = auto()  # Care/Concern - Grundstruktur des Daseins
+    ANGST = auto()  # Anxiety - Erschließt eigentliches Sein
+    DAS_MAN = auto()  # The They - Uneigentlichkeit
+    SEIN_ZUM_TODE = auto()  # Being-toward-death
+    GEWORFENHEIT = auto()  # Thrownness
+    ENTWURF = auto()  # Projection
+    REDE = auto()  # Discourse
+    BEFINDLICHKEIT = auto()  # Attunement/Mood
+
+
+@dataclass
+class ExistentialAnalysis:
+    """Existenziale Analyse eines Phänomens"""
+    phenomenon: str
+    existential: ExistentialMode
+    interpretation: str
+    authentic_possibility: str
+    inauthentic_tendency: str
+
+
+class HeideggereusExistentialEngine:
+    """
+    Erweiterte Heidegger-Analyse
+
+    Analysiert Phänomene durch existenziale Strukturen:
+    - Sorge (Care) als Grundstruktur
+    - Angst als erschließende Stimmung
+    - Das Man und Verfallenheit
+    - Sein-zum-Tode und Eigentlichkeit
+    """
+
+    def __init__(self):
+        self.analyses: List[ExistentialAnalysis] = []
+
+    def analyze_sorge(self, situation: str) -> Dict[str, Any]:
+        """
+        Analysiert Sorge-Struktur
+        Sorge = Sich-vorweg-sein (Entwurf) +
+                Schon-sein-in (Geworfenheit) +
+                Sein-bei (Verfallenheit)
+        """
+        return {
+            "situation": situation,
+            "sorge_structure": {
+                "sich_vorweg": f"Entwurf auf Möglichkeiten in '{situation}'",
+                "schon_sein_in": f"Immer schon geworfen in '{situation}'",
+                "sein_bei": f"Aufgehen im Besorgen von '{situation}'"
+            },
+            "temporal_ecstases": {
+                "zukunft": "Sich-vorweg (Entwurf)",
+                "gewesenheit": "Schon-sein-in (Geworfenheit)",
+                "gegenwart": "Sein-bei (Verfallenheit)"
+            },
+            "unity": "Sorge ist die einheitliche Struktur des In-der-Welt-seins"
+        }
+
+    def experience_angst(self, trigger: str) -> Dict[str, Any]:
+        """
+        Analysiert Angst als erschließende Grundstimmung
+        Angst unterscheidet sich von Furcht: kein bestimmtes Wovor
+        """
+        return {
+            "trigger": trigger,
+            "angst_analysis": {
+                "wovor": "Das In-der-Welt-sein selbst",
+                "worum": "Das eigenste Seinkönnen",
+                "nicht_furcht": "Kein bestimmtes innerweltliches Seiendes"
+            },
+            "disclosure": [
+                "Unheimlichkeit: Nicht-zuhause-sein in der Welt",
+                "Vereinzelung: Herauslösung aus dem Man",
+                "Nichtigkeit: Grundlosigkeit des Daseins",
+                "Eigentlichkeit: Möglichkeit des eigenen Seinkönnens"
+            ],
+            "transformation": "Angst öffnet den Weg zur Eigentlichkeit"
+        }
+
+    def analyze_das_man(self, behavior: str) -> Dict[str, Any]:
+        """
+        Analysiert Das-Man-Struktur
+        Durchschnittliche Alltäglichkeit und Verfallenheit
+        """
+        return {
+            "behavior": behavior,
+            "das_man_analysis": {
+                "durchschnittlichkeit": f"'{behavior}' wie man es tut",
+                "abständigkeit": "Orientierung am anderen",
+                "einebnung": "Nivellierung aller Seinsmöglichkeiten"
+            },
+            "public_interpretation": {
+                "gerede": "Man sagt, dass...",
+                "neugier": "Überall-und-nirgends-sein",
+                "zweideutigkeit": "Scheinen vs. Sein"
+            },
+            "entlastung": "Das Man nimmt dem Dasein sein Sein ab",
+            "authentic_counter": "Zurückholung aus der Verfallenheit durch Angst"
+        }
+
+    def contemplate_sein_zum_tode(self) -> Dict[str, Any]:
+        """
+        Analysiert Sein-zum-Tode
+        Eigenste, unbezügliche, unüberholbare Möglichkeit
+        """
+        return {
+            "death_analysis": {
+                "eigenste": "Niemand kann mir meinen Tod abnehmen",
+                "unbezüglich": "Vereinzelt das Dasein auf sich selbst",
+                "unüberholbar": "Die äußerste Möglichkeit",
+                "gewiss": "Mit Gewissheit unbestimmt",
+                "unbestimmt": "Jederzeit möglich"
+            },
+            "vorlaufen": {
+                "meaning": "Vorlaufen in den Tod",
+                "effect": "Erschließt eigentliches Seinkönnen",
+                "freedom": "Freiheit zum Tode befreit von Verfallenheit"
+            },
+            "authentic_existence": {
+                "entschlossenheit": "Eigentliches Selbstsein in der Entschlossenheit",
+                "augenblick": "Der Augenblick als eigentliche Gegenwart",
+                "wiederholung": "Übernahme des geworfenen Seinkönnens"
+            },
+            "temporal_unity": "Zeitlichkeit als Sinn der Sorge"
+        }
+
+    def analyze_geworfenheit(self, facticity: str) -> Dict[str, Any]:
+        """
+        Analysiert Geworfenheit
+        Das Dasein ist immer schon in einer Situation
+        """
+        return {
+            "facticity": facticity,
+            "geworfenheit_analysis": {
+                "dass_sein": f"Das Dass des '{facticity}' ist unverfügbar",
+                "faktizität": "Nicht selbst gewählt, aber zu übernehmen",
+                "last": "Geworfenheit als Last des Daseins"
+            },
+            "mood_disclosure": {
+                "befindlichkeit": f"Stimmungsmäßige Erschlossenheit von '{facticity}'",
+                "examples": ["Langeweile", "Freude", "Angst"]
+            },
+            "authentic_response": "Übernahme der Geworfenheit in Entschlossenheit"
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: ZEIT-BEWUSSTSEIN (HUSSERL)
+# =============================================================================
+
+class TimeConsciousnessMode(Enum):
+    """Modi des Zeitbewusstseins"""
+    RETENTION = auto()  # Primäre Erinnerung (gerade vergangen)
+    PRIMAL_IMPRESSION = auto()  # Urimpression (jetzt)
+    PROTENTION = auto()  # Vorerwartung (kommend)
+    RECOLLECTION = auto()  # Sekundäre Erinnerung
+    ANTICIPATION = auto()  # Erwartung
+
+
+@dataclass
+class TimePhase:
+    """Phase im Zeitbewusstsein"""
+    mode: TimeConsciousnessMode
+    content: str
+    vivacity: float  # 0-1 (wie lebendig)
+    distance_from_now: float  # Abstand vom Jetzt
+
+
+@dataclass
+class TemporalFlow:
+    """Zeitlicher Erlebnisstrom"""
+    retentions: List[TimePhase]
+    primal_impression: TimePhase
+    protentions: List[TimePhase]
+    duration_feeling: str
+
+
+class TimeConsciousnessEngine:
+    """
+    Husserls Phänomenologie des inneren Zeitbewusstseins
+
+    Strukturen:
+    - Urimpression: lebendige Gegenwart
+    - Retention: primäre Erinnerung (Kometenschweif)
+    - Protention: Vorerwartung
+    - Sekundäre Erinnerung und Erwartung
+    """
+
+    def __init__(self):
+        self.temporal_flows: List[TemporalFlow] = []
+
+    def analyze_temporal_experience(
+        self,
+        experience: str,
+        past_phases: List[str] = None,
+        expected_phases: List[str] = None
+    ) -> TemporalFlow:
+        """Analysiert das Zeitbewusstsein einer Erfahrung"""
+
+        past_phases = past_phases or []
+        expected_phases = expected_phases or []
+
+        # Retentionen (verblassende Vergangenheit)
+        retentions = []
+        for i, phase in enumerate(reversed(past_phases)):
+            retentions.append(TimePhase(
+                mode=TimeConsciousnessMode.RETENTION,
+                content=phase,
+                vivacity=max(0.1, 0.9 - i * 0.2),
+                distance_from_now=-(i + 1)
+            ))
+
+        # Urimpression (Jetzt)
+        primal = TimePhase(
+            mode=TimeConsciousnessMode.PRIMAL_IMPRESSION,
+            content=experience,
+            vivacity=1.0,
+            distance_from_now=0.0
+        )
+
+        # Protentionen (vorerwartete Zukunft)
+        protentions = []
+        for i, phase in enumerate(expected_phases):
+            protentions.append(TimePhase(
+                mode=TimeConsciousnessMode.PROTENTION,
+                content=phase,
+                vivacity=max(0.1, 0.8 - i * 0.2),
+                distance_from_now=i + 1
+            ))
+
+        flow = TemporalFlow(
+            retentions=retentions,
+            primal_impression=primal,
+            protentions=protentions,
+            duration_feeling="Kontinuierlicher Fluss des Erlebens"
+        )
+
+        self.temporal_flows.append(flow)
+        return flow
+
+    def describe_retention_modification(self) -> Dict[str, Any]:
+        """Beschreibt die Retentionsmodifikation"""
+        return {
+            "concept": "Retentionsmodifikation",
+            "description": [
+                "Jede Urimpression sinkt in die Retention",
+                "Die Retention wird selbst zur Retention einer Retention",
+                "Kometenschweif der Vergangenheit",
+                "Stetige Abschattung der Lebendigkeit"
+            ],
+            "example": {
+                "melodie": [
+                    "Ton C erklingt (Urimpression)",
+                    "Ton D erklingt, C sinkt in Retention",
+                    "Ton E erklingt, D in Retention, C in Retention der Retention",
+                    "Die Melodie erscheint als Einheit trotz Sukzession"
+                ]
+            },
+            "constitution": "So konstituiert sich die immanente Dauer"
+        }
+
+    def analyze_living_present(self, moment: str) -> Dict[str, Any]:
+        """
+        Analysiert die lebendige Gegenwart
+        Die Urimpression als Quellpunkt
+        """
+        return {
+            "moment": moment,
+            "living_present": {
+                "urimpression": f"'{moment}' als lebendiger Quellpunkt",
+                "nicht_punktuell": "Nicht mathematischer Punkt, sondern Spanne",
+                "fließend": "Ständig übergehend in Retention"
+            },
+            "absolute_consciousness": {
+                "zeitkonstituierend": "Das absolute Bewusstsein konstituiert Zeit",
+                "selbst_nicht_in_zeit": "Ist selbst nicht in der Zeit",
+                "fließende_gegenwart": "Ist fließende, stehende Gegenwart"
+            },
+            "passive_synthesis": "Passive Synthesis der Zeitkonstitution"
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: FACTORY FUNCTIONS
+# =============================================================================
+
+_embodied_engine: Optional[EmbodiedPhenomenologyEngine] = None
+_existential_engine: Optional[HeideggereusExistentialEngine] = None
+_time_consciousness_engine: Optional[TimeConsciousnessEngine] = None
+
+
+def create_embodied_phenomenology_engine() -> EmbodiedPhenomenologyEngine:
+    """Factory: Erstellt EmbodiedPhenomenologyEngine"""
+    global _embodied_engine
+    if _embodied_engine is None:
+        _embodied_engine = EmbodiedPhenomenologyEngine()
+    return _embodied_engine
+
+
+def create_existential_engine() -> HeideggereusExistentialEngine:
+    """Factory: Erstellt HeideggereusExistentialEngine"""
+    global _existential_engine
+    if _existential_engine is None:
+        _existential_engine = HeideggereusExistentialEngine()
+    return _existential_engine
+
+
+def create_time_consciousness_engine() -> TimeConsciousnessEngine:
+    """Factory: Erstellt TimeConsciousnessEngine"""
+    global _time_consciousness_engine
+    if _time_consciousness_engine is None:
+        _time_consciousness_engine = TimeConsciousnessEngine()
+    return _time_consciousness_engine
 
 
 # =============================================================================

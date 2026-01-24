@@ -68,18 +68,15 @@ __all__ = [
     "ParetoEngine",
     "ParetoPoint",
     "ParetoFront",
-    "MultiObjectiveOptimizer",
 
     # Markt
     "MarketEngine",
     "MarketEquilibrium",
-    "WelfareAnalysis",
 
     # Entscheidungstheorie
     "DecisionTheoryEngine",
     "ExpectedUtility",
     "RiskProfile",
-    "ProspectTheory",
 
     # Ressourcen
     "ResourceAllocationEngine",
@@ -100,6 +97,27 @@ __all__ = [
     "create_pareto_engine",
     "create_market_engine",
     "get_economics_engine",
+
+    # Erweiterung: Welfare Economics
+    "WelfareEconomicsEngine",
+    "WelfareState",
+    "CompensationTest",
+    "SocialWelfareType",
+    "create_welfare_engine",
+
+    # Erweiterung: Behavioral Economics
+    "BehavioralEconomicsEngine",
+    "BehavioralPrediction",
+    "ProspectTheoryResult",
+    "CognitiveBias",
+    "create_behavioral_engine",
+
+    # Erweiterung: Information Economics
+    "InformationEconomicsEngine",
+    "Contract",
+    "SignalingEquilibrium",
+    "InformationType",
+    "create_information_engine",
 ]
 
 
@@ -1071,6 +1089,599 @@ def get_economics_engine() -> EconomicsEngine:
     if _economics_engine is None:
         _economics_engine = EconomicsEngine()
     return _economics_engine
+
+
+# =============================================================================
+# ERWEITERUNG: WELFARE ECONOMICS
+# =============================================================================
+
+class SocialWelfareType(Enum):
+    """Typen von Sozialwohlfahrtsfunktionen"""
+    UTILITARIAN = auto()  # Summe der Nutzen (Bentham)
+    RAWLSIAN = auto()  # Max-Min (Rawls)
+    NASH = auto()  # Produkt der Nutzen
+    EGALITARIAN = auto()  # Gleichverteilung
+    PRIORITARIAN = auto()  # Gewichtung zugunsten Ärmerer
+
+
+@dataclass
+class WelfareState:
+    """Wohlfahrtszustand einer Ökonomie"""
+    individual_utilities: Dict[str, float]
+    social_welfare: float
+    welfare_type: SocialWelfareType
+    is_efficient: bool
+    gini_coefficient: float
+
+
+@dataclass
+class CompensationTest:
+    """Kaldor-Hicks Kompensationstest"""
+    policy: str
+    winners: Dict[str, float]
+    losers: Dict[str, float]
+    net_benefit: float
+    passes_test: bool
+    compensation_possible: bool
+
+
+class WelfareEconomicsEngine:
+    """
+    Wohlfahrtsökonomik
+
+    Konzepte:
+    - Sozialwohlfahrtsfunktionen (SWF)
+    - Erste und Zweite Hauptsätze der Wohlfahrtsökonomik
+    - Kaldor-Hicks Effizienz
+    - Arrow's Unmöglichkeitstheorem
+    """
+
+    def __init__(self):
+        self.welfare_states: List[WelfareState] = []
+
+    def calculate_social_welfare(
+        self,
+        utilities: Dict[str, float],
+        welfare_type: SocialWelfareType = SocialWelfareType.UTILITARIAN
+    ) -> float:
+        """Berechnet Sozialwohlfahrt basierend auf gewählter Funktion"""
+        values = list(utilities.values())
+
+        if welfare_type == SocialWelfareType.UTILITARIAN:
+            return sum(values)
+        elif welfare_type == SocialWelfareType.RAWLSIAN:
+            return min(values)
+        elif welfare_type == SocialWelfareType.NASH:
+            result = 1.0
+            for v in values:
+                result *= max(v, 0.001)  # Vermeidet Division durch 0
+            return result
+        elif welfare_type == SocialWelfareType.EGALITARIAN:
+            mean = sum(values) / len(values)
+            variance = sum((v - mean) ** 2 for v in values) / len(values)
+            return sum(values) - variance  # Bestraft Ungleichheit
+        elif welfare_type == SocialWelfareType.PRIORITARIAN:
+            return sum(math.sqrt(max(v, 0)) for v in values)
+
+        return sum(values)
+
+    def calculate_gini(self, incomes: List[float]) -> float:
+        """Berechnet Gini-Koeffizient (Ungleichheitsmaß)"""
+        if not incomes or all(i == 0 for i in incomes):
+            return 0.0
+
+        sorted_incomes = sorted(incomes)
+        n = len(sorted_incomes)
+        total = sum(sorted_incomes)
+
+        # Gini = (2 * Summe(i * x_i) - (n+1) * Summe(x_i)) / (n * Summe(x_i))
+        numerator = sum((i + 1) * x for i, x in enumerate(sorted_incomes))
+        gini = (2 * numerator - (n + 1) * total) / (n * total) if total > 0 else 0
+
+        return max(0, min(1, gini))
+
+    def analyze_welfare_state(
+        self,
+        utilities: Dict[str, float],
+        welfare_type: SocialWelfareType = SocialWelfareType.UTILITARIAN
+    ) -> WelfareState:
+        """Analysiert einen Wohlfahrtszustand"""
+        social_welfare = self.calculate_social_welfare(utilities, welfare_type)
+        gini = self.calculate_gini(list(utilities.values()))
+
+        state = WelfareState(
+            individual_utilities=utilities,
+            social_welfare=social_welfare,
+            welfare_type=welfare_type,
+            is_efficient=True,  # Vereinfacht
+            gini_coefficient=gini
+        )
+        self.welfare_states.append(state)
+        return state
+
+    def kaldor_hicks_test(
+        self,
+        policy: str,
+        before: Dict[str, float],
+        after: Dict[str, float]
+    ) -> CompensationTest:
+        """
+        Kaldor-Hicks Kompensationstest
+        Eine Änderung ist effizient, wenn Gewinner Verlierer kompensieren könnten
+        """
+        winners = {}
+        losers = {}
+
+        for person in before:
+            diff = after.get(person, 0) - before[person]
+            if diff > 0:
+                winners[person] = diff
+            elif diff < 0:
+                losers[person] = abs(diff)
+
+        total_gain = sum(winners.values())
+        total_loss = sum(losers.values())
+        net_benefit = total_gain - total_loss
+
+        return CompensationTest(
+            policy=policy,
+            winners=winners,
+            losers=losers,
+            net_benefit=net_benefit,
+            passes_test=net_benefit >= 0,
+            compensation_possible=total_gain >= total_loss
+        )
+
+    def explain_welfare_theorems(self) -> Dict[str, str]:
+        """Erklärt die Hauptsätze der Wohlfahrtsökonomik"""
+        return {
+            "first_theorem": {
+                "statement": "Jedes Wettbewerbsgleichgewicht ist Pareto-effizient",
+                "assumptions": [
+                    "Vollständige Märkte",
+                    "Perfekter Wettbewerb",
+                    "Keine externen Effekte",
+                    "Vollständige Information"
+                ],
+                "implication": "Der Markt erreicht Effizienz ohne zentrale Planung"
+            },
+            "second_theorem": {
+                "statement": "Jede Pareto-effiziente Allokation kann als Wettbewerbsgleichgewicht erreicht werden",
+                "assumptions": [
+                    "Konvexe Präferenzen",
+                    "Lump-sum Transfers möglich"
+                ],
+                "implication": "Effizienz und Verteilung können getrennt behandelt werden"
+            },
+            "arrow_impossibility": {
+                "statement": "Keine Sozialwahlregel kann alle vernünftigen Bedingungen erfüllen",
+                "conditions": [
+                    "Unbeschränkte Domäne",
+                    "Pareto-Kriterium",
+                    "Unabhängigkeit irrelevanter Alternativen",
+                    "Nicht-Diktatur"
+                ],
+                "implication": "Demokratische Aggregation von Präferenzen ist fundamental problematisch"
+            }
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: BEHAVIORAL ECONOMICS
+# =============================================================================
+
+class CognitiveBias(Enum):
+    """Kognitive Verzerrungen"""
+    LOSS_AVERSION = auto()  # Verlustaversion
+    STATUS_QUO_BIAS = auto()  # Status-quo-Verzerrung
+    ANCHORING = auto()  # Ankereffekt
+    FRAMING = auto()  # Framing-Effekt
+    OVERCONFIDENCE = auto()  # Überkonfidenz
+    HYPERBOLIC_DISCOUNTING = auto()  # Hyperbolisches Diskontieren
+    MENTAL_ACCOUNTING = auto()  # Mentale Buchführung
+    ENDOWMENT_EFFECT = auto()  # Besitztumseffekt
+    SUNK_COST = auto()  # Versunkene Kosten Fehlschluss
+
+
+@dataclass
+class BehavioralPrediction:
+    """Vorhersage basierend auf Verhaltensökonomik"""
+    situation: str
+    rational_choice: str
+    behavioral_choice: str
+    biases_involved: List[CognitiveBias]
+    nudge_recommendation: str
+
+
+@dataclass
+class ProspectTheoryResult:
+    """Ergebnis einer Prospect Theory Analyse"""
+    reference_point: float
+    gains: List[float]
+    losses: List[float]
+    total_value: float
+    decision_weights: Dict[float, float]
+
+
+class BehavioralEconomicsEngine:
+    """
+    Verhaltensökonomik
+
+    Konzepte:
+    - Prospect Theory (Kahneman & Tversky)
+    - Bounded Rationality (Simon)
+    - Nudging (Thaler & Sunstein)
+    - Kognitive Verzerrungen
+    """
+
+    def __init__(self):
+        self.loss_aversion_lambda: float = 2.25  # Kahneman's estimate
+        self.alpha: float = 0.88  # Wertfunktion Parameter
+        self.predictions: List[BehavioralPrediction] = []
+
+    def prospect_theory_value(
+        self,
+        outcomes: List[Tuple[float, float]],
+        reference_point: float = 0
+    ) -> ProspectTheoryResult:
+        """
+        Berechnet Prospect Theory Wert
+
+        Args:
+            outcomes: Liste von (Wahrscheinlichkeit, Betrag) Paaren
+            reference_point: Referenzpunkt für Gewinne/Verluste
+        """
+        gains = []
+        losses = []
+        total_value = 0.0
+        decision_weights = {}
+
+        for prob, amount in outcomes:
+            relative = amount - reference_point
+            # Entscheidungsgewicht (vereinfacht)
+            weight = self._probability_weight(prob)
+            decision_weights[prob] = weight
+
+            if relative >= 0:
+                gains.append(relative)
+                value = weight * (relative ** self.alpha)
+            else:
+                losses.append(abs(relative))
+                value = -weight * self.loss_aversion_lambda * (abs(relative) ** self.alpha)
+
+            total_value += value
+
+        return ProspectTheoryResult(
+            reference_point=reference_point,
+            gains=gains,
+            losses=losses,
+            total_value=total_value,
+            decision_weights=decision_weights
+        )
+
+    def _probability_weight(self, p: float) -> float:
+        """Wahrscheinlichkeitsgewichtung (Prelec)"""
+        if p == 0:
+            return 0
+        if p == 1:
+            return 1
+        gamma = 0.65  # Typischer Wert
+        return math.exp(-(-math.log(p)) ** gamma)
+
+    def analyze_bias(
+        self,
+        situation: str,
+        bias: CognitiveBias
+    ) -> Dict[str, Any]:
+        """Analysiert Auswirkung einer kognitiven Verzerrung"""
+        bias_effects = {
+            CognitiveBias.LOSS_AVERSION: {
+                "effect": "Verluste wiegen ~2.25x schwerer als äquivalente Gewinne",
+                "example": "Ablehnung einer 50/50 Chance auf +150€/-100€",
+                "debiasing": "Breite Framing; aggregierte Betrachtung"
+            },
+            CognitiveBias.ANCHORING: {
+                "effect": "Erste Information beeinflusst spätere Schätzungen überproportional",
+                "example": "Hoher Anfangspreis erhöht Verkaufspreis",
+                "debiasing": "Bewusst alternative Anker setzen"
+            },
+            CognitiveBias.HYPERBOLIC_DISCOUNTING: {
+                "effect": "Gegenwärtige Belohnungen werden überbewertet",
+                "example": "100€ heute > 110€ morgen, aber 100€ in 30 Tagen ≈ 110€ in 31 Tagen",
+                "debiasing": "Commitment-Mechanismen; Vorauswahl"
+            },
+            CognitiveBias.MENTAL_ACCOUNTING: {
+                "effect": "Geld wird nicht fungibel behandelt",
+                "example": "Unterschiedliche Ausgabenbereitschaft aus 'gefundenem' vs. 'verdientem' Geld",
+                "debiasing": "Konsolidierte Finanzübersicht"
+            },
+            CognitiveBias.ENDOWMENT_EFFECT: {
+                "effect": "Besitz erhöht subjektiven Wert",
+                "example": "Verkaufspreis > Kaufpreis für identisches Gut",
+                "debiasing": "Perspektivwechsel; Opportunitätskosten betonen"
+            },
+            CognitiveBias.SUNK_COST: {
+                "effect": "Vergangene Kosten beeinflussen zukünftige Entscheidungen",
+                "example": "Weiterschauen eines langweiligen Films, weil Ticket bezahlt",
+                "debiasing": "Fokus auf marginale Kosten und Nutzen"
+            }
+        }
+
+        return {
+            "situation": situation,
+            "bias": bias.name,
+            **bias_effects.get(bias, {"effect": "Unbekannt", "example": "", "debiasing": ""})
+        }
+
+    def suggest_nudge(
+        self,
+        goal: str,
+        target_behavior: str
+    ) -> Dict[str, Any]:
+        """Schlägt Nudges vor, um gewünschtes Verhalten zu fördern"""
+        return {
+            "goal": goal,
+            "target_behavior": target_behavior,
+            "nudge_types": {
+                "default_option": f"Mache '{target_behavior}' zur Standardoption",
+                "social_proof": f"Zeige, dass viele andere '{target_behavior}' wählen",
+                "salience": f"Mache Vorteile von '{target_behavior}' sichtbarer",
+                "commitment": f"Ermögliche Vorab-Commitment zu '{target_behavior}'",
+                "simplification": f"Reduziere Aufwand für '{target_behavior}'"
+            },
+            "libertarian_paternalism": "Wahlfreiheit erhalten, aber Architektur optimieren"
+        }
+
+    def hyperbolic_discount(
+        self,
+        future_value: float,
+        delay_days: int,
+        k: float = 0.1
+    ) -> float:
+        """
+        Hyperbolisches Diskontieren
+        Gegensatz zum exponentiellen Diskontieren der Standardökonomik
+        """
+        return future_value / (1 + k * delay_days)
+
+    def compare_discounting(
+        self,
+        future_value: float,
+        delay_days: int,
+        daily_rate: float = 0.01
+    ) -> Dict[str, float]:
+        """Vergleicht hyperbolisches und exponentielles Diskontieren"""
+        exponential = future_value * ((1 - daily_rate) ** delay_days)
+        hyperbolic = self.hyperbolic_discount(future_value, delay_days)
+
+        return {
+            "future_value": future_value,
+            "delay_days": delay_days,
+            "exponential_present_value": exponential,
+            "hyperbolic_present_value": hyperbolic,
+            "difference": hyperbolic - exponential,
+            "interpretation": "Hyperbolisch: Starke Ungeduld kurzfristig, weniger langfristig"
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: INFORMATION ECONOMICS
+# =============================================================================
+
+class InformationType(Enum):
+    """Informationsasymmetrie-Typen"""
+    HIDDEN_ACTION = auto()  # Moral Hazard
+    HIDDEN_INFORMATION = auto()  # Adverse Selection
+    SIGNALING = auto()  # Signaling
+    SCREENING = auto()  # Screening
+
+
+@dataclass
+class Contract:
+    """Vertrag in Principal-Agent Beziehung"""
+    principal: str
+    agent: str
+    fixed_payment: float
+    performance_bonus: float
+    monitoring_intensity: float
+    incentive_compatibility: bool
+
+
+@dataclass
+class SignalingEquilibrium:
+    """Gleichgewicht in einem Signaling-Spiel"""
+    signal: str
+    cost_for_high_type: float
+    cost_for_low_type: float
+    is_separating: bool
+    high_type_payoff: float
+    low_type_payoff: float
+
+
+class InformationEconomicsEngine:
+    """
+    Informationsökonomik
+
+    Konzepte:
+    - Adverse Selection (Akerlof's Market for Lemons)
+    - Moral Hazard (Principal-Agent)
+    - Signaling (Spence)
+    - Screening (Stiglitz)
+    """
+
+    def __init__(self):
+        self.contracts: List[Contract] = []
+        self.markets: Dict[str, Any] = {}
+
+    def analyze_adverse_selection(
+        self,
+        market: str,
+        quality_distribution: Dict[str, float],
+        buyer_valuation: Callable[[str], float],
+        seller_reservation: Callable[[str], float]
+    ) -> Dict[str, Any]:
+        """
+        Analysiert Adverse Selection (Negativauslese)
+        Akerlof's Market for Lemons
+        """
+        # Berechne Durchschnittsqualität bei verschiedenen Preisen
+        qualities = list(quality_distribution.keys())
+        probs = list(quality_distribution.values())
+
+        avg_quality = sum(
+            buyer_valuation(q) * p for q, p in zip(qualities, probs)
+        ) / sum(probs)
+
+        # Welche Verkäufer bleiben bei diesem Preis?
+        sellers_remaining = [
+            q for q in qualities
+            if seller_reservation(q) <= avg_quality
+        ]
+
+        market_collapse = len(sellers_remaining) == 0 or all(
+            buyer_valuation(q) < seller_reservation(q) for q in qualities
+        )
+
+        return {
+            "market": market,
+            "initial_qualities": qualities,
+            "average_valuation": avg_quality,
+            "sellers_at_avg_price": sellers_remaining,
+            "market_unraveling": market_collapse,
+            "lemons_problem": "Hochqualitative Anbieter verlassen den Markt",
+            "solutions": [
+                "Garantien und Gewährleistungen",
+                "Zertifizierung und Qualitätssiegel",
+                "Reputation und Wiederholungskäufe",
+                "Obligatorische Offenlegung"
+            ]
+        }
+
+    def design_incentive_contract(
+        self,
+        principal: str,
+        agent: str,
+        effort_cost: float,
+        high_effort_probability: float,
+        high_outcome_value: float,
+        low_outcome_value: float
+    ) -> Contract:
+        """
+        Entwirft anreizkompatiblen Vertrag
+        Principal-Agent Problem mit Moral Hazard
+        """
+        # Incentive Compatibility: Agent wählt hohe Anstrengung
+        # Participation Constraint: Agent nimmt Vertrag an
+
+        # Vereinfachte Lösung
+        expected_value_high = high_effort_probability * high_outcome_value + \
+                             (1 - high_effort_probability) * low_outcome_value
+        expected_value_low = 0.5 * high_outcome_value + 0.5 * low_outcome_value
+
+        # Bonus muss Anstrengungskosten decken
+        min_bonus = effort_cost / (high_effort_probability - 0.5)
+
+        contract = Contract(
+            principal=principal,
+            agent=agent,
+            fixed_payment=effort_cost * 0.5,  # Participation
+            performance_bonus=max(min_bonus, 0),
+            monitoring_intensity=0.3,
+            incentive_compatibility=True
+        )
+        self.contracts.append(contract)
+        return contract
+
+    def analyze_signaling(
+        self,
+        signal: str,
+        high_type_cost: float,
+        low_type_cost: float,
+        high_type_benefit: float,
+        low_type_benefit: float
+    ) -> SignalingEquilibrium:
+        """
+        Analysiert Signaling-Gleichgewicht
+        z.B. Bildung als Signal für Produktivität (Spence)
+        """
+        # Separating Equilibrium möglich wenn:
+        # Hoher Typ: Benefit > Cost
+        # Niedriger Typ: Benefit < Cost
+        high_net = high_type_benefit - high_type_cost
+        low_net = low_type_benefit - low_type_cost
+
+        is_separating = high_net > 0 and low_net < 0
+
+        return SignalingEquilibrium(
+            signal=signal,
+            cost_for_high_type=high_type_cost,
+            cost_for_low_type=low_type_cost,
+            is_separating=is_separating,
+            high_type_payoff=high_net if is_separating else high_type_benefit * 0.5,
+            low_type_payoff=0 if is_separating else low_type_benefit * 0.5
+        )
+
+    def explain_information_problems(self) -> Dict[str, Dict[str, str]]:
+        """Erklärt zentrale Konzepte der Informationsökonomik"""
+        return {
+            "adverse_selection": {
+                "definition": "Informationsasymmetrie VOR Vertragsschluss",
+                "example": "Gebrauchtwagenmarkt: Verkäufer kennt Qualität, Käufer nicht",
+                "consequence": "Marktversagen durch Negativauslese",
+                "solution": "Signaling, Screening, Garantien"
+            },
+            "moral_hazard": {
+                "definition": "Informationsasymmetrie NACH Vertragsschluss",
+                "example": "Versicherung: Versicherter verhält sich riskanter",
+                "consequence": "Ineffiziente Anstrengung/Risikoübernahme",
+                "solution": "Monitoring, Anreizverträge, Selbstbeteiligung"
+            },
+            "signaling": {
+                "definition": "Informierte Partei sendet kostspieliges Signal",
+                "example": "Bildung signalisiert Produktivität",
+                "requirement": "Signal muss für guten Typ günstiger sein",
+                "equilibrium": "Separating oder Pooling"
+            },
+            "screening": {
+                "definition": "Uninformierte Partei bietet Menü von Verträgen",
+                "example": "Versicherung bietet verschiedene Tarife",
+                "mechanism": "Selbstselektion durch Anreizkompatibilität",
+                "result": "Typen offenbaren sich durch Wahl"
+            }
+        }
+
+
+# =============================================================================
+# ERWEITERUNG: FACTORY FUNCTIONS
+# =============================================================================
+
+_welfare_engine: Optional[WelfareEconomicsEngine] = None
+_behavioral_engine: Optional[BehavioralEconomicsEngine] = None
+_information_engine: Optional[InformationEconomicsEngine] = None
+
+
+def create_welfare_engine() -> WelfareEconomicsEngine:
+    """Factory: Erstellt WelfareEconomicsEngine"""
+    global _welfare_engine
+    if _welfare_engine is None:
+        _welfare_engine = WelfareEconomicsEngine()
+    return _welfare_engine
+
+
+def create_behavioral_engine() -> BehavioralEconomicsEngine:
+    """Factory: Erstellt BehavioralEconomicsEngine"""
+    global _behavioral_engine
+    if _behavioral_engine is None:
+        _behavioral_engine = BehavioralEconomicsEngine()
+    return _behavioral_engine
+
+
+def create_information_engine() -> InformationEconomicsEngine:
+    """Factory: Erstellt InformationEconomicsEngine"""
+    global _information_engine
+    if _information_engine is None:
+        _information_engine = InformationEconomicsEngine()
+    return _information_engine
 
 
 # =============================================================================
