@@ -1176,6 +1176,7 @@ try:
         HumorType,
         EmotionCategory,
         RelationshipLevel,
+        EmotionalResponseSystem,
     )
     EMOTIONAL_ENGINES_AVAILABLE = True
     logger.info("[Brain] ✓ EmotionalEngines (Humor, Trost, Mirroring, 14 Engines) geladen")
@@ -1198,6 +1199,7 @@ except ImportError as e:
     HumorType = None
     EmotionCategory = None
     RelationshipLevel = None
+    EmotionalResponseSystem = None
     logger.debug(f"[Brain] EmotionalEngines nicht verfügbar: {e}")
 
 # Emotional Complexity - Negative Verhaltensweisen für authentische Persönlichkeit
