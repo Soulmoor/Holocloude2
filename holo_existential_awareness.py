@@ -5445,7 +5445,7 @@ class HoloExistentialAwareness:
                 last_mention = datetime.fromisoformat(self.state.last_outer_world_mention)
                 if (datetime.now() - last_mention).seconds < 1800:  # 30 min Mindestabstand
                     return False
-            except:
+            except (ValueError, TypeError):
                 pass
 
         # Basiswahrscheinlichkeit
@@ -5457,7 +5457,7 @@ class HoloExistentialAwareness:
                 update_time = datetime.fromisoformat(self.outer_world_data.last_updated)
                 if (datetime.now() - update_time).seconds < 300:  # Daten < 5 min alt
                     base_chance *= 1.5
-            except:
+            except (ValueError, TypeError):
                 pass
 
         return random.random() < base_chance
@@ -7972,7 +7972,7 @@ class HoloExistentialAwareness:
             try:
                 update_time = datetime.fromisoformat(self.outer_world_data.last_updated)
                 data_fresh = (datetime.now() - update_time).seconds < 600  # < 10 min
-            except:
+            except (ValueError, TypeError):
                 pass
 
         return {
@@ -8133,7 +8133,7 @@ class HoloExistentialAwareness:
                     if "current_mood" in s:
                         try:
                             self.state.current_mood = ExistentialMood[s["current_mood"]]
-                        except:
+                        except (KeyError, ValueError):
                             pass
 
                 logger.info("Existenzieller Zustand geladen")

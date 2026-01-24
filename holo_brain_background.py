@@ -857,7 +857,7 @@ class AutonomousThinkingProcess(BackgroundProcessBase):
                         recent = self.memory_store.get_recent(limit=5)
                         if recent:
                             reflection_prompt = f"Reflektiere über: {recent[0] if recent else 'den Tag'}"
-                except:
+                except Exception:
                     pass
 
             result = self.cognition_hub.think(

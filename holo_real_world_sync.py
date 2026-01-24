@@ -460,7 +460,7 @@ class AstronomyCalculator:
             cos_ha = -math.tan(lat_rad) * math.tan(decl)
             cos_ha = max(-1, min(1, cos_ha))  # Clamping
             ha = math.degrees(math.acos(cos_ha))
-        except:
+        except (ValueError, ZeroDivisionError):
             # Mitternachtssonne oder Polarnacht
             ha = 90 if day_of_year > 80 and day_of_year < 265 else 0
 

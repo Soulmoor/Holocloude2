@@ -7041,7 +7041,7 @@ class PiCommunicator:
             Dict mit Daten oder None
         """
         try:
-            state = self.get_cached_status()
+            state = self.get_pi_status()
             if key:
                 return state.get(key)
             return state

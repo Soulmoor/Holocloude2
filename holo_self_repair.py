@@ -358,7 +358,7 @@ class DatabaseRepairer(BaseRepairer):
             result = cursor.fetchone()
             conn.close()
             return result[0] != "ok"
-        except:
+        except Exception:
             return True
 
     def _check_missing_tables(self, db_path: Path) -> List[str]:
@@ -376,7 +376,7 @@ class DatabaseRepairer(BaseRepairer):
             conn.close()
 
             return list(expected_tables - existing_tables)
-        except:
+        except Exception:
             return list(expected_tables)
 
     def _check_integrity(self, db_path: Path) -> Optional[str]:
@@ -685,7 +685,7 @@ class ConfigRepairer(BaseRepairer):
             if backup_path.exists():
                 shutil.copy2(backup_path, target_path)
                 return True
-        except:
+        except Exception:
             pass
 
         return False
@@ -723,7 +723,7 @@ class ConfigRepairer(BaseRepairer):
             required = self.REQUIRED_FIELDS[config_path.name]
             missing = [f for f in required if f not in config]
             return missing
-        except:
+        except Exception:
             return []
 
     def _check_invalid_values(self, config_path: Path) -> List[str]:
@@ -748,7 +748,7 @@ class ConfigRepairer(BaseRepairer):
                 if key in config and not config[key]:
                     invalid.append(f"{key}: leer")
 
-        except:
+        except Exception:
             pass
 
         return invalid
@@ -997,7 +997,7 @@ class ModuleRepairer(BaseRepairer):
                 # Modul neu laden
                 self._reload_module(target_path.stem)
                 return True
-        except:
+        except Exception:
             pass
 
         return False
@@ -1029,7 +1029,7 @@ class ModuleRepairer(BaseRepairer):
             else:
                 importlib.import_module(module_name)
                 return True
-        except:
+        except Exception:
             return False
 
     def _check_import(self, py_path: Path) -> Optional[str]:
@@ -1377,7 +1377,7 @@ class CodePatchRepairer(BaseRepairer):
             if backup_path.exists():
                 shutil.copy2(backup_path, target_path)
                 return True
-        except:
+        except Exception:
             pass
 
         return False

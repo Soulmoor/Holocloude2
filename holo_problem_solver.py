@@ -1148,7 +1148,7 @@ class WebResearcher:
                                 "source": str(doc_path),
                                 "relevance": "partial_match"
                             })
-                    except:
+                    except Exception:
                         pass
 
         return results
@@ -1429,7 +1429,7 @@ class SolutionSimulator:
             return {"valid": True, "error": None}
         except SyntaxError as e:
             return {"valid": False, "error": str(e)}
-        except:
+        except Exception:
             return {"valid": True, "error": None}  # Bei anderen Fehlern annehmen es ist ok
 
 

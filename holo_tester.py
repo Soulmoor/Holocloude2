@@ -1107,7 +1107,7 @@ class IntelligentAnalyzer:
                             if re.search(rf'\b{func}\b', source):
                                 found_as_ref = True
                                 break
-                        except:
+                        except Exception:
                             pass
 
                     if not found_as_ref:
@@ -2756,7 +2756,7 @@ class IntelligentTester:
                             data = json.loads(resp.read())
                             models = [m.get("name") for m in data.get("models", [])]
                             return True, f"{len(models)} Modelle verfügbar"
-                    except:
+                    except Exception:
                         return True, "Erreichbar"
                 return True, "Erreichbar"
             return False, "Nicht erreichbar"
