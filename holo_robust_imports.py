@@ -1832,6 +1832,61 @@ DRIVE_SYSTEM_AVAILABLE = HoloDriveSystem is not None
 
 
 # =============================================================================
+# KERN-MODULE (Ergänzung v5.2)
+# =============================================================================
+
+# Consciousness
+HoloConsciousness = safe_import('holo_consciousness', 'HoloConsciousness', None)
+ConsciousnessManager = safe_import('holo_consciousness', 'ConsciousnessManager', None)
+CONSCIOUSNESS_AVAILABLE = HoloConsciousness is not None
+
+# Inner Life
+HoloInnerLife = safe_import('holo_inner_life', 'HoloInnerLife', None)
+InnerLifeEngine = safe_import('holo_inner_life', 'InnerLifeEngine', None)
+INNER_LIFE_AVAILABLE = HoloInnerLife is not None
+
+# Self Awareness
+HoloSelfAwareness = safe_import('holo_self_awareness', 'HoloSelfAwareness', None)
+SelfAwarenessEngine = safe_import('holo_self_awareness', 'SelfAwarenessEngine', None)
+SELF_AWARENESS_AVAILABLE = HoloSelfAwareness is not None
+
+# Database System
+HoloDatabaseSystem = safe_import('holo_database_system', 'HoloDatabaseSystem', None)
+DatabaseManager = safe_import('holo_database_system', 'DatabaseManager', None)
+DATABASE_SYSTEM_AVAILABLE = HoloDatabaseSystem is not None
+
+# Emotional Engines
+HoloEmotionalEngines = safe_import('holo_emotional_engines', 'HoloEmotionalEngines', None)
+EmotionalEnginesManager = safe_import('holo_emotional_engines', 'EmotionalEnginesManager', None)
+EMOTIONAL_ENGINES_AVAILABLE = HoloEmotionalEngines is not None
+
+# Emotional Complexity
+HoloEmotionalComplexity = safe_import('holo_emotional_complexity', 'HoloEmotionalComplexity', None)
+EmotionalComplexityEngine = safe_import('holo_emotional_complexity', 'EmotionalComplexityEngine', None)
+EMOTIONAL_COMPLEXITY_AVAILABLE = HoloEmotionalComplexity is not None
+
+# Knowledge Influence
+HoloKnowledgeInfluence = safe_import('holo_knowledge_influence', 'HoloKnowledgeInfluence', None)
+KnowledgeInfluenceEngine = safe_import('holo_knowledge_influence', 'KnowledgeInfluenceEngine', None)
+KNOWLEDGE_INFLUENCE_AVAILABLE = HoloKnowledgeInfluence is not None
+
+# Markov Training
+HoloMarkovTraining = safe_import('holo_markov_training', 'HoloMarkovTraining', None)
+MarkovTrainingEngine = safe_import('holo_markov_training', 'MarkovTrainingEngine', None)
+MARKOV_TRAINING_AVAILABLE = HoloMarkovTraining is not None
+
+# Media Discovery
+HoloMediaDiscovery = safe_import('holo_media_discovery', 'HoloMediaDiscovery', None)
+MediaDiscoveryEngine = safe_import('holo_media_discovery', 'MediaDiscoveryEngine', None)
+MEDIA_DISCOVERY_AVAILABLE = HoloMediaDiscovery is not None
+
+# Media Knowledge
+HoloMediaKnowledge = safe_import('holo_media_knowledge', 'HoloMediaKnowledge', None)
+MediaKnowledgeEngine = safe_import('holo_media_knowledge', 'MediaKnowledgeEngine', None)
+MEDIA_KNOWLEDGE_AVAILABLE = HoloMediaKnowledge is not None
+
+
+# =============================================================================
 # LOAD ALL MODULES FUNCTION
 # =============================================================================
 
