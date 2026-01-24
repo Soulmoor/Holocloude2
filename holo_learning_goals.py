@@ -50,6 +50,14 @@ class GoalStatus(Enum):
     ABANDONED = "abandoned"
 
 
+class GoalPriority(Enum):
+    """Priorität eines Lernziels"""
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    URGENT = "urgent"
+
+
 class AchievementTier(Enum):
     """Rang von Achievements"""
     BRONZE = "bronze"
@@ -794,6 +802,11 @@ def get_learning_goals_engine() -> LearningGoalsEngine:
     if _learning_goals_engine is None:
         _learning_goals_engine = LearningGoalsEngine()
     return _learning_goals_engine
+
+
+# Aliase für holo_brain.py Kompatibilität
+LearningGoalsManager = LearningGoalsEngine
+create_learning_goals_manager = get_learning_goals_engine
 
 
 # =============================================================================

@@ -3443,6 +3443,11 @@ def get_fun_fact() -> Optional[str]:
     return fact.fact if fact else None
 
 
+# Aliase für holo_brain.py Kompatibilität
+SmalltalkTopicsEngine = SmalltalkEngine
+create_smalltalk_engine = get_smalltalk_engine
+
+
 # =============================================================================
 # MAIN (TEST)
 # =============================================================================

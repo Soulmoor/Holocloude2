@@ -1520,6 +1520,104 @@ except ImportError as e:
     SemanticFrame = None
     logger.debug(f"[Brain] NLPIntentSemantics nicht verfügbar: {e}")
 
+# NLP Style Analysis - Sprachstil- und Persönlichkeitsanalyse
+try:
+    from holo_nlp_style_analysis import (
+        StyleAnalysisEngine,
+        WritingStyleAnalyzer,
+        PersonalityInsights,
+        RhetoricalPatternDetector,
+        ToneAnalyzer,
+        RegisterClassifier,
+        StyleProfile,
+        PersonalityProfile,
+        ToneProfile,
+        FormalityLevel,
+        WritingStyle,
+        PersonalityTrait,
+        RhetoricalDevice,
+        ToneType,
+        RegisterType,
+        get_style_analysis_engine,
+        get_writing_style_analyzer,
+        get_personality_insights,
+    )
+    NLP_STYLE_ANALYSIS_AVAILABLE = True
+    logger.info("[Brain] ✓ NLPStyleAnalysis (Stil, Persönlichkeit, Rhetorik, Ton) geladen")
+except ImportError as e:
+    NLP_STYLE_ANALYSIS_AVAILABLE = False
+    StyleAnalysisEngine = None
+    WritingStyleAnalyzer = None
+    PersonalityInsights = None
+    RhetoricalPatternDetector = None
+    ToneAnalyzer = None
+    RegisterClassifier = None
+    StyleProfile = None
+    PersonalityProfile = None
+    ToneProfile = None
+    FormalityLevel = None
+    WritingStyle = None
+    PersonalityTrait = None
+    RhetoricalDevice = None
+    ToneType = None
+    RegisterType = None
+    get_style_analysis_engine = None
+    get_writing_style_analyzer = None
+    get_personality_insights = None
+    logger.debug(f"[Brain] NLPStyleAnalysis nicht verfügbar: {e}")
+
+# NLP Conversation Intelligence - Konversationssteuerung und Engagement
+try:
+    from holo_nlp_conversation_intelligence import (
+        ConversationIntelligenceEngine,
+        ConversationFlowManager,
+        EngagementDetector,
+        ClarificationGenerator,
+        TurnTakingManager,
+        RepairDetector,
+        ConversationState,
+        EngagementScore,
+        ClarificationRequest,
+        TurnInfo,
+        RepairSignal,
+        FlowRecommendation,
+        ConversationPhase,
+        EngagementLevel,
+        ClarificationType,
+        TurnType,
+        RepairType,
+        FlowAction,
+        get_conversation_intelligence_engine,
+        get_engagement_detector,
+        get_clarification_generator,
+    )
+    NLP_CONVERSATION_INTELLIGENCE_AVAILABLE = True
+    logger.info("[Brain] ✓ NLPConversationIntelligence (Flow, Engagement, Klärung) geladen")
+except ImportError as e:
+    NLP_CONVERSATION_INTELLIGENCE_AVAILABLE = False
+    ConversationIntelligenceEngine = None
+    ConversationFlowManager = None
+    EngagementDetector = None
+    ClarificationGenerator = None
+    TurnTakingManager = None
+    RepairDetector = None
+    ConversationState = None
+    EngagementScore = None
+    ClarificationRequest = None
+    TurnInfo = None
+    RepairSignal = None
+    FlowRecommendation = None
+    ConversationPhase = None
+    EngagementLevel = None
+    ClarificationType = None
+    TurnType = None
+    RepairType = None
+    FlowAction = None
+    get_conversation_intelligence_engine = None
+    get_engagement_detector = None
+    get_clarification_generator = None
+    logger.debug(f"[Brain] NLPConversationIntelligence nicht verfügbar: {e}")
+
 # Calendar Awareness - Feiertage, Jahreszeiten, Mondphasen
 try:
     from holo_calendar_awareness import (

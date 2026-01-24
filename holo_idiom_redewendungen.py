@@ -3242,6 +3242,10 @@ def get_wisdom() -> Optional[str]:
     return idiom.text if idiom else None
 
 
+# Factory-Alias für holo_brain.py Kompatibilität
+create_idiom_engine = get_idiom_engine
+
+
 # =============================================================================
 # MAIN (TEST)
 # =============================================================================

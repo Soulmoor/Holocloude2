@@ -1488,6 +1488,12 @@ def get_wolf_fact() -> Optional[str]:
     return engine.format_fact_full(fact) if fact else None
 
 
+# Aliase für holo_brain.py Kompatibilität
+ExpertiseKnowledgeBase = ExpertiseEngine
+ExpertiseDomain = KnowledgeDomain
+create_expertise_knowledge = get_expertise_engine
+
+
 # =============================================================================
 # MAIN (TEST)
 # =============================================================================

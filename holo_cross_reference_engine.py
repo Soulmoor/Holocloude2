@@ -1076,6 +1076,11 @@ def get_reference_finder() -> ReferenceFinder:
     return _reference_finder
 
 
+# Aliase für holo_brain.py Kompatibilität
+Reference = CrossReference
+create_cross_reference_engine = get_cross_reference_engine
+
+
 # =============================================================================
 # TEST
 # =============================================================================
