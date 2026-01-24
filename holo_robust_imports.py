@@ -1885,6 +1885,47 @@ HoloMediaKnowledge = safe_import('holo_media_knowledge', 'HoloMediaKnowledge', N
 MediaKnowledgeEngine = safe_import('holo_media_knowledge', 'MediaKnowledgeEngine', None)
 MEDIA_KNOWLEDGE_AVAILABLE = HoloMediaKnowledge is not None
 
+# ============================================================================
+# MODULE LOADER (Robustes Modul-Laden & Überwachung) - NEU v5.3
+# ============================================================================
+RobustModuleLoader = safe_import('holo_module_loader', 'RobustModuleLoader', None)
+HoloBootManager = safe_import('holo_module_loader', 'HoloBootManager', None)
+ModuleStatus = safe_import('holo_module_loader', 'ModuleStatus', None)
+ModuleInfo = safe_import('holo_module_loader', 'ModuleInfo', None)
+ModuleLogHandler = safe_import('holo_module_loader', 'ModuleLogHandler', None)
+MODULE_LOADER_AVAILABLE = RobustModuleLoader is not None
+
+# ============================================================================
+# VISION EXTENDED (Erweiterte Bild-Analyse) - NEU v5.3
+# ============================================================================
+HoloVisionExtended = safe_import('holo_vision_extended', 'HoloVisionExtended', None)
+FacialEmotion = safe_import('holo_vision_extended', 'FacialEmotion', None)
+SceneType = safe_import('holo_vision_extended', 'SceneType', None)
+ArtStyle = safe_import('holo_vision_extended', 'ArtStyle', None)
+MemeTemplate = safe_import('holo_vision_extended', 'MemeTemplate', None)
+EmotionAnalysisResult = safe_import('holo_vision_extended', 'EmotionAnalysisResult', None)
+OCRResult = safe_import('holo_vision_extended', 'OCRResult', None)
+VISION_EXTENDED_FULL_AVAILABLE = HoloVisionExtended is not None
+
+# ============================================================================
+# UTILS (Hilfsfunktionen) - NEU v5.3
+# ============================================================================
+HoloUtils = safe_import('holo_utils', 'HoloUtils', None)
+get_iso_timestamp = safe_import('holo_utils', 'get_iso_timestamp', None)
+safe_json_dumps = safe_import('holo_utils', 'safe_json_dumps', None)
+safe_json_loads = safe_import('holo_utils', 'safe_json_loads', None)
+validate_string = safe_import('holo_utils', 'validate_string', None)
+safe_get = safe_import('holo_utils', 'safe_get', None)
+merge_dicts = safe_import('holo_utils', 'merge_dicts', None)
+HOLO_UTILS_AVAILABLE = HoloUtils is not None or get_iso_timestamp is not None
+
+# ============================================================================
+# TESTER (System-Test-Tool) - NEU v5.3
+# ============================================================================
+HoloTester = safe_import('holo_tester', 'HoloTester', None)
+TestResult = safe_import('holo_tester', 'TestResult', None)
+TESTER_AVAILABLE = HoloTester is not None
+
 
 # =============================================================================
 # LOAD ALL MODULES FUNCTION
@@ -2202,4 +2243,20 @@ __all__ = [
     'get_all_knowledge_topics', 'generate_random_sentence', 'get_markov_trainer',
     'count_training_sentences', 'TRAINING_SENTENCES',
     'EmotionState', 'ThoughtCategory', 'PersonalityTrait', 'TrainingCategory',
+
+    # NEU v5.3: Module Loader
+    'RobustModuleLoader', 'HoloBootManager', 'ModuleStatus', 'ModuleInfo',
+    'ModuleLogHandler', 'MODULE_LOADER_AVAILABLE',
+
+    # NEU v5.3: Vision Extended
+    'HoloVisionExtended', 'FacialEmotion', 'SceneType', 'ArtStyle',
+    'MemeTemplate', 'EmotionAnalysisResult', 'OCRResult',
+    'VISION_EXTENDED_FULL_AVAILABLE',
+
+    # NEU v5.3: Utils
+    'HoloUtils', 'get_iso_timestamp', 'safe_json_dumps', 'safe_json_loads',
+    'validate_string', 'safe_get', 'merge_dicts', 'HOLO_UTILS_AVAILABLE',
+
+    # NEU v5.3: Tester
+    'HoloTester', 'TestResult', 'TESTER_AVAILABLE',
 ]

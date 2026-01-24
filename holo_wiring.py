@@ -1208,13 +1208,46 @@ MODULE_CONNECTIONS: List[ModuleConnection] = [
     ModuleConnection("learning_goals", "longterm_goals", "learning",
                     "LongtermGoals integriert Lernziele"),
 
-    # Tester (keine Verbindungen nötig - Test-Framework)
+    # === VISION EXTENDED VERBINDUNGEN (NEU v15.3) ===
+    ModuleConnection("perception", "vision_extended", "perception",
+                    "VisionExtended erweitert Perception"),
+    ModuleConnection("vision_enhanced", "vision_extended", "vision",
+                    "VisionExtended baut auf VisionEnhanced auf"),
+    ModuleConnection("vision_advanced", "vision_extended", "advanced",
+                    "VisionExtended nutzt VisionAdvanced"),
+    ModuleConnection("emotions", "vision_extended", "emotions",
+                    "VisionExtended erkennt Gesichtsemotionen"),
+    ModuleConnection("memory", "vision_extended", "memory",
+                    "VisionExtended speichert Bild-Analysen"),
 
-    # Module Loader (keine Verbindungen nötig - Loader)
+    # === UTILS VERBINDUNGEN (NEU v15.3) ===
+    # Utils ist eine Hilfsbibliothek, die von vielen Modulen genutzt wird
+    # Hier definieren wir die Hauptnutzer
+    ModuleConnection("utils", "database_system", "helpers",
+                    "DatabaseSystem nutzt Utils-Hilfsfunktionen"),
+    ModuleConnection("utils", "error_handling", "helpers",
+                    "ErrorHandling nutzt Utils"),
+    ModuleConnection("utils", "structured_logging", "helpers",
+                    "StructuredLogging nutzt Utils"),
 
-    # Robust Imports (keine Verbindungen nötig - Import-System)
+    # === MODULE LOADER VERBINDUNGEN (NEU v15.3) ===
+    # ModuleLoader lädt und überwacht alle Module
+    ModuleConnection("health_checks", "module_loader", "health",
+                    "ModuleLoader nutzt HealthChecks"),
+    ModuleConnection("error_tracker", "module_loader", "errors",
+                    "ModuleLoader nutzt ErrorTracker"),
+    ModuleConnection("metrics", "module_loader", "metrics",
+                    "ModuleLoader sammelt Metriken"),
 
-    # Wiring (keine Verbindungen nötig - Wiring selbst)
+    # Tester (Test-Framework - nutzt viele Module für Tests)
+    ModuleConnection("module_loader", "tester", "loader",
+                    "Tester nutzt ModuleLoader"),
+    ModuleConnection("health_checks", "tester", "health",
+                    "Tester nutzt HealthChecks"),
+
+    # Robust Imports (Import-System - keine Runtime-Verbindungen nötig)
+
+    # Wiring (Wiring selbst - keine Verbindungen nötig)
 ]
 
 
